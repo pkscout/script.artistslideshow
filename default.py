@@ -117,11 +117,13 @@ class Main:
                 log('no music playing')
                 if self.DAEMON == "False":
                     self.WINDOW.clearProperty("ArtistSlideshowRunning")
+            elif(not __addon__.getSetting('slideshow_path') == ''):
+                self.WINDOW.setProperty("ArtistSlideshow", __addon__.getSetting('slideshow_path'))
             else:
                 log('first song started')
                 time.sleep(0.2) # it may take some time for xbmc to read tag info after playback started
                 self._start_download()
-            while (not xbmc.abortRequested):
+            while (not xbmc.abortRequested and __addon__.getSetting('slideshow_path') == ''):
                 time.sleep(0.5)
                 if xbmc.getInfoLabel( "Window(12006).Property(ArtistSlideshowRunning)" ) == "True":
                     if xbmc.Player().isPlayingAudio() == True:
