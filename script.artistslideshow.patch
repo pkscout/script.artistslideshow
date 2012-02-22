@@ -1,0 +1,37 @@
+diff -rupN old/script.artistslideshow/default.py new/script.artistslideshow/default.py
+--- old/script.artistslideshow/default.py	2012-02-22 10:18:07.000000000 -0500
++++ new/script.artistslideshow/default.py	2012-02-22 10:10:14.000000000 -0500
+@@ -117,11 +117,13 @@ class Main:
+                 log('no music playing')
+                 if self.DAEMON == "False":
+                     self.WINDOW.clearProperty("ArtistSlideshowRunning")
++            elif(not __addon__.getSetting('slideshow_path') == ''):
++                self.WINDOW.setProperty("ArtistSlideshow", __addon__.getSetting('slideshow_path'))
+             else:
+                 log('first song started')
+                 time.sleep(0.2) # it may take some time for xbmc to read tag info after playback started
+                 self._start_download()
+-            while (not xbmc.abortRequested):
++            while (not xbmc.abortRequested and __addon__.getSetting('slideshow_path') == ''):
+                 time.sleep(0.5)
+                 if xbmc.getInfoLabel( "Window(12006).Property(ArtistSlideshowRunning)" ) == "True":
+                     if xbmc.Player().isPlayingAudio() == True:
+diff -rupN old/script.artistslideshow/resources/language/English/strings.xml new/script.artistslideshow/resources/language/English/strings.xml
+--- old/script.artistslideshow/resources/language/English/strings.xml	2012-02-22 10:18:07.000000000 -0500
++++ new/script.artistslideshow/resources/language/English/strings.xml	2012-02-22 10:06:30.000000000 -0500
+@@ -53,4 +53,5 @@
+     <string id="32004">Minimal image height</string>
+     <string id="32005">Download additional artist information</string>
+     <string id="32006">Preferred language for artist information</string>
++    <string id="32007">Alternate slideshow location</string>
+ </strings>
+diff -rupN old/script.artistslideshow/resources/settings.xml new/script.artistslideshow/resources/settings.xml
+--- old/script.artistslideshow/resources/settings.xml	2012-02-22 10:18:07.000000000 -0500
++++ new/script.artistslideshow/resources/settings.xml	2012-02-22 10:06:03.000000000 -0500
+@@ -7,5 +7,6 @@
+         <setting id="minheight" type="text" label="32004" default="0"/>
+         <setting id="artistinfo" type="bool" label="32005" default="false"/>
+         <setting id="language" type="enum" label="32006" enable="eq(-1,true)" default="11" lvalues="30201|30202|30203|30204|30205|30206|30207|30208|30209|30210|30211|30212|30213|30247|30214|30215|30216|30217|30218|30219|30220|30221|30222|30224|30225|30226|30227|30228|30229|30230|30232|30233|30234|30235|30236|30237|30238|30239|30240|30242|30243|30244|30245|30246"/>
++        <setting id="slideshow_path" type="folder" label="32007" />
+     </category>
+ </settings>
