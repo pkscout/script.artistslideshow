@@ -49,13 +49,13 @@
     <string id="32000">General</string>
     <string id="32001">Download images from last.fm</string>
     <string id="32002">Download images from htbackdrops.com</string>
-    <string id="32003">Minimal image width</string>
-    <string id="32004">Minimal image height</string>
+    <string id="32003">    Minimal image width</string>
+    <string id="32004">    Minimal image height</string>
     <string id="32005">Download additional artist information</string>
     <string id="32006">Preferred language for artist information</string>
     <string id="33000">Advanced</string>
     <string id="33001">Local artist folder</string>
-    <string id="33002">Prioritze local artist artwork</string>
+    <string id="33002">    Prioritze local artist artwork</string>
     <string id="33003">Fallback slideshow folder</string>
     <string id="33004">Override slideshow folder</string>
 </strings>
