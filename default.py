@@ -117,22 +117,56 @@ class Main:
                 log('no music playing')
                 if self.DAEMON == "False":
                     self.WINDOW.clearProperty("ArtistSlideshowRunning")
-            elif(not __addon__.getSetting('slideshow_path') == ''):
-                self.WINDOW.setProperty("ArtistSlideshow", __addon__.getSetting('slideshow_path'))
+            elif(not self.OVERRIDEPATH == ''):
+                self.WINDOW.setProperty("ArtistSlideshow", self.OVERRIDEPATH)
             else:
                 log('first song started')
                 time.sleep(0.2) # it may take some time for xbmc to read tag info after playback started
-                self._start_download()
-            while (not xbmc.abortRequested and __addon__.getSetting('slideshow_path') == ''):
+                if(self.PRIORITIZELOCAL == 'true'):
+                    log('looking for local artwork')
+                    self._get_local_images()
+                    if(not self.LocalImagesFound):
+                        log('no local artist artwork found, start download')
+                        self._start_download()
+                else:
+                    log('start download')
+                    self._start_download()
+                    if(not (self.CachedImagesFound or self.ImageDownloaded)):
+                        log('no remote artist artwork found, looking for local artwork')
+                        self._get_local_images()
+                if(not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded)):
+                    if (not self.FALLBACKPATH == ''):
+                        log('no images found for artist, using fallback slideshow')
+                        log('fallbackdir = ' +self.FALLBACKPATH)
+                        self.UsingFallback = True
+                        self.WINDOW.setProperty("ArtistSlideshow", self.FALLBACKPATH)                            
+            while (not xbmc.abortRequested and self.OVERRIDEPATH == ''):
                 time.sleep(0.5)
                 if xbmc.getInfoLabel( "Window(12006).Property(ArtistSlideshowRunning)" ) == "True":
                     if xbmc.Player().isPlayingAudio() == True:
                         currentname = xbmc.Player().getMusicInfoTag().getArtist()
                         if self.NAME != currentname:
-                            log('new artist playing, start download')
                             self._clear_properties()
-                            self._start_download()
-                        elif not self.DownloadedAllImages:
+                            self.UsingFallback = False
+                            if(self.PRIORITIZELOCAL == 'true'):
+                                log('new artist playing, looking for local artwork')
+                                self._get_local_images()
+                                if(not self.LocalImagesFound):
+                                    log('no local artist artwork found, start download')
+                                    self._start_download()
+                            else:
+                                log('new artist playing, start download')
+                                self._start_download()
+                                if(not (self.CachedImagesFound or self.ImageDownloaded)):
+                                    log('no remote artist artwork found, looking for local artwork')
+                                    self._get_local_images()
+                            if(not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded)):
+                                if (not self.FALLBACKPATH == ''):
+                                    log('no images found for artist, using fallback slideshow')
+                                    log('fallbackdir = ' +self.FALLBACKPATH)
+                                    self.UsingFallback = True
+                                    self.WINDOW.setProperty("ArtistSlideshow", self.FALLBACKPATH)                            
+                        elif(not (self.DownloadedAllImages or self.LocalImagesFound or self.UsingFallback)):
                             log('same artist playing, continue download')
                             self._start_download()
                     else:
@@ -167,6 +201,10 @@ class Main:
         self.LASTFM = __addon__.getSetting( "lastfm" )
         self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
         self.ARTISTINFO = __addon__.getSetting( "artistinfo" )
+        self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" )
+        self.PRIORITIZELOCAL = __addon__.getSetting( "prioritize_local" )
+        self.FALLBACKPATH = __addon__.getSetting( "fallback_path" )
+        self.OVERRIDEPATH = __addon__.getSetting( "slideshow_path" )
         self.LANGUAGE = __addon__.getSetting( "language" )
         for language in LANGUAGES:
             if self.LANGUAGE == language[2]:
@@ -177,6 +215,11 @@ class Main:
     def _init_vars( self ):
         self.WINDOW = xbmcgui.Window( 12006 )
         self.NAME = ''
+        self.LocalImagesFound = False
+        self.CachedImagesFound = False
+        self.ImageDownloaded = False
+        self.DownloadedAllImages = False
+        self.UsingFallback = False
         LastfmApiKey = 'fbd57a1baddb983d1848a939665310f6'
         HtbackdropsApiKey = '96d681ea0dcb07ad9d27a347e64b652a'
         self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/?autocorrect=1&api_key=' + LastfmApiKey
@@ -262,17 +305,34 @@ class Main:
             log('no images downloaded')
             self.DownloadedAllImages = True
             if not self.CachedImagesFound:
-                if (not __addon__.getSetting('fallback_path') == ''):
-                    log('no images found for artist, using fallback slideshow')
-#                    self.WINDOW.setProperty("ArtistSlideshowRefresh", "True")
-#                    time.sleep(0.3)
-#                    self.WINDOW.clearProperty("ArtistSlideshow")
-#                    time.sleep(1)
-                    self.WINDOW.setProperty("ArtistSlideshow", __addon__.getSetting('fallback_path'))
-                else:
-                    self.WINDOW.clearProperty("ArtistSlideshow")
+                log('clearing ArtistSlideshow property')
+                self.WINDOW.clearProperty("ArtistSlideshow")
                 if self.ARTISTINFO == "true":
                     self._get_artistinfo()
+
+
+    def _get_local_images( self ):
+        self.LocalImagesFound = False
+        self.NAME = xbmc.Player().getMusicInfoTag().getArtist()
+        if len(self.NAME) == 0:
+            log('no artist name provided')
+            return
+        CacheName = xbmc.getCacheThumbName(self.NAME).replace('.tbn', '')
+        self.LocalDir = self.LOCALARTISTPATH + self.NAME + '/extrafanart'
+        log('localdir = %s' % self.LocalDir)
+        try:
+            files = os.listdir(self.LocalDir)
+            for file in files:
+                if(file.endswith('tbn') or file.endswith('jpg') or file.endswith('jpeg') or file.endswith('gif') or file.endswith('png')):
+                    self.LocalImagesFound = True
+        except OSError:
+             self.LocalImagesFound = False
+
+        if self.LocalImagesFound:
+            log('local images found')
+            self.WINDOW.setProperty("ArtistSlideshow", self.LocalDir)
+            if self.ARTISTINFO == "true":
+                self._get_artistinfo()
 
 
     def _get_images( self, site ):
