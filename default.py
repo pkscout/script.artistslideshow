@@ -262,7 +262,15 @@ class Main:
             log('no images downloaded')
             self.DownloadedAllImages = True
             if not self.CachedImagesFound:
-                self.WINDOW.clearProperty("ArtistSlideshow")
+                if (not __addon__.getSetting('fallback_path') == ''):
+                    log('no images found for artist, using fallback slideshow')
+#                    self.WINDOW.setProperty("ArtistSlideshowRefresh", "True")
+#                    time.sleep(0.3)
+#                    self.WINDOW.clearProperty("ArtistSlideshow")
+#                    time.sleep(1)
+                    self.WINDOW.setProperty("ArtistSlideshow", __addon__.getSetting('fallback_path'))
+                else:
+                    self.WINDOW.clearProperty("ArtistSlideshow")
                 if self.ARTISTINFO == "true":
                     self._get_artistinfo()
 
