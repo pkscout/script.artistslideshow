@@ -122,24 +122,7 @@ class Main:
             else:
                 log('first song started')
                 time.sleep(0.2) # it may take some time for xbmc to read tag info after playback started
-                if(self.PRIORITIZELOCAL == 'true'):
-                    log('looking for local artwork')
-                    self._get_local_images()
-                    if(not self.LocalImagesFound):
-                        log('no local artist artwork found, start download')
-                        self._start_download()
-                else:
-                    log('start download')
-                    self._start_download()
-                    if(not (self.CachedImagesFound or self.ImageDownloaded)):
-                        log('no remote artist artwork found, looking for local artwork')
-                        self._get_local_images()
-                if(not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded)):
-                    if (not self.FALLBACKPATH == ''):
-                        log('no images found for artist, using fallback slideshow')
-                        log('fallbackdir = ' +self.FALLBACKPATH)
-                        self.UsingFallback = True
-                        self.WINDOW.setProperty("ArtistSlideshow", self.FALLBACKPATH)                            
+                self._use_correct_artwork()
             while (not xbmc.abortRequested and self.OVERRIDEPATH == ''):
                 time.sleep(0.5)
                 if xbmc.getInfoLabel( "Window(12006).Property(ArtistSlideshowRunning)" ) == "True":
@@ -148,24 +131,7 @@ class Main:
                         if self.NAME != currentname:
                             self._clear_properties()
                             self.UsingFallback = False
-                            if(self.PRIORITIZELOCAL == 'true'):
-                                log('new artist playing, looking for local artwork')
-                                self._get_local_images()
-                                if(not self.LocalImagesFound):
-                                    log('no local artist artwork found, start download')
-                                    self._start_download()
-                            else:
-                                log('new artist playing, start download')
-                                self._start_download()
-                                if(not (self.CachedImagesFound or self.ImageDownloaded)):
-                                    log('no remote artist artwork found, looking for local artwork')
-                                    self._get_local_images()
-                            if(not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded)):
-                                if (not self.FALLBACKPATH == ''):
-                                    log('no images found for artist, using fallback slideshow')
-                                    log('fallbackdir = ' +self.FALLBACKPATH)
-                                    self.UsingFallback = True
-                                    self.WINDOW.setProperty("ArtistSlideshow", self.FALLBACKPATH)                            
+                            self._use_correct_artwork()
                         elif(not (self.DownloadedAllImages or self.LocalImagesFound or self.UsingFallback)):
                             log('same artist playing, continue download')
                             self._start_download()
@@ -178,7 +144,28 @@ class Main:
                     self._clear_properties()
                     break
 
-      
+
+    def _use_correct_artwork( self ):
+        if(self.PRIORITIZELOCAL == 'true'):
+            log('looking for local artwork')
+            self._get_local_images()
+            if(not self.LocalImagesFound):
+                log('no local artist artwork found, start download')
+                self._start_download()
+        else:
+            log('start download')
+            self._start_download()
+            if(not (self.CachedImagesFound or self.ImageDownloaded)):
+                log('no remote artist artwork found, looking for local artwork')
+                self._get_local_images()
+        if(not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded)):
+            if (not self.FALLBACKPATH == ''):
+                log('no images found for artist, using fallback slideshow')
+                log('fallbackdir = ' +self.FALLBACKPATH)
+                self.UsingFallback = True
+                self.WINDOW.setProperty("ArtistSlideshow", self.FALLBACKPATH)                            
+
+
     def _parse_argv( self ):
         try:
             params = dict( arg.split( "=" ) for arg in sys.argv[ 1 ].split( "&" ) )
