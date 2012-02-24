@@ -266,9 +266,13 @@ class Main:
 
             path = getCacheThumbName(url, self.CacheDir)
             if not xbmcvfs.exists(path):
-                download(url, path)
-                log('downloaded %s to %s' % (url, path) )
-                self.ImageDownloaded=True
+                try:
+                    download(url, path)
+                except:
+                    log ('site unreachable')
+                else:
+                    log('downloaded %s to %s' % (url, path) )
+                    self.ImageDownloaded=True
             if self.ImageDownloaded:
                 if not self.DownloadedFirstImage:
                     log('downloaded first image')
@@ -304,7 +308,6 @@ class Main:
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
-        CacheName = xbmc.getCacheThumbName(self.NAME).replace('.tbn', '')
         self.LocalDir = self.LOCALARTISTPATH + self.NAME + '/extrafanart'
         log('localdir = %s' % self.LocalDir)
         try:
