@@ -1,6 +1,6 @@
-diff -rupN old/script.artistslideshow/default.py new/script.artistslideshow/default.py
---- old/script.artistslideshow/default.py	2012-02-22 21:37:12.000000000 -0500
-+++ new/script.artistslideshow/default.py	2012-02-23 13:15:18.000000000 -0500
+diff -rupN org/script.artistslideshow/default.py new/script.artistslideshow/default.py
+--- org/script.artistslideshow/default.py	2012-02-24 16:11:05.000000000 -0500
++++ new/script.artistslideshow/default.py	2012-02-24 15:56:57.000000000 -0500
 @@ -117,20 +117,22 @@ class Main:
                  log('no music playing')
                  if self.DAEMON == "False":
@@ -82,7 +82,24 @@ diff -rupN old/script.artistslideshow/default.py new/script.artistslideshow/defa
          LastfmApiKey = 'fbd57a1baddb983d1848a939665310f6'
          HtbackdropsApiKey = '96d681ea0dcb07ad9d27a347e64b652a'
          self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/?autocorrect=1&api_key=' + LastfmApiKey
-@@ -260,11 +292,36 @@ class Main:
+@@ -234,9 +266,13 @@ class Main:
+ 
+             path = getCacheThumbName(url, self.CacheDir)
+             if not xbmcvfs.exists(path):
+-                download(url, path)
+-                log('downloaded %s to %s' % (url, path) )
+-                self.ImageDownloaded=True
++                try:
++                    download(url, path)
++                except:
++                    log ('site unreachable')
++                else:
++                    log('downloaded %s to %s' % (url, path) )
++                    self.ImageDownloaded=True
+             if self.ImageDownloaded:
+                 if not self.DownloadedFirstImage:
+                     log('downloaded first image')
+@@ -260,11 +296,35 @@ class Main:
              log('no images downloaded')
              self.DownloadedAllImages = True
              if not self.CachedImagesFound:
@@ -98,7 +115,6 @@ diff -rupN old/script.artistslideshow/default.py new/script.artistslideshow/defa
 +        if len(self.NAME) == 0:
 +            log('no artist name provided')
 +            return
-+        CacheName = xbmc.getCacheThumbName(self.NAME).replace('.tbn', '')
 +        self.LocalDir = self.LOCALARTISTPATH + self.NAME + '/extrafanart'
 +        log('localdir = %s' % self.LocalDir)
 +        try:
@@ -119,9 +135,9 @@ diff -rupN old/script.artistslideshow/default.py new/script.artistslideshow/defa
      def _get_images( self, site ):
          if site == "lastfm":
              self.info = 'artist.getImages'
-diff -rupN old/script.artistslideshow/resources/language/English/strings.xml new/script.artistslideshow/resources/language/English/strings.xml
---- old/script.artistslideshow/resources/language/English/strings.xml	2012-02-22 21:37:12.000000000 -0500
-+++ new/script.artistslideshow/resources/language/English/strings.xml	2012-02-23 13:43:04.000000000 -0500
+diff -rupN org/script.artistslideshow/resources/language/English/strings.xml new/script.artistslideshow/resources/language/English/strings.xml
+--- org/script.artistslideshow/resources/language/English/strings.xml	2012-02-24 16:11:05.000000000 -0500
++++ new/script.artistslideshow/resources/language/English/strings.xml	2012-02-24 10:11:37.000000000 -0500
 @@ -49,8 +49,13 @@
      <string id="32000">General</string>
      <string id="32001">Download images from last.fm</string>
@@ -138,9 +154,9 @@ diff -rupN old/script.artistslideshow/resources/language/English/strings.xml new
 +    <string id="33003">Fallback slideshow folder</string>
 +    <string id="33004">Override slideshow folder</string>
  </strings>
-diff -rupN old/script.artistslideshow/resources/settings.xml new/script.artistslideshow/resources/settings.xml
---- old/script.artistslideshow/resources/settings.xml	2012-02-22 21:37:12.000000000 -0500
-+++ new/script.artistslideshow/resources/settings.xml	2012-02-23 13:48:09.000000000 -0500
+diff -rupN org/script.artistslideshow/resources/settings.xml new/script.artistslideshow/resources/settings.xml
+--- org/script.artistslideshow/resources/settings.xml	2012-02-24 16:11:05.000000000 -0500
++++ new/script.artistslideshow/resources/settings.xml	2012-02-24 10:11:37.000000000 -0500
 @@ -1,11 +1,17 @@
  <?xml version="1.0" encoding="utf-8" standalone="yes"?>
  <settings>
