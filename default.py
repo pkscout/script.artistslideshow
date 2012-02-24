@@ -322,6 +322,9 @@ class Main:
             log('local images found')
             self.WINDOW.setProperty("ArtistSlideshow", self.LocalDir)
             if self.ARTISTINFO == "true":
+                CacheName = xbmc.getCacheThumbName(self.NAME).replace('.tbn', '')
+                self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, ))
+                checkDir(self.CacheDir)
                 self._get_artistinfo()
 
 
