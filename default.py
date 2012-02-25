@@ -187,6 +187,7 @@ class Main:
             self.minheight = 0
         self.LASTFM = __addon__.getSetting( "lastfm" )
         self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
+        self.HDASPECTONLY = __addon__.getSetting( "hd_aspect_only" )
         self.ARTISTINFO = __addon__.getSetting( "artistinfo" )
         self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" )
         self.PRIORITIZELOCAL = __addon__.getSetting( "prioritize_local" )
@@ -395,7 +396,12 @@ class Main:
                             width = element.attrib.get('width')
                             height = element.attrib.get('height')
                             if ( int(width) >= self.minwidth ) and ( int(height) >= self.minheight ):
-                                data.append(element.text)
+                                if(self.HDASPECTONLY == 'true'):
+                                    aspect_ratio = int(width)/int(height)
+                                    if(aspect_ratio > 1.770 and aspect_ratio < 1.787):
+                                        data.append(element.text)
+                                else:
+                                    data.append(element.text)
                 elif site == "htbackdrops":
                     if element.tag == "id":
                         data.append(self.HtbackdropsDownloadURL + str( element.text ) + '/fullsize')
