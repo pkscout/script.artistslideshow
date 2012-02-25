@@ -60,4 +60,5 @@
     <string id="33003">Fallback slideshow folder</string>
     <string id="33004">Override slideshow folder</string>
     <string id="33005">Fade time after all images downloaded (in seconds)</string>
+    <string id="33006">Refresh slideshow after every image download</string>
 </strings>
