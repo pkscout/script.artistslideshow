@@ -16,6 +16,7 @@ from elementtree import ElementTree as xmltree
 __addon__        = xbmcaddon.Addon()
 __addonname__    = __addon__.getAddonInfo('id')
 __addonversion__ = __addon__.getAddonInfo('version')
+__addonpath__    = __addon__.getAddonInfo('path')
 
 socket.setdefaulttimeout(10)
 
@@ -208,6 +209,7 @@ class Main:
         self.ImageDownloaded = False
         self.DownloadedAllImages = False
         self.UsingFallback = False
+        self.BlankDir = xbmc.translatePath('%s/resources/blank/' % ( __addonpath__ ))
         LastfmApiKey = 'fbd57a1baddb983d1848a939665310f6'
         HtbackdropsApiKey = '96d681ea0dcb07ad9d27a347e64b652a'
         self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/?autocorrect=1&api_key=' + LastfmApiKey
@@ -219,6 +221,7 @@ class Main:
         checkDir(xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ))
         checkDir(xbmc.translatePath('special://profile/addon_data/%s/temp' % __addonname__ ))
         checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow' % __addonname__ ))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/blank' % __addonname__ ))
         
 
     def _start_download( self ):
@@ -286,12 +289,9 @@ class Main:
         if self.ImageDownloaded:
             log('finished downloading images')
             self.DownloadedAllImages = True
-            self.WINDOW.setProperty("ArtistSlideshowRefresh", "True")
-            time.sleep(0.3)
-            self.WINDOW.clearProperty("ArtistSlideshow")
-            time.sleep(1)
+            self.WINDOW.setProperty("ArtistSlideshow", self.BlankDir)
+            time.sleep(2)
             self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
-            self.WINDOW.clearProperty("ArtistSlideshowRefresh")
 
         if not self.ImageDownloaded:
             log('no images downloaded')
@@ -456,7 +456,6 @@ class Main:
     def _clear_properties( self ):
         if not xbmc.getInfoLabel( "Window(12006).Property(ArtistSlideshowRunning)" ) == "True":
             self.WINDOW.clearProperty("ArtistSlideshow")
-            self.WINDOW.clearProperty("ArtistSlideshowRefresh")
         self.WINDOW.clearProperty( "ArtistSlideshow.ArtistBiography" )
         for count in range( 50 ):
             self.WINDOW.clearProperty( "ArtistSlideshow.%d.SimilarName" % ( count ) )
