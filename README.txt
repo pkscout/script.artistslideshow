@@ -17,6 +17,7 @@ Slideshow
 -Fallback slideshow folder: path to a directory of images that should be used if no local or remote images can be found.
 -Override slideshow folder: path to a directory of images that should be used intead of artist artwork. With this set no artwork will ever be downloaded.
 -Fade time after all images loaded: when the addon starts downloading images, it shows the first one while it downloads all the others.  When it refreshes the directory it fades out and back in.  For the most seamless experience, set this to the same fade time as your skin uses.
+-Refresh slideshow after every image download: if set to true, the slideshow will refresh after every image instead of after all the images are downloaded.  This is really only useful for slow connections.
 
 
 -----How to use this addon in your skin:
