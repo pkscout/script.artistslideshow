@@ -193,6 +193,7 @@ class Main:
         self.LASTFM = __addon__.getSetting( "lastfm" )
         self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
         self.HDASPECTONLY = __addon__.getSetting( "hd_aspect_only" )
+        self.REFRESHEVERYIMAGE = __addon__.getSetting( "refresh_every_image" )
         self.ARTISTINFO = __addon__.getSetting( "artistinfo" )
         self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" )
         self.PRIORITIZELOCAL = __addon__.getSetting( "prioritize_local" )
@@ -271,7 +272,6 @@ class Main:
                     return
             else:
                 return
-
             path = getCacheThumbName(url, self.CacheDir)
             if not xbmcvfs.exists(path):
                 try:
@@ -289,13 +289,13 @@ class Main:
                         self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
                         if self.ARTISTINFO == "true":
                             self._get_artistinfo()
-
+                elif(self.REFRESHEVERYIMAGE == 'true'):
+                    self._refresh_image_directory()
+                    
         if self.ImageDownloaded:
             log('finished downloading images')
             self.DownloadedAllImages = True
-            self.WINDOW.setProperty("ArtistSlideshow", self.BlankDir)
-            time.sleep(self.fadetime)
-            self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
+            self._refresh_image_directory()
 
         if not self.ImageDownloaded:
             log('no images downloaded')
@@ -305,6 +305,12 @@ class Main:
                 self.WINDOW.clearProperty("ArtistSlideshow")
                 if self.ARTISTINFO == "true":
                     self._get_artistinfo()
+
+
+    def _refresh_image_directory( self ):
+        self.WINDOW.setProperty("ArtistSlideshow", self.BlankDir)
+        time.sleep(self.fadetime)
+        self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
 
 
     def _get_local_images( self ):
