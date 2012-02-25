@@ -15,5 +15,7 @@
         <setting id="prioritize_local" type="bool" label="33002" default="false"/>
         <setting id="fallback_path" type="folder" label="33003" default=""/>
         <setting id="slideshow_path" type="folder" label="33004" default=""/>
+        <setting type="sep" />
+        <setting id="fade_time" type="text" label="33005" default="2" />
     </category>
 </settings>
