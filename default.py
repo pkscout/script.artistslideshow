@@ -186,6 +186,10 @@ class Main:
             self.minheight = int(__addon__.getSetting( "minheight" ))
         except:
             self.minheight = 0
+        try:
+            self.fadetime = int(__addon__.getSetting( "fade_time" ))
+        except:
+            self.fadetime = 2
         self.LASTFM = __addon__.getSetting( "lastfm" )
         self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
         self.HDASPECTONLY = __addon__.getSetting( "hd_aspect_only" )
@@ -290,7 +294,7 @@ class Main:
             log('finished downloading images')
             self.DownloadedAllImages = True
             self.WINDOW.setProperty("ArtistSlideshow", self.BlankDir)
-            time.sleep(2)
+            time.sleep(self.fadetime)
             self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
 
         if not self.ImageDownloaded:
