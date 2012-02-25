@@ -1,6 +1,25 @@
+-----How to use this addon:
 
-How to use this addon in your skin:
+You must have a compatible skin (or update your skin using the instructions below).
 
+There are two groupings of settings: Download and Slideshow.
+
+Download
+-Download images from last.fm (self expanitory)
+-Download images from htbackdrops.com (self expanitory)
+-Minimal image width and height: any images smaller than the set dimensions will not be downloaded.
+-Download only 16:9 images: will discard any images that aren't really, really close to a 16:9 aspect ratio.
+-Download additional artist info: includes information like the artist's bio and artists similar to the one to which you are listening.  Your skin must support this extra information, or nothing will be displayed.
+
+Slideshow
+-Local artist folder: path to a directory that has artist images.  Images must be organized in artist/extrafanart/
+-Prioritize local artwork: if set to true, the addon will use your local artwork if found.  If none is found, the addon will attempt to download remote artwork.
+-Fallback slideshow folder: path to a directory of images that should be used if no local or remote images can be found.
+-Override slideshow folder: path to a directory of images that should be used intead of artist artwork. With this set no artwork will ever be downloaded.
+-Fade time after all images loaded: when the addon starts downloading images, it shows the first one while it downloads all the others.  When it refreshes the directory it fades out and back in.  For the most seamless experience, set this to the same fade time as your skin uses.
+
+
+-----How to use this addon in your skin:
 
 In MusicVisualisation.xml:
 
@@ -29,7 +48,6 @@ In MusicVisualisation.xml:
 	<randomize>true</randomize>
 	<animation effect="fade" start="0" end="100" time="300">Visible</animation>
 	<animation effect="fade" start="100" end="0" time="300">Hidden</animation>
-	<visible>IsEmpty(Window(Visualisation).Property(ArtistSlideshowRefresh))</visible>
 </control>
 
 
@@ -44,6 +62,7 @@ The script provides these properties to the skin:
 This is the path to the directory containing the downloaded images for the currently playing artist
 
 - Window(Visualisation).Property(ArtistSlideshowRefresh)
+DEPRECIATED.  No longer needed as of v.?????
 This can be used to fade out/fade in the slideshow when the path is refreshed.
 The path will refresh after all images for a certain artist have been downloaded.
 This is needed since xbmc will not automatically pick up any new images after the multiimage control has been loaded.
