@@ -316,7 +316,7 @@ class Main:
                 if(file.endswith('tbn') or file.endswith('jpg') or file.endswith('jpeg') or file.endswith('gif') or file.endswith('png')):
                     self.LocalImagesFound = True
         except OSError:
-             self.LocalImagesFound = False
+            self.LocalImagesFound = False
 
         if self.LocalImagesFound:
             log('local images found')
