@@ -41,6 +41,9 @@ Slideshow
 -Refresh slideshow after every image download: (default false)
  if set to true, the slideshow will refresh after every image instead of after all the images are
  downloaded.  This is really only useful for slow connections.
+-Minimum time between refresh: (default 0)
+ if set to non-zero and you are refreshing after every image, the script will wait this long before
+ doing a refresh
 
 
 -----How to use this addon in your skin:
