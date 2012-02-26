@@ -226,7 +226,6 @@ class Main:
         checkDir(xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ))
         checkDir(xbmc.translatePath('special://profile/addon_data/%s/temp' % __addonname__ ))
         checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow' % __addonname__ ))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/blank' % __addonname__ ))
         
 
     def _start_download( self ):
