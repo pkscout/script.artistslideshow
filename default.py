@@ -147,18 +147,24 @@ class Main:
 
 
     def _use_correct_artwork( self ):
-        if(self.PRIORITIZELOCAL == 'true'):
+        if(self.PRIORITY == '1' and not self.LOCALARTISTPATH == ''):
             log('looking for local artwork')
             self._get_local_images()
             if(not self.LocalImagesFound):
                 log('no local artist artwork found, start download')
                 self._start_download()
+        elif(self.PRIORITY == '2' and not self.LOCALARTISTPATH == ''):
+            log('looking for local artwork')
+            self._get_local_images()
+            log('start download')
+            self._start_download()
         else:
             log('start download')
             self._start_download()
             if(not (self.CachedImagesFound or self.ImageDownloaded)):
                 log('no remote artist artwork found, looking for local artwork')
                 self._get_local_images()
+        
         if(not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded)):
             if (not self.FALLBACKPATH == ''):
                 log('no images found for artist, using fallback slideshow')
@@ -196,7 +202,7 @@ class Main:
         self.REFRESHEVERYIMAGE = __addon__.getSetting( "refresh_every_image" )
         self.ARTISTINFO = __addon__.getSetting( "artistinfo" )
         self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" )
-        self.PRIORITIZELOCAL = __addon__.getSetting( "prioritize_local" )
+        self.PRIORITY = __addon__.getSetting( "priority" )
         self.FALLBACKPATH = __addon__.getSetting( "fallback_path" )
         self.OVERRIDEPATH = __addon__.getSetting( "slideshow_path" )
         self.LANGUAGE = __addon__.getSetting( "language" )
@@ -237,9 +243,13 @@ class Main:
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
-        CacheName = xbmc.getCacheThumbName(self.NAME).replace('.tbn', '')
-        self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, ))
-        checkDir(self.CacheDir)
+        if(self.PRIORITY == '2' and self.LocalImagesFound):
+            pass
+            #self.CacheDir was successfully set in _get_local_images
+        else:
+            CacheName = xbmc.getCacheThumbName(self.NAME).replace('.tbn', '')
+            self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, ))
+            checkDir(self.CacheDir)
         log('cachedir = %s' % self.CacheDir)
         files = os.listdir(self.CacheDir)
         for file in files:
@@ -318,23 +328,20 @@ class Main:
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
-        self.LocalDir = self.LOCALARTISTPATH + self.NAME + '/extrafanart'
-        log('localdir = %s' % self.LocalDir)
+        self.CacheDir = self.LOCALARTISTPATH + self.NAME + '/extrafanart'
+        log('cachedir = %s' % self.CacheDir)
         try:
-            files = os.listdir(self.LocalDir)
-            for file in files:
-                if(file.endswith('tbn') or file.endswith('jpg') or file.endswith('jpeg') or file.endswith('gif') or file.endswith('png')):
-                    self.LocalImagesFound = True
+            files = os.listdir(self.CacheDir)
         except OSError:
-            self.LocalImagesFound = False
+            files = []
+        for file in files:
+            if(file.endswith('tbn') or file.endswith('jpg') or file.endswith('jpeg') or file.endswith('gif') or file.endswith('png')):
+                self.LocalImagesFound = True
 
         if self.LocalImagesFound:
             log('local images found')
-            self.WINDOW.setProperty("ArtistSlideshow", self.LocalDir)
+            self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
             if self.ARTISTINFO == "true":
-                CacheName = xbmc.getCacheThumbName(self.NAME).replace('.tbn', '')
-                self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, ))
-                checkDir(self.CacheDir)
                 self._get_artistinfo()
 
 
