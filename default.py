@@ -114,8 +114,6 @@ class Main:
             log('script already running')
         else:
             self.WINDOW.setProperty("ArtistSlideshowRunning", "True")
-            self.LastCacheTrim = 0
-            self._trim_cache()
             if xbmc.Player().isPlayingAudio() == False:
                 log('no music playing')
                 if self.DAEMON == "False":
@@ -135,7 +133,6 @@ class Main:
                             self._clear_properties()
                             self.UsingFallback = False
                             self._use_correct_artwork()
-                            self._trim_cache()
                         elif(not (self.DownloadedAllImages or self.UsingFallback)):
                             if(not (self.LocalImagesFound and self.PRIORITY == '1')):
                                 log('same artist playing, continue download')
@@ -188,8 +185,6 @@ class Main:
 
 
     def _get_settings( self ):
-        self.LASTFM = __addon__.getSetting( "lastfm" )
-        self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
         try:
             self.minwidth = int(__addon__.getSetting( "minwidth" ))
         except:
@@ -198,33 +193,29 @@ class Main:
             self.minheight = int(__addon__.getSetting( "minheight" ))
         except:
             self.minheight = 0
+        try:
+            self.fadetime = int(__addon__.getSetting( "fade_time" ))
+        except:
+            self.fadetime = 2
+        try:
+            self.minrefresh = int(__addon__.getSetting( "min_refresh" ))
+        except:
+            self.minrefresh = 0
+        self.LASTFM = __addon__.getSetting( "lastfm" )
+        self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
         self.HDASPECTONLY = __addon__.getSetting( "hd_aspect_only" )
+        self.REFRESHEVERYIMAGE = __addon__.getSetting( "refresh_every_image" )
         self.ARTISTINFO = __addon__.getSetting( "artistinfo" )
+        self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" )
+        self.PRIORITY = __addon__.getSetting( "priority" )
+        self.FALLBACKPATH = __addon__.getSetting( "fallback_path" )
+        self.OVERRIDEPATH = __addon__.getSetting( "slideshow_path" )
         self.LANGUAGE = __addon__.getSetting( "language" )
         for language in LANGUAGES:
             if self.LANGUAGE == language[2]:
                 self.LANGUAGE = language[1]
                 log('language = %s' % self.LANGUAGE)
                 break
-        self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" )
-        self.PRIORITY = __addon__.getSetting( "priority" )
-        self.FALLBACKPATH = __addon__.getSetting( "fallback_path" )
-        self.OVERRIDEPATH = __addon__.getSetting( "slideshow_path" )
-        try:
-            self.fadetime = int(__addon__.getSetting( "fade_time" ))
-        except:
-            self.fadetime = 2
-        self.REFRESHEVERYIMAGE = __addon__.getSetting( "refresh_every_image" )
-        try:
-            self.minrefresh = int(__addon__.getSetting( "min_refresh" ))
-        except:
-            self.minrefresh = 0
-        self.RESTRICTCACHE = __addon__.getSetting( "restrict_cache" )
-        try:
-            self.maxcachesize = int(__addon__.getSetting( "max_cache_size" ))
-        except:
-            self.maxcachesize = 1024
-
 
     def _init_vars( self ):
         self.WINDOW = xbmcgui.Window( 12006 )
@@ -360,21 +351,6 @@ class Main:
             if self.ARTISTINFO == "true":
                 self._get_artistinfo()
 
-
-    def _trim_cache( self ):
-        if(self.RESTRICTCACHE == 'true' and not self.PRIORITY == '2'):
-            now = time.time()
-            cache_delay = 60*60     #one hour
-            if(now - self.LastCacheTrim > cache_delay):
-                log('trimming the cache down to %sMbs' % self.maxcachesize)
-                CacheRoot = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/' % __addonname__)
-                #get a list of the cache directories ordered from newest to oldest
-                #for each dir
-                #    get the size and add it to the total size
-                #    if the total size is more than the set amount
-                #         add the dir to a list of dirs to be deleted
-                #delete any dirs in the deleted list
-                self.LastCacheTrim = now
 
     def _get_images( self, site ):
         if site == "lastfm":
