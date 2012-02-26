@@ -197,6 +197,10 @@ class Main:
             self.fadetime = int(__addon__.getSetting( "fade_time" ))
         except:
             self.fadetime = 2
+        try:
+            self.minrefresh = int(__addon__.getSetting( "min_refresh" ))
+        except:
+            self.minrefresh = 0
         self.LASTFM = __addon__.getSetting( "lastfm" )
         self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
         self.HDASPECTONLY = __addon__.getSetting( "hd_aspect_only" )
@@ -275,6 +279,7 @@ class Main:
 
         lastfmlist.extend(htbackdropslist)
         log('downloading images')
+        last_time = 0
         for url in lastfmlist:
             if xbmc.Player().isPlayingAudio() == True:
                 currentname = xbmc.Player().getMusicInfoTag().getArtist()
@@ -299,8 +304,9 @@ class Main:
                         self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
                         if self.ARTISTINFO == "true":
                             self._get_artistinfo()
-                elif(self.REFRESHEVERYIMAGE == 'true'):
+                elif(self.REFRESHEVERYIMAGE == 'true' and (time.time() - last_time > self.minrefresh)):
                     self._refresh_image_directory()
+                    last_time = time.time()
                     
         if self.ImageDownloaded:
             log('finished downloading images')
