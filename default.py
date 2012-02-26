@@ -133,9 +133,10 @@ class Main:
                             self._clear_properties()
                             self.UsingFallback = False
                             self._use_correct_artwork()
-                        elif(not (self.DownloadedAllImages or self.LocalImagesFound or self.UsingFallback)):
-                            log('same artist playing, continue download')
-                            self._start_download()
+                        elif(not (self.DownloadedAllImages or self.UsingFallback)):
+                            if(not (self.LocalImagesFound and self.PRIORITY == '1')):
+                                log('same artist playing, continue download')
+                                self._use_correct_artwork()
                     else:
                         time.sleep(1) # doublecheck if playback really stopped
                         if xbmc.Player().isPlayingAudio() == False:
