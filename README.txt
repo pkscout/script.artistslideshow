@@ -2,7 +2,7 @@
 
 You must have a compatible skin (or update your skin using the instructions below).
 
-There are two groupings of settings: Download and Slideshow.
+There are three groupings of settings: Download, Slideshow, and Advanced.
 
 Download
 -Download images from last.fm (default true)
@@ -41,6 +41,14 @@ Slideshow
 -Minimum time between refresh: (default 20)
  if the above setting is enabled, this allows the user to change the period of time between
  refreshes of the image directory during downloads
+ 
+Advanced
+-Limit size of download cache: (default false)
+ if enabled, the download cache will be trimmed (oldest first) to keep the size below the specified
+ minimum
+-Maximum cache size (in megabytes): (default 256)
+ if Limit size of download cache is set to true, this allows the user to specify the maximum size
+ of the cache
 
 
 -----How to use this addon in your skin:

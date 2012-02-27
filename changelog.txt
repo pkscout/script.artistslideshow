@@ -6,6 +6,7 @@ v1.2.0
 - added option for override folder that will be showed instead of artists images
 - updated logic to refresh images after all are downloaded
 - fixed potential script crash if remote sites unavailable
+- experimental support for limiting size of cache folder
 
 v1.1.5
 - blank window property a little longer
