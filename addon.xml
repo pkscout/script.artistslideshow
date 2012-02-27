@@ -9,7 +9,7 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<summary>Download images and additional info of the currently playing artist</summary>
-		<description>Addon to download images and additional information from Last.FM and htbackdrops.com of the currently playing artist. The images and info can be used by the skin to create a slideshow for the artist being listened to.</description>
+		<description>Addon to download images and additional information from Last.FM and htbackdrops.com of the currently playing artist. The images, along with local artists' images, and info can be used by the skin to create a slideshow for the artist being listened to.</description>
 		<platform>all</platform>
 	</extension>
 </addon>
