@@ -276,7 +276,6 @@ class Main:
 
         lastfmlist.extend(htbackdropslist)
         log('downloading images')
-        last_time = 0
         for url in lastfmlist:
             if xbmc.Player().isPlayingAudio() == True:
                 currentname = xbmc.Player().getMusicInfoTag().getArtist()
@@ -297,6 +296,7 @@ class Main:
                 if not self.DownloadedFirstImage:
                     log('downloaded first image')
                     self.DownloadedFirstImage = True
+                    last_time = 0
                     if not self.CachedImagesFound:
                         self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
                         if self.ARTISTINFO == "true":
