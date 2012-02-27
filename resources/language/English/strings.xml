@@ -56,12 +56,12 @@
     <string id="32007">Download only 16:9 images</string>
     <string id="33000">Slideshow</string>
     <string id="33001">Local artist folder</string>
-    <string id="33002">    Image Priority</string>
+    <string id="33002">  Image Priority</string>
     <string id="33003">Fallback slideshow folder</string>
     <string id="33004">Override slideshow folder</string>
     <string id="33005">Fade time after all images downloaded (in seconds)</string>
-    <string id="33006">Refresh slideshow after every image download</string>
-    <string id="33007">    Minimum time between refresh (in seconds)</string>    
+    <string id="33006">Refresh slideshow before all downloads complete</string>
+    <string id="33007">  Minimum time between refresh (in seconds)</string>    
     <string id="33201">Use remote images first</string>
     <string id="33202">Use local images first</string>
     <string id="33203">Use both local and remote images</string>

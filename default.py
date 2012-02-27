@@ -185,6 +185,8 @@ class Main:
 
 
     def _get_settings( self ):
+        self.LASTFM = __addon__.getSetting( "lastfm" )
+        self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
         try:
             self.minwidth = int(__addon__.getSetting( "minwidth" ))
         except:
@@ -193,29 +195,24 @@ class Main:
             self.minheight = int(__addon__.getSetting( "minheight" ))
         except:
             self.minheight = 0
-        try:
-            self.fadetime = int(__addon__.getSetting( "fade_time" ))
-        except:
-            self.fadetime = 2
-        try:
-            self.minrefresh = int(__addon__.getSetting( "min_refresh" ))
-        except:
-            self.minrefresh = 0
-        self.LASTFM = __addon__.getSetting( "lastfm" )
-        self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
         self.HDASPECTONLY = __addon__.getSetting( "hd_aspect_only" )
-        self.REFRESHEVERYIMAGE = __addon__.getSetting( "refresh_every_image" )
         self.ARTISTINFO = __addon__.getSetting( "artistinfo" )
-        self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" )
-        self.PRIORITY = __addon__.getSetting( "priority" )
-        self.FALLBACKPATH = __addon__.getSetting( "fallback_path" )
-        self.OVERRIDEPATH = __addon__.getSetting( "slideshow_path" )
         self.LANGUAGE = __addon__.getSetting( "language" )
         for language in LANGUAGES:
             if self.LANGUAGE == language[2]:
                 self.LANGUAGE = language[1]
                 log('language = %s' % self.LANGUAGE)
                 break
+        self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" )
+        self.PRIORITY = __addon__.getSetting( "priority" )
+        self.FALLBACKPATH = __addon__.getSetting( "fallback_path" )
+        self.OVERRIDEPATH = __addon__.getSetting( "slideshow_path" )
+        self.REFRESHEVERYIMAGE = __addon__.getSetting( "refresh_every_image" )
+        try:
+            self.minrefresh = int(__addon__.getSetting( "min_refresh" ))
+        except:
+            self.minrefresh = 20
+
 
     def _init_vars( self ):
         self.WINDOW = xbmcgui.Window( 12006 )
@@ -325,7 +322,7 @@ class Main:
 
     def _refresh_image_directory( self ):
         self.WINDOW.setProperty("ArtistSlideshow", self.BlankDir)
-        time.sleep(self.fadetime)
+        time.sleep(2)
         self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
 
 
