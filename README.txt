@@ -34,16 +34,13 @@ Slideshow
 -Override slideshow folder: (default none)
  path to a directory of images that should be used intead of artist artwork. With this set no
  artwork will ever be downloaded.
--Fade time after all images loaded: (default 2 seconds)
- when the addon starts downloading images, it shows the first one while it downloads all the
- others.  When it refreshes the directory it fades out and back in.  For the most seamless
- experience, set this to the same fade time as your skin uses.
--Refresh slideshow after every image download: (default false)
- if set to true, the slideshow will refresh after every image instead of after all the images are
- downloaded.  This is really only useful for slow connections.
--Minimum time between refresh: (default 0)
- if set to non-zero and you are refreshing after every image, the script will wait this long before
- doing a refresh
+-Refresh slideshow before all downloads complete: (default false)
+ by default the add-on shows the first image downloaded and then doesn't show anymore until the
+ all the downloads are done. if set to true, the slideshow will refresh after every x seconds
+ instead of after all the images are downloaded.
+-Minimum time between refresh: (default 20)
+ if the above setting is enabled, this allows the user to change the period of time between
+ refreshes of the image directory during downloads
 
 
 -----How to use this addon in your skin:
@@ -85,27 +82,25 @@ this will keep the script running all the time.
 
 The script provides these properties to the skin:
 
-- Window(Visualisation).Property(ArtistSlideshow)
-This is the path to the directory containing the downloaded images for the currently playing artist
+Window(Visualisation).Property(ArtistSlideshow)
+ This is the path to the directory containing the downloaded images for the currently playing
+ artist
 
-- Window(Visualisation).Property(ArtistSlideshowRefresh)
-DEPRECIATED.  No longer needed as of v.?????
-Was used to fade out/fade in the slideshow when the path is refreshed in older versions.
-The path will refresh after all images for a certain artist have been downloaded.
-This is needed since xbmc will not automatically pick up any new images after the multiimage control has been loaded.
+Window(Visualisation).Property(ArtistSlideshowRefresh)
+ DEPRECIATED.  No longer needed as of version 1.2
+ There is no harm if you leave it in the skin, but you should remove it when you have a chance.
 
-- Window(Visualisation).Property(ArtistSlideshowRunning)
-This one is used internally by the script to check if it is already running.
-There's no need to use this property in your skin.
+Window(Visualisation).Property(ArtistSlideshowRunning)
+ This one is used internally by the script to check if it is already running.
+ There's no need to use this property in your skin.
 
-- Window(Visualisation).Property(ArtistSlideshow.ArtistBiography)
-Artist biography from last.fm
+Window(Visualisation).Property(ArtistSlideshow.ArtistBiography)
+ Artist biography from last.fm
 
-- Window(Visualisation).Property(ArtistSlideshow.%d.SimilarName)
-- Window(Visualisation).Property(ArtistSlideshow.%d.SimilarThumb)
-Similar artists
+Window(Visualisation).Property(ArtistSlideshow.%d.SimilarName)
+Window(Visualisation).Property(ArtistSlideshow.%d.SimilarThumb)
+ Similar artists
 
-- Window(Visualisation).Property(ArtistSlideshow.%d.AlbumName)
-- Window(Visualisation).Property(ArtistSlideshow.%d.AlbumThumb)
-Albums by the artist
-
+Window(Visualisation).Property(ArtistSlideshow.%d.AlbumName)
+Window(Visualisation).Property(ArtistSlideshow.%d.AlbumThumb)
+ Albums by the artist

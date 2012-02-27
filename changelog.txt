@@ -1,8 +1,8 @@
-v?????
+v1.2.0
 - added ability to use local or remote images
-- added priority control for local or remote images
+- added priority image control to use local first, remote first, or both
 - added option to restrict downloads to 16:9 images
-- added option to have slideshow refresh after every image download
+- added option to have slideshow refresh after every image download or after x seconds
 - added option for override folder that will be showed instead of artists images
 - updated logic to refresh images after all are downloaded
 - fixed potential script crash if remote sites unavailable
