@@ -52,7 +52,7 @@
     <string id="32003">Minimal image width</string>
     <string id="32004">Minimal image height</string>
     <string id="32005">Download additional artist information</string>
-    <string id="32006">Preferred language for artist information</string>
+    <string id="32006">  Preferred language for artist information</string>
     <string id="32007">Download only 16:9 images</string>
     <string id="33000">Slideshow</string>
     <string id="33001">Local artist folder</string>
@@ -65,4 +65,7 @@
     <string id="33201">Use remote images first</string>
     <string id="33202">Use local images first</string>
     <string id="33203">Use both local and remote images</string>
+    <string id="34000">Advanced</string>
+    <string id="34001">Limit size of download cache</string>
+    <string id="34002">  Maximum cache size (in megabytes)</string>
 </strings>
