@@ -9,7 +9,7 @@
 # *  Last.fm:      http://www.last.fm/
 # *  htbackdrops:  http://www.htbackdrops.com/
 
-import urllib, re, os, sys, time, unicodedata, socket
+import urllib, re, os, sys, time, unicodedata, socket, shutil
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 from elementtree import ElementTree as xmltree
 
@@ -113,6 +113,7 @@ class Main:
         if xbmc.getInfoLabel( "Window(12006).Property(ArtistSlideshowRunning)" ) == "True":
             log('script already running')
         else:
+            self.LastCacheTrim = 0
             self.WINDOW.setProperty("ArtistSlideshowRunning", "True")
             if xbmc.Player().isPlayingAudio() == False:
                 log('no music playing')
@@ -124,6 +125,7 @@ class Main:
                 log('first song started')
                 time.sleep(0.2) # it may take some time for xbmc to read tag info after playback started
                 self._use_correct_artwork()
+                self._trim_cache()
             while (not xbmc.abortRequested and self.OVERRIDEPATH == ''):
                 time.sleep(0.5)
                 if xbmc.getInfoLabel( "Window(12006).Property(ArtistSlideshowRunning)" ) == "True":
@@ -133,6 +135,7 @@ class Main:
                             self._clear_properties()
                             self.UsingFallback = False
                             self._use_correct_artwork()
+                            self._trim_cache()
                         elif(not (self.DownloadedAllImages or self.UsingFallback)):
                             if(not (self.LocalImagesFound and self.PRIORITY == '1')):
                                 log('same artist playing, continue download')
@@ -212,6 +215,11 @@ class Main:
             self.minrefresh = int(__addon__.getSetting( "min_refresh" ))
         except:
             self.minrefresh = 20
+        self.RESTRICTCACHE = __addon__.getSetting( "restrict_cache" )
+        try:
+            self.maxcachesize = int(__addon__.getSetting( "max_cache_size" )) * 1000000
+        except:
+            self.maxcachesize = 1024 * 1000000
 
 
     def _init_vars( self ):
@@ -241,7 +249,10 @@ class Main:
         self.DownloadedFirstImage = False
         self.DownloadedAllImages = False
         self.ImageDownloaded = False
-        self.NAME = xbmc.Player().getMusicInfoTag().getArtist()
+        try:
+            self.NAME = xbmc.Player().getMusicInfoTag().getArtist()
+        except:
+            return
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
@@ -253,7 +264,27 @@ class Main:
             self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, ))
             checkDir(self.CacheDir)
         log('cachedir = %s' % self.CacheDir)
-        files = os.listdir(self.CacheDir)
+
+        success = False
+        attempts = 0
+        while( not success ):
+            if( self._playback_stopped_or_changed() ):
+                    return
+            try:
+                files = os.listdir(self.CacheDir)
+            except OSError as (errno, strerror):
+                if( errno == 2 or errno == 3):
+                    checkDir( self.CacheDir )
+                else:
+                    log( 'error: %s %s' % (errno, strerror) )
+                    time.sleep(10)
+                success = False
+                attempts = attmepts + 1
+                if( attempts > 3 ):
+                    return
+            else:
+                success = True
+                
         for file in files:
             if file.endswith('tbn'):
                 self.CachedImagesFound = True
@@ -277,11 +308,7 @@ class Main:
         lastfmlist.extend(htbackdropslist)
         log('downloading images')
         for url in lastfmlist:
-            if xbmc.Player().isPlayingAudio() == True:
-                currentname = xbmc.Player().getMusicInfoTag().getArtist()
-                if self.NAME != currentname:
-                    return
-            else:
+            if( self._playback_stopped_or_changed() ):
                 return
             path = getCacheThumbName(url, self.CacheDir)
             if not xbmcvfs.exists(path):
@@ -326,9 +353,21 @@ class Main:
         self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
 
 
+    def _playback_stopped_or_changed( self ):
+        if xbmc.Player().isPlayingAudio() == True:
+            currentname = xbmc.Player().getMusicInfoTag().getArtist()
+            if self.NAME != currentname:
+                return True
+        else:
+            return True
+
+
     def _get_local_images( self ):
         self.LocalImagesFound = False
-        self.NAME = xbmc.Player().getMusicInfoTag().getArtist()
+        try:
+            self.NAME = xbmc.Player().getMusicInfoTag().getArtist()
+        except:
+            return
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
@@ -347,6 +386,53 @@ class Main:
             self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
             if self.ARTISTINFO == "true":
                 self._get_artistinfo()
+
+
+    def _trim_cache( self ):
+        if( self.RESTRICTCACHE == 'true' and not self.PRIORITY == '2' ):
+            now = time.time()
+            cache_trim_delay = 0   #delay time is in seconds
+            if( now - self.LastCacheTrim > cache_trim_delay ):
+                log(' trimming the cache down to %s bytes' % self.maxcachesize )
+                cache_root = xbmc.translatePath( 'special://profile/addon_data/%s/ArtistSlideshow/' % __addonname__ )
+                os.chdir( cache_root )
+                folders = os.listdir( cache_root )
+
+                success = False
+                while( not success ):
+                    if( self._playback_stopped_or_changed() ):
+                        return
+                    try:
+                        folders.sort( key=lambda x: os.path.getmtime(x), reverse=True )
+                    except OSerror:
+                        time.sleep(10)
+                        success = False
+                    else:
+                        success = True                    
+
+                cache_size = 0
+                first_folder = True
+                for folder in folders:
+                    cache_size = cache_size + self._get_folder_size( cache_root + folder )
+                    log( 'looking at folder %s cache size is now %s' % (folder, cache_size) )
+                    if( cache_size > self.maxcachesize and not first_folder ):
+                        log( 'attempting to delete folder %s' % folder )
+                        try:
+                            shutil.rmtree( cache_root + folder, True )
+                            log( '%s successfully deleted' % folder )
+                        except:
+                            log( '%s was not deleted due to an error' % folder )                            
+                    first_folder = False
+                self.LastCacheTrim = now
+
+
+    def _get_folder_size( self, start_path ):
+        total_size = 0
+        for dirpath, dirnames, filenames in os.walk( start_path ):
+            for f in filenames:
+                fp = os.path.join( dirpath, f )
+                total_size += os.path.getsize( fp )
+        return total_size
 
 
     def _get_images( self, site ):
