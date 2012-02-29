@@ -307,6 +307,7 @@ class Main:
 
         lastfmlist.extend(htbackdropslist)
         log('downloading images')
+        images_downloaded = 0
         for url in lastfmlist:
             if( self._playback_stopped_or_changed() ):
                 return
@@ -320,22 +321,27 @@ class Main:
                     log('downloaded %s to %s' % (url, path) )
                     self.ImageDownloaded=True
             if self.ImageDownloaded:
+                images_downloaded = images_downloaded + 1
                 if not self.DownloadedFirstImage:
                     log('downloaded first image')
                     self.DownloadedFirstImage = True
-                    last_time = 0
+                    last_time = time.time()
                     if not self.CachedImagesFound:
                         self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
                         if self.ARTISTINFO == "true":
                             self._get_artistinfo()
-                elif(self.REFRESHEVERYIMAGE == 'true' and (time.time() - last_time > self.minrefresh)):
+                elif(self.REFRESHEVERYIMAGE == 'true' and time.time() - last_time > self.minrefresh ):
                     self._refresh_image_directory()
                     last_time = time.time()
                     
         if self.ImageDownloaded:
             log('finished downloading images')
             self.DownloadedAllImages = True
-            self._refresh_image_directory()
+            if( self.REFRESHEVERYIMAGE == 'true' and images_downloaded > 1 ):
+                wait_elapsed = time.time() - last_time
+                if( wait_elapsed < self.minrefresh ):
+                    time.sleep( self.minrefresh - wait_elapsed )
+                self._refresh_image_directory()
 
         if not self.ImageDownloaded:
             log('no images downloaded')
