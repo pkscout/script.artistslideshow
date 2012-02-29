@@ -1,3 +1,6 @@
+v1.2.1
+- updated refresh during download logic to make it more asthetically pleasing
+
 v1.2.0
 - added ability to use local or remote images
 - added priority image control to use local first, remote first, or both
