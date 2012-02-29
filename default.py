@@ -93,13 +93,16 @@ def cleanText(text):
     text = re.sub('User-contributed text is available under the Creative Commons By-SA License and may also be available under the GNU FDL.','',text)
     return text.strip()
         
-def download(src, dst):
+def download(src, dst, dst2):
     if (not xbmc.abortRequested):
         tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
         if xbmcvfs.exists(tmpname):
             xbmcvfs.delete(tmpname)
         urllib.urlretrieve(src, tmpname)
         if os.path.getsize(tmpname) > 999:
+            log( 'copying file to transition directory' )
+            xbmcvfs.copy(tmpname, dst2)
+            log( 'moving file to cache directory' )
             xbmcvfs.rename(tmpname, dst)
         else:
             xbmcvfs.delete(tmpname)
@@ -214,7 +217,7 @@ class Main:
         try:
             self.minrefresh = int(__addon__.getSetting( "min_refresh" ))
         except:
-            self.minrefresh = 20
+            self.minrefresh = 9
         self.RESTRICTCACHE = __addon__.getSetting( "restrict_cache" )
         try:
             self.maxcachesize = int(__addon__.getSetting( "max_cache_size" )) * 1000000
@@ -230,7 +233,7 @@ class Main:
         self.ImageDownloaded = False
         self.DownloadedAllImages = False
         self.UsingFallback = False
-        self.BlankDir = xbmc.translatePath('%s/resources/blank/' % ( __addonpath__ ))
+        self.BlankDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ )
         LastfmApiKey = 'fbd57a1baddb983d1848a939665310f6'
         HtbackdropsApiKey = '96d681ea0dcb07ad9d27a347e64b652a'
         self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/?autocorrect=1&api_key=' + LastfmApiKey
@@ -242,6 +245,7 @@ class Main:
         checkDir(xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ))
         checkDir(xbmc.translatePath('special://profile/addon_data/%s/temp' % __addonname__ ))
         checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow' % __addonname__ ))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ))
         
 
     def _start_download( self ):
@@ -310,11 +314,13 @@ class Main:
         images_downloaded = 0
         for url in lastfmlist:
             if( self._playback_stopped_or_changed() ):
+                self._clean_transition_dir()
                 return
             path = getCacheThumbName(url, self.CacheDir)
+            path2 = getCacheThumbName(url, self.BlankDir)
             if not xbmcvfs.exists(path):
                 try:
-                    download(url, path)
+                    download(url, path, path2)
                 except:
                     log ('site unreachable')
                 else:
@@ -338,10 +344,15 @@ class Main:
             log('finished downloading images')
             self.DownloadedAllImages = True
             if( self.REFRESHEVERYIMAGE == 'true' and images_downloaded > 1 ):
+                log( 'cleaning up from refreshing images' )
                 wait_elapsed = time.time() - last_time
                 if( wait_elapsed < self.minrefresh ):
                     time.sleep( self.minrefresh - wait_elapsed )
                 self._refresh_image_directory()
+                if( xbmc.getInfoLabel("Window(12006).Property(ArtistSlideshow)") == self.BlankDir):
+                    time.sleep( self.minrefresh )
+                    self._refresh_image_directory()
+            self._clean_transition_dir()
 
         if not self.ImageDownloaded:
             log('no images downloaded')
@@ -353,10 +364,20 @@ class Main:
                     self._get_artistinfo()
 
 
+    def _clean_transition_dir( self ):
+        old_files = os.listdir(self.BlankDir)
+        for old_file in old_files:
+            xbmcvfs.delete( '%s/%s' % (self.BlankDir, old_file) )
+            log( 'deleting file %s/%s' % (self.BlankDir, old_file) )
+
+
     def _refresh_image_directory( self ):
-        self.WINDOW.setProperty("ArtistSlideshow", self.BlankDir)
-        time.sleep(2)
-        self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
+        if( xbmc.getInfoLabel("Window(12006).Property(ArtistSlideshow)") == self.BlankDir):
+            self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
+            log( 'switching slideshow to ' + self.CacheDir )
+        else:    
+            self.WINDOW.setProperty("ArtistSlideshow", self.BlankDir)
+            log( 'switching slideshow to ' + self.BlankDir )
 
 
     def _playback_stopped_or_changed( self ):
