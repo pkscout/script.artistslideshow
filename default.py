@@ -110,12 +110,12 @@ class Main:
         self._get_settings()
         self._init_vars()
         self._make_dirs()
-        if xbmc.getInfoLabel( "Window(12006).Property(ArtistSlideshowRunning)" ) == "True":
+        if( xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True" and self.ARTISTBYARG == '' ):
             log('script already running')
         else:
             self.LastCacheTrim = 0
             self.WINDOW.setProperty("ArtistSlideshowRunning", "True")
-            if xbmc.Player().isPlayingAudio() == False:
+            if(xbmc.Player().isPlayingAudio() == False and self.ARTISTBYARG == ''):
                 log('no music playing')
                 if self.DAEMON == "False":
                     self.WINDOW.clearProperty("ArtistSlideshowRunning")
@@ -128,9 +128,9 @@ class Main:
                 self._trim_cache()
             while (not xbmc.abortRequested and self.OVERRIDEPATH == ''):
                 time.sleep(0.5)
-                if xbmc.getInfoLabel( "Window(12006).Property(ArtistSlideshowRunning)" ) == "True":
-                    if xbmc.Player().isPlayingAudio() == True:
-                        currentname = xbmc.Player().getMusicInfoTag().getArtist()
+                if xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
+                    if(xbmc.Player().isPlayingAudio() == True or not self.ARTISTBYARG == ''):
+                        currentname = self._set_artist_name()
                         if self.NAME != currentname:
                             self._clear_properties()
                             self.UsingFallback = False
@@ -182,9 +182,24 @@ class Main:
             params = dict( arg.split( "=" ) for arg in sys.argv[ 1 ].split( "&" ) )
         except:
             params = {}
+        self.ARTISTBYARG = urllib.unquote(params.get("artist", "")).decode('utf8')
+        log( 'set artist to %s' % self.ARTISTBYARG )
+        self.WINDOWID = params.get( "windowid", "12006")
         self.DAEMON = params.get( "daemon", "False" )
         if self.DAEMON == "True":
             log('daemonizing')
+
+
+    def _set_artist_name( self ):
+        if(self.ARTISTBYARG == ''):
+            if(xbmc.Player().isPlayingAudio() == True):
+                theArtist = xbmc.Player().getMusicInfoTag().getArtist()
+            else:
+                theArtist = ''
+        else:
+            theArtist = self.ARTISTBYARG
+        log('using artist ' + theArtist)
+        return theArtist
 
 
     def _get_settings( self ):
@@ -223,7 +238,8 @@ class Main:
 
 
     def _init_vars( self ):
-        self.WINDOW = xbmcgui.Window( 12006 )
+        self.WINDOW = xbmcgui.Window( int(self.WINDOWID) )
+        self.ARTISTSLIDESHOWRUNNING = "Window(" + self.WINDOWID + ").Property(ArtistSlideshowRunning)"
         self.NAME = ''
         self.LocalImagesFound = False
         self.CachedImagesFound = False
@@ -249,10 +265,7 @@ class Main:
         self.DownloadedFirstImage = False
         self.DownloadedAllImages = False
         self.ImageDownloaded = False
-        try:
-            self.NAME = xbmc.Player().getMusicInfoTag().getArtist()
-        except:
-            return
+        self.NAME = self._set_artist_name()
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
@@ -308,7 +321,11 @@ class Main:
         lastfmlist.extend(htbackdropslist)
         log('downloading images')
         for url in lastfmlist:
-            if( self._playback_stopped_or_changed() ):
+            if(xbmc.Player().isPlayingAudio() == True or not self.ARTISTBYARG == ''):
+                currentname = self._set_artist_name()
+                if self.NAME != currentname:
+                    return
+            else:
                 return
             path = getCacheThumbName(url, self.CacheDir)
             if not xbmcvfs.exists(path):
@@ -364,10 +381,7 @@ class Main:
 
     def _get_local_images( self ):
         self.LocalImagesFound = False
-        try:
-            self.NAME = xbmc.Player().getMusicInfoTag().getArtist()
-        except:
-            return
+        self.NAME = self._set_artist_name()
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
@@ -560,7 +574,7 @@ class Main:
 
 
     def _clear_properties( self ):
-        if not xbmc.getInfoLabel( "Window(12006).Property(ArtistSlideshowRunning)" ) == "True":
+        if not xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
             self.WINDOW.clearProperty("ArtistSlideshow")
         self.WINDOW.clearProperty( "ArtistSlideshow.ArtistBiography" )
         for count in range( 50 ):
