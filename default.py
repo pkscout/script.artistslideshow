@@ -110,12 +110,12 @@ class Main:
         self._get_settings()
         self._init_vars()
         self._make_dirs()
-        if xbmc.getInfoLabel( "Window(12006).Property(ArtistSlideshowRunning)" ) == "True":
+        if xbmc.getInfoLabel( "Window(" + self.WINDOWID + ").Property(ArtistSlideshowRunning)" ) == "True":
             log('script already running')
         else:
             self.LastCacheTrim = 0
             self.WINDOW.setProperty("ArtistSlideshowRunning", "True")
-            if xbmc.Player().isPlayingAudio() == False:
+            if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel(self.SKINARTIST) == '' ):
                 log('no music playing')
                 if self.DAEMON == "False":
                     self.WINDOW.clearProperty("ArtistSlideshowRunning")
@@ -128,10 +128,9 @@ class Main:
                 self._trim_cache()
             while (not xbmc.abortRequested and self.OVERRIDEPATH == ''):
                 time.sleep(0.5)
-                if xbmc.getInfoLabel( "Window(12006).Property(ArtistSlideshowRunning)" ) == "True":
-                    if xbmc.Player().isPlayingAudio() == True:
-                        currentname = xbmc.Player().getMusicInfoTag().getArtist()
-                        if self.NAME != currentname:
+                if xbmc.getInfoLabel( "Window(" + self.WINDOWID + ").Property(ArtistSlideshowRunning)" ) == "True":
+                    if( xbmc.Player().isPlayingAudio() == True or not xbmc.getInfoLabel(self.SKINARTIST) == '' ):
+                        if self.NAME != self._get_current_artist():
                             self._clear_properties()
                             self.UsingFallback = False
                             self._use_correct_artwork()
@@ -142,7 +141,7 @@ class Main:
                                 self._use_correct_artwork()
                     else:
                         time.sleep(1) # doublecheck if playback really stopped
-                        if xbmc.Player().isPlayingAudio() == False:
+                        if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel(self.SKINARTIST) == '' ):
                             if self.DAEMON == "False":
                                 self.WINDOW.clearProperty("ArtistSlideshowRunning")
                 else:
@@ -172,7 +171,7 @@ class Main:
         if(not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded)):
             if (not self.FALLBACKPATH == ''):
                 log('no images found for artist, using fallback slideshow')
-                log('fallbackdir = ' +self.FALLBACKPATH)
+                log('fallbackdir = ' + self.FALLBACKPATH)
                 self.UsingFallback = True
                 self.WINDOW.setProperty("ArtistSlideshow", self.FALLBACKPATH)                            
 
@@ -182,6 +181,12 @@ class Main:
             params = dict( arg.split( "=" ) for arg in sys.argv[ 1 ].split( "&" ) )
         except:
             params = {}
+        self.WINDOWID = params.get( "windowid", "12006")
+        artist_field = params.get( "artistfield", "" )
+        if( artist_field == '' ):
+            self.SKINARTIST = ''
+        else:
+            self.SKINARTIST = "Window(%s).Property(%s)" % ( self.WINDOWID, artist_field )
         self.DAEMON = params.get( "daemon", "False" )
         if self.DAEMON == "True":
             log('daemonizing')
@@ -223,7 +228,7 @@ class Main:
 
 
     def _init_vars( self ):
-        self.WINDOW = xbmcgui.Window( 12006 )
+        self.WINDOW = xbmcgui.Window( int(self.WINDOWID) )
         self.NAME = ''
         self.LocalImagesFound = False
         self.CachedImagesFound = False
@@ -252,7 +257,7 @@ class Main:
         try:
             self.NAME = xbmc.Player().getMusicInfoTag().getArtist()
         except:
-            return
+            self.NAME = xbmc.getInfoLabel( self.SKINARTIST )
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
@@ -353,13 +358,20 @@ class Main:
         self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
 
 
-    def _playback_stopped_or_changed( self ):
-        if xbmc.Player().isPlayingAudio() == True:
-            currentname = xbmc.Player().getMusicInfoTag().getArtist()
-            if self.NAME != currentname:
-                return True
+    def _get_current_artist( self ):
+        if( xbmc.Player().isPlayingAudio() == True ):
+            return xbmc.Player().getMusicInfoTag().getArtist()
+        elif( not xbmc.getInfoLabel(self.SKINARTIST) == '' ):
+            return  xbmc.getInfoLabel( self.SKINARTIST )
         else:
+            return ''
+
+
+    def _playback_stopped_or_changed( self ):
+        if self.NAME != self._get_current_artist():
             return True
+        else:
+            return False
 
 
     def _get_local_images( self ):
@@ -367,7 +379,7 @@ class Main:
         try:
             self.NAME = xbmc.Player().getMusicInfoTag().getArtist()
         except:
-            return
+            self.NAME = xbmc.getInfoLabel( self.SKINARTIST )
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
@@ -560,7 +572,7 @@ class Main:
 
 
     def _clear_properties( self ):
-        if not xbmc.getInfoLabel( "Window(12006).Property(ArtistSlideshowRunning)" ) == "True":
+        if not xbmc.getInfoLabel( "Window(" + self.WINDOWID + ").Property(ArtistSlideshowRunning)" ) == "True":
             self.WINDOW.clearProperty("ArtistSlideshow")
         self.WINDOW.clearProperty( "ArtistSlideshow.ArtistBiography" )
         for count in range( 50 ):
