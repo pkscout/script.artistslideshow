@@ -410,16 +410,10 @@ class Main:
                 first_folder = True
                 for folder in folders:
                     cache_size = cache_size + self._get_folder_size( cache_root + folder )
-                    log( 'looking at item %s cache size is now %s' % (folder, cache_size) )
+                    log( 'looking at folder %s cache size is now %s' % (folder, cache_size) )
                     if( cache_size > self.maxcachesize and not first_folder ):
                         self._clean_dir( cache_root + folder )
                         log( 'deleted files in folder %s' % folder )
-                        if( not os.name == 'nt' ):
-                            try:
-                                os.rmdir( cache_root + folder )
-                                log( 'deleted folder %s' % folder )
-                            except OSError:
-                                log( 'did not deleted folder %s' % folder )
                     first_folder = False
                 self.LastCacheTrim = now
 
