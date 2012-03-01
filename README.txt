@@ -34,13 +34,6 @@ Slideshow
 -Override slideshow folder: (default none)
  path to a directory of images that should be used intead of artist artwork. With this set no
  artwork will ever be downloaded.
--Refresh slideshow before all downloads complete: (default false)
- by default the add-on shows the first image downloaded and then doesn't show anymore until the
- all the downloads are done. if set to true, the slideshow will refresh after every x seconds
- instead of after all the images are downloaded.
--Minimum time between refresh: (default 20)
- if the above setting is enabled, this allows the user to change the period of time between
- refreshes of the image directory during downloads
  
 Advanced
 -Limit size of download cache: (default false)
