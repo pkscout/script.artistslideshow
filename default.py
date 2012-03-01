@@ -313,7 +313,7 @@ class Main:
         log('downloading images')
         for url in lastfmlist:
             if( self._playback_stopped_or_changed() ):
-                self._clean_transition_dir()
+                self._clean_dir( self.BlankDir )
                 return
             path = getCacheThumbName(url, self.CacheDir)
             path2 = getCacheThumbName(url, self.BlankDir)
@@ -353,7 +353,7 @@ class Main:
                 if( xbmc.getInfoLabel("Window(12006).Property(ArtistSlideshow)") == self.BlankDir):
                     time.sleep( self.minrefresh )
                     self._refresh_image_directory()
-            self._clean_transition_dir()
+            self._clean_dir( self.BlankDir )
 
         if not self.ImageDownloaded:
             log('no images downloaded')
@@ -365,11 +365,14 @@ class Main:
                     self._get_artistinfo()
 
 
-    def _clean_transition_dir( self ):
-        old_files = os.listdir(self.BlankDir)
+    def _clean_dir( self, dir_path ):
+        try:
+            old_files = os.listdir( dir_path )
+        except:
+            old_files = []
         for old_file in old_files:
-            xbmcvfs.delete( '%s/%s' % (self.BlankDir, old_file) )
-            log( 'deleting file %s/%s' % (self.BlankDir, old_file) )
+            xbmcvfs.delete( '%s/%s' % (dir_path, old_file) )
+            log( 'deleting file %s/%s' % (dir_path, old_file) )
 
 
     def _refresh_image_directory( self ):
@@ -425,31 +428,18 @@ class Main:
                 cache_root = xbmc.translatePath( 'special://profile/addon_data/%s/ArtistSlideshow/' % __addonname__ )
                 os.chdir( cache_root )
                 folders = os.listdir( cache_root )
-
-                success = False
-                while( not success ):
-                    if( self._playback_stopped_or_changed() ):
-                        return
-                    try:
-                        folders.sort( key=lambda x: os.path.getmtime(x), reverse=True )
-                    except OSerror:
-                        time.sleep(10)
-                        success = False
-                    else:
-                        success = True                    
-
+                folders.sort( key=lambda x: os.path.getmtime(x), reverse=True )
                 cache_size = 0
                 first_folder = True
                 for folder in folders:
                     cache_size = cache_size + self._get_folder_size( cache_root + folder )
                     log( 'looking at folder %s cache size is now %s' % (folder, cache_size) )
                     if( cache_size > self.maxcachesize and not first_folder ):
-                        log( 'attempting to delete folder %s' % folder )
-                        try:
-                            shutil.rmtree( cache_root + folder, True )
-                            log( '%s successfully deleted' % folder )
-                        except:
-                            log( '%s was not deleted due to an error' % folder )                            
+                        self._clean_dir( cache_root + folder )
+                        log( 'deleted files in folder %s' % folder )
+                        if( not os.name == 'nt' ):
+                            os.rmdir( cache_root + folder )
+                            log( 'deleted folder %s' % folder )
                     first_folder = False
                 self.LastCacheTrim = now
 

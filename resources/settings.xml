@@ -20,6 +20,6 @@
     </category>
     <category label="32200">
         <setting id="restrict_cache" type="bool" label="32201" default="false" />
-        <setting id="max_cache_size" label="32202" type="labelenum" values="256|512|768|1024|2048|3072|4096" enable="eq(-1,true)" default="1024" />
+        <setting id="max_cache_size" label="32202" type="labelenum" values="32|256|512|768|1024|2048|3072|4096" enable="eq(-1,true)" default="1024" />
     </category>
 </settings>
