@@ -182,6 +182,10 @@ class Main:
         except:
             params = {}
         self.WINDOWID = params.get( "windowid", "12006")
+        try:
+           int( self.WINDOWID )
+        except ValueError:
+           self.WINDOWID = '12006'
         artist_field = params.get( "artistfield", "" )
         if( artist_field == '' ):
             self.SKINARTIST = ''
