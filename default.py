@@ -213,11 +213,6 @@ class Main:
         self.PRIORITY = __addon__.getSetting( "priority" )
         self.FALLBACKPATH = __addon__.getSetting( "fallback_path" )
         self.OVERRIDEPATH = __addon__.getSetting( "slideshow_path" )
-        self.REFRESHEVERYIMAGE = __addon__.getSetting( "refresh_every_image" )
-        try:
-            self.minrefresh = int(__addon__.getSetting( "min_refresh" ))
-        except:
-            self.minrefresh = 9
         self.RESTRICTCACHE = __addon__.getSetting( "restrict_cache" )
         try:
             self.maxcachesize = int(__addon__.getSetting( "max_cache_size" )) * 1000000
@@ -253,6 +248,8 @@ class Main:
         self.DownloadedFirstImage = False
         self.DownloadedAllImages = False
         self.ImageDownloaded = False
+        self.FirstImage = True
+        min_refresh = 9.9
         try:
             self.NAME = xbmc.Player().getMusicInfoTag().getArtist()
         except:
@@ -269,26 +266,7 @@ class Main:
             checkDir(self.CacheDir)
         log('cachedir = %s' % self.CacheDir)
 
-        success = False
-        attempts = 0
-        while( not success ):
-            if( self._playback_stopped_or_changed() ):
-                    return
-            try:
-                files = os.listdir(self.CacheDir)
-            except OSError as (errno, strerror):
-                if( errno == 2 or errno == 3):
-                    checkDir( self.CacheDir )
-                else:
-                    log( 'error: %s %s' % (errno, strerror) )
-                    time.sleep(10)
-                success = False
-                attempts = attmepts + 1
-                if( attempts > 3 ):
-                    return
-            else:
-                success = True
-                
+        files = os.listdir(self.CacheDir)
         for file in files:
             if file.endswith('tbn'):
                 self.CachedImagesFound = True
@@ -296,8 +274,11 @@ class Main:
         if self.CachedImagesFound:
             log('cached images found')
             self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
+            last_time = time.time()
             if self.ARTISTINFO == "true":
                 self._get_artistinfo()
+        else:
+            last_time = 0
 
         if self.LASTFM == "true":
             lastfmlist = self._get_images('lastfm')
@@ -308,8 +289,8 @@ class Main:
             htbackdropslist = self._get_images('htbackdrops')
         else:
             htbackdropslist = []
-
         lastfmlist.extend(htbackdropslist)
+
         log('downloading images')
         for url in lastfmlist:
             if( self._playback_stopped_or_changed() ):
@@ -326,33 +307,29 @@ class Main:
                     log('downloaded %s to %s' % (url, path) )
                     self.ImageDownloaded=True
             if self.ImageDownloaded:
-                if not self.DownloadedFirstImage:
-                    log('downloaded first image')
-                    self.DownloadedFirstImage = True
-                    last_time = time.time()
-                    if not self.CachedImagesFound:
-                        self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
-                        if self.ARTISTINFO == "true":
-                            self._get_artistinfo()
-                    elif(self.REFRESHEVERYIMAGE == 'true' and time.time() - last_time > self.minrefresh ):
-                        self._refresh_image_directory()
-                        last_time = time.time()
-                elif(self.REFRESHEVERYIMAGE == 'true' and time.time() - last_time > self.minrefresh ):
+                wait_elapsed = time.time() - last_time
+                if( wait_elapsed > min_refresh ):
+                    if( not (self.FirstImage and not self.CachedImagesFound) ):
+                        time.sleep( min_refresh - (wait_elapsed % min_refresh) )
                     self._refresh_image_directory()
                     last_time = time.time()
+                if not self.CachedImagesFound:
+                    self.CachedImagesFound = True
+                    if self.ARTISTINFO == "true":
+                        self._get_artistinfo()
+                self.FirstImage = False
                     
         if self.ImageDownloaded:
             log('finished downloading images')
             self.DownloadedAllImages = True
-            if( self.REFRESHEVERYIMAGE == 'true' ):
-                log( 'cleaning up from refreshing images' )
-                wait_elapsed = time.time() - last_time
-                if( wait_elapsed < self.minrefresh ):
-                    time.sleep( self.minrefresh - wait_elapsed )
+            log( 'cleaning up from refreshing slideshow' )
+            wait_elapsed = time.time() - last_time
+            if( wait_elapsed < min_refresh ):
+                time.sleep( min_refresh - wait_elapsed )
+            self._refresh_image_directory()
+            if( xbmc.getInfoLabel("Window(12006).Property(ArtistSlideshow)") == self.BlankDir):
+                time.sleep( min_refresh )
                 self._refresh_image_directory()
-                if( xbmc.getInfoLabel("Window(12006).Property(ArtistSlideshow)") == self.BlankDir):
-                    time.sleep( self.minrefresh )
-                    self._refresh_image_directory()
             self._clean_dir( self.BlankDir )
 
         if not self.ImageDownloaded:
@@ -433,13 +410,16 @@ class Main:
                 first_folder = True
                 for folder in folders:
                     cache_size = cache_size + self._get_folder_size( cache_root + folder )
-                    log( 'looking at folder %s cache size is now %s' % (folder, cache_size) )
+                    log( 'looking at item %s cache size is now %s' % (folder, cache_size) )
                     if( cache_size > self.maxcachesize and not first_folder ):
                         self._clean_dir( cache_root + folder )
                         log( 'deleted files in folder %s' % folder )
                         if( not os.name == 'nt' ):
-                            os.rmdir( cache_root + folder )
-                            log( 'deleted folder %s' % folder )
+                            try:
+                                os.rmdir( cache_root + folder )
+                                log( 'deleted folder %s' % folder )
+                            except OSError:
+                                log( 'did not deleted folder %s' % folder )
                     first_folder = False
                 self.LastCacheTrim = now
 
