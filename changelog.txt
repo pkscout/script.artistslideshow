@@ -1,5 +1,8 @@
 v1.2.1
 - updated refresh during download logic to make it more asthetically pleasing
+- refresh during downloads is now the non-optional behavior
+- removed option to change refresh timing
+- new cache manager (removes only files, not directories)
 
 v1.2.0
 - added ability to use local or remote images
