@@ -431,8 +431,10 @@ class Main:
         if site == "lastfm":
             self.info = 'artist.getImages'
             self.url = self.LastfmURL + '&method=artist.getImages&artist=' + self.NAME.replace('&','%26').replace(' ','+')
+            log( 'asking for images from: %s' %self.url )
         elif site == "htbackdrops":
             self.url = self.HtbackdropsQueryURL + '&keywords=' + self.NAME.replace('&','%26').replace(' ','+') + '&dmin_w=' + str( self.minwidth ) + '&dmin_h=' + str( self.minheight )
+            log( 'asking for images from: %s' %self.url )
         images = self._get_data(site, 'images')
         return images
 
