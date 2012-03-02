@@ -134,6 +134,8 @@ class Main:
                 if xbmc.getInfoLabel( "Window(12006).Property(ArtistSlideshowRunning)" ) == "True":
                     if xbmc.Player().isPlayingAudio() == True:
                         currentname = xbmc.Player().getMusicInfoTag().getArtist()
+                        if len(currentname) == 0:
+                            currentname = xbmc.Player().getMusicInfoTag().getTitle()
                         if self.NAME != currentname:
                             self._clear_properties()
                             self.UsingFallback = False
@@ -255,6 +257,11 @@ class Main:
         except:
             return
         if len(self.NAME) == 0:
+            try:
+                self.NAME = xbmc.Player().getMusicInfoTag().getTitle()
+            except:
+                return
+        if len(self.NAME) == 0:
             log('no artist name provided')
             return
         if(self.PRIORITY == '2' and self.LocalImagesFound):
@@ -364,6 +371,8 @@ class Main:
     def _playback_stopped_or_changed( self ):
         if xbmc.Player().isPlayingAudio() == True:
             currentname = xbmc.Player().getMusicInfoTag().getArtist()
+            if len(currentname) == 0:
+                currentname = xbmc.Player().getMusicInfoTag().getTitle()
             if self.NAME != currentname:
                 return True
         else:
@@ -376,6 +385,11 @@ class Main:
             self.NAME = xbmc.Player().getMusicInfoTag().getArtist()
         except:
             return
+        if len(self.NAME) == 0:
+            try:
+                self.NAME = xbmc.Player().getMusicInfoTag().getTitle()
+            except:
+                return
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
