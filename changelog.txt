@@ -1,8 +1,10 @@
-v1.2.1
+v1.3.0
 - updated refresh during download logic to make it more asthetically pleasing
 - refresh during downloads is now the non-optional behavior
 - removed option to change refresh timing
 - new cache manager (removes only files, not directories)
+- experimental support for external scripts using artistslideshow
+- experimental support for internet streams
 
 v1.2.0
 - added ability to use local or remote images
