@@ -113,12 +113,12 @@ class Main:
         self._get_settings()
         self._init_vars()
         self._make_dirs()
-        if xbmc.getInfoLabel( "Window(" + self.WINDOWID + ").Property(ArtistSlideshowRunning)" ) == "True":
+        if xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
             log('script already running')
         else:
             self.LastCacheTrim = 0
             self.WINDOW.setProperty("ArtistSlideshowRunning", "True")
-            if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel(self.SKINARTIST) == '' ):
+            if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
                 log('no music playing')
                 if self.DAEMON == "False":
                     self.WINDOW.clearProperty("ArtistSlideshowRunning")
@@ -131,8 +131,8 @@ class Main:
                 self._trim_cache()
             while (not xbmc.abortRequested and self.OVERRIDEPATH == ''):
                 time.sleep(0.5)
-                if xbmc.getInfoLabel( "Window(" + self.WINDOWID + ").Property(ArtistSlideshowRunning)" ) == "True":
-                    if( xbmc.Player().isPlayingAudio() == True or not xbmc.getInfoLabel(self.SKINARTIST) == '' ):
+                if xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
+                    if( xbmc.Player().isPlayingAudio() == True or not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
                         if self.NAME != self._get_current_artist():
                             self._clear_properties()
                             self.UsingFallback = False
@@ -144,7 +144,7 @@ class Main:
                                 self._use_correct_artwork()
                     else:
                         time.sleep(1) # doublecheck if playback really stopped
-                        if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel(self.SKINARTIST) == '' ):
+                        if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
                             if self.DAEMON == "False":
                                 self.WINDOW.clearProperty("ArtistSlideshowRunning")
                 else:
@@ -189,11 +189,7 @@ class Main:
            int( self.WINDOWID )
         except ValueError:
            self.WINDOWID = '12006'
-        artist_field = params.get( "artistfield", "" )
-        if( artist_field == '' ):
-            self.SKINARTIST = ''
-        else:
-            self.SKINARTIST = "Window(%s).Property(%s)" % ( self.WINDOWID, artist_field )
+        self.ARTISTFIELD = params.get( "artistfield", "" )
         self.DAEMON = params.get( "daemon", "False" )
         if self.DAEMON == "True":
             log('daemonizing')
@@ -231,6 +227,12 @@ class Main:
 
     def _init_vars( self ):
         self.WINDOW = xbmcgui.Window( int(self.WINDOWID) )
+        if( self.ARTISTFIELD == '' ):
+            self.SKINARTIST = ''
+        else:
+            self.SKINARTIST = "Window(%s).Property(%s)" % ( self.WINDOWID, self.ARTISTFIELD )
+        self.ARTISTSLIDESHOW = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshow" )
+        self.ARTISTSLIDESHOWRUNNING = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshowRunning" )
         self.NAME = ''
         self.LocalImagesFound = False
         self.CachedImagesFound = False
@@ -259,10 +261,7 @@ class Main:
         self.ImageDownloaded = False
         self.FirstImage = True
         min_refresh = 9.9
-        try:
-            self.NAME = xbmc.Player().getMusicInfoTag().getArtist()
-        except:
-            self.NAME = xbmc.getInfoLabel( self.SKINARTIST )
+        self.NAME = self._get_current_artist()
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
@@ -336,7 +335,7 @@ class Main:
             if( wait_elapsed < min_refresh ):
                 time.sleep( min_refresh - wait_elapsed )
             self._refresh_image_directory()
-            if( xbmc.getInfoLabel("Window(12006).Property(ArtistSlideshow)") == self.BlankDir):
+            if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ) == self.BlankDir ):
                 time.sleep( min_refresh )
                 self._refresh_image_directory()
             self._clean_dir( self.BlankDir )
@@ -362,7 +361,7 @@ class Main:
 
 
     def _refresh_image_directory( self ):
-        if( xbmc.getInfoLabel("Window(12006).Property(ArtistSlideshow)") == self.BlankDir):
+        if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ) == self.BlankDir):
             self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
             log( 'switching slideshow to ' + self.CacheDir )
         else:    
@@ -372,8 +371,12 @@ class Main:
 
     def _get_current_artist( self ):
         if( xbmc.Player().isPlayingAudio() == True ):
-            return xbmc.Player().getMusicInfoTag().getArtist()
-        elif( not xbmc.getInfoLabel(self.SKINARTIST) == '' ):
+            artist = xbmc.Player().getMusicInfoTag().getArtist()
+            if( artist == '' ):
+                return xbmc.Player().getMusicInfoTag().getTitle()
+            else:
+                return artist
+        elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
             return  xbmc.getInfoLabel( self.SKINARTIST )
         else:
             return ''
@@ -388,10 +391,7 @@ class Main:
 
     def _get_local_images( self ):
         self.LocalImagesFound = False
-        try:
-            self.NAME = xbmc.Player().getMusicInfoTag().getArtist()
-        except:
-            self.NAME = xbmc.getInfoLabel( self.SKINARTIST )
+        self.NAME = self._get_current_artist()
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
@@ -570,7 +570,7 @@ class Main:
 
 
     def _clear_properties( self ):
-        if not xbmc.getInfoLabel( "Window(" + self.WINDOWID + ").Property(ArtistSlideshowRunning)" ) == "True":
+        if not xbmc.getInfoLabel( self.ARTISTSLIDESHOW ) == "True":
             self.WINDOW.clearProperty("ArtistSlideshow")
         self.WINDOW.clearProperty( "ArtistSlideshow.ArtistBiography" )
         for count in range( 50 ):
