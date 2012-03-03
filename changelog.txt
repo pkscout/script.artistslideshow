@@ -1,8 +1,9 @@
 v1.3.0
 - updated refresh during download logic to make it more asthetically pleasing
-- refresh during downloads is now the non-optional behavior
+- refresh during downloads is now the default (and non-optional) behavior
 - removed option to change refresh timing
 - new cache manager (removes only files, not directories)
+- added one additional (smaller) option for cache size
 - experimental support for external scripts using artistslideshow
 - experimental support for internet streams
 
