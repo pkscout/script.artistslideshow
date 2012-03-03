@@ -39,9 +39,9 @@ Advanced
 -Limit size of download cache: (default false)
  if enabled, the download cache will be trimmed (oldest first) to keep the size below the specified
  minimum
--Maximum cache size (in megabytes): (default 256)
+-Maximum cache size (in megabytes): (default 1024mb)
  if Limit size of download cache is set to true, this allows the user to specify the maximum size
- of the cache
+ of the cache (from 128mb to 4096mb)
 
 
 -----How to use this addon in your skin:
@@ -68,32 +68,22 @@ In MusicVisualisation.xml:
 	<height>720</height>
 	<imagepath background="true">$INFO[Window(Visualisation).Property(ArtistSlideshow)]</imagepath>
 	<aspectratio>keep</aspectratio>
-	<timeperimage>5000</timeperimage>
+	<timeperimage>10000</timeperimage>
 	<fadetime>2000</fadetime>
 	<randomize>true</randomize>
 	<animation effect="fade" start="0" end="100" time="300">Visible</animation>
 	<animation effect="fade" start="100" end="0" time="300">Hidden</animation>
 </control>
 
-
 You can also start this script at startup instead:
 - RunScript(script.artistslideshow,daemon=True)
 this will keep the script running all the time.
-
 
 The script provides these properties to the skin:
 
 Window(Visualisation).Property(ArtistSlideshow)
  This is the path to the directory containing the downloaded images for the currently playing
  artist
-
-Window(Visualisation).Property(ArtistSlideshowRefresh)
- DEPRECIATED.  No longer needed as of version 1.2
- There is no harm if you leave it in the skin, but you should remove it when you have a chance.
-
-Window(Visualisation).Property(ArtistSlideshowRunning)
- This one is used internally by the script to check if it is already running.
- There's no need to use this property in your skin.
 
 Window(Visualisation).Property(ArtistSlideshow.ArtistBiography)
  Artist biography from last.fm
@@ -105,3 +95,18 @@ Window(Visualisation).Property(ArtistSlideshow.%d.SimilarThumb)
 Window(Visualisation).Property(ArtistSlideshow.%d.AlbumName)
 Window(Visualisation).Property(ArtistSlideshow.%d.AlbumThumb)
  Albums by the artist
+
+Window(Visualisation).Property(ArtistSlideshowRunning)
+ This one is used internally by the script to check if it is already running.
+ There's no need to use this property in your skin.
+
+ 
+----How to call this addon from another addon
+
+To use this addon to provide the background for another addon, your addon must create a window that uses a multimage control the same as above.  That window must have an infolabel in which the currently playing artist is stored.  It is the responsibility of the calling addon to change that infolabel when the artist changes.
+
+The created window can call this addon by using:
+
+RunScript(script.artistslideshow,windowid=<somenumber>&artistfield=<infolabelname>)
+
+where <somenumber> is the number of the window the calling addon created and <infolabelname> if the name of the infolabel where the currently playing artist is being stored.
