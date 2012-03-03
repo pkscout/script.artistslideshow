@@ -1,5 +1,5 @@
 v1.3.0
-- updated refresh during download logic to make it more asthetically pleasing
+- updated refresh during download logic to make it more aesthetically pleasing
 - refresh during downloads is now the default (and non-optional) behavior
 - removed option to change refresh timing
 - new cache manager (removes only files, not directories)
