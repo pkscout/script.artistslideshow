@@ -226,7 +226,10 @@ class Main:
 
 
     def _init_vars( self ):
-        self.WINDOW = xbmcgui.Window( int(self.WINDOWID) )
+        try:
+            self.WINDOW = xbmcgui.Window( int(self.WINDOWID) )
+        except ValueError:
+            self.WINDOW = xbmcgui.Window( 12006 )
         if( self.ARTISTFIELD == '' ):
             self.SKINARTIST = ''
         else:
