@@ -99,6 +99,10 @@ Window(Visualisation).Property(ArtistSlideshow.%d.AlbumThumb)
 Window(Visualisation).Property(ArtistSlideshowRunning)
  This one is used internally by the script to check if it is already running.
  There's no need to use this property in your skin.
+ 
+Window(Visualisation).Property(ArtistSlideshow.CleanupComplete)
+ This one is used internally by the script to tell an external script that it
+ is done running and is exiting.
 
  
 ----How to call this addon from another addon
@@ -110,3 +114,5 @@ The created window can call this addon by using:
 RunScript(script.artistslideshow,windowid=<somenumber>&artistfield=<infolabelname>)
 
 where <somenumber> is the number of the window the calling addon created and <infolabelname> if the name of the infolabel where the currently playing artist is being stored.
+
+Artistslideshow should be called only once when you first instantiate the window with the specified windowid.  When your script exits you should set the artist infolabel you defined in the call to empty.  ArtistSlideshow will set the window property Artistslideshow.CleanupComplete to True when it is done with cleanup and exiting.  You should check that this property is True before destroying the Window with the windowid used to call ArtistSlideshow.
