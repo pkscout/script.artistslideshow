@@ -118,9 +118,9 @@ class Main:
         else:
             self.LastCacheTrim = 0
             self.WINDOW.setProperty("ArtistSlideshowRunning", "True")
-            if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
+            if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
                 log('no music playing')
-                if self.DAEMON == "False":
+                if( self.DAEMON == "False" ):
                     self.WINDOW.clearProperty("ArtistSlideshowRunning")
             elif(not self.OVERRIDEPATH == ''):
                 self.WINDOW.setProperty("ArtistSlideshow", self.OVERRIDEPATH)
@@ -132,7 +132,7 @@ class Main:
             while (not xbmc.abortRequested and self.OVERRIDEPATH == ''):
                 time.sleep(0.5)
                 if xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
-                    if( xbmc.Player().isPlayingAudio() == True or not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
+                    if( xbmc.Player().isPlayingAudio() == True or not xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
                         if self.NAME != self._get_current_artist():
                             self._clear_properties()
                             self.UsingFallback = False
@@ -144,8 +144,8 @@ class Main:
                                 self._use_correct_artwork()
                     else:
                         time.sleep(1) # doublecheck if playback really stopped
-                        if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
-                            if self.DAEMON == "False":
+                        if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
+                            if ( self.DAEMON == "False" ):
                                 self.WINDOW.clearProperty("ArtistSlideshowRunning")
                 else:
                     self._clear_properties()
@@ -185,7 +185,9 @@ class Main:
         except:
             params = {}
         self.WINDOWID = params.get( "windowid", "12006")
+        log( 'window id is set to %s' % self.WINDOWID )
         self.ARTISTFIELD = params.get( "artistfield", "" )
+        log( 'artist field is set to %s' % self.ARTISTFIELD )
         self.DAEMON = params.get( "daemon", "False" )
         if self.DAEMON == "True":
             log('daemonizing')
@@ -230,6 +232,8 @@ class Main:
             self.SKINARTIST = "Window(%s).Property(%s)" % ( self.WINDOWID, self.ARTISTFIELD )
         self.ARTISTSLIDESHOW = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshow" )
         self.ARTISTSLIDESHOWRUNNING = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshowRunning" )
+        self.EXTERNALCALL = "Window(%s).Property(%s)" % ( self.WINDOWID, "Artistslideshow.ExternalCall" )
+        log( 'external call is set to ' + xbmc.getInfoLabel( self.EXTERNALCALL ) )
         self.NAME = ''
         self.LocalImagesFound = False
         self.CachedImagesFound = False
@@ -380,7 +384,7 @@ class Main:
 
 
     def _playback_stopped_or_changed( self ):
-        if self.NAME != self._get_current_artist():
+        if (self.NAME != self._get_current_artist() or xbmc.getInfoLabel( self.EXTERNALCALL ) == ''):
             return True
         else:
             return False
@@ -422,6 +426,8 @@ class Main:
                 cache_size = 0
                 first_folder = True
                 for folder in folders:
+                    if( self._playback_stopped_or_changed() ):
+                        break
                     cache_size = cache_size + self._get_folder_size( cache_root + folder )
                     log( 'looking at folder %s cache size is now %s' % (folder, cache_size) )
                     if( cache_size > self.maxcachesize and not first_folder ):
@@ -567,7 +573,7 @@ class Main:
 
 
     def _clear_properties( self ):
-        if not xbmc.getInfoLabel( self.ARTISTSLIDESHOW ) == "True":
+        if not xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
             self.WINDOW.clearProperty("ArtistSlideshow")
         self.WINDOW.clearProperty( "ArtistSlideshow.ArtistBiography" )
         for count in range( 50 ):
@@ -575,10 +581,10 @@ class Main:
             self.WINDOW.clearProperty( "ArtistSlideshow.%d.SimilarThumb" % ( count ) )
             self.WINDOW.clearProperty( "ArtistSlideshow.%d.AlbumName" % ( count ) )
             self.WINDOW.clearProperty( "ArtistSlideshow.%d.AlbumThumb" % ( count ) )
-        self.WINDOW.setProperty("ArtistSlideshow.CleanupComplete", "True")
 
 
 if ( __name__ == "__main__" ):
         log('script version %s started' % __addonversion__)
-        Main()
+        slideshow = Main()
+        slideshow.WINDOW.setProperty("ArtistSlideshow.CleanupComplete", "True")
 log('script stopped')
