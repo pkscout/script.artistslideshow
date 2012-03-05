@@ -185,10 +185,6 @@ class Main:
         except:
             params = {}
         self.WINDOWID = params.get( "windowid", "12006")
-        try:
-           int( self.WINDOWID )
-        except ValueError:
-           self.WINDOWID = '12006'
         self.ARTISTFIELD = params.get( "artistfield", "" )
         self.DAEMON = params.get( "daemon", "False" )
         if self.DAEMON == "True":
@@ -226,10 +222,8 @@ class Main:
 
 
     def _init_vars( self ):
-        try:
-            self.WINDOW = xbmcgui.Window( int(self.WINDOWID) )
-        except ValueError:
-            self.WINDOW = xbmcgui.Window( 12006 )
+        self.WINDOW = xbmcgui.Window( int(self.WINDOWID) )
+        self.WINDOW.clearProperty( "ArtistSlideshow.CleanupComplete" )
         if( self.ARTISTFIELD == '' ):
             self.SKINARTIST = ''
         else:
@@ -581,6 +575,7 @@ class Main:
             self.WINDOW.clearProperty( "ArtistSlideshow.%d.SimilarThumb" % ( count ) )
             self.WINDOW.clearProperty( "ArtistSlideshow.%d.AlbumName" % ( count ) )
             self.WINDOW.clearProperty( "ArtistSlideshow.%d.AlbumThumb" % ( count ) )
+        self.WINDOW.setProperty("ArtistSlideshow.CleanupComplete", "True")
 
 
 if ( __name__ == "__main__" ):
