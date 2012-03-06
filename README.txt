@@ -48,10 +48,10 @@ Advanced
 
 In MusicVisualisation.xml:
 
-- 1) Set the default control to 999:
+Set the default control to 999:
 <defaultcontrol>999</defaultcontrol>
 
-- 2) Add a button to start the script:
+Add a button to start the script:
 <control type="button" id="999">
 	<posx>-10</posx>
 	<posy>-10</posy>
@@ -60,7 +60,7 @@ In MusicVisualisation.xml:
 	<onfocus>RunScript(script.artistslideshow)</onfocus>
 </control>
 
-- 3) Add a multiimage conrol:
+Add a multiimage conrol:
 <control type="multiimage">
 	<posx>0</posx>
 	<posy>0</posy>
@@ -74,10 +74,6 @@ In MusicVisualisation.xml:
 	<animation effect="fade" start="0" end="100" time="300">Visible</animation>
 	<animation effect="fade" start="100" end="0" time="300">Hidden</animation>
 </control>
-
-You can also start this script at startup instead:
-- RunScript(script.artistslideshow,daemon=True)
-this will keep the script running all the time.
 
 The script provides these properties to the skin:
 
@@ -107,12 +103,73 @@ Window(Visualisation).Property(ArtistSlideshow.CleanupComplete)
  
 ----How to call this addon from another addon
 
-To use this addon to provide the background for another addon, your addon must create a window that uses a multimage control the same as above.  That window must have an infolabel in which the currently playing artist is stored.  It is the responsibility of the calling addon to change that infolabel when the artist changes.
+To use this addon to provide the background for another addon, the addon must create a window that uses a multimage control:
 
-The created window can call this addon by using:
+<control type="multiimage">
+	<posx>0</posx>
+	<posy>0</posy>
+	<width>1280</width>
+	<height>720</height>
+	<imagepath background="true">$INFO[Window.Property(ArtistSlideshow)]</imagepath>
+	<aspectratio>keep</aspectratio>
+	<timeperimage>10000</timeperimage>
+	<fadetime>2000</fadetime>
+	<randomize>true</randomize>
+	<animation effect="fade" start="0" end="100" time="300">Visible</animation>
+	<animation effect="fade" start="100" end="0" time="300">Hidden</animation>
+</control>
 
-RunScript(script.artistslideshow,windowid=<somenumber>&artistfield=<infolabelname>)
+That window must have an infolabel in which the currently playing artist is stored with a suggested name of CURRENTARTIST.  It is the responsibility of the calling addon to change that infolabel when the artist changes.
 
-where <somenumber> is the number of the window the calling addon created and <infolabelname> if the name of the infolabel where the currently playing artist is being stored.
+The following additional properties are available to the skin of an addon calling ArtistSlideshow.
 
-Artistslideshow should be called only once when you first instantiate the window with the specified windowid.  Artistslideshow runs as a pseudo service and will continue checking for changes to the artist infolabel you define in the call until that infolabel is set to empty.  Given that, when your script exits you should set the artist infolabel you defined in the call to empty.  ArtistSlideshow will set the window property Artistslideshow.CleanupComplete to True when it is done with cleanup and exiting.  You should check that this property is True before destroying the Window with the windowid used to call ArtistSlideshow.
+Window.Property(ArtistSlideshow)
+ This is the path to the directory containing the downloaded images for the currently playing
+ artist
+
+Window.Property(ArtistSlideshow.ArtistBiography)
+ Artist biography from last.fm
+
+Window.Property(ArtistSlideshow.%d.SimilarName)
+Window.Property(ArtistSlideshow.%d.SimilarThumb)
+ Similar artists
+
+Window.Property(ArtistSlideshow.%d.AlbumName)
+Window.Property(ArtistSlideshow.%d.AlbumThumb)
+ Albums by the artist
+
+Window.Property(ArtistSlideshowRunning)
+ This one is used internally by ArtistSlideshow to check if it is already running.
+ There's no need to use this property in your script's skin.
+
+Window.Property(ArtistSlideshow.ExternalCall)
+ An external addon needs to set this to True so that ArtistSlideshow will run properly when
+ called by an external script.  This property should be cleared to tell ArtistSlideshow to stop
+ running.
+ 
+Window.Property(ArtistSlideshow.CleanupComplete)
+ This one is used internally by Artistslideshow to tell an external script that ArtistSlideshow
+ is done running and is exiting.
+
+Artistslideshow does not exit after being called.  It continues to run to check for changes in the artist infolabel.  Becasue of that, the calling addon will have to create another thread for ArtistSlideshow.  The calling addon needs to import the python theading module for this to work.  
+
+def runArtistSlideshow(self):
+    #startup artistslideshow
+    xbmcgui.Window(xbmcgui.getCurrentWindowId()).setProperty("ArtistSlideshow.ExternalCall", "True")
+    #assumes addon is using suggested infolabel name of CURRENTARTIST
+    artistslideshow = "RunScript(script.artistslideshow,windowid=%s&artistfield=%s)" % (xbmcgui.getCurrentWindowId(), "CURRENTARTIST")
+    xbmc.executebuiltin(artistslideshow)
+
+self.thread = threading.Thread(target=self.runArtistSlideshow)
+self.thread.setDaemon(True)
+self.thread.start()
+
+The suggestion is for the addon to spawn this thread right after it spawns the window.
+
+When the calling addon is preparing to exit, it must tell ArtistSlideshow to stop and wait until it has.  This logic should be added *before* the addon's window is destroyed.  Failure to include this step will likely cause XBMC to crash.
+
+#tell ArtistSlideshow to exit
+xbmcgui.Window(xbmcgui.getCurrentWindowId()).clearProperty("ArtistSlideshow.ExternalCall")
+#wait until ArtistSlideshow exits
+while (not xbmcgui.Window(xbmcgui.getCurrentWindowId()).getProperty("ArtistSlideshow.CleanupComplete") == "True"):
+    time.sleep(1)
