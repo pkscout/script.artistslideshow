@@ -132,7 +132,7 @@ class Main:
             while (not xbmc.abortRequested and self.OVERRIDEPATH == ''):
                 time.sleep(0.5)
                 if xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
-                    if( xbmc.Player().isPlayingAudio() == True or not xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
+                    if( xbmc.Player().isPlayingAudio() == True or xbmc.getInfoLabel( self.EXTERNALCALL ) != '' ):
                         if self.NAME != self._get_current_artist():
                             self._clear_properties()
                             self.UsingFallback = False
@@ -233,6 +233,7 @@ class Main:
         self.ARTISTSLIDESHOW = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshow" )
         self.ARTISTSLIDESHOWRUNNING = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshowRunning" )
         self.EXTERNALCALL = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshow.ExternalCall" )
+        self.EXTERNALCALLSTATUS = xbmc.getInfoLabel( self.EXTERNALCALL )
         log( 'external call is set to ' + xbmc.getInfoLabel( self.EXTERNALCALL ) )
         self.NAME = ''
         self.LocalImagesFound = False
@@ -303,6 +304,7 @@ class Main:
         log('downloading images')
         for url in lastfmlist:
             if( self._playback_stopped_or_changed() ):
+                self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
                 self._clean_dir( self.BlankDir )
                 return
             path = getCacheThumbName(url, self.CacheDir)
@@ -316,29 +318,40 @@ class Main:
                     log('downloaded %s to %s' % (url, path) )
                     self.ImageDownloaded=True
             if self.ImageDownloaded:
-                wait_elapsed = time.time() - last_time
-                if( wait_elapsed > min_refresh ):
-                    if( not (self.FirstImage and not self.CachedImagesFound) ):
-                        time.sleep( min_refresh - (wait_elapsed % min_refresh) )
-                    self._refresh_image_directory()
-                    last_time = time.time()
+                if( self._playback_stopped_or_changed() ):
+                    self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
+                    self._clean_dir( self.BlankDir )
+                    return
                 if not self.CachedImagesFound:
                     self.CachedImagesFound = True
                     if self.ARTISTINFO == "true":
                         self._get_artistinfo()
+                wait_elapsed = time.time() - last_time
+                if( wait_elapsed > min_refresh ):
+                    if( not (self.FirstImage and not self.CachedImagesFound) ):
+                        self._wait( min_refresh - (wait_elapsed % min_refresh) )
+                    if( not self._playback_stopped_or_changed() ):
+                        self._refresh_image_directory()
+                    last_time = time.time()
                 self.FirstImage = False
                     
         if self.ImageDownloaded:
             log('finished downloading images')
             self.DownloadedAllImages = True
+            if( self._playback_stopped_or_changed() ):
+                self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
+                self._clean_dir( self.BlankDir )
+                return
             log( 'cleaning up from refreshing slideshow' )
             wait_elapsed = time.time() - last_time
             if( wait_elapsed < min_refresh ):
-                time.sleep( min_refresh - wait_elapsed )
-            self._refresh_image_directory()
-            if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ) == self.BlankDir ):
-                time.sleep( min_refresh )
+                self._wait( min_refresh - wait_elapsed )
+            if( not self._playback_stopped_or_changed() ):
                 self._refresh_image_directory()
+            if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ) == self.BlankDir ):
+                self._wait( min_refresh )
+                if( not self._playback_stopped_or_changed() ):
+                    self._refresh_image_directory()
             self._clean_dir( self.BlankDir )
 
         if not self.ImageDownloaded:
@@ -347,8 +360,19 @@ class Main:
             if not self.CachedImagesFound:
                 log('clearing ArtistSlideshow property')
                 self.WINDOW.clearProperty("ArtistSlideshow")
-                if self.ARTISTINFO == "true":
+                if( self.ARTISTINFO == "true" and not self._playback_stopped_or_changed() ):
                     self._get_artistinfo()
+
+
+    def _wait( self, wait_time ):
+        waited = 0
+        while( waited < wait_time ):
+            time.sleep(0.1)
+            waited = waited + 0.1
+            if( self._playback_stopped_or_changed() ):
+                self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
+                self.Abort = True
+                return
 
 
     def _clean_dir( self, dir_path ):
@@ -384,7 +408,7 @@ class Main:
 
 
     def _playback_stopped_or_changed( self ):
-        if (self.NAME != self._get_current_artist() or xbmc.getInfoLabel( self.EXTERNALCALL ) == ''):
+        if (self.NAME != self._get_current_artist() or self.EXTERNALCALLSTATUS != xbmc.getInfoLabel(self.EXTERNALCALL) ):
             return True
         else:
             return False
