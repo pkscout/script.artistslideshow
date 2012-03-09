@@ -398,9 +398,8 @@ class Main:
         if( xbmc.Player().isPlayingAudio() == True ):
             artist = xbmc.Player().getMusicInfoTag().getArtist()
             if( artist == '' ):
-                string = xbmc.Player().getMusicInfoTag().getTitle()
-                index = string.find('-')
-                return string[0:index-1]
+                artist = xbmc.Player().getMusicInfoTag().getTitle()
+                return artist[0:(artist.find('-'))-1]
             else:
                 return artist
         elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
