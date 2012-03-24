@@ -519,7 +519,7 @@ class Main:
                 ForceUpdate = False
             else:
                 log('outdated cached artist %s info found' % item)
-        elif ForceUpdate:
+        if ForceUpdate:
             log('downloading artist %s info %s' % (item, site))
             try:
                 urllib.urlretrieve( self.url, filename )
