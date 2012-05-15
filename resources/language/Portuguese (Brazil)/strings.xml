@@ -1,5 +1,3 @@
-from Wanilton
-
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
   <!-- Languages  -->  
@@ -53,18 +51,18 @@ from Wanilton
     <string id="32002">Download imagens do htbackdrops.com</string>
     <string id="32003">Largura mínima da imagem</string>
     <string id="32004">Altura mínima da imagem</string>
-    <string id="32005">Download  de informções adicionais dos artistas</string>
+    <string id="32005">Download  de informações adicionais dos artistas</string>
     <string id="32006">  Linguagem Preferida para informações dos artistas</string>
     <string id="32007">Download somente de imagens 16:9</string>
     <string id="32100">Slideshow</string>
-    <string id="32101">Pasta Artists Locais</string>
+    <string id="32101">Pasta Artistas Locais</string>
     <string id="32102">  Imagem Prioritária</string>
     <string id="32103">Pasta reserva slideshow</string>
     <string id="32104">Substituir pasta do slideshow</string>
     <string id="32901">Usar imagens remotas primeiro</string>
     <string id="32902">Usar imagens locais primeiro</string>
     <string id="32903">Usar imagens locais e remotas (ambas)</string>
-    <string id="32200">Avançadoi</string>
-    <string id="32201">Tamanho Limite do cache para download cache</string>
-    <string id="32202">  Tamanho do cache máximo(em megabytes)</string>
+    <string id="32200">Avançado</string>
+    <string id="32201">Tamanho Limite do cache para download</string>
+    <string id="32202">  Tamanho do cache máximo (em megabytes)</string>
 </strings>
