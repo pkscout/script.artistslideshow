@@ -221,11 +221,9 @@ class Main:
             self.maxcachesize = int(__addon__.getSetting( "max_cache_size" )) * 1000000
         except:
             self.maxcachesize = 1024 * 1000000
-        self.SHOWPROGRESS = __addon__.getSetting( "show_progress" )
-        self.PROGRESSPATH = __addon__.getSetting( "progress_path" )
-        if len (self.PROGRESSPATH) == 0:
-        	self.PROGRESSPATH = '%s/resources/progress' % __addonpath__
-        	log('set progress path to %s' % self.PROGRESSPATH)
+        if ( len ( __addon__.getSetting( "progress_path" ) ) > 0 ) + ( __addon__.getSetting( "show_progress" ) == "true" ):
+            self.PROGRESSPATH = __addon__.getSetting( "progress_path" )
+            log('set progress path to %s' % self.PROGRESSPATH)
 
 
     def _init_vars( self ):
@@ -294,8 +292,8 @@ class Main:
                 self._get_artistinfo()
         else:
             last_time = 0
-            if self.SHOWPROGRESS == "true":
-	            self.WINDOW.setProperty("ArtistSlideshow", self.PROGRESSPATH)
+            if len ( self.PROGRESSPATH ) > 0:
+                self.WINDOW.setProperty("ArtistSlideshow", self.PROGRESSPATH)
 
         if self.LASTFM == "true":
             lastfmlist = self._get_images('lastfm')
