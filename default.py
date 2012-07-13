@@ -228,6 +228,11 @@ class Main:
             log('set progress path to %s' % self.PROGRESSPATH)
         else:
         	self.PROGRESSPATH = ''
+        if len ( __addon__.getSetting( "fanart_folder" ) ) > 0:
+            self.FANARTFOLDER = __addon__.getSetting( "fanart_folder" )
+            log('set fanart folder to %s' % self.FANARTFOLDER)
+        else:
+        	self.FANARTFOLDER = 'extrafanart'
 
 
     def _init_vars( self ):
@@ -434,7 +439,7 @@ class Main:
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
-        self.CacheDir = self.LOCALARTISTPATH + self.NAME + '/extrafanart'
+        self.CacheDir = self.LOCALARTISTPATH + self.NAME + '/' + self.FANARTFOLDER
         log('cachedir = %s' % self.CacheDir)
         try:
             files = os.listdir(self.CacheDir)

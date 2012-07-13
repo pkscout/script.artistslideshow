@@ -70,4 +70,5 @@
     <string id="32202">  Maximum cache size (in megabytes)</string>
     <string id="32203">Display progress images during first download</string>
     <string id="32204">  Progress images folder</string>
+    <string id="32205">Alternate name for local fanart folder</string>
 </strings>

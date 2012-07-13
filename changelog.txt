@@ -1,4 +1,7 @@
-v1.3.3
+v1.3.5 (unreleased)
+- added option for a folder name other than extrafanart
+
+v1.3.3 (unreleased)
 - added notification when downloading first image for an artist
 - added option for user to set image to use during download of first image
 
