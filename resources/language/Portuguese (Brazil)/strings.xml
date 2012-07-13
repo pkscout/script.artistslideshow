@@ -65,4 +65,6 @@
     <string id="32200">Avançado</string>
     <string id="32201">Tamanho Limite do cache para download</string>
     <string id="32202">  Tamanho do cache máximo (em megabytes)</string>
+    <string id="32203">Display progress images during first download</string>
+    <string id="32204">  Override progress images folder</string>
 </strings>
