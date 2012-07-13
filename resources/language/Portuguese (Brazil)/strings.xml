@@ -46,8 +46,8 @@
     <string id="30246">Vietnamese</string>
     <string id="30247">Farsi</string>
   <!-- Dialog Text -->
-    <string id="30300">Por favor, seja paciente</string>
-    <string id="30301">Baixando imagem primeiro artista</string>
+    <string id="30300">Por favor, aguarde</string>
+    <string id="30301">Baixando primeira imagem do artista</string>
   <!-- Settings  --> 
     <string id="32000">Download</string>
     <string id="32001">Download imagens do last.fm</string>
