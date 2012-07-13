@@ -17,6 +17,8 @@ __addon__        = xbmcaddon.Addon()
 __addonname__    = __addon__.getAddonInfo('id')
 __addonversion__ = __addon__.getAddonInfo('version')
 __addonpath__    = __addon__.getAddonInfo('path')
+__addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ )
+__language__     = __addon__.getLocalizedString
 
 socket.setdefaulttimeout(10)
 
@@ -221,9 +223,11 @@ class Main:
             self.maxcachesize = int(__addon__.getSetting( "max_cache_size" )) * 1000000
         except:
             self.maxcachesize = 1024 * 1000000
-        if ( len ( __addon__.getSetting( "progress_path" ) ) > 0 ) + ( __addon__.getSetting( "show_progress" ) == "true" ):
+        if ( len ( __addon__.getSetting( "progress_path" ) ) > 0 ) and ( __addon__.getSetting( "show_progress" ) == "true" ):
             self.PROGRESSPATH = __addon__.getSetting( "progress_path" )
             log('set progress path to %s' % self.PROGRESSPATH)
+        else:
+        	self.PROGRESSPATH = ''
 
 
     def _init_vars( self ):
@@ -245,6 +249,7 @@ class Main:
         self.DownloadedAllImages = False
         self.UsingFallback = False
         self.BlankDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ )
+        self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ )
         LastfmApiKey = 'fbd57a1baddb983d1848a939665310f6'
         HtbackdropsApiKey = '96d681ea0dcb07ad9d27a347e64b652a'
         self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/?autocorrect=1&api_key=' + LastfmApiKey
@@ -294,6 +299,9 @@ class Main:
             last_time = 0
             if len ( self.PROGRESSPATH ) > 0:
                 self.WINDOW.setProperty("ArtistSlideshow", self.PROGRESSPATH)
+            else:
+            	self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
+                xbmc.executebuiltin('XBMC.Notification("' + __language__(30300) + '", "' + __language__(30301) + '", 10000, ' + __addonicon__ + ')')
 
         if self.LASTFM == "true":
             lastfmlist = self._get_images('lastfm')
