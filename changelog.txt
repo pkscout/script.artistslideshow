@@ -1,7 +1,7 @@
-v.1.3.6 (unreleased)
+v.1.3.5 (unreleased)
 - added ability to display artwork from multiple artists simultaneously
 
-v1.3.5 (unreleased)
+v1.3.4 (unreleased)
 - added option for a folder name other than extrafanart
 
 v1.3.3 (unreleased)
