@@ -303,7 +303,7 @@ class Main:
 
         files = os.listdir(self.CacheDir)
         for file in files:
-            if file.endswith('tbn'):
+            if file.endswith('tbn') or (self.PRIORITY == '2' and self.LocalImagesFound):
                 self.CachedImagesFound = True
 
         if self.CachedImagesFound:
