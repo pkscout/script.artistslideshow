@@ -541,11 +541,14 @@ class Main:
     def _get_artistinfo( self ):
         site = "lastfm"
         self.url = self.LastfmURL + '&method=artist.getInfo&artist=' + self.NAME.replace('&','%26').replace(' ','+') + '&lang=' + self.LANGUAGE
-        bio = self._get_data(site, 'bio')
-        if bio == []:
-            self.biography = ''
-        else:
-            self.biography = cleanText(bio[0])
+        try:
+        	self.biography = open( self.LOCALARTISTPATH + self.NAME + '/bio/artistbio.nfo', 'rU' ).read()
+        except IOError:
+            bio = self._get_data(site, 'bio')
+            if bio == []:
+                self.biography = ''
+            else:
+                self.biography = cleanText(bio[0])
         self.url = self.LastfmURL + '&method=artist.getSimilar&artist=' + self.NAME.replace('&','%26').replace(' ','+')
         self.similar = self._get_data(site, 'similar')
         self.url = self.LastfmURL + '&method=artist.getTopAlbums&artist=' + self.NAME.replace('&','%26').replace(' ','+')
