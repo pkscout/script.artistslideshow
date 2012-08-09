@@ -320,7 +320,7 @@ class Main:
                     self.WINDOW.setProperty("ArtistSlideshow", self.PROGRESSPATH)
                 else:
                     self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
-                    xbmc.executebuiltin('XBMC.Notification("' + __language__(30300) + '", "' + __language__(30301) + '", 10000, ' + __addonicon__ + ')')
+                    xbmc.executebuiltin('XBMC.Notification("' + __language__(30300).encode("utf8") + '", "' + __language__(30301).encode("utf8") + '", 10000, ' + __addonicon__ + ')')
 
         if self.LASTFM == "true":
             lastfmlist = self._get_images('lastfm')
