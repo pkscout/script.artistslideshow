@@ -1,3 +1,6 @@
+v.1.4.1.2
+- updated featured artist parsing to support radio streams
+
 v.1.4.1.1
 - added ability to override artist bio, albums, and similar artists with local info
 - fixed bug when using both local and remote images
