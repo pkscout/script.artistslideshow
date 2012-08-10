@@ -322,11 +322,22 @@ class Main:
         else:
             last_time = 0
             if self.ARTISTNUM == 1:
-                if len ( self.PROGRESSPATH ) > 0:
-                    self.WINDOW.setProperty("ArtistSlideshow", self.PROGRESSPATH)
-                else:
-                    self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
-                    xbmc.executebuiltin('XBMC.Notification("' + __language__(30300).encode("utf8") + '", "' + __language__(30301).encode("utf8") + '", 10000, ' + __addonicon__ + ')')
+                show_progress = True
+                for cache_file in ['artistimageshtbackdrops.nfo', 'artistimageslastfm.nfo']:
+                    filename = os.path.join( self.CacheDir, cache_file )
+                    if xbmcvfs.exists( os.path.join( self.CacheDir, filename ) ):
+                        if time.time() - os.path.getmtime(filename) < 1209600:
+                            log('cached %s found' % filename)
+                            show_progress = False
+                        else:
+                           log('outdated %s found' % filename)
+                           show_progress = True
+                if show_progress:
+                    if len ( self.PROGRESSPATH ) > 0:
+                        self.WINDOW.setProperty("ArtistSlideshow", self.PROGRESSPATH)
+                    else:
+                        self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
+                        xbmc.executebuiltin('XBMC.Notification("' + __language__(30300).encode("utf8") + '", "' + __language__(30301).encode("utf8") + '", 10000, ' + __addonicon__ + ')')
 
         if self.LASTFM == "true":
             lastfmlist = self._get_images('lastfm')
@@ -401,7 +412,9 @@ class Main:
             if not self.CachedImagesFound:
                 if self.ARTISTNUM == 1:
                     log('clearing ArtistSlideshow property')
-                    self.WINDOW.clearProperty("ArtistSlideshow")
+                    self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
+                    if show_progress:
+                        xbmc.executebuiltin('XBMC.Notification("' + __language__(30302).encode("utf8") + '", "' + __language__(30303).encode("utf8") + '", 10000, ' + __addonicon__ + ')')
                     if( self.ARTISTINFO == "true" and not self._playback_stopped_or_changed() ):
                         self._get_artistinfo()
             elif self.TOTALARTISTS > 1:
