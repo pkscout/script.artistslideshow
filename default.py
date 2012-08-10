@@ -294,6 +294,7 @@ class Main:
         self.DownloadedAllImages = False
         self.ImageDownloaded = False
         self.FirstImage = True
+        display_dialog = False
         min_refresh = 9.9
         if len(self.NAME) == 0:
             log('no artist name provided')
@@ -337,7 +338,7 @@ class Main:
                         self.WINDOW.setProperty("ArtistSlideshow", self.PROGRESSPATH)
                     else:
                         self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
-                        xbmc.executebuiltin('XBMC.Notification("' + __language__(30300).encode("utf8") + '", "' + __language__(30301).encode("utf8") + '", 10000, ' + __addonicon__ + ')')
+                        display_dialog = True
                 else:
                     self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
 
@@ -354,6 +355,8 @@ class Main:
 
         log('downloading images')
         for url in lastfmlist:
+            if display_dialog:
+                xbmc.executebuiltin('XBMC.Notification("' + __language__(30300).encode("utf8") + '", "' + __language__(30301).encode("utf8") + '", 10000, ' + __addonicon__ + ')')
             if( self._playback_stopped_or_changed() ):
                 self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
                 self._clean_dir( self.BlankDir )
@@ -393,6 +396,8 @@ class Main:
                 self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
                 self._clean_dir( self.BlankDir )
                 return
+            if display_dialog:
+                xbmc.executebuiltin('XBMC.Notification("' + __language__(30304).encode("utf8") + '", "' + __language__(30305).encode("utf8") + '", 10000, ' + __addonicon__ + ')')
             log( 'cleaning up from refreshing slideshow' )
             wait_elapsed = time.time() - last_time
             if( wait_elapsed < min_refresh ):
@@ -415,7 +420,7 @@ class Main:
                 if self.ARTISTNUM == 1:
                     log('clearing ArtistSlideshow property')
                     self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
-                    if show_progress:
+                    if show_dialog:
                         xbmc.executebuiltin('XBMC.Notification("' + __language__(30302).encode("utf8") + '", "' + __language__(30303).encode("utf8") + '", 10000, ' + __addonicon__ + ')')
                     if( self.ARTISTINFO == "true" and not self._playback_stopped_or_changed() ):
                         self._get_artistinfo()

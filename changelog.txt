@@ -2,7 +2,8 @@ v.1.4.1.2
 - updated featured artist parsing to support radio streams
 - updated featured artist title search to support calls from external scripts
 - added notification if no images downloaded
-- set first image download notification to not repeat as often
+- added notification when all downloads complete
+- set image download notifications to not repeat as often
 
 v.1.4.1.1
 - added ability to override artist bio, albums, and similar artists with local info
