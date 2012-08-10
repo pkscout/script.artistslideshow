@@ -201,6 +201,8 @@ class Main:
         log( 'window id is set to %s' % self.WINDOWID )
         self.ARTISTFIELD = params.get( "artistfield", "" )
         log( 'artist field is set to %s' % self.ARTISTFIELD )
+        self.TITLEFIELD = params.get( "titlefield", "" )
+        log( 'title field is set to %s' % self.TITLEFIELD )
         self.DAEMON = params.get( "daemon", "False" )
         if self.DAEMON == "True":
             log('daemonizing')
@@ -253,6 +255,10 @@ class Main:
             self.SKINARTIST = ''
         else:
             self.SKINARTIST = "Window(%s).Property(%s)" % ( self.WINDOWID, self.ARTISTFIELD )
+        if( self.TITLEFIELD == '' ):
+            self.SKINTITLE = ''
+        else:
+            self.SKINTITLE = "Window(%s).Property(%s)" % ( self.WINDOWID, self.TITLEFIELD )
         self.ARTISTSLIDESHOW = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshow" )
         self.ARTISTSLIDESHOWRUNNING = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshowRunning" )
         self.EXTERNALCALL = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshow.ExternalCall" )
@@ -441,7 +447,7 @@ class Main:
             featured_artist = xbmc.Player().getMusicInfoTag().getTitle().replace('ft.','feat.').split('feat.')
         elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
             artist = xbmc.getInfoLabel( self.SKINARTIST )
-#            featured_artist = xbmc.Player().getMusicInfoTag().getTitle().replace('ft.','feat.').split('feat.')
+            featured_artist = xbmc.getInfoLabel( self.SKINTITLE ).replace('ft.','feat.').split('feat.')
         else:
             artist = ''
         artists = artist.replace('ft.','/').replace('feat.','/').split('/')
