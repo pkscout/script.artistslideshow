@@ -436,17 +436,15 @@ class Main:
         check_title = False
         if( xbmc.Player().isPlayingAudio() == True ):
             artist = xbmc.Player().getMusicInfoTag().getArtist()
-            featured_artist = xbmc.Player().getMusicInfoTag().getTitle().replace('ft.','feat.').split('feat.')
             if( artist == '' ):
                 artist = xbmc.Player().getMusicInfoTag().getTitle()[0:(artist.find('-'))-1]
-            else:
-                check_title = True
+            featured_artist = xbmc.Player().getMusicInfoTag().getTitle().replace('ft.','feat.').split('feat.')
         elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
             artist = xbmc.getInfoLabel( self.SKINARTIST )
         else:
             artist = ''
         artists = artist.replace('ft.','/').replace('feat.','/').split('/')
-        if check_title and len( featured_artist ) > 1:
+        if len( featured_artist ) > 1:
             artists.append( featured_artist[-1] )
         return [a.strip(' ()') for a in artists]
 
