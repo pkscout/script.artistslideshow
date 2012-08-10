@@ -433,7 +433,7 @@ class Main:
 
 
     def _get_current_artist( self ):
-        check_title = False
+        featured_artist = ''
         if( xbmc.Player().isPlayingAudio() == True ):
             artist = xbmc.Player().getMusicInfoTag().getArtist()
             if( artist == '' ):
@@ -441,6 +441,7 @@ class Main:
             featured_artist = xbmc.Player().getMusicInfoTag().getTitle().replace('ft.','feat.').split('feat.')
         elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
             artist = xbmc.getInfoLabel( self.SKINARTIST )
+#            featured_artist = xbmc.Player().getMusicInfoTag().getTitle().replace('ft.','feat.').split('feat.')
         else:
             artist = ''
         artists = artist.replace('ft.','/').replace('feat.','/').split('/')
