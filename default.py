@@ -540,20 +540,62 @@ class Main:
 
     def _get_artistinfo( self ):
         site = "lastfm"
-        self.url = self.LastfmURL + '&method=artist.getInfo&artist=' + self.NAME.replace('&','%26').replace(' ','+') + '&lang=' + self.LANGUAGE
-        try:
-        	self.biography = open( self.LOCALARTISTPATH + self.NAME + '/bio/artistbio.nfo', 'rU' ).read()
-        except IOError:
+        bio = self._get_local_data( 'bio' )
+        if bio == []:
+            self.url = self.LastfmURL + '&method=artist.getInfo&artist=' + self.NAME.replace('&','%26').replace(' ','+') + '&lang=' + self.LANGUAGE
             bio = self._get_data(site, 'bio')
-            if bio == []:
-                self.biography = ''
-            else:
-                self.biography = cleanText(bio[0])
-        self.url = self.LastfmURL + '&method=artist.getSimilar&artist=' + self.NAME.replace('&','%26').replace(' ','+')
-        self.similar = self._get_data(site, 'similar')
-        self.url = self.LastfmURL + '&method=artist.getTopAlbums&artist=' + self.NAME.replace('&','%26').replace(' ','+')
-        self.albums = self._get_data(site, 'albums')
+        if bio == []:
+            self.biography = ''
+        else:
+            self.biography = cleanText(bio[0])
+        self.similar = self._get_local_data( 'similar' )
+        if self.similar == []:
+            self.url = self.LastfmURL + '&method=artist.getSimilar&artist=' + self.NAME.replace('&','%26').replace(' ','+')
+            self.similar = self._get_data(site, 'similar')
+        self.albums = self._get_local_data( 'albums' )
+        if self.albums == []:
+            self.url = self.LastfmURL + '&method=artist.getTopAlbums&artist=' + self.NAME.replace('&','%26').replace(' ','+')
+            self.albums = self._get_data(site, 'albums')
         self._set_properties()
+
+
+    def _get_local_data( self, item ):
+        data = []
+        local_path = os.path.join( self.LOCALARTISTPATH, self.NAME, 'override' )
+        if item == "similar":
+            filename = os.path.join( local_path, 'artistsimilar.nfo' )
+        elif item == "albums":
+            filename = os.path.join( local_path, 'artistsalbums.nfo' )
+        elif item == "bio":
+            filename = os.path.join( local_path, 'artistbio.nfo' )
+        try:
+            xmldata = xmltree.parse(filename).getroot()
+        except:
+            log('invalid local xml file for %s' % item)
+            return data
+        if item == "bio":
+            for element in xmldata.getiterator():
+                if element.tag == "content":
+                    bio = element.text
+                    if not bio:
+                        bio = ''
+                    data.append(bio)
+        elif( item == "similar" or item == "albums" ):
+            for element in xmldata.getiterator():
+                if element.tag == "name":
+                    name = element.text
+                    name.encode('ascii', 'ignore')
+                elif element.tag == "image":
+                    image_text = element.text
+                    if not image_text:
+                        image = ''
+                    else:
+                        image = os.path.join( local_path, item, image_text )
+                    data.append( ( name , image ) )
+        if data == '':
+            log('no %s found in local xml file' % item)
+        return data
+
 
 
     def _get_data( self, site, item ):
