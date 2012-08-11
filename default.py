@@ -294,6 +294,7 @@ class Main:
         self.DownloadedAllImages = False
         self.ImageDownloaded = False
         self.FirstImage = True
+        show_progress = True
         display_dialog = False
         min_refresh = 9.9
         if len(self.NAME) == 0:
@@ -323,7 +324,6 @@ class Main:
         else:
             last_time = 0
             if self.ARTISTNUM == 1:
-                show_progress = True
                 for cache_file in ['artistimageshtbackdrops.nfo', 'artistimageslastfm.nfo']:
                     filename = os.path.join( self.CacheDir, cache_file )
                     if xbmcvfs.exists( os.path.join( self.CacheDir, filename ) ):
@@ -420,7 +420,7 @@ class Main:
                 if self.ARTISTNUM == 1:
                     log('clearing ArtistSlideshow property')
                     self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
-                    if show_dialog:
+                    if display_dialog:
                         xbmc.executebuiltin('XBMC.Notification("' + __language__(30302).encode("utf8") + '", "' + __language__(30303).encode("utf8") + '", 10000, ' + __addonicon__ + ')')
                     if( self.ARTISTINFO == "true" and not self._playback_stopped_or_changed() ):
                         self._get_artistinfo()
