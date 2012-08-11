@@ -101,8 +101,9 @@ def download(src, dst, dst2, display_dialog):
         if xbmcvfs.exists(tmpname):
             xbmcvfs.delete(tmpname)
         global __last_time__
-        __last_time__ = 0
-        urllib.urlretrieve( src, tmpname, lambda nb, bs, fs: reporthook(nb, bs, fs, display_dialog) )
+        # __last_time__ = 0
+        # urllib.urlretrieve( src, tmpname, lambda nb, bs, fs: reporthook(nb, bs, fs, display_dialog) )
+        urllib.urlretrieve( src, tmpname )
         if os.path.getsize(tmpname) > 999:
             log( 'copying file to transition directory' )
             xbmcvfs.copy(tmpname, dst2)
@@ -351,7 +352,7 @@ class Main:
                     self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
 
         if display_dialog:
-            xbmc.executebuiltin('XBMC.Notification("' + __language__(30300).encode("utf8") + '", "' + __language__(30301).encode("utf8") + '", 10000, ' + __addonicon__ + ')')
+            xbmc.executebuiltin('XBMC.Notification("' + __language__(30300).encode("utf8") + '", "' + __language__(30301).encode("utf8") + '", 5000, ' + __addonicon__ + ')')
 
         if self.LASTFM == "true":
             lastfmlist = self._get_images('lastfm')
@@ -405,8 +406,6 @@ class Main:
                 self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
                 self._clean_dir( self.BlankDir )
                 return
-            if display_dialog:
-                xbmc.executebuiltin('XBMC.Notification("' + __language__(30304).encode("utf8") + '", "' + __language__(30305).encode("utf8") + '", 10000, ' + __addonicon__ + ')')
             log( 'cleaning up from refreshing slideshow' )
             wait_elapsed = time.time() - last_time
             if( wait_elapsed < min_refresh ):
@@ -421,6 +420,8 @@ class Main:
                 if( not self._playback_stopped_or_changed() ):
                     self._refresh_image_directory()
             self._clean_dir( self.BlankDir )
+            if display_dialog:
+                xbmc.executebuiltin('XBMC.Notification("' + __language__(30304).encode("utf8") + '", "' + __language__(30305).encode("utf8") + '", 5000, ' + __addonicon__ + ')')
 
         if not self.ImageDownloaded:
             log('no images downloaded')
@@ -476,6 +477,7 @@ class Main:
             featured_artist = xbmc.Player().getMusicInfoTag().getTitle().replace('ft.','feat.').split('feat.')
         elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
             artist = xbmc.getInfoLabel( self.SKINARTIST )
+            log('current song title from skin is %s' % self.SKINTITLE)
             featured_artist = xbmc.getInfoLabel( self.SKINTITLE ).replace('ft.','feat.').split('feat.')
         else:
             artist = ''
