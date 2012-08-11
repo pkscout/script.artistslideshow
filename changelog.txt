@@ -4,7 +4,6 @@ v.1.4.1.2
 - updated the notifications logic when downloading images
 - added notification if no images downloaded
 - added notification when all downloads complete
-- set image download notifications to not repeat as often
 
 v.1.4.1.1
 - added ability to override artist bio, albums, and similar artists with local info
