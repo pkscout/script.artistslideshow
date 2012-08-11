@@ -95,12 +95,14 @@ def cleanText(text):
     text = re.sub('User-contributed text is available under the Creative Commons By-SA License and may also be available under the GNU FDL.','',text)
     return text.strip()
         
-def download(src, dst, dst2):
+def download(src, dst, dst2, display_dialog):
     if (not xbmc.abortRequested):
         tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
         if xbmcvfs.exists(tmpname):
             xbmcvfs.delete(tmpname)
-        urllib.urlretrieve(src, tmpname)
+        global __last_time__
+        __last_time__ = 0
+        urllib.urlretrieve( src, tmpname, lambda nb, bs, fs: reporthook(nb, bs, fs, display_dialog) )
         if os.path.getsize(tmpname) > 999:
             log( 'copying file to transition directory' )
             xbmcvfs.copy(tmpname, dst2)
@@ -108,6 +110,12 @@ def download(src, dst, dst2):
             xbmcvfs.rename(tmpname, dst)
         else:
             xbmcvfs.delete(tmpname)
+
+def reporthook( numblocks, blocksize, filesize, display_dialog ):
+    if time.time() - __last_time__ > 3 and display_dialog:
+        xbmc.executebuiltin('XBMC.Notification("' + __language__(30300).encode("utf8") + '", "' + __language__(30301).encode("utf8") + '", 20000, ' + __addonicon__ + ')')
+        global __last_time__
+        __last_time__ = time.time()
 
 class Main:
     def __init__( self ):
@@ -342,6 +350,9 @@ class Main:
                 else:
                     self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
 
+        if display_dialog:
+            xbmc.executebuiltin('XBMC.Notification("' + __language__(30300).encode("utf8") + '", "' + __language__(30301).encode("utf8") + '", 5000, ' + __addonicon__ + ')')
+
         if self.LASTFM == "true":
             lastfmlist = self._get_images('lastfm')
         else:
@@ -355,8 +366,6 @@ class Main:
 
         log('downloading images')
         for url in lastfmlist:
-            if display_dialog:
-                xbmc.executebuiltin('XBMC.Notification("' + __language__(30300).encode("utf8") + '", "' + __language__(30301).encode("utf8") + '", 10000, ' + __addonicon__ + ')')
             if( self._playback_stopped_or_changed() ):
                 self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
                 self._clean_dir( self.BlankDir )
@@ -365,7 +374,7 @@ class Main:
             path2 = getCacheThumbName(url, self.BlankDir)
             if not xbmcvfs.exists(path):
                 try:
-                    download(url, path, path2)
+                    download(url, path, path2, display_dialog)
                 except:
                     log ('site unreachable')
                 else:
@@ -388,7 +397,7 @@ class Main:
                         self._refresh_image_directory()
                     last_time = time.time()
                 self.FirstImage = False
-                    
+                
         if self.ImageDownloaded:
             log('finished downloading images')
             self.DownloadedAllImages = True
