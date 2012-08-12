@@ -477,7 +477,7 @@ class Main:
             featured_artist = xbmc.Player().getMusicInfoTag().getTitle().replace('ft.','feat.').split('feat.')
         elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
             artist = xbmc.getInfoLabel( self.SKINARTIST )
-            log('current song title from skin is %s' % self.SKINTITLE)
+            log('current song title from skin is %s' % xbmc.getInfoLabel( self.SKINTITLE ))
             featured_artist = xbmc.getInfoLabel( self.SKINTITLE ).replace('ft.','feat.').split('feat.')
         else:
             artist = ''
