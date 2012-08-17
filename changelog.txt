@@ -1,14 +1,13 @@
-v.1.4.1.2
+v.1.4.2
 - updated featured artist parsing to support radio streams
 - updated featured artist parsing to support calls from external scripts
 - updated the notifications logic when downloading images
 - added notification if no images downloaded
 - added notification when all downloads complete
-
-v.1.4.1.1
 - added ability to override artist bio, albums, and similar artists with local info
 - fixed bug when using both local and remote images
 - added French localization strings and description (thanks to mikebzh44)
+- updated Portuguese-Brazil strings (thanks to Wanilton)
 - UTF8 encoded message strings
 
 v.1.4.1
