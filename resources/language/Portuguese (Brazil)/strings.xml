@@ -72,7 +72,10 @@
     <string id="32200">Avançado</string>
     <string id="32201">Tamanho Limite do cache para download</string>
     <string id="32202">  Tamanho do cache máximo (em megabytes)</string>
-    <string id="32203">Exibir imagens de progresso durante a primeira transferência</string>
-    <string id="32204">  Pasta de imagens Progresso</string>
+    <string id="32203">Download notification type</string>
+    <string id="32204">  Custom notification images folder</string>
 	<string id="32205">Nome alternativo para a pasta fanart locais</string>
+    <string id="32206">None</string>
+    <string id="32207">Text notifications</string>
+    <string id="32208">Custom images</string>
 </strings>

@@ -1,3 +1,6 @@
+v.1.4.3
+- added option to disable notifications
+
 v.1.4.2
 - updated featured artist parsing to support radio streams
 - updated featured artist parsing to support calls from external scripts

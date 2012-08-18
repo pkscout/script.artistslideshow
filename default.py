@@ -95,14 +95,12 @@ def cleanText(text):
     text = re.sub('User-contributed text is available under the Creative Commons By-SA License and may also be available under the GNU FDL.','',text)
     return text.strip()
         
-def download(src, dst, dst2, display_dialog):
+def download(src, dst, dst2):
     if (not xbmc.abortRequested):
         tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
         if xbmcvfs.exists(tmpname):
             xbmcvfs.delete(tmpname)
         global __last_time__
-        # __last_time__ = 0
-        # urllib.urlretrieve( src, tmpname, lambda nb, bs, fs: reporthook(nb, bs, fs, display_dialog) )
         urllib.urlretrieve( src, tmpname )
         if os.path.getsize(tmpname) > 999:
             log( 'copying file to transition directory' )
@@ -112,11 +110,6 @@ def download(src, dst, dst2, display_dialog):
         else:
             xbmcvfs.delete(tmpname)
 
-def reporthook( numblocks, blocksize, filesize, display_dialog ):
-    if time.time() - __last_time__ > 3 and display_dialog:
-        xbmc.executebuiltin('XBMC.Notification("' + __language__(30300).encode("utf8") + '", "' + __language__(30301).encode("utf8") + '", 20000, ' + __addonicon__ + ')')
-        global __last_time__
-        __last_time__ = time.time()
 
 class Main:
     def __init__( self ):
@@ -245,7 +238,8 @@ class Main:
             self.maxcachesize = int(__addon__.getSetting( "max_cache_size" )) * 1000000
         except:
             self.maxcachesize = 1024 * 1000000
-        if ( len ( __addon__.getSetting( "progress_path" ) ) > 0 ) and ( __addon__.getSetting( "show_progress" ) == "true" ):
+        self.NOTIFICATIONTYPE = __addon__.getSetting( "show_progress" )
+        if self.NOTIFICATIONTYPE == "2":    
             self.PROGRESSPATH = __addon__.getSetting( "progress_path" )
             log('set progress path to %s' % self.PROGRESSPATH)
         else:
@@ -303,8 +297,7 @@ class Main:
         self.DownloadedAllImages = False
         self.ImageDownloaded = False
         self.FirstImage = True
-        show_progress = True
-        display_dialog = False
+        cached_image_info = False
         min_refresh = 9.9
         if len(self.NAME) == 0:
             log('no artist name provided')
@@ -338,21 +331,21 @@ class Main:
                     if xbmcvfs.exists( os.path.join( self.CacheDir, filename ) ):
                         if time.time() - os.path.getmtime(filename) < 1209600:
                             log('cached %s found' % filename)
-                            show_progress = False
+                            cached_image_info = True
                         else:
                            log('outdated %s found' % filename)
-                           show_progress = True
-                if show_progress:
-                    if len ( self.PROGRESSPATH ) > 0:
+                           cached_image_info = False
+                if self.NOTIFICATIONTYPE == "1":
+                    self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
+                    if not cached_image_info:
+                        xbmc.executebuiltin('XBMC.Notification("' + __language__(30300).encode("utf8") + '", "' + __language__(30301).encode("utf8") + '", 5000, ' + __addonicon__ + ')')
+                elif self.NOTIFICATIONTYPE == "2":
+                    if not cached_image_info:
                         self.WINDOW.setProperty("ArtistSlideshow", self.PROGRESSPATH)
                     else:
-                        self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
-                        display_dialog = True
+                        self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)                    
                 else:
                     self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
-
-        if display_dialog:
-            xbmc.executebuiltin('XBMC.Notification("' + __language__(30300).encode("utf8") + '", "' + __language__(30301).encode("utf8") + '", 5000, ' + __addonicon__ + ')')
 
         if self.LASTFM == "true":
             lastfmlist = self._get_images('lastfm')
@@ -375,7 +368,7 @@ class Main:
             path2 = getCacheThumbName(url, self.BlankDir)
             if not xbmcvfs.exists(path):
                 try:
-                    download(url, path, path2, display_dialog)
+                    download(url, path, path2)
                 except:
                     log ('site unreachable')
                 else:
@@ -413,6 +406,8 @@ class Main:
             if( not self._playback_stopped_or_changed() ):
                 if self.ARTISTNUM == 1:
                     self._refresh_image_directory()
+                    if self.NOTIFICATIONTYPE == "1" and not cached_image_info:
+                        xbmc.executebuiltin('XBMC.Notification("' + __language__(30304).encode("utf8") + '", "' + __language__(30305).encode("utf8") + '", 5000, ' + __addonicon__ + ')')
                 if self.TOTALARTISTS > 1:
                     self._merge_images()                
             if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ) == self.BlankDir and self.ARTISTNUM == 1):
@@ -420,8 +415,6 @@ class Main:
                 if( not self._playback_stopped_or_changed() ):
                     self._refresh_image_directory()
             self._clean_dir( self.BlankDir )
-            if display_dialog:
-                xbmc.executebuiltin('XBMC.Notification("' + __language__(30304).encode("utf8") + '", "' + __language__(30305).encode("utf8") + '", 5000, ' + __addonicon__ + ')')
 
         if not self.ImageDownloaded:
             log('no images downloaded')
@@ -430,7 +423,7 @@ class Main:
                 if self.ARTISTNUM == 1:
                     log('clearing ArtistSlideshow property')
                     self.WINDOW.setProperty("ArtistSlideshow", self.InitDir)
-                    if display_dialog:
+                    if self.NOTIFICATIONTYPE == "1" and not cached_image_info:
                         xbmc.executebuiltin('XBMC.Notification("' + __language__(30302).encode("utf8") + '", "' + __language__(30303).encode("utf8") + '", 10000, ' + __addonicon__ + ')')
                     if( self.ARTISTINFO == "true" and not self._playback_stopped_or_changed() ):
                         self._get_artistinfo()

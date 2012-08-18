@@ -72,7 +72,10 @@
     <string id="32200">Avancé</string>
     <string id="32201">Limiter la taille du cache de téléchargement</string>
     <string id="32202">Taille maximale du cache (en mégaoctets)</string>
-    <string id="32203">Afficher progress images durant le premier téléchargement</string>
-    <string id="32204">Dossier Progress images</string>
+    <string id="32203">Download notification type</string>
+    <string id="32204">  Custom notification images folder</string>
     <string id="32205">Nom alternatif pour le dossier des fanart locaux</string>
+    <string id="32206">None</string>
+    <string id="32207">Text notifications</string>
+    <string id="32208">Custom images</string>
 </strings>
