@@ -285,10 +285,10 @@ class Main:
 
 
     def _make_dirs( self ):
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ )).decode("utf-8")
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/temp' % __addonname__ )).decode("utf-8")
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow' % __addonname__ )).decode("utf-8")
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ )).decode("utf-8")
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ).decode("utf-8"))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/temp' % __addonname__ ).decode("utf-8"))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow' % __addonname__ ).decode("utf-8"))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode("utf-8"))
         
 
     def _start_download( self ):
