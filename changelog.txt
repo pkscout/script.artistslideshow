@@ -1,4 +1,8 @@
-v.1.4.3
+v.1.4.2.2
+- fix for non-ascii characters in windows user name
+- fix for non-ascii characters in artist name
+
+v.1.4.2.1
 - added option to disable notifications
 
 v.1.4.2
