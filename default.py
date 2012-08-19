@@ -17,7 +17,7 @@ __addon__        = xbmcaddon.Addon()
 __addonname__    = __addon__.getAddonInfo('id')
 __addonversion__ = __addon__.getAddonInfo('version')
 __addonpath__    = __addon__.getAddonInfo('path')
-__addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ )
+__addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ ).decode("utf-8")
 __language__     = __addon__.getLocalizedString
 
 socket.setdefaulttimeout(10)
@@ -97,7 +97,7 @@ def cleanText(text):
         
 def download(src, dst, dst2):
     if (not xbmc.abortRequested):
-        tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
+        tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) )).decode("utf-8")
         if xbmcvfs.exists(tmpname):
             xbmcvfs.delete(tmpname)
         global __last_time__
@@ -274,9 +274,9 @@ class Main:
         self.ImageDownloaded = False
         self.DownloadedAllImages = False
         self.UsingFallback = False
-        self.BlankDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ )
-        self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % __addonname__ )    
-        self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ )
+        self.BlankDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode("utf-8")
+        self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % __addonname__ ).decode("utf-8")
+        self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode("utf-8")
         LastfmApiKey = 'fbd57a1baddb983d1848a939665310f6'
         HtbackdropsApiKey = '96d681ea0dcb07ad9d27a347e64b652a'
         self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/?autocorrect=1&api_key=' + LastfmApiKey
@@ -285,10 +285,10 @@ class Main:
 
 
     def _make_dirs( self ):
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/temp' % __addonname__ ))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow' % __addonname__ ))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ )).decode("utf-8")
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/temp' % __addonname__ )).decode("utf-8")
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow' % __addonname__ )).decode("utf-8")
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ )).decode("utf-8")
         
 
     def _start_download( self ):
@@ -307,7 +307,7 @@ class Main:
             #self.CacheDir was successfully set in _get_local_images
         else:
             CacheName = xbmc.getCacheThumbName(self.NAME).replace('.tbn', '')
-            self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, ))
+            self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, )).decode("utf-8")
             checkDir(self.CacheDir)
         log('cachedir = %s' % self.CacheDir)
 
@@ -492,7 +492,7 @@ class Main:
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
-        self.CacheDir = os.path.join( self.LOCALARTISTPATH, self.NAME, self.FANARTFOLDER )
+        self.CacheDir = os.path.join( self.LOCALARTISTPATH, self.NAME, self.FANARTFOLDER ).decode("utf-8")
         log('cachedir = %s' % self.CacheDir)
         try:
             files = os.listdir(self.CacheDir)
@@ -528,7 +528,7 @@ class Main:
             cache_trim_delay = 0   #delay time is in seconds
             if( now - self.LastCacheTrim > cache_trim_delay ):
                 log(' trimming the cache down to %s bytes' % self.maxcachesize )
-                cache_root = xbmc.translatePath( 'special://profile/addon_data/%s/ArtistSlideshow/' % __addonname__ )
+                cache_root = xbmc.translatePath( 'special://profile/addon_data/%s/ArtistSlideshow/' % __addonname__ ).decode("utf-8")
                 os.chdir( cache_root )
                 folders = os.listdir( cache_root )
                 folders.sort( key=lambda x: os.path.getmtime(x), reverse=True )
