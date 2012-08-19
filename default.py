@@ -492,7 +492,7 @@ class Main:
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
-        self.CacheDir = self.LOCALARTISTPATH + self.NAME + '/' + self.FANARTFOLDER
+        self.CacheDir = os.path.join( self.LOCALARTISTPATH, self.NAME, self.FANARTFOLDER )
         log('cachedir = %s' % self.CacheDir)
         try:
             files = os.listdir(self.CacheDir)
