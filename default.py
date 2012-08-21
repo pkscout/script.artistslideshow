@@ -74,7 +74,7 @@ LANGUAGES = (
     ("Brazilian"                  , "pb",            "32" ) )
 
 def log(txt):
-    message = 'script.artistslideshow: %s' % txt
+    message = 'script.artistslideshow: %s' % txt.encode("utf-8")
     xbmc.log(msg=message, level=xbmc.LOGDEBUG)
 
 def checkDir(path):
@@ -166,7 +166,7 @@ class Main:
     	self.TOTALARTISTS = len(artists)
     	self.MergedImagesFound = False
     	for artist in artists:
-    	    log('current artist is %s' % artist)
+    	    log('current artist is %s' % artist.decode("utf-8"))
     	    self.ARTISTNUM += 1
             self.NAME = artist
             if(self.PRIORITY == '1' and not self.LOCALARTISTPATH == ''):
@@ -470,7 +470,7 @@ class Main:
             featured_artist = xbmc.Player().getMusicInfoTag().getTitle().replace('ft.','feat.').split('feat.')
         elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
             artist = xbmc.getInfoLabel( self.SKINARTIST )
-            log('current song title from skin is %s' % xbmc.getInfoLabel( self.SKINTITLE ))
+            log('current song title from skin is %s' % xbmc.getInfoLabel( self.SKINTITLE ).decode("utf-8"))
             featured_artist = xbmc.getInfoLabel( self.SKINTITLE ).replace('ft.','feat.').split('feat.')
         else:
             artist = ''
