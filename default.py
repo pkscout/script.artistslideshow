@@ -318,6 +318,7 @@ class Main:
 
         if self.CachedImagesFound:
             log('cached images found')
+            cached_image_info = True
             last_time = time.time()
             if self.ARTISTNUM == 1:
                 self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
@@ -559,10 +560,10 @@ class Main:
         if site == "lastfm":
             self.info = 'artist.getImages'
             self.url = self.LastfmURL + '&method=artist.getImages&artist=' + self.NAME.replace('&','%26').replace(' ','+')
-            log( 'asking for images from: %s' %self.url )
+            log( 'asking for images from: %s' %self.url.decode("utf-8") )
         elif site == "htbackdrops":
             self.url = self.HtbackdropsQueryURL + '&keywords=' + self.NAME.replace('&','%26').replace(' ','+') + '&dmin_w=' + str( self.minwidth ) + '&dmin_h=' + str( self.minheight )
-            log( 'asking for images from: %s' %self.url )
+            log( 'asking for images from: %s' %self.url.decode("utf-8") )
         images = self._get_data(site, 'images')
         return images
 
@@ -600,7 +601,7 @@ class Main:
         try:
             xmldata = xmltree.parse(filename).getroot()
         except:
-            log('invalid local xml file for %s' % item)
+            log('invalid or missing local xml file for %s' % item)
             return data
         if item == "bio":
             for element in xmldata.getiterator():
