@@ -411,7 +411,7 @@ class Main:
                         xbmc.executebuiltin('XBMC.Notification("' + __language__(30304).encode("utf8") + '", "' + __language__(30305).encode("utf8") + '", 5000, ' + __addonicon__ + ')')
                 if self.TOTALARTISTS > 1:
                     self._merge_images()                
-            if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ) == self.BlankDir and self.ARTISTNUM == 1):
+            if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode("utf-8") == self.BlankDir and self.ARTISTNUM == 1):
                 self._wait( min_refresh )
                 if( not self._playback_stopped_or_changed() ):
                     self._refresh_image_directory()
@@ -454,7 +454,7 @@ class Main:
 
 
     def _refresh_image_directory( self ):
-        if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ) == self.BlankDir):
+        if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode("utf-8") == self.BlankDir):
             self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
             log( 'switching slideshow to ' + self.CacheDir )
         else:    
