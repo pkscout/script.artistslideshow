@@ -17,7 +17,7 @@ __addon__        = xbmcaddon.Addon()
 __addonname__    = __addon__.getAddonInfo('id')
 __addonversion__ = __addon__.getAddonInfo('version')
 __addonpath__    = __addon__.getAddonInfo('path')
-__addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ )
+__addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ ).decode("utf-8")
 __language__     = __addon__.getLocalizedString
 
 socket.setdefaulttimeout(10)
@@ -74,7 +74,7 @@ LANGUAGES = (
     ("Brazilian"                  , "pb",            "32" ) )
 
 def log(txt):
-    message = 'script.artistslideshow: %s' % txt
+    message = 'script.artistslideshow: %s' % txt.encode("utf-8")
     xbmc.log(msg=message, level=xbmc.LOGDEBUG)
 
 def checkDir(path):
@@ -97,7 +97,7 @@ def cleanText(text):
         
 def download(src, dst, dst2):
     if (not xbmc.abortRequested):
-        tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
+        tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) )).decode("utf-8")
         if xbmcvfs.exists(tmpname):
             xbmcvfs.delete(tmpname)
         global __last_time__
@@ -166,7 +166,7 @@ class Main:
     	self.TOTALARTISTS = len(artists)
     	self.MergedImagesFound = False
     	for artist in artists:
-    	    log('current artist is %s' % artist)
+    	    log('current artist is %s' % artist.decode("utf-8"))
     	    self.ARTISTNUM += 1
             self.NAME = artist
             if(self.PRIORITY == '1' and not self.LOCALARTISTPATH == ''):
@@ -274,9 +274,9 @@ class Main:
         self.ImageDownloaded = False
         self.DownloadedAllImages = False
         self.UsingFallback = False
-        self.BlankDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ )
-        self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % __addonname__ )    
-        self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ )
+        self.BlankDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode("utf-8")
+        self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % __addonname__ ).decode("utf-8")
+        self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode("utf-8")
         LastfmApiKey = 'fbd57a1baddb983d1848a939665310f6'
         HtbackdropsApiKey = '96d681ea0dcb07ad9d27a347e64b652a'
         self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/?autocorrect=1&api_key=' + LastfmApiKey
@@ -285,10 +285,10 @@ class Main:
 
 
     def _make_dirs( self ):
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/temp' % __addonname__ ))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow' % __addonname__ ))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ).decode("utf-8"))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/temp' % __addonname__ ).decode("utf-8"))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow' % __addonname__ ).decode("utf-8"))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode("utf-8"))
         
 
     def _start_download( self ):
@@ -307,7 +307,7 @@ class Main:
             #self.CacheDir was successfully set in _get_local_images
         else:
             CacheName = xbmc.getCacheThumbName(self.NAME).replace('.tbn', '')
-            self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, ))
+            self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, )).decode("utf-8")
             checkDir(self.CacheDir)
         log('cachedir = %s' % self.CacheDir)
 
@@ -318,6 +318,7 @@ class Main:
 
         if self.CachedImagesFound:
             log('cached images found')
+            cached_image_info = True
             last_time = time.time()
             if self.ARTISTNUM == 1:
                 self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
@@ -410,7 +411,7 @@ class Main:
                         xbmc.executebuiltin('XBMC.Notification("' + __language__(30304).encode("utf8") + '", "' + __language__(30305).encode("utf8") + '", 5000, ' + __addonicon__ + ')')
                 if self.TOTALARTISTS > 1:
                     self._merge_images()                
-            if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ) == self.BlankDir and self.ARTISTNUM == 1):
+            if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode("utf-8") == self.BlankDir and self.ARTISTNUM == 1):
                 self._wait( min_refresh )
                 if( not self._playback_stopped_or_changed() ):
                     self._refresh_image_directory()
@@ -453,7 +454,7 @@ class Main:
 
 
     def _refresh_image_directory( self ):
-        if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ) == self.BlankDir):
+        if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode("utf-8") == self.BlankDir):
             self.WINDOW.setProperty("ArtistSlideshow", self.CacheDir)
             log( 'switching slideshow to ' + self.CacheDir )
         else:    
@@ -470,7 +471,7 @@ class Main:
             featured_artist = xbmc.Player().getMusicInfoTag().getTitle().replace('ft.','feat.').split('feat.')
         elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
             artist = xbmc.getInfoLabel( self.SKINARTIST )
-            log('current song title from skin is %s' % xbmc.getInfoLabel( self.SKINTITLE ))
+            log('current song title from skin is %s' % xbmc.getInfoLabel( self.SKINTITLE ).decode("utf-8"))
             featured_artist = xbmc.getInfoLabel( self.SKINTITLE ).replace('ft.','feat.').split('feat.')
         else:
             artist = ''
@@ -492,7 +493,7 @@ class Main:
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
-        self.CacheDir = os.path.join( self.LOCALARTISTPATH, self.NAME, self.FANARTFOLDER )
+        self.CacheDir = os.path.join( self.LOCALARTISTPATH, self.NAME, self.FANARTFOLDER ).decode("utf-8")
         log('cachedir = %s' % self.CacheDir)
         try:
             files = os.listdir(self.CacheDir)
@@ -528,7 +529,7 @@ class Main:
             cache_trim_delay = 0   #delay time is in seconds
             if( now - self.LastCacheTrim > cache_trim_delay ):
                 log(' trimming the cache down to %s bytes' % self.maxcachesize )
-                cache_root = xbmc.translatePath( 'special://profile/addon_data/%s/ArtistSlideshow/' % __addonname__ )
+                cache_root = xbmc.translatePath( 'special://profile/addon_data/%s/ArtistSlideshow/' % __addonname__ ).decode("utf-8")
                 os.chdir( cache_root )
                 folders = os.listdir( cache_root )
                 folders.sort( key=lambda x: os.path.getmtime(x), reverse=True )
@@ -559,10 +560,10 @@ class Main:
         if site == "lastfm":
             self.info = 'artist.getImages'
             self.url = self.LastfmURL + '&method=artist.getImages&artist=' + self.NAME.replace('&','%26').replace(' ','+')
-            log( 'asking for images from: %s' %self.url )
+            log( 'asking for images from: %s' %self.url.decode("utf-8") )
         elif site == "htbackdrops":
             self.url = self.HtbackdropsQueryURL + '&keywords=' + self.NAME.replace('&','%26').replace(' ','+') + '&dmin_w=' + str( self.minwidth ) + '&dmin_h=' + str( self.minheight )
-            log( 'asking for images from: %s' %self.url )
+            log( 'asking for images from: %s' %self.url.decode("utf-8") )
         images = self._get_data(site, 'images')
         return images
 
@@ -600,7 +601,7 @@ class Main:
         try:
             xmldata = xmltree.parse(filename).getroot()
         except:
-            log('invalid local xml file for %s' % item)
+            log('invalid or missing local xml file for %s' % item)
             return data
         if item == "bio":
             for element in xmldata.getiterator():
