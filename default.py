@@ -124,6 +124,7 @@ class Main:
             self.WINDOW.setProperty("ArtistSlideshowRunning", "True")
             if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
                 log('no music playing')
+                self._clear_properties()
                 if( self.DAEMON == "False" ):
                     self.WINDOW.clearProperty("ArtistSlideshowRunning")
             elif(not self.OVERRIDEPATH == ''):
@@ -137,7 +138,6 @@ class Main:
                 time.sleep(0.5)
                 if xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
                     if( xbmc.Player().isPlayingAudio() == True or xbmc.getInfoLabel( self.EXTERNALCALL ) != '' ):
-                        #if self.NAME not in self._get_current_artist():
                         if set( self.ALLARTISTS ) <> set( self._get_current_artist() ):
                             self._clear_properties()
                             self.UsingFallback = False
@@ -150,11 +150,13 @@ class Main:
                     else:
                         time.sleep(1) # doublecheck if playback really stopped
                         if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
+                            self._clear_properties()
+                            self._clean_dir( self.MergeDir )
                             if ( self.DAEMON == "False" ):
-                                self._clean_dir( self.MergeDir )
                                 self.WINDOW.clearProperty("ArtistSlideshowRunning")
                 else:
                     self._clear_properties()
+                    self.WINDOW.clearProperty("ArtistSlideshowRunning")
                     break
 
 
