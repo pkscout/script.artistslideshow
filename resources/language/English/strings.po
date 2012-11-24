@@ -5,7 +5,7 @@
 # Addon Provider: ronie, kyleejohnson (pkcsuot)
 msgid ""
 msgstr ""
-"Project-Id-Version: xbmc.script.artistslideshow-Frodo\n"
+"Project-Id-Version: xbmc.script.artistslideshow\n"
 "Report-Msgid-Bugs-To: kyle.johnson@alumni.duke.edu\n"
 "POT-Creation-Date: 2012-11-24 9:02-0010\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
