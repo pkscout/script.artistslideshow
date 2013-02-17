@@ -126,18 +126,15 @@ class Main:
                 log('no music playing')
                 if( self.DAEMON == "False" ):
                     self.WINDOW.clearProperty("ArtistSlideshowRunning")
-            elif(not self.OVERRIDEPATH == ''):
-                self._set_property("ArtistSlideshow", self.OVERRIDEPATH)
             else:
                 log('first song started')
                 time.sleep(0.2) # it may take some time for xbmc to read tag info after playback started
                 self._use_correct_artwork()
                 self._trim_cache()
-            while (not xbmc.abortRequested and self.OVERRIDEPATH == ''):
+            while (not xbmc.abortRequested):
                 time.sleep(0.5)
                 if xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
                     if( xbmc.Player().isPlayingAudio() == True or xbmc.getInfoLabel( self.EXTERNALCALL ) != '' ):
-                        #if self.NAME not in self._get_current_artist():
                         if set( self.ALLARTISTS ) <> set( self._get_current_artist() ):
                             self._clear_properties()
                             self.UsingFallback = False
@@ -169,7 +166,13 @@ class Main:
             log('current artist is %s' % artist.decode("utf-8"))
             self.ARTISTNUM += 1
             self.NAME = artist
-            if(self.PRIORITY == '1' and not self.LOCALARTISTPATH == ''):
+            if(not self.OVERRIDEPATH == ''):
+                log('using override directory for images')
+                self._set_property("ArtistSlideshow", self.OVERRIDEPATH)
+                if(self.ARTISTNUM == 1):
+                    self._set_cachedir()
+                    self._get_artistinfo()
+            elif(self.PRIORITY == '1' and not self.LOCALARTISTPATH == ''):
                 log('looking for local artwork')
                 self._get_local_images()
                 if(not self.LocalImagesFound):
@@ -290,6 +293,11 @@ class Main:
         checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow' % __addonname__ ).decode("utf-8"))
         checkDir(xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode("utf-8"))
 
+    def _set_cachedir( self ):
+        CacheName = xbmc.getCacheThumbName(self.NAME).replace('.tbn', '')
+        self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, )).decode("utf-8")
+        checkDir(self.CacheDir)
+
 
     def _start_download( self ):
         self.CachedImagesFound = False
@@ -306,9 +314,7 @@ class Main:
             pass
             #self.CacheDir was successfully set in _get_local_images
         else:
-            CacheName = xbmc.getCacheThumbName(self.NAME).replace('.tbn', '')
-            self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, )).decode("utf-8")
-            checkDir(self.CacheDir)
+            self._set_cachedir()
         log('cachedir = %s' % self.CacheDir)
 
         files = os.listdir(self.CacheDir)
