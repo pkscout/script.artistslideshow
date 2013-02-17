@@ -87,6 +87,7 @@ def getCacheThumbName(url, CachePath):
     return thumbpath
 
 def cleanText(text):
+    text = re.sub('<a href="http://www.last.fm/music/.*</a>.','',text)
     text = re.sub('<(.|\n|\r)*?>','',text)
     text = re.sub('&quot;','"',text)
     text = re.sub('&amp;','&',text)
