@@ -1,3 +1,9 @@
+v.1.5.1
+- changed artist bio download so it downloads even if just showing the override images
+- new language files for Danish and Italian
+- changed over to Frodo .po language files
+- updated addon.xml with new information and format for repo database
+
 v.1.5.0
 - updated language files from Transifex
 - branched Eden and Frodo versions and updated Frodo addon.xml information
