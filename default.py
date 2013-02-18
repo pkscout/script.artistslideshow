@@ -167,7 +167,7 @@ class Main:
             log('current artist is %s' % artist.decode("utf-8"))
             self.ARTISTNUM += 1
             self.NAME = artist
-            if(not self.OVERRIDEPATH == ''):
+            if(self.USEOVERRIDE == 'true'):
                 log('using override directory for images')
                 self._set_property("ArtistSlideshow", self.OVERRIDEPATH)
                 if(self.ARTISTNUM == 1):
@@ -191,7 +191,7 @@ class Main:
                     log('no remote artist artwork found, looking for local artwork')
                     self._get_local_images()
         if(not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded or self.MergedImagesFound)):
-            if (not self.FALLBACKPATH == ''):
+            if (self.USEFALLBACK == 'true'):
                 log('no images found for artist, using fallback slideshow')
                 log('fallbackdir = ' + self.FALLBACKPATH)
                 self.UsingFallback = True
@@ -235,7 +235,9 @@ class Main:
                 break
         self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" )
         self.PRIORITY = __addon__.getSetting( "priority" )
+        self.USEFALLBACK = __addon__.getSetting( "fallback" )
         self.FALLBACKPATH = __addon__.getSetting( "fallback_path" )
+        self.USEOVERRIDE = __addon__.getSetting( "slideshow" )
         self.OVERRIDEPATH = __addon__.getSetting( "slideshow_path" )
         self.RESTRICTCACHE = __addon__.getSetting( "restrict_cache" )
         try:
