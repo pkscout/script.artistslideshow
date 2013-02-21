@@ -9,7 +9,7 @@
 # *  Last.fm:      http://www.last.fm/
 # *  htbackdrops:  http://www.htbackdrops.com/
 
-import urllib, re, os, sys, time, unicodedata, socket, shutil
+import json, urllib, re, os, sys, time, unicodedata, socket, shutil
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 from elementtree import ElementTree as xmltree
 
@@ -474,20 +474,34 @@ class Main:
             log( 'switching slideshow to ' + self.BlankDir )
 
 
+    def _split_artists( self, response):
+        return response.replace('ft.',' / ').replace('feat.',' / ').split(' / ')
+
+
+    def _get_featured_artists( self, data ):
+        return data.replace('ft.','feat.').split('feat.')
+    
+
     def _get_current_artist( self ):
         featured_artist = ''
+        artists = []
         if( xbmc.Player().isPlayingAudio() == True ):
-            artist = xbmc.Player().getMusicInfoTag().getArtist()
-            if( artist == '' ):
-                artist = xbmc.Player().getMusicInfoTag().getTitle()[0:(artist.find('-'))-1]
-            featured_artist = xbmc.Player().getMusicInfoTag().getTitle().replace('ft.','feat.').split('feat.')
+            response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist","musicbrainzartistid"]},"id":1}' )
+            artists = json.loads(response)['result']['item']['artist']
+            if( len( artists ) == 0 ):
+                try:
+                    response = xbmc.Player().getMusicInfoTag().getTitle()[0:(artist.find('-'))-1]
+                except RuntimeError:
+                    response = ''
+                artists = self._split_artists( response )
+            try:
+                featured_artist = self._get_featured_artists( xbmc.Player().getMusicInfoTag().getTitle() )
+            except RuntimeError:
+                featured_artist = ''
         elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
-            artist = xbmc.getInfoLabel( self.SKINARTIST )
-            log('current song title from skin is %s' % xbmc.getInfoLabel( self.SKINTITLE ).decode("utf-8"))
-            featured_artist = xbmc.getInfoLabel( self.SKINTITLE ).replace('ft.','feat.').split('feat.')
-        else:
-            artist = ''
-        artists = artist.replace('ft.',' / ').replace('feat.',' / ').split(' / ')
+            response = xbmc.getInfoLabel( self.SKINARTIST )
+            artists = self._split_artists( response )
+            featured_artist = self._get_featured_artists( xbmc.getInfoLabel( self.SKINTITLE ) )
         if len( featured_artist ) > 1:
             artists.append( featured_artist[-1] )
         return [a.strip(' ()') for a in artists]
