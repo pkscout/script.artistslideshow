@@ -126,7 +126,7 @@ class Main:
             if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
                 log('no music playing')
                 if( self.DAEMON == "False" ):
-                    self.WINDOW.clearProperty("ArtistSlideshowRunning")
+                    self._set_property("ArtistSlideshowRunning")
             else:
                 log('first song started')
                 time.sleep(0.2) # it may take some time for xbmc to read tag info after playback started
@@ -145,12 +145,15 @@ class Main:
                             if(not (self.LocalImagesFound and self.PRIORITY == '1')):
                                 log('same artist playing, continue download')
                                 self._use_correct_artwork()
-                    else:
-                        time.sleep(1) # doublecheck if playback really stopped
-                        if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
-                            if ( self.DAEMON == "False" ):
-                                self._clean_dir( self.MergeDir )
-                                self._set_property("ArtistSlideshowRunning")
+                    elif ( self.DAEMON == "False" ):
+                        self._clean_dir( self.MergeDir )
+                        self._set_property("ArtistSlideshowRunning") 
+                    #else:
+                    #    time.sleep(1) # doublecheck if playback really stopped
+                    #    if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
+                    #        if ( self.DAEMON == "False" ):
+                    #            self._clean_dir( self.MergeDir )
+                    #            self._set_property("ArtistSlideshowRunning")
                 else:
                     self._clear_properties()
                     break
@@ -771,7 +774,7 @@ class Main:
         self.WINDOW.setProperty(property_name, value)
       except:
         pass
-        #log(" *************** Exception: Couldn't set propery " + property_name + " value " + value)
+        log(" *************** Exception: Couldn't set propery " + property_name + " value " + value)
 
 
 if ( __name__ == "__main__" ):
