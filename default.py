@@ -145,15 +145,15 @@ class Main:
                             if(not (self.LocalImagesFound and self.PRIORITY == '1')):
                                 log('same artist playing, continue download')
                                 self._use_correct_artwork()
-                    elif ( self.DAEMON == "False" ):
-                        self._clean_dir( self.MergeDir )
-                        self._set_property("ArtistSlideshowRunning") 
-                    #else:
-                    #    time.sleep(1) # doublecheck if playback really stopped
-                    #    if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
-                    #        if ( self.DAEMON == "False" ):
-                    #            self._clean_dir( self.MergeDir )
-                    #            self._set_property("ArtistSlideshowRunning")
+                    #elif ( self.DAEMON == "False" ):
+                    #    self._clean_dir( self.MergeDir )
+                    #    self._set_property("ArtistSlideshowRunning") 
+                    else:
+                        time.sleep(2) # doublecheck if playback really stopped
+                        if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
+                            if ( self.DAEMON == "False" ):
+                                self._clean_dir( self.MergeDir )
+                                self._set_property("ArtistSlideshowRunning")
                 else:
                     self._clear_properties()
                     break
@@ -482,7 +482,7 @@ class Main:
 
 
     def _get_featured_artists( self, data ):
-        return data.replace('ft.','feat.').split('feat.')
+        return self._split_artists( data.replace('ft.','feat.').split('feat.')[-1] )
     
 
     def _get_current_artist( self ):
@@ -493,7 +493,7 @@ class Main:
             artists = json.loads(response)['result']['item']['artist']
             if( len( artists ) == 0 ):
                 try:
-                    response = xbmc.Player().getMusicInfoTag().getTitle()[0:(artist.find('-'))-1]
+                    response = xbmc.Player().getMusicInfoTag().getTitle()[0:(response.find('-'))-1]
                 except RuntimeError:
                     response = ''
                 artists = self._split_artists( response )
@@ -504,9 +504,9 @@ class Main:
         elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
             response = xbmc.getInfoLabel( self.SKINARTIST )
             artists = self._split_artists( response )
-            featured_artist = self._get_featured_artists( xbmc.getInfoLabel( self.SKINTITLE ) )
-        if len( featured_artist ) > 1:
-            artists.append( featured_artist[-1] )
+            featured_artists = self._get_featured_artists( xbmc.getInfoLabel( self.SKINTITLE ) )
+        if len( featured_artists ) > 1:
+            artists.append( featured_artists )
         return [a.strip(' ()') for a in artists]
 
 
