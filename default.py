@@ -486,7 +486,7 @@ class Main:
     
 
     def _get_current_artist( self ):
-        featured_artist = ''
+        featured_artists = ''
         artists = []
         if( xbmc.Player().isPlayingAudio() == True ):
             response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist","musicbrainzartistid"]},"id":1}' )
@@ -498,9 +498,9 @@ class Main:
                     response = ''
                 artists = self._split_artists( response )
             try:
-                featured_artist = self._get_featured_artists( xbmc.Player().getMusicInfoTag().getTitle() )
+                featured_artists = self._get_featured_artists( xbmc.Player().getMusicInfoTag().getTitle() )
             except RuntimeError:
-                featured_artist = ''
+                featured_artists = ''
         elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
             response = xbmc.getInfoLabel( self.SKINARTIST )
             artists = self._split_artists( response )
