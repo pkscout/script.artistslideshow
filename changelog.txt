@@ -7,7 +7,7 @@ v.1.5.1
 - fixed issue where files ending with capitalized extensions were ignored
 - fixed issue where artist bio not downloaded when using override image directory
 - updated language files from Transifex
-- changed over to Frodo .po language files (coming)
+- changed over to Frodo .po language files
 - updated addon.xml with new information and format for repo database
 
 v.1.5.0
