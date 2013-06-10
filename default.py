@@ -330,7 +330,7 @@ class Main:
 
         files = os.listdir(self.CacheDir)
         for file in files:
-            if file.endswith('tbn') or (self.PRIORITY == '2' and self.LocalImagesFound):
+            if file.lower().endswith('tbn') or (self.PRIORITY == '2' and self.LocalImagesFound):
                 self.CachedImagesFound = True
 
         if self.CachedImagesFound:
@@ -534,7 +534,7 @@ class Main:
         except OSError:
             files = []
         for file in files:
-            if(file.endswith('tbn') or file.endswith('jpg') or file.endswith('jpeg') or file.endswith('gif') or file.endswith('png')):
+            if(file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')):
                 self.LocalImagesFound = True
         if self.LocalImagesFound:
             log('local images found')
@@ -550,7 +550,7 @@ class Main:
         self.MergedImagesFound = True
         files = os.listdir(self.CacheDir)
         for file in files:
-            if(file.endswith('tbn') or file.endswith('jpg') or file.endswith('jpeg') or file.endswith('gif') or file.endswith('png')):
+            if(file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')):
                 xbmcvfs.copy(os.path.join(self.CacheDir, file), os.path.join(self.MergeDir, file))
         if self.ARTISTNUM == self.TOTALARTISTS:
             self._wait( 9.8 )
