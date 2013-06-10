@@ -150,9 +150,6 @@ class Main:
                             if(not (self.LocalImagesFound and self.PRIORITY == '1')):
                                 log('same artist playing, continue download')
                                 self._use_correct_artwork()
-                    #elif ( self.DAEMON == "False" ):
-                    #    self._clean_dir( self.MergeDir )
-                    #    self._set_property("ArtistSlideshowRunning") 
                     else:
                         time.sleep(2) # doublecheck if playback really stopped
                         if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
