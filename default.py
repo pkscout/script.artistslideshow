@@ -9,9 +9,14 @@
 # *  Last.fm:      http://www.last.fm/
 # *  htbackdrops:  http://www.htbackdrops.com/
 
-import json, urllib, re, os, sys, time, unicodedata, socket, shutil
+import urllib, re, os, sys, time, unicodedata, socket, shutil
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 from elementtree import ElementTree as xmltree
+if sys.version_info >= (2, 7):
+    import json
+else:
+    import simplejson as json
+
 
 __addon__        = xbmcaddon.Addon()
 __addonname__    = __addon__.getAddonInfo('id')
