@@ -21,8 +21,8 @@ else:
 __addon__        = xbmcaddon.Addon()
 __addonname__    = __addon__.getAddonInfo('id')
 __addonversion__ = __addon__.getAddonInfo('version')
-__addonpath__    = __addon__.getAddonInfo('path')
-__addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ ).decode("utf-8")
+__addonpath__    = __addon__.getAddonInfo('path').decode('utf-8')
+__addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ )
 __language__     = __addon__.getLocalizedString
 
 socket.setdefaulttimeout(10)
@@ -78,9 +78,11 @@ LANGUAGES = (
     ("Portuguese-BR"              , "pb",            "32" ),
     ("Brazilian"                  , "pb",            "32" ) )
 
-def log(txt):
-    message = 'script.artistslideshow: %s' % txt.encode("utf-8")
-    xbmc.log(msg=message, level=xbmc.LOGDEBUG)
+def log(msg, level=xbmc.LOGDEBUG):
+    plugin = "Artist Slideshow"
+    if type(msg).__name__=='unicode':
+        msg = msg.encode('utf-8')
+    xbmc.log("[%s] %s" % (plugin, msg.__str__()), level)
 
 def checkDir(path):
     if not xbmcvfs.exists(path):
@@ -88,8 +90,33 @@ def checkDir(path):
 
 def getCacheThumbName(url, CachePath):
     thumb = xbmc.getCacheThumbName(url)
-    thumbpath = os.path.join(CachePath, thumb)
+    thumbpath = os.path.join(CachePath, thumb.encode("utf-8"))
     return thumbpath
+
+def smart_unicode(s):
+    #"""credit : sfaxman"""
+    if not s:
+        return ''
+    try:
+        if not isinstance(s, basestring):
+            if hasattr(s, '__unicode__'):
+                s = unicode(s)
+            else:
+                s = unicode(str(s), 'UTF-8')
+        elif not isinstance(s, unicode):
+            s = unicode(s, 'UTF-8')
+    except:
+        if not isinstance(s, basestring):
+            if hasattr(s, '__unicode__'):
+                s = unicode(s)
+            else:
+                s = unicode(str(s), 'ISO-8859-1')
+        elif not isinstance(s, unicode):
+            s = unicode(s, 'ISO-8859-1')
+    return s
+
+def smart_utf8(s):
+    return smart_unicode(s).encode('utf-8')
 
 def cleanText(text):
     text = re.sub('<a href="http://www.last.fm/music/.*</a>.','',text)
@@ -103,7 +130,7 @@ def cleanText(text):
 
 def download(src, dst, dst2):
     if (not xbmc.abortRequested):
-        tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) )).decode("utf-8")
+        tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
         if xbmcvfs.exists(tmpname):
             xbmcvfs.delete(tmpname)
         global __last_time__
@@ -238,12 +265,12 @@ class Main:
                 self.LANGUAGE = language[1]
                 log('language = %s' % self.LANGUAGE)
                 break
-        self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" )
+        self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" ).decode("utf-8")
         self.PRIORITY = __addon__.getSetting( "priority" )
         self.USEFALLBACK = __addon__.getSetting( "fallback" )
-        self.FALLBACKPATH = __addon__.getSetting( "fallback_path" )
+        self.FALLBACKPATH = __addon__.getSetting( "fallback_path" ).decode("utf-8")
         self.USEOVERRIDE = __addon__.getSetting( "slideshow" )
-        self.OVERRIDEPATH = __addon__.getSetting( "slideshow_path" )
+        self.OVERRIDEPATH = __addon__.getSetting( "slideshow_path" ).decode("utf-8")
         self.RESTRICTCACHE = __addon__.getSetting( "restrict_cache" )
         try:
             self.maxcachesize = int(__addon__.getSetting( "max_cache_size" )) * 1000000
@@ -251,12 +278,12 @@ class Main:
             self.maxcachesize = 1024 * 1000000
         self.NOTIFICATIONTYPE = __addon__.getSetting( "show_progress" )
         if self.NOTIFICATIONTYPE == "2":
-            self.PROGRESSPATH = __addon__.getSetting( "progress_path" )
+            self.PROGRESSPATH = __addon__.getSetting( "progress_path" ).decode("utf-8")
             log('set progress path to %s' % self.PROGRESSPATH)
         else:
             self.PROGRESSPATH = ''
         if len ( __addon__.getSetting( "fanart_folder" ) ) > 0:
-            self.FANARTFOLDER = __addon__.getSetting( "fanart_folder" )
+            self.FANARTFOLDER = __addon__.getSetting( "fanart_folder" ).decode("utf-8")
             log('set fanart folder to %s' % self.FANARTFOLDER)
         else:
             self.FANARTFOLDER = 'extrafanart'
@@ -343,8 +370,8 @@ class Main:
             if self.ARTISTNUM == 1:
                 #THIS IS WHERE THE CACHE FILES GET IN THE WRONG PLACE
                 for cache_file in ['artistimageshtbackdrops.nfo', 'artistimageslastfm.nfo']:
-                    filename = os.path.join( self.CacheDir, cache_file )
-                    if xbmcvfs.exists( os.path.join( self.CacheDir, filename ) ):
+                    filename = os.path.join( self.CacheDir, cache_file.decode("utf-8") )
+                    if xbmcvfs.exists( filename ):
                         if time.time() - os.path.getmtime(filename) < 1209600:
                             log('cached %s found' % filename)
                             cached_image_info = True
@@ -354,8 +381,8 @@ class Main:
                 if self.NOTIFICATIONTYPE == "1":
                     self._set_property("ArtistSlideshow", self.InitDir)
                     if not cached_image_info:
-                        execute_text = 'XBMC.Notification("' + __language__(30300) + '", "' + __language__(30301) + '", 5000, ' + __addonicon__ + ')'
-                        xbmc.executebuiltin(execute_text.encode("utf-8"))
+                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smart_utf8(__language__(30300)), smart_utf8(__language__(30301)), 5000, smart_utf8(__addonicon__))
+                        xbmc.executebuiltin(command)
                 elif self.NOTIFICATIONTYPE == "2":
                     if not cached_image_info:
                         self._set_property("ArtistSlideshow", self.PROGRESSPATH)
@@ -424,8 +451,8 @@ class Main:
                 if self.ARTISTNUM == 1:
                     self._refresh_image_directory()
                     if self.NOTIFICATIONTYPE == "1" and not cached_image_info:
-                        execute_text = 'XBMC.Notification("' + __language__(30304) + '", "' + __language__(30305) + '", 5000, ' + __addonicon__ + ')'
-                        xbmc.executebuiltin(execute_text.encode("utf-8"))
+                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smart_utf8(__language__(30304)), smart_utf8(__language__(30305)), 5000, smart_utf8(__addonicon__))
+                        xbmc.executebuiltin(command)
                 if self.TOTALARTISTS > 1:
                     self._merge_images()
             if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode("utf-8") == self.BlankDir and self.ARTISTNUM == 1):
@@ -442,8 +469,8 @@ class Main:
                     log('clearing ArtistSlideshow property')
                     self._set_property("ArtistSlideshow", self.InitDir)
                     if self.NOTIFICATIONTYPE == "1" and not cached_image_info:
-                        execute_text = 'XBMC.Notification("' + __language__(30302) + '", "' + __language__(30303) + '", 10000, ' + __addonicon__ + ')'
-                        xbmc.executebuiltin(execute_text.encode("utf-8"))
+                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smart_utf8(__language__(30302)), smart_utf8(__language__(30303)), 10000, smart_utf8(__addonicon__))
+                        xbmc.executebuiltin(command)
                     if( self.ARTISTINFO == "true" and not self._playback_stopped_or_changed() ):
                         self._get_artistinfo()
         elif self.TOTALARTISTS > 1:
