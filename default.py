@@ -341,6 +341,7 @@ class Main:
         else:
             last_time = 0
             if self.ARTISTNUM == 1:
+                #THIS IS WHERE THE CACHE FILES GET IN THE WRONG PLACE
                 for cache_file in ['artistimageshtbackdrops.nfo', 'artistimageslastfm.nfo']:
                     filename = os.path.join( self.CacheDir, cache_file )
                     if xbmcvfs.exists( os.path.join( self.CacheDir, filename ) ):
