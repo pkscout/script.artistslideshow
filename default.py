@@ -134,7 +134,7 @@ class Main:
                     self._set_property("ArtistSlideshowRunning")
             else:
                 log('first song started')
-                time.sleep(0.2) # it may take some time for xbmc to read tag info after playback started
+                time.sleep(0.5) # it may take some time for xbmc to read tag info after playback started
                 self._use_correct_artwork()
                 self._trim_cache()
             while (not xbmc.abortRequested):
