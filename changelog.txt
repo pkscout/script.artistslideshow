@@ -1,3 +1,8 @@
+v.1.5.3
+- added musicbrainz support
+- added download of images from fanart.tv and theaudiodb.com (coming)
+- changed artist info to come from theaudiodb.com with last.fm as fallback (coming)
+
 v.1.5.1
 - added ability to parse multiple featured artists from title of song
 - fixed bug on Windows where once override or fallback were set they could not be unset
