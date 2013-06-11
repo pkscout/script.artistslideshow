@@ -519,8 +519,11 @@ class Main:
         featured_artists = ''
         artists = []
         if( xbmc.Player().isPlayingAudio() == True ):
-            response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist","musicbrainzartistid"]},"id":1}' )
-            artists = json.loads(response)['result']['item']['artist']
+            response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist"]},"id":1}' )
+            try:
+                artists = json.loads(response)['result']['item']['artist']
+            except KeyError:
+                artists = []
             if( len( artists ) == 0 ):
                 try:
                     response = xbmc.Player().getMusicInfoTag().getTitle()[0:(response.find('-'))-1]
