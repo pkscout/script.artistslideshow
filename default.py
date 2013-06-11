@@ -5,9 +5,13 @@
 # *
 # *  code of both scripts is used in script.artistslideshow
 # *
-# *
+# *  Musicbrainz python library by Kenneth Reitz
+# *  see resource/musicbrainzngs/copying for copyright and use restrictions
+# *  
 # *  Last.fm:      http://www.last.fm/
-# *  htbackdrops:  http://www.htbackdrops.com/
+# *  htbackdrops:  http://www.htbackdrops.com/ (depreciated)
+# *  fanart.tv:    http://www.fanart.tv
+# *  theaudiodb:   http://www.theaudiodb.com
 
 
 import xbmc, xbmcaddon, os, xbmcgui, xbmcvfs
@@ -30,6 +34,7 @@ sys.path.append( os.path.join( __addonpath__, "resources" ) )
 
 # for musicbrainz lookups
 from musicbrainzngs import musicbrainz
+musicbrainz.set_useragent( __addonname__, __addonversion__ , 'https://github.com/pkscout/script.artistslideshow' )
 
 # for fanart.tv lookups
 # os.environ.setdefault('FANART_APIKEY', '7a93c84fe1c9999e6f0fec206a66b0f5')
@@ -233,6 +238,7 @@ class Main:
                 if(not (self.CachedImagesFound or self.ImageDownloaded)):
                     log('no remote artist artwork found, looking for local artwork')
                     self._get_local_images()
+            log('musicbrainzid: ' + self._get_musicbrainz_id( artist ))
         if(not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded or self.MergedImagesFound)):
             if (self.USEFALLBACK == 'true'):
                 log('no images found for artist, using fallback slideshow')
@@ -637,6 +643,29 @@ class Main:
         images = self._get_data(site, 'images')
         return images
 
+    def _get_musicbrainz_id ( self, theartist ):
+        cached_mb_info = False
+        filename = os.path.join( self.CacheDir, 'musicbrainz.nfo' )
+        if xbmcvfs.exists( filename ):
+            mbfile = open(filename, 'r')
+            mbid = mbfile.read()
+            mbfile.close()
+            if len(mbid) > 1:
+                log('cached %s found' % filename)
+                cached_mb_info = True
+            elif time.time() - os.path.getmtime(filename) > 1209600:
+                log('outdated %s found' % filename)
+                cached_mb_info = False
+        if not cached_mb_info:
+            result = musicbrainz.search_artists( artist=theartist )
+            try:
+                mbid = result['artist-list'][0]['id']
+            except (IndexError, KeyError):
+                mbid = 0
+            mbfile = open(filename, 'w')
+            mbfile.write( mbid )
+            mbfile.close()
+        return mbid
 
     def _get_artistinfo( self ):
         site = "lastfm"
@@ -819,11 +848,11 @@ class Main:
 
 
 if ( __name__ == "__main__" ):
-        log('script version %s started' % __addonversion__)
-        slideshow = Main()
-        try:
-          slideshow._set_property("ArtistSlideshow.CleanupComplete", "True")
-        except:
-          pass
+    log('script version %s started' % __addonversion__)
+    slideshow = Main()
+    try:
+        slideshow._set_property("ArtistSlideshow.CleanupComplete", "True")
+    except:
+        pass
 
 log('script stopped')
