@@ -238,7 +238,6 @@ class Main:
                 if(not (self.CachedImagesFound or self.ImageDownloaded)):
                     log('no remote artist artwork found, looking for local artwork')
                     self._get_local_images()
-            log('musicbrainzid: ' + self._get_musicbrainz_id( artist ))
         if(not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded or self.MergedImagesFound)):
             if (self.USEFALLBACK == 'true'):
                 log('no images found for artist, using fallback slideshow')
@@ -644,27 +643,34 @@ class Main:
         return images
 
     def _get_musicbrainz_id ( self, theartist ):
-        cached_mb_info = False
-        filename = os.path.join( self.CacheDir, 'musicbrainz.nfo' )
-        if xbmcvfs.exists( filename ):
-            mbfile = open(filename, 'r')
-            mbid = mbfile.read()
-            mbfile.close()
-            if len(mbid) > 1:
-                log('cached %s found' % filename)
-                cached_mb_info = True
-            elif time.time() - os.path.getmtime(filename) > 1209600:
-                log('outdated %s found' % filename)
-                cached_mb_info = False
-        if not cached_mb_info:
-            result = musicbrainz.search_artists( artist=theartist )
-            try:
-                mbid = result['artist-list'][0]['id']
-            except (IndexError, KeyError):
-                mbid = 0
-            mbfile = open(filename, 'w')
-            mbfile.write( mbid )
-            mbfile.close()
+        response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["musicbrainzartistid"]},"id":1}' )
+        try:
+            mbid = json.loads(response)['result']['item']['muiscbrainzartistid']
+        except (IndexError, KeyError):
+            mbid = ''
+        if len( mbid ) == 0:
+            cached_mb_info = False
+            filename = os.path.join( self.CacheDir, 'musicbrainz.nfo' )
+            if xbmcvfs.exists( filename ):
+                mbfile = open(filename, 'r')
+                mbid = mbfile.read()
+                mbfile.close()
+                if len(mbid) > 1:
+                    log('cached %s found' % filename)
+                    cached_mb_info = True
+                elif time.time() - os.path.getmtime(filename) > 1209600:
+                    log('outdated %s found' % filename)
+                    cached_mb_info = False
+            if not cached_mb_info:
+                result = musicbrainz.search_artists( artist=theartist )
+                try:
+                    mbid = result['artist-list'][0]['id']
+                except (IndexError, KeyError):
+                    mbid = 0
+                mbfile = open(filename, 'w')
+                mbfile.write( mbid )
+                mbfile.close()
+        log( 'musicbrainzid is ' + mbid)
         return mbid
 
     def _get_artistinfo( self ):
@@ -728,6 +734,7 @@ class Main:
 
 
     def _get_data( self, site, item ):
+        mbid = self._get_musicbrainz_id( self.NAME )
         data = []
         match = ''
         ForceUpdate = True
@@ -817,7 +824,6 @@ class Main:
 
 
     def _set_properties( self ):
-
       self._set_property("ArtistSlideshow.ArtistBiography", self.biography)
       for count, item in enumerate( self.similar ):
           self._set_property("ArtistSlideshow.%d.SimilarName" % ( count + 1 ), item[0])
