@@ -196,7 +196,7 @@ class Main:
         self.TOTALARTISTS = len(artists)
         self.MergedImagesFound = False
         for artist in artists:
-            log('current artist is %s' % artist.decode("utf-8"))
+            log('current artist is %s' % artist)
             self.ARTISTNUM += 1
             self.NAME = artist
             if(self.USEOVERRIDE == 'true'):
@@ -555,7 +555,7 @@ class Main:
         if len(self.NAME) == 0:
             log('no artist name provided')
             return
-        self.CacheDir = os.path.join( self.LOCALARTISTPATH, self.NAME, self.FANARTFOLDER ).decode("utf-8")
+        self.CacheDir = os.path.join( self.LOCALARTISTPATH, self.NAME, self.FANARTFOLDER )
         log('cachedir = %s' % self.CacheDir)
         try:
             files = os.listdir(self.CacheDir)
@@ -622,10 +622,10 @@ class Main:
         if site == "lastfm":
             self.info = 'artist.getImages'
             self.url = self.LastfmURL + '&method=artist.getImages&artist=' + self.NAME.replace('&','%26').replace(' ','+')
-            log( 'asking for images from: %s' %self.url.decode("utf-8") )
+            log( 'asking for images from: %s' %self.url )
         elif site == "htbackdrops":
             self.url = self.HtbackdropsQueryURL + '&keywords=' + self.NAME.replace('&','%26').replace(' ','+') + '&dmin_w=' + str( self.minwidth ) + '&dmin_h=' + str( self.minheight )
-            log( 'asking for images from: %s' %self.url.decode("utf-8") )
+            log( 'asking for images from: %s' %self.url )
         images = self._get_data(site, 'images')
         return images
 
