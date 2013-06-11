@@ -9,14 +9,14 @@
 # *  Last.fm:      http://www.last.fm/
 # *  htbackdrops:  http://www.htbackdrops.com/
 
-import urllib, re, os, sys, time, unicodedata, socket, shutil
-import xbmc, xbmcgui, xbmcaddon, xbmcvfs
+
+import xbmc, xbmcaddon, os, xbmcgui, xbmcvfs
+import urllib, re, sys, time, unicodedata, socket, shutil
 from elementtree import ElementTree as xmltree
 if sys.version_info >= (2, 7):
     import json
 else:
     import simplejson as json
-
 
 __addon__        = xbmcaddon.Addon()
 __addonname__    = __addon__.getAddonInfo('id')
@@ -24,6 +24,17 @@ __addonversion__ = __addon__.getAddonInfo('version')
 __addonpath__    = __addon__.getAddonInfo('path').decode('utf-8')
 __addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ )
 __language__     = __addon__.getLocalizedString
+
+# to be able to import libraries from the artistslideshow addon directory
+sys.path.append( os.path.join( __addonpath__, "resources" ) )
+
+# for musicbrainz lookups
+from musicbrainzngs import musicbrainz
+
+# for fanart.tv lookups
+# os.environ.setdefault('FANART_APIKEY', '7a93c84fe1c9999e6f0fec206a66b0f5')
+# import requests
+# from fanart.music import Artist
 
 socket.setdefaulttimeout(10)
 
