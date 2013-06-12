@@ -31,15 +31,13 @@ __language__     = __addon__.getLocalizedString
 
 # to be able to import libraries from the artistslideshow addon directory
 sys.path.append( os.path.join( __addonpath__, "resources" ) )
+sys.path.append( os.path.join( __addonpath__, "resources/dicttoxml" ) )
 
+from dicttoxml import dicttoxml
 # for musicbrainz lookups
 from musicbrainzngs import musicbrainz
 musicbrainz.set_useragent( __addonname__, __addonversion__ , 'https://github.com/pkscout/script.artistslideshow' )
 
-# for fanart.tv lookups
-# os.environ.setdefault('FANART_APIKEY', '7a93c84fe1c9999e6f0fec206a66b0f5')
-# import requests
-# from fanart.music import Artist
 
 socket.setdefaulttimeout(10)
 
@@ -264,7 +262,6 @@ class Main:
 
     def _get_settings( self ):
         self.LASTFM = __addon__.getSetting( "lastfm" )
-        self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
         try:
             self.minwidth = int(__addon__.getSetting( "minwidth" ))
         except:
@@ -274,6 +271,8 @@ class Main:
         except:
             self.minheight = 0
         self.HDASPECTONLY = __addon__.getSetting( "hd_aspect_only" )
+        self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
+        self.FANARTTV = __addon__.getSetting( "fanarttv" )
         self.ARTISTINFO = __addon__.getSetting( "artistinfo" )
         self.LANGUAGE = __addon__.getSetting( "language" )
         for language in LANGUAGES:
@@ -333,9 +332,12 @@ class Main:
         self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode("utf-8")
         LastfmApiKey = 'fbd57a1baddb983d1848a939665310f6'
         HtbackdropsApiKey = '96d681ea0dcb07ad9d27a347e64b652a'
+        fanarttvApiKey = '7a93c84fe1c9999e6f0fec206a66b0f5'
         self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/?autocorrect=1&api_key=' + LastfmApiKey
         self.HtbackdropsQueryURL = 'http://htbackdrops.com/api/' + HtbackdropsApiKey + '/searchXML?default_operator=and&fields=title&aid=1'
         self.HtbackdropsDownloadURL = 'http://htbackdrops.com/api/' + HtbackdropsApiKey + '/download/'
+        self.fanarttvURL = 'http://api.fanart.tv/webservice/artist/%s/' % fanarttvApiKey
+        self.fanarttvOPTIONS = '/json/artistbackground/'
 
 
     def _make_dirs( self ):
@@ -384,7 +386,6 @@ class Main:
         else:
             last_time = 0
             if self.ARTISTNUM == 1:
-                #THIS IS WHERE THE CACHE FILES GET IN THE WRONG PLACE
                 for cache_file in ['artistimageshtbackdrops.nfo', 'artistimageslastfm.nfo']:
                     filename = os.path.join( self.CacheDir, cache_file.decode("utf-8") )
                     if xbmcvfs.exists( filename ):
@@ -406,20 +407,24 @@ class Main:
                         self._set_property("ArtistSlideshow", self.InitDir)
                 else:
                       self._set_property("ArtistSlideshow", self.InitDir)
-
+        imagelist = []
         if self.LASTFM == "true":
             lastfmlist = self._get_images('lastfm')
         else:
             lastfmlist = []
-
+        imagelist.extend(lastfmlist)
         if self.HTBACKDROPS == "true":
             htbackdropslist = self._get_images('htbackdrops')
         else:
             htbackdropslist = []
-        lastfmlist.extend(htbackdropslist)
-
+        imagelist.extend(htbackdropslist)
+        if self.FANARTTV == "true":
+            fanarttvlist = self._get_images('fanarttv')
+        else:
+            fanarttvlist = []
+        imagelist.extend(fanarttvlist)
         log('downloading images')
-        for url in lastfmlist:
+        for url in imagelist:
             if( self._playback_stopped_or_changed() ):
                 self._set_property("ArtistSlideshow", self.CacheDir)
                 self._clean_dir( self.BlankDir )
@@ -639,6 +644,11 @@ class Main:
         elif site == "htbackdrops":
             self.url = self.HtbackdropsQueryURL + '&keywords=' + self.NAME.replace('&','%26').replace(' ','+') + '&dmin_w=' + str( self.minwidth ) + '&dmin_h=' + str( self.minheight )
             log( 'asking for images from: %s' %self.url.decode("utf-8") )
+        elif site == 'fanarttv':
+            mbid = self._get_musicbrainz_id( self.NAME )
+            if len( mbid ) > 1:
+               self.url = self.fanarttvURL + mbid + self.fanarttvOPTIONS
+               log( 'the fanarttv url is: ' + self.url )
         images = self._get_data(site, 'images')
         return images
 
@@ -732,7 +742,6 @@ class Main:
         return data
 
 
-
     def _get_data( self, site, item ):
         mbid = self._get_musicbrainz_id( self.NAME )
         data = []
@@ -743,6 +752,8 @@ class Main:
                 filename = os.path.join( self.CacheDir, 'artistimageslastfm.nfo')
             elif site == "htbackdrops":
                 filename = os.path.join( self.CacheDir, 'artistimageshtbackdrops.nfo')
+            elif site == "fanarttv":
+                filename = os.path.join( self.CacheDir, 'artistimagesfanarttv.nfo')
         elif item == "bio":
             filename = os.path.join( self.CacheDir, 'artistbio.nfo')
         elif item == "similar":
@@ -762,11 +773,18 @@ class Main:
             except:
                 log('site unreachable')
                 return data
+            if site == 'fanarttv':
+                json_data=open( filename )
+                serial_data = json.load(json_data)
+                json_data.close()
+                xml_file = open(filename, 'w')
+                xml_file.write( dicttoxml( serial_data ) )
+                xml_file.close()
         try:
             xmldata = xmltree.parse(filename).getroot()
         except:
             log('invalid xml file')
-            xbmcvfs.delete(filename)
+            #xbmcvfs.delete(filename)
             return data
         if item == "images":
             for element in xmldata.getiterator():
@@ -785,6 +803,9 @@ class Main:
                 elif site == "htbackdrops":
                     if element.tag == "id":
                         data.append(self.HtbackdropsDownloadURL + str( element.text ) + '/fullsize')
+                elif site == "fanarttv":
+                    if element.tag == "url":
+                        data.append(element.text)
         elif item == "bio":
             for element in xmldata.getiterator():
                 if element.tag == "content":

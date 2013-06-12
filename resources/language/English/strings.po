@@ -262,7 +262,11 @@ msgctxt "#32007"
 msgid "  Download only 16:9 images"
 msgstr ""
 
-#empty strings from id 32008 to 32099
+msgctxt "#32008"
+msgid "  Download images from fanart.tv"
+msgstr ""
+
+#empty strings from id 32009 to 32099
 
 msgctxt "#32100"
 msgid "Slideshow"
