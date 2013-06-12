@@ -1,7 +1,7 @@
 v.1.5.3
-- added musicbrainz support
-- added download of images from fanart.tv and theaudiodb.com (coming)
-- changed artist info to come from theaudiodb.com with last.fm as fallback (coming)
+- EXPERIMENTAL: added musicbrainz support
+- EXPERIMENTAL: added download of images from fanart.tv
+- rearranged settings some to make options clearer
 
 v.1.5.1
 - added ability to parse multiple featured artists from title of song
