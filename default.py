@@ -660,6 +660,7 @@ class Main:
         except (IndexError, KeyError):
             mbid = ''
         if len( mbid ) == 0:
+            log( 'WARNING! No internal musicbrainz ID found. This is about to get messy.' )
             cached_mb_info = False
             filename = os.path.join( self.CacheDir, 'musicbrainz.nfo' )
             if xbmcvfs.exists( filename ):
@@ -675,12 +676,10 @@ class Main:
             if not cached_mb_info:
                 xmlfilename = filename + '.xml'
                 mburl = 'http://www.musicbrainz.org/ws/2/recording/'
-                badSubstrings = ["the ", "The ", "a ", "A ", "an ", "An "]
+                badSubstrings = ["the ", "The ", "THE ", "a ", "A ", "an ", "An ", "AN "]
                 searchartist = theartist
                 for badSubstring in badSubstrings:
-                    log( 'checking artist with: ' + badSubstring)
                     if searchartist.startswith(badSubstring):
-                        log( 'found that substring' )
                         searchartist = searchartist.replace(badSubstring, "")
             	encoded_artist = searchartist.replace(' ', '&20')
             	try:
@@ -689,33 +688,36 @@ class Main:
                     album = ''
                 searchalbum = album
                 for badSubstring in badSubstrings:
-                    log( 'checking album with: ' + badSubstring)
                     if searchalbum.startswith(badSubstring):
-                        log( 'found that substring' )
                         seachalbum = searchalbum.replace(badSubstring, "")
                 encoded_album = searchalbum.replace(' ', '&20')
             	mboptions = '?query=artist:%s&20AND&20release:%s' % (encoded_artist, encoded_album )
-            	log( 'getting mbid using: ' + mburl + mboptions)
-                urllib.urlretrieve( mburl + mboptions, filename + '.xml' )
+            	log( 'getting results from musicbrainz using: ' + mburl + mboptions)
+                urllib.urlretrieve( mburl + mboptions, xmlfilename )
                 try:
                     xmldata = xmltree.parse(xmlfilename).getroot()
                 except:
                     log('invalid xml file')
-                    #xbmcvfs.delete(xmlfilename)
+                    xbmcvfs.delete(xmlfilename)
                     return ''
+                log( 'parsing musicbrainz response for muiscbrainz ID' )
                 for element in xmldata.getiterator():
                     if element.tag == "{http://musicbrainz.org/ns/mmd-2.0#}artist":
                         mbid = element.attrib.get('id')
+                        log( 'found a potential musicbrainz ID: ' + mbid )
                     if len( mbid ) > 0 and element.tag == "{http://musicbrainz.org/ns/mmd-2.0#}name":
+                        log( 'checking to see if artist %s matches %s' % (element.text, theartist) )
                         if element.text.lower() == theartist.lower():
+                            log( 'match found' )
                             break
                         else:
+                            log ( 'not a match, continuing search' )
                             mbid = ''
                 mbfile = open(filename, 'w')
                 mbfile.write( mbid )
                 mbfile.close()
-                #xbmcvfs.delete(xmlfilename)
-        log( 'musicbrainzid is ' + mbid)
+                xbmcvfs.delete( xmlfilename )
+        log( 'musicbrainzid is ' + mbid )
         return mbid
 
     def _get_artistinfo( self ):
