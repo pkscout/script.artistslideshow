@@ -348,6 +348,7 @@ class Main:
 
     def _set_cachedir( self ):
         CacheName = xbmc.getCacheThumbName(self.NAME).replace('.tbn', '')
+        #CacheName = self.NAME
         self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, )).decode("utf-8")
         checkDir(self.CacheDir)
 
@@ -672,14 +673,48 @@ class Main:
                     log('outdated %s found' % filename)
                     cached_mb_info = False
             if not cached_mb_info:
-                result = musicbrainz.search_artists( artist=theartist )
+                xmlfilename = filename + '.xml'
+                mburl = 'http://www.musicbrainz.org/ws/2/recording/'
+                badSubstrings = ["the ", "The ", "a ", "A ", "an ", "An "]
+                searchartist = theartist
+                for badSubstring in badSubstrings:
+                    log( 'checking artist with: ' + badSubstring)
+                    if searchartist.startswith(badSubstring):
+                        log( 'found that substring' )
+                        searchartist = searchartist.replace(badSubstring, "")
+            	encoded_artist = searchartist.replace(' ', '&20')
+            	try:
+                    album = xbmc.Player().getMusicInfoTag().getAlbum()
+                except RuntimeError:
+                    album = ''
+                searchalbum = album
+                for badSubstring in badSubstrings:
+                    log( 'checking album with: ' + badSubstring)
+                    if searchalbum.startswith(badSubstring):
+                        log( 'found that substring' )
+                        seachalbum = searchalbum.replace(badSubstring, "")
+                encoded_album = searchalbum.replace(' ', '&20')
+            	mboptions = '?query=artist:%s&20AND&20release:%s' % (encoded_artist, encoded_album )
+            	log( 'getting mbid using: ' + mburl + mboptions)
+                urllib.urlretrieve( mburl + mboptions, filename + '.xml' )
                 try:
-                    mbid = result['artist-list'][0]['id']
-                except (IndexError, KeyError):
-                    mbid = 0
+                    xmldata = xmltree.parse(xmlfilename).getroot()
+                except:
+                    log('invalid xml file')
+                    #xbmcvfs.delete(xmlfilename)
+                    return ''
+                for element in xmldata.getiterator():
+                    if element.tag == "{http://musicbrainz.org/ns/mmd-2.0#}artist":
+                        mbid = element.attrib.get('id')
+                    if len( mbid ) > 0 and element.tag == "{http://musicbrainz.org/ns/mmd-2.0#}name":
+                        if element.text.lower() == theartist.lower():
+                            break
+                        else:
+                            mbid = ''
                 mbfile = open(filename, 'w')
                 mbfile.write( mbid )
                 mbfile.close()
+                #xbmcvfs.delete(xmlfilename)
         log( 'musicbrainzid is ' + mbid)
         return mbid
 
@@ -777,9 +812,14 @@ class Main:
                 json_data=open( filename )
                 serial_data = json.load(json_data)
                 json_data.close()
-                xml_file = open(filename, 'w')
-                xml_file.write( dicttoxml( serial_data ) )
-                xml_file.close()
+                try:
+                    # this fixes the artist key so it has no spaces and then generates valid XML
+                    fixed_data = dict(map(lambda (key, value): (str(key).replace(' ', '_'), value), serial_data.items()))
+                    xml_file = open(filename, 'w')
+                    xml_file.write( dicttoxml( fixed_data ) )
+                    xml_file.close()
+                except:
+                    pass
         try:
             xmldata = xmltree.parse(filename).getroot()
         except:
