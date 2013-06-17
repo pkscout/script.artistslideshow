@@ -837,9 +837,12 @@ class Main:
                         if element.attrib.get('name') == "original":
                             width = element.attrib.get('width')
                             height = element.attrib.get('height')
+                            log( 'the width is %s and the height is %s' % (width, height) )
                             if ( int(width) >= self.minwidth ) and ( int(height) >= self.minheight ):
+                                log( 'got passed the minimum width and height check' )
                                 if(self.HDASPECTONLY == 'true'):
-                                    aspect_ratio = int(width)/int(height)
+                                    aspect_ratio = float(width)/float(height)
+                                    log( 'the aspect ratio of the image is ' + str(aspect_ratio) )
                                     if(aspect_ratio > 1.770 and aspect_ratio < 1.787):
                                         data.append(element.text)
                                 else:
