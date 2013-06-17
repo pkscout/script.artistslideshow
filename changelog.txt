@@ -5,6 +5,7 @@ v.1.5.3
 - added download of images from theaudiodb.com
 - rearranged settings some to make options clearer
 - changed over to urllib2 for web downloads
+- fix so that artists with unicode characters in name return results from Last.fm
 
 v.1.5.1
 - added ability to parse multiple featured artists from title of song
