@@ -15,7 +15,7 @@
 
 
 import xbmc, xbmcaddon, os, xbmcgui, xbmcvfs
-import urllib, re, sys, time, unicodedata, socket, shutil
+import urllib2, urlparse, codecs, re, sys, time, unicodedata, socket, shutil
 from elementtree import ElementTree as xmltree
 if sys.version_info >= (2, 7):
     import json
@@ -132,6 +132,50 @@ def smart_unicode(s):
 def smart_utf8(s):
     return smart_unicode(s).encode('utf-8')
 
+def save_url( url, filename ):
+    try:
+        data = urllib2.urlopen( url ).read()
+    except urllib2.URLError:
+        log( 'site unreachable at ' + url )
+        return False
+    try:
+        thefile = open( filename, 'w' )
+        thefile.write( data )
+        thefile.close()
+    except IOError:
+        log( 'unable to write data to %s for %s' % (filename, url) )
+        return False
+    return True
+
+def fix_url( url ):
+    # turn string into unicode
+    if not isinstance(url,unicode):
+        url = url.decode('utf8')
+    # parse it
+    parsed = urlparse.urlsplit(url)
+    # divide the netloc further
+    userpass,at,hostport = parsed.netloc.rpartition('@')
+    user,colon1,pass_ = userpass.partition(':')
+    host,colon2,port = hostport.partition(':')
+    # encode each component
+    scheme = parsed.scheme.encode('utf8')
+    user = urllib2.quote(user.encode('utf8'))
+    colon1 = colon1.encode('utf8')
+    pass_ = urllib2.quote(pass_.encode('utf8'))
+    at = at.encode('utf8')
+    host = host.encode('idna')
+    colon2 = colon2.encode('utf8')
+    port = port.encode('utf8')
+    path = '/'.join(  # could be encoded slashes!
+        urllib2.quote(urllib2.unquote(pce).encode('utf8'),'')
+        for pce in parsed.path.split('/')
+    )
+    query = urllib2.quote(urllib2.unquote(parsed.query).encode('utf8'),'=&?/')
+    fragment = urllib2.quote(urllib2.unquote(parsed.fragment).encode('utf8'))
+    # put it back together
+    netloc = ''.join((user,colon1,pass_,at,host,colon2,port))
+    return urlparse.urlunsplit((scheme,netloc,path,query,fragment))
+
 def cleanText(text):
     text = re.sub('<a href="http://www.last.fm/music/.*</a>.','',text)
     text = re.sub('<(.|\n|\r)*?>','',text)
@@ -147,15 +191,31 @@ def download(src, dst, dst2):
         tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
         if xbmcvfs.exists(tmpname):
             xbmcvfs.delete(tmpname)
-        global __last_time__
-        urllib.urlretrieve( src, tmpname )
-        if os.path.getsize(tmpname) > 999:
-            log( 'copying file to transition directory' )
-            xbmcvfs.copy(tmpname, dst2)
-            log( 'moving file to cache directory' )
-            xbmcvfs.rename(tmpname, dst)
+        if save_url( src, tmpname ):
+            if os.path.getsize(tmpname) > 999:
+                log( 'copying file to transition directory' )
+                xbmcvfs.copy(tmpname, dst2)
+                log( 'moving file to cache directory' )
+                xbmcvfs.rename(tmpname, dst)
+            else:
+                xbmcvfs.delete(tmpname)
+            return True
         else:
-            xbmcvfs.delete(tmpname)
+            return False
+
+def writeFile( data, filename ):
+    the_file = open (filename, 'w')
+    the_file.write( data )
+    the_file.close()
+
+def readFile( filename ):
+    if xbmcvfs.exists( filename):
+        the_file = open (filename, 'r')
+        data = the_file.read()
+        the_file.close()
+        return data
+    else:
+        return ''
 
 
 class Main:
@@ -270,8 +330,9 @@ class Main:
         except:
             self.minheight = 0
         self.HDASPECTONLY = __addon__.getSetting( "hd_aspect_only" )
-        self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
         self.FANARTTV = __addon__.getSetting( "fanarttv" )
+        self.THEAUDIODB = __addon__.getSetting( "theaudiodb" )
+        self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
         self.ARTISTINFO = __addon__.getSetting( "artistinfo" )
         self.LANGUAGE = __addon__.getSetting( "language" )
         for language in LANGUAGES:
@@ -329,15 +390,18 @@ class Main:
         self.BlankDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode("utf-8")
         self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % __addonname__ ).decode("utf-8")
         self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode("utf-8")
-        LastfmApiKey = 'fbd57a1baddb983d1848a939665310f6'
+        LastfmApiKey = 'afe7e856e4f4089fc90f841980ea1ada'
         HtbackdropsApiKey = '96d681ea0dcb07ad9d27a347e64b652a'
         fanarttvApiKey = '7a93c84fe1c9999e6f0fec206a66b0f5'
+        theaudiodbApiKey = '193621276b2d731671156g'
         self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/?autocorrect=1&api_key=' + LastfmApiKey
         self.HtbackdropsQueryURL = 'http://htbackdrops.com/api/' + HtbackdropsApiKey + '/searchXML?default_operator=and&fields=title&aid=1'
         self.HtbackdropsDownloadURL = 'http://htbackdrops.com/api/' + HtbackdropsApiKey + '/download/'
         self.fanarttvURL = 'http://api.fanart.tv/webservice/artist/%s/' % fanarttvApiKey
         self.fanarttvOPTIONS = '/json/artistbackground/'
-
+        self.theaudiodbURL = 'http://www.theaudiodb.com/api/v1/json/%s/' % theaudiodbApiKey
+        self.theaudiodbARTISTURL = 'artist-mb.php?i='
+        self.theaudiodbALBUMURL = 'album.php?i='
 
     def _make_dirs( self ):
         checkDir(xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ).decode("utf-8"))
@@ -407,22 +471,16 @@ class Main:
                         self._set_property("ArtistSlideshow", self.InitDir)
                 else:
                       self._set_property("ArtistSlideshow", self.InitDir)
+        sourcelist = []
+        sourcelist.append( ['lastfm', self.LASTFM] )
+        sourcelist.append( ['fanarttv', self.FANARTTV] )
+        sourcelist.append( ['theaudiodb', self.THEAUDIODB] )
+        sourcelist.append( ['htbackdrops', self.HTBACKDROPS] )
         imagelist = []
-        if self.LASTFM == "true":
-            lastfmlist = self._get_images('lastfm')
-        else:
-            lastfmlist = []
-        imagelist.extend(lastfmlist)
-        if self.HTBACKDROPS == "true":
-            htbackdropslist = self._get_images('htbackdrops')
-        else:
-            htbackdropslist = []
-        imagelist.extend(htbackdropslist)
-        if self.FANARTTV == "true":
-            fanarttvlist = self._get_images('fanarttv')
-        else:
-            fanarttvlist = []
-        imagelist.extend(fanarttvlist)
+        for source in sourcelist:
+            log( ' checking the source %s with a value of %s.' % (source[0], source[1]) )
+            if source[1] == "true":
+                imagelist.extend( self._get_images(source[0]) )
         log('downloading images')
         for url in imagelist:
             if( self._playback_stopped_or_changed() ):
@@ -432,11 +490,7 @@ class Main:
             path = getCacheThumbName(url, self.CacheDir)
             path2 = getCacheThumbName(url, self.BlankDir)
             if not xbmcvfs.exists(path):
-                try:
-                    download(url, path, path2)
-                except:
-                    log ('site unreachable')
-                else:
+                if download(url, path, path2):
                     log('downloaded %s to %s' % (url, path) )
                     self.ImageDownloaded=True
             if self.ImageDownloaded:
@@ -504,7 +558,7 @@ class Main:
             time.sleep(0.1)
             waited = waited + 0.1
             if( self._playback_stopped_or_changed() ):
-                self._set_property("ArtistSlideshow", self.CacheDir)
+                self._set_property("ArtistSlideshow", self.InitDir)
                 self.Abort = True
                 return
 
@@ -642,121 +696,210 @@ class Main:
     def _get_images( self, site ):
         if site == "lastfm":
             self.info = 'artist.getImages'
-            self.url = self.LastfmURL + '&method=artist.getImages&artist=' + self.NAME.replace('&','%26').replace(' ','+')
-            log( 'asking for images from: %s' %self.url )
-        elif site == "htbackdrops":
-            self.url = self.HtbackdropsQueryURL + '&keywords=' + self.NAME.replace('&','%26').replace(' ','+') + '&dmin_w=' + str( self.minwidth ) + '&dmin_h=' + str( self.minheight )
+            self.url = fix_url( self.LastfmURL + '&method=artist.getImages&artist=' + self.NAME.replace('&','%26') ).replace('%2B','+')
             log( 'asking for images from: %s' %self.url )
         elif site == 'fanarttv':
             mbid = self._get_musicbrainz_id( self.NAME )
+            log( 'the returned mbid was ' + mbid )
             if len( mbid ) > 1:
-               self.url = self.fanarttvURL + mbid + self.fanarttvOPTIONS
-               log( 'asking for images from: %s' %self.url )
+                self.url = self.fanarttvURL + mbid + self.fanarttvOPTIONS
+                log( 'asking for images from: %s' %self.url )
+            else:
+                return []
+        elif site == 'theaudiodb':
+            mbid = self._get_musicbrainz_id( self.NAME )
+            log( 'the returned mbid was ' + str(mbid) )
+            if len( mbid ) > 1:
+                self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + mbid
+                log( 'asking for images from: %s' %self.url )
+            else:
+                return []
+        elif site == "htbackdrops":
+            self.url = self.HtbackdropsQueryURL + '&keywords=' + self.NAME.replace('&','%26').replace(' ','+') + '&dmin_w=' + str( self.minwidth ) + '&dmin_h=' + str( self.minheight )
+            log( 'asking for images from: %s' %self.url )
         images = self._get_data(site, 'images')
         return images
 
+
+    def _get_musicbrainz_xml( self, theartist, xmlfilename, mboptions ):
+        wait_time = 5
+        mburl = 'http://www.musicbrainz.org/ws/2/artist/'
+        mbquery = mburl + mboptions
+        log( 'getting results from musicbrainz using: ' + mbquery)
+        for x in range(1, 5):
+            if not save_url( fix_url(mbquery), xmlfilename ):
+                log('site unreachable, waiting %s seconds to try again.' % wait_time)
+                self._wait( wait_time )
+            if xbmcvfs.exists( xmlfilename ):
+                break
+        if not xbmcvfs.exists( xmlfilename ):
+            log( 'No musicbrainz ID found for %s.' % theartist )
+            xbmcvfs.delete( xmlfilename )
+            return ''
+        try:
+            xmldata = xmltree.parse(xmlfilename).getroot()
+        except:
+            log('invalid or missing xml file')
+            xbmcvfs.delete( xmlfilename )
+            log( 'No musicbrainz ID found for %s.' % theartist )
+            return ''
+        return xmldata
+ 
+
     def _get_musicbrainz_id ( self, theartist ):
+        log( 'Looking for musicbrainz ID in the XBMC JSON response' )
         response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["musicbrainzartistid"]},"id":1}' )
         try:
             mbid = json.loads(response)['result']['item']['muiscbrainzartistid']
         except (IndexError, KeyError):
             mbid = ''
         if len( mbid ) == 0:
-            log( 'WARNING! No internal musicbrainz ID found. This is about to get messy.' )
             cached_mb_info = False
+            log( 'no musicbrainz ID found in XBMC JSON response' )
+        else:
+            cached_mb_info = True
+            log( 'musicbrainz ID found in XBMC JSON response' )
+            return mbid
+        if self._playback_stopped_or_changed():
+            return ''
+        if not cached_mb_info:
+            log( 'Looking for musicbrainz ID in the musicbrainz.nfo file' )
             filename = os.path.join( self.CacheDir, 'musicbrainz.nfo' )
             if xbmcvfs.exists( filename ):
-                mbfile = open(filename, 'r')
-                mbid = mbfile.read()
-                mbfile.close()
-                if len(mbid) > 1:
-                    log('cached %s found' % filename)
-                    cached_mb_info = True
-                elif time.time() - os.path.getmtime(filename) > 1209600:
-                    log('outdated %s found' % filename)
+                mbid = readFile( filename )
+                if len(mbid) == 0:
+                    log( 'no musicbrainz ID found in musicbrainz.nfo file' )
                     cached_mb_info = False
-            if not cached_mb_info:
-                xmlfilename = filename + '.xml'
-                mburl = 'http://www.musicbrainz.org/ws/2/recording/'
-                badSubstrings = ["the ", "The ", "THE ", "a ", "A ", "an ", "An ", "AN "]
-                searchartist = theartist
-                for badSubstring in badSubstrings:
-                    if searchartist.startswith(badSubstring):
-                        searchartist = searchartist.replace(badSubstring, "")
-            	encoded_artist = searchartist.replace(' ', '&20')
-            	try:
-                    album = xbmc.Player().getMusicInfoTag().getAlbum()
-                except RuntimeError:
-                    album = ''
-                searchalbum = album
-                for badSubstring in badSubstrings:
-                    if searchalbum.startswith(badSubstring):
-                        seachalbum = searchalbum.replace(badSubstring, "")
-                encoded_album = searchalbum.replace(' ', '&20')
-            	mboptions = '?query=artist:%s&20AND&20release:%s' % (encoded_artist, encoded_album )
-            	log( 'getting results from musicbrainz using: ' + mburl + mboptions)
-                urllib.urlretrieve( mburl + mboptions, xmlfilename )
-                try:
-                    xmldata = xmltree.parse(xmlfilename).getroot()
-                except:
-                    log('invalid xml file')
-                    xbmcvfs.delete(xmlfilename)
+                else:
+                    log( 'musicbrainz ID found in musicbrainz.nfo file' )
+                    cached_mb_info = True
+                    return str( mbid )
+            else:
+                log( 'no musicbrainz.nfo file found' )
+                cached_mb_info = False         
+        if self._playback_stopped_or_changed():
+            return ''
+        if not cached_mb_info:
+            log( 'querying musicbrainz.com for musicbrainz ID. This is about to get messy.' )
+            badSubstrings = ["the ", "The ", "THE ", "a ", "A ", "an ", "An ", "AN "]
+            searchartist = theartist
+            for badSubstring in badSubstrings:
+                if searchartist.startswith(badSubstring):
+                    searchartist = searchartist.replace(badSubstring, "")
+            xmlfilename = filename + '.xml'
+            mboptions = '?query=artist:%s' % searchartist.replace(' ', '+')
+            xmldata = self._get_musicbrainz_xml( theartist, xmlfilename, mboptions )
+            if len( xmldata ) == 0:
+                return ''
+            log( 'parsing musicbrainz response for muiscbrainz ID' )
+            for element in xmldata.getiterator():
+                if self._playback_stopped_or_changed():
                     return ''
-                log( 'parsing musicbrainz response for muiscbrainz ID' )
-                for element in xmldata.getiterator():
-                    if element.tag == "{http://musicbrainz.org/ns/mmd-2.0#}artist":
-                        mbid = element.attrib.get('id')
-                        log( 'found a potential musicbrainz ID: ' + mbid )
-                    if len( mbid ) > 0 and element.tag == "{http://musicbrainz.org/ns/mmd-2.0#}name":
-                        log( 'checking to see if artist %s matches %s' % (element.text, theartist) )
-                        if element.text.lower() == theartist.lower():
-                            log( 'match found' )
-                            break
-                        else:
-                            log ( 'not a match, continuing search' )
-                            mbid = ''
-                mbfile = open(filename, 'w')
-                mbfile.write( mbid )
-                mbfile.close()
+                if element.tag == "{http://musicbrainz.org/ns/mmd-2.0#}artist":
+                    mbid = element.attrib.get('id')
+                    log( 'found a potential musicbrainz ID: ' + mbid )
+                    log( "checking this artist's songs/albums against currently playing song/album" )
+                    mboptions2 = mbid + '?inc=recordings+releases+release-groups+works'
+                    xmlfilename2 = filename + '.2.xml'
+                    xmldata2 = self._get_musicbrainz_xml( theartist, xmlfilename2, mboptions2 )
+                    if len( xmldata2 ) == 0:
+                        xbmcvfs.delete( xmlfilename )
+                        return ''
+                    if self._playback_stopped_or_changed():
+                        return ''
+                    for element2 in xmldata2.getiterator():
+                        if element2.tag == "{http://musicbrainz.org/ns/mmd-2.0#}title":
+                            mb_title = element2.text
+                            try:
+                                playing_song = xbmc.Player().getMusicInfoTag().getTitle().decode('utf-8')
+                                playing_album = xbmc.Player().getMusicInfoTag().getAlbum().decode('utf-8')
+                            except RuntimeError:
+                                playing_song = ''
+                                playing_album = ''
+                            if playing_song.startswith( mb_title ) or playing_album.startswith( mb_title ):
+                                log( 'found matching song or album, this must be the right artist' )
+                                cached_mb_info = True
+                                break
+                            else:
+                                log( 'this song does not match. trying the next one' )
+                                cached_mb_info = False
+                    if cached_mb_info:
+                        break
+                    else:
+                        mbid = ''
+                        log( 'no matching song found from this artist. trying the next artist' )
+            try:
                 xbmcvfs.delete( xmlfilename )
-        log( 'musicbrainzid is ' + mbid )
-        return mbid
+                xbmcvfs.delete( xmlfilename2 )
+            except:
+                pass
+            if cached_mb_info:
+                log( 'musicbrainzid is %s. writing out to cache file.' % mbid )
+                writeFile( mbid, filename )
+                return mbid
+            else:
+                log( 'No musicbrainz ID found for %s.' % theartist )
+                return ''            
 
     def _get_artistinfo( self ):
-        site = "lastfm"
+        log( 'checking for local artist bio data' )
         bio = self._get_local_data( 'bio' )
         if bio == []:
-            self.url = self.LastfmURL + '&method=artist.getInfo&artist=' + self.NAME.replace('&','%26').replace(' ','+') + '&lang=' + self.LANGUAGE
-            bio = self._get_data(site, 'bio')
+            mbid = self._get_musicbrainz_id( self.NAME )
+            log( 'the returned mbid was ' + mbid )
+            if len( mbid ) > 1:
+                self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + mbid
+                log( 'trying to get artist bio from ' + self.url )
+                bio = self._get_data( 'theaudiodb', 'bio' )
+        if bio == []:
+            self.url = fix_url( self.LastfmURL + '&method=artist.getInfo&artist=' + self.NAME.replace('&','%26') + '&lang=' + self.LANGUAGE ).replace('%2B','+')
+            log( 'trying to get artist bio from ' + self.url )
+            bio = self._get_data('lastfm', 'bio')
         if bio == []:
             self.biography = ''
         else:
             self.biography = cleanText(bio[0])
-        self.similar = self._get_local_data( 'similar' )
-        if self.similar == []:
-            self.url = self.LastfmURL + '&method=artist.getSimilar&artist=' + self.NAME.replace('&','%26').replace(' ','+')
-            self.similar = self._get_data(site, 'similar')
         self.albums = self._get_local_data( 'albums' )
         if self.albums == []:
-            self.url = self.LastfmURL + '&method=artist.getTopAlbums&artist=' + self.NAME.replace('&','%26').replace(' ','+')
-            self.albums = self._get_data(site, 'albums')
+            theaudiodb_id = readFile( os.path.join(self.CacheDir, 'theaudiodbid.nfo') )
+            if len( theaudiodb_id ) > 1:
+                self.url = self.theaudiodbURL + self.theaudiodbALBUMURL + theaudiodb_id
+                log( 'trying to get artist albumns from ' + self.url )
+                self.albums = self._get_data('theaudiodb', 'albums')
+        if self.albums == []:
+            self.url = fix_url( self.LastfmURL + '&method=artist.getTopAlbums&artist=' + self.NAME.replace('&','%26') ).replace('%2B','+')
+            log( 'trying to get artist albums from ' + self.url )
+            self.albums = self._get_data('lastfm', 'albums')
+        self.similar = self._get_local_data( 'similar' )
+        if self.similar == []:
+            self.url = fix_url( self.LastfmURL + '&method=artist.getSimilar&artist=' + self.NAME.replace('&','%26') ).replace('%2B','+')
+            self.similar = self._get_data('lastfm', 'similar')
         self._set_properties()
 
 
     def _get_local_data( self, item ):
         data = []
+        filenames = []
         local_path = os.path.join( self.LOCALARTISTPATH, self.NAME, 'override' )
         if item == "similar":
-            filename = os.path.join( local_path, 'artistsimilar.nfo' )
+            filenames.append( os.path.join( local_path, 'artistsimilar.nfo' ) )
         elif item == "albums":
-            filename = os.path.join( local_path, 'artistsalbums.nfo' )
+            filenames.append( os.path.join( local_path, 'artistsalbums.nfo' ) )
         elif item == "bio":
-            filename = os.path.join( local_path, 'artistbio.nfo' )
-        try:
-            xmldata = xmltree.parse(filename).getroot()
-        except:
-            log('invalid or missing local xml file for %s' % item)
-            return data
+            filenames.append( os.path.join( local_path, 'theaudiodbartistbio.nfo' ) )
+            filenames.append( os.path.join( local_path, 'artistbio.nfo' ) )
+        found_xml = True
+        for filename in filenames:
+            log( 'checking filename ' + filename )
+            try:
+                xmldata = xmltree.parse(filename).getroot()
+            except:
+                log('invalid or missing local xml file for %s' % item)
+                found_xml = False
+            if found_xml:
+                break
+        if not found_xml:
+            return []
         if item == "bio":
             for element in xmldata.getiterator():
                 if element.tag == "content":
@@ -782,57 +925,60 @@ class Main:
 
 
     def _get_data( self, site, item ):
-        mbid = self._get_musicbrainz_id( self.NAME )
         data = []
-        match = ''
         ForceUpdate = True
         if item == "images":
             if site == "lastfm":
                 filename = os.path.join( self.CacheDir, 'artistimageslastfm.nfo')
-            elif site == "htbackdrops":
-                filename = os.path.join( self.CacheDir, 'artistimageshtbackdrops.nfo')
             elif site == "fanarttv":
                 filename = os.path.join( self.CacheDir, 'artistimagesfanarttv.nfo')
+            elif site == "theaudiodb":
+                filename = os.path.join( self.CacheDir, 'theaudiodbartistbio.nfo')
+                id_filename = os.path.join( self.CacheDir, 'theaudiodbid.nfo')
+            elif site == "htbackdrops":
+                filename = os.path.join( self.CacheDir, 'artistimageshtbackdrops.nfo')
         elif item == "bio":
-            filename = os.path.join( self.CacheDir, 'artistbio.nfo')
+            if site == "theaudiodb":
+                filename = os.path.join( self.CacheDir, 'theaudiodbartistbio.nfo')
+                id_filename = os.path.join( self.CacheDir, 'theaudiodbid.nfo')
+            elif site == "lastfm":
+                filename = os.path.join( self.CacheDir, 'artistbio.nfo')
         elif item == "similar":
             filename = os.path.join( self.CacheDir, 'artistsimilar.nfo')
         elif item == "albums":
-            filename = os.path.join( self.CacheDir, 'artistsalbums.nfo')
+            if site == "theaudiodb":
+                filename = os.path.join( self.CacheDir, 'theaudiodbartistsalbums.nfo')
+            elif site == "lastfm":
+                filename = os.path.join( self.CacheDir, 'artistsalbums.nfo')
         if xbmcvfs.exists( filename ):
             if time.time() - os.path.getmtime(filename) < 1209600:
                 log('cached artist %s info found' % item)
                 ForceUpdate = False
             else:
-                log('outdated cached artist %s info found' % item)
+                log('outdated cached info found for %s ' % item)
         if ForceUpdate:
-            log('downloading artist %s info %s' % (item, site))
-            try:
-                urllib.urlretrieve( self.url, filename )
-            except:
-                log('site unreachable')
+            log('downloading artist %s info from %s' % (item, site))
+            if not save_url( self.url, filename ):
                 return data
-            if site == 'fanarttv':
-                json_data=open( filename )
+            if site == 'fanarttv' or site == 'theaudiodb':
+                #converts the JSON response to XML
+                json_data=open( filename, 'r' )
                 serial_data = json.load(json_data)
                 json_data.close()
-                try:
-                    # this fixes the artist key so it has no spaces and then generates valid XML
-                    fixed_data = dict(map(lambda (key, value): (str(key).replace(' ', '_'), value), serial_data.items()))
-                    xml_file = open(filename, 'w')
-                    xml_file.write( dicttoxml( fixed_data ) )
-                    xml_file.close()
-                except:
-                    pass
+                if site == 'fanarttv':
+                    fixed_data = dict(map(lambda (key, value): ('artistImages', value), serial_data.items()))
+                else:
+                    fixed_data = serial_data
+                writeFile( dicttoxml( fixed_data ).encode('utf-8'), filename )
         try:
             xmldata = xmltree.parse(filename).getroot()
         except:
-            log('invalid xml file')
-            #xbmcvfs.delete(filename)
+            log('invalid or missing xml file')
+            xbmcvfs.delete(filename)
             return data
         if item == "images":
-            for element in xmldata.getiterator():
-                if site == "lastfm":
+            if site == "lastfm":
+                for element in xmldata.getiterator():
                     if element.tag == "size":
                         if element.attrib.get('name') == "original":
                             width = element.attrib.get('width')
@@ -847,45 +993,79 @@ class Main:
                                         data.append(element.text)
                                 else:
                                     data.append(element.text)
-                elif site == "htbackdrops":
-                    if element.tag == "id":
-                        data.append(self.HtbackdropsDownloadURL + str( element.text ) + '/fullsize')
-                elif site == "fanarttv":
+            elif site == "fanarttv":
+                for element in xmldata.getiterator():
                     if element.tag == "url":
                         data.append(element.text)
+            elif site == "theaudiodb":
+                for element in xmldata.getiterator():
+                    if element.tag.startswith( "strArtistFanart" ):
+                        data.append(element.text)
+                    if element.tag == 'idArtist' and not xbmcvfs.exists( id_filename ):
+                        writeFile( element.text, id_filename )
+            elif site == "htbackdrops":
+                for element in xmldata.getiterator():
+                    if element.tag == "id":
+                        data.append(self.HtbackdropsDownloadURL + str( element.text ) + '/fullsize')
         elif item == "bio":
-            for element in xmldata.getiterator():
-                if element.tag == "content":
-                    bio = element.text
-                    if not bio:
-                        bio = ''
-                    data.append(bio)
+            if site == "theaudiodb":
+                for element in xmldata.getiterator():
+                    if element.tag == "strBiography" + self.LANGUAGE.upper():
+                        bio = element.text
+                        if not bio:
+                            bio = ''
+                        data.append(bio)            
+                    if element.tag == 'idArtist' and not xbmcvfs.exists( id_filename ):
+                        writeFile( element.text, id_filename )
+            if site == "lastfm":
+                for element in xmldata.getiterator():
+                    if element.tag == "content":
+                        bio = element.text
+                        if not bio:
+                            bio = ''
+                        data.append(bio)
         elif item == "similar":
-            for element in xmldata.getiterator():
-                if element.tag == "name":
-                    name = element.text
-                    name.encode('ascii', 'ignore')
-                elif element.tag == "image":
-                    if element.attrib.get('size') == "mega":
-                        image = element.text
-                        if not image:
-                            image = ''
-                        data.append( ( name , image ) )
-        elif item == "albums":
-            for element in xmldata.getiterator():
-                if element.tag == "name":
-                    if match:
-                        match = ''
-                    else:
+            if site == "lastfm":
+                for element in xmldata.getiterator():
+                    if element.tag == "name":
                         name = element.text
                         name.encode('ascii', 'ignore')
-                        match = 'true'
-                elif element.tag == "image":
-                    if element.attrib.get('size') == "extralarge":
+                    elif element.tag == "image":
+                        if element.attrib.get('size') == "mega":
+                            image = element.text
+                            if not image:
+                                image = ''
+                            data.append( ( name , image ) )
+        elif item == "albums":
+            if site == "theaudiodb":
+                match = False
+                for element in xmldata.getiterator():
+                    if element.tag == "strAlbum":
+                        name = element.text
+                        name.encode('ascii', 'ignore')
+                        match = True
+                    elif element.tag == "strAlbumThumb" and match:
                         image = element.text
                         if not image:
                             image = ''
-                        data.append( ( name , image ) )
+                        data.append( ( name , image ) )            
+                        match = False
+            if site == "lastfm":
+                match = False
+                for element in xmldata.getiterator():
+                    if element.tag == "name":
+                        if match:
+                            match = False
+                        else:
+                            name = element.text
+                            name.encode('ascii', 'ignore')
+                            match = True
+                    elif element.tag == "image":
+                        if element.attrib.get('size') == "extralarge":
+                            image = element.text
+                            if not image:
+                                image = ''
+                            data.append( ( name , image ) )
         if data == '':
             log('no %s found on %s' % (item, site))
         return data
