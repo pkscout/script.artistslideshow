@@ -1000,7 +1000,8 @@ class Main:
             elif site == "theaudiodb":
                 for element in xmldata.getiterator():
                     if element.tag.startswith( "strArtistFanart" ):
-                        data.append(element.text)
+                        if element.text:
+                            data.append(element.text)
                     if element.tag == 'idArtist' and not xbmcvfs.exists( id_filename ):
                         writeFile( element.text, id_filename )
             elif site == "htbackdrops":
