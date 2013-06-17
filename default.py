@@ -195,8 +195,7 @@ class Main:
                         time.sleep(2) # doublecheck if playback really stopped
                         if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
                             if ( self.DAEMON == "False" ):
-                                self._clean_dir( self.MergeDir )
-                                self._set_property("ArtistSlideshowRunning")
+                                self._set_property( "ArtistSlideshowRunning" )
                 else:
                     self._clear_properties()
                     break
@@ -900,8 +899,8 @@ class Main:
 
 
     def _clear_properties( self ):
-        if not xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
-            self._set_property("ArtistSlideshow")
+        self._set_property( "ArtistSlideshow", self.InitDir )
+        self._clean_dir( self.MergeDir )
         self._set_property( "ArtistSlideshow.ArtistBiography" )
         for count in range( 50 ):
             self._set_property( "ArtistSlideshow.%d.SimilarName" % ( count + 1 ) )
