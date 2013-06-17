@@ -733,7 +733,7 @@ class Main:
                             height = element.attrib.get('height')
                             if ( int(width) >= self.minwidth ) and ( int(height) >= self.minheight ):
                                 if(self.HDASPECTONLY == 'true'):
-                                    aspect_ratio = int(width)/int(height)
+                                    aspect_ratio = float(width)/float(height)
                                     if(aspect_ratio > 1.770 and aspect_ratio < 1.787):
                                         data.append(element.text)
                                 else:
