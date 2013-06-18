@@ -696,7 +696,7 @@ class Main:
     def _get_images( self, site ):
         if site == "lastfm":
             self.info = 'artist.getImages'
-            self.url = fix_url( self.LastfmURL + '&method=artist.getImages&artist=' + self.NAME.replace('&','%26') ).replace('%2B','+')
+            self.url = fix_url( self.LastfmURL + '&method=artist.getImages&artist=' + self.NAME.replace('&','THISISANAMPERSAND').replace(' ', 'THISISASPACE') ).replace('THISISANAMPERSAND', '%26').replace('THISISASPACE', '+')
             log( 'asking for images from: %s' %self.url )
         elif site == 'fanarttv':
             mbid = self._get_musicbrainz_id( self.NAME )
@@ -715,7 +715,7 @@ class Main:
             else:
                 return []
         elif site == "htbackdrops":
-            self.url = self.HtbackdropsQueryURL + '&keywords=' + self.NAME.replace('&','%26').replace(' ','+') + '&dmin_w=' + str( self.minwidth ) + '&dmin_h=' + str( self.minheight )
+            self.url = self.HtbackdropsQueryURL + '&keywords=' + self.NAME.replace('&','%26').replace(' ', '+') + '&dmin_w=' + str( self.minwidth ) + '&dmin_h=' + str( self.minheight )
             log( 'asking for images from: %s' %self.url )
         images = self._get_data(site, 'images')
         return images
@@ -724,10 +724,10 @@ class Main:
     def _get_musicbrainz_xml( self, theartist, xmlfilename, mboptions ):
         wait_time = 5
         mburl = 'http://www.musicbrainz.org/ws/2/artist/'
-        mbquery = mburl + mboptions
+        mbquery = mburl + fix_url( mboptions ).replace(' ', '+').replace('%2B', '+').replace('&','%26').replace('%3A', ':')
         log( 'getting results from musicbrainz using: ' + mbquery)
         for x in range(1, 5):
-            if not save_url( fix_url(mbquery), xmlfilename ):
+            if not save_url( mbquery, xmlfilename ):
                 log('site unreachable, waiting %s seconds to try again.' % wait_time)
                 self._wait( wait_time )
             if xbmcvfs.exists( xmlfilename ):
@@ -787,7 +787,7 @@ class Main:
                 if searchartist.startswith(badSubstring):
                     searchartist = searchartist.replace(badSubstring, "")
             xmlfilename = filename + '.xml'
-            mboptions = '?query=artist:%s' % searchartist.replace(' ', '+')
+            mboptions = '?query=artist:%s' % searchartist
             xmldata = self._get_musicbrainz_xml( theartist, xmlfilename, mboptions )
             if len( xmldata ) == 0:
                 return ''
@@ -852,7 +852,7 @@ class Main:
                 log( 'trying to get artist bio from ' + self.url )
                 bio = self._get_data( 'theaudiodb', 'bio' )
         if bio == []:
-            self.url = fix_url( self.LastfmURL + '&method=artist.getInfo&artist=' + self.NAME.replace('&','%26') + '&lang=' + self.LANGUAGE ).replace('%2B','+')
+            self.url = fix_url( self.LastfmURL + '&method=artist.getInfo&artist=' + self.NAME.replace('&','THISISANAMPERSAND').replace(' ', 'THISISASPACE') + '&lang=' + self.LANGUAGE ).replace('THISISANAMPERSAND', '%26').replace('THISISASPACE', '+')
             log( 'trying to get artist bio from ' + self.url )
             bio = self._get_data('lastfm', 'bio')
         if bio == []:
@@ -867,12 +867,12 @@ class Main:
                 log( 'trying to get artist albumns from ' + self.url )
                 self.albums = self._get_data('theaudiodb', 'albums')
         if self.albums == []:
-            self.url = fix_url( self.LastfmURL + '&method=artist.getTopAlbums&artist=' + self.NAME.replace('&','%26') ).replace('%2B','+')
+            self.url = fix_url( self.LastfmURL + '&method=artist.getTopAlbums&artist=' + self.NAME.replace('&','THISISANAMPERSAND').replace(' ','THISISASPACE') + '&lang=' + self.LANGUAGE ).replace('THISISANAMPERSAND', '%26').replace('THISISASPACE', '+')
             log( 'trying to get artist albums from ' + self.url )
             self.albums = self._get_data('lastfm', 'albums')
         self.similar = self._get_local_data( 'similar' )
         if self.similar == []:
-            self.url = fix_url( self.LastfmURL + '&method=artist.getSimilar&artist=' + self.NAME.replace('&','%26') ).replace('%2B','+')
+            self.url = fix_url( self.LastfmURL + '&method=artist.getSimilar&artist=' + self.NAME.replace('&','THISISANAMPERSAND').replace(' ', 'THISISASPACE') + '&lang=' + self.LANGUAGE ).replace('THISISANAMPERSAND', '%26').replace('THISISASPACE', '+')
             self.similar = self._get_data('lastfm', 'similar')
         self._set_properties()
 
