@@ -19,7 +19,7 @@ v.1.5.2
 - fixed bug on Windows where once override or fallback were set they could not be unset
 - updated artist bio infolabel to filter out link to READ MORE on last.fm
 - changed to using JSON call to get artist array from XBMC rather than manually splitting
-- (hopefully) fixed unicode support
+- updated unicode support
 - fixed issue where files ending with capitalized extensions were ignored
 - fixed issue where artist bio not downloaded when using override image directory
 - fixed issue where selecting HD Aspect Ratio for Last.fm downloads resulted in no images
