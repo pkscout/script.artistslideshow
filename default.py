@@ -128,9 +128,14 @@ def smart_unicode(s):
 def smart_utf8(s):
     return smart_unicode(s).encode('utf-8')
 
-def save_url( url, filename ):
+def save_url( url, filename, *args, **kwargs ):
+    req = urllib2.Request(url=url)
+    for key, value in kwargs.items():
+        req.add_header(key.replace('_', '-'), value)
+    for header, value in req.headers.items():
+        log('url header %s is %s' % (header, value) )
     try:
-        data = urllib2.urlopen( url ).read()
+        data = urllib2.urlopen( req ).read()
     except urllib2.URLError:
         log( 'site unreachable at ' + url )
         return False
@@ -723,7 +728,7 @@ class Main:
         mbquery = mburl + fix_url( mboptions ).replace(' ', '+').replace('%2B', '+').replace('&','%26').replace('%3A', ':')
         log( 'getting results from musicbrainz using: ' + mbquery)
         for x in range(1, 5):
-            if not save_url( mbquery, xmlfilename ):
+            if not save_url( mbquery, xmlfilename, User_Agent=__addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )' ):
                 log('site unreachable, waiting %s seconds to try again.' % wait_time)
                 self._wait( wait_time )
             if xbmcvfs.exists( xmlfilename ):
@@ -784,6 +789,7 @@ class Main:
                     searchartist = searchartist.replace(badSubstring, "")
             xmlfilename = filename + '.xml'
             mboptions = '?query=artist:%s' % searchartist
+            query_start = time.time()
             xmldata = self._get_musicbrainz_xml( theartist, xmlfilename, mboptions )
             if len( xmldata ) == 0:
                 return ''
@@ -797,6 +803,10 @@ class Main:
                     log( "checking this artist's songs/albums against currently playing song/album" )
                     mboptions2 = mbid + '?inc=recordings+releases+release-groups+works'
                     xmlfilename2 = filename + '.2.xml'
+                    query_elapsed = time.time() - query_start
+                    if query_elapsed < 1:
+                        self._wait(1)
+                    query_start = time.time()
                     xmldata2 = self._get_musicbrainz_xml( theartist, xmlfilename2, mboptions2 )
                     if len( xmldata2 ) == 0:
                         xbmcvfs.delete( xmlfilename )
