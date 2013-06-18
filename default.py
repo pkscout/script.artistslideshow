@@ -34,10 +34,6 @@ sys.path.append( os.path.join( __addonpath__, "resources" ) )
 sys.path.append( os.path.join( __addonpath__, "resources/dicttoxml" ) )
 
 from dicttoxml import dicttoxml
-# for musicbrainz lookups
-from musicbrainzngs import musicbrainz
-musicbrainz.set_useragent( __addonname__, __addonversion__ , 'https://github.com/pkscout/script.artistslideshow' )
-
 
 socket.setdefaulttimeout(10)
 
