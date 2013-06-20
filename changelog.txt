@@ -1,3 +1,6 @@
+v.1.5.3.004
+- fixed musicbrainz lookup so that it works with streaming audio as well
+
 v.1.5.3.003
 - fix for artists with ampersand in their name
 - fix for last.fm showing unexpected results

@@ -15,7 +15,7 @@
 
 
 import xbmc, xbmcaddon, os, xbmcgui, xbmcvfs
-import urllib2, urlparse, codecs, re, sys, time, unicodedata, socket, shutil
+import codecs, random, re, sys, time, unicodedata, urllib2, urlparse, socket, shutil
 from elementtree import ElementTree as xmltree
 if sys.version_info >= (2, 7):
     import json
@@ -601,11 +601,13 @@ class Main:
             except KeyError:
                 artists = []
             if( len( artists ) == 0 ):
+                log( 'No artist name returned from JSON call, assuming this is an internet stream' )
                 try:
-                    response = xbmc.Player().getMusicInfoTag().getTitle()[0:(response.find('-'))-1]
+                    playing_song = xbmc.Player().getMusicInfoTag().getTitle()
+                    playingartist = playing_song[0:(playing_song.find('-'))-1]
                 except RuntimeError:
-                    response = ''
-                artists = self._split_artists( response )
+                    playingartist = ''
+                artists = self._split_artists( playingartist )
             try:
                 featured_artists = self._get_featured_artists( xbmc.Player().getMusicInfoTag().getTitle() )
             except RuntimeError:
@@ -696,7 +698,7 @@ class Main:
 
     def _get_images( self, site ):
         if site == "lastfm":
-            self.info = 'artist.getImages'
+#            self.info = 'artist.getImages'
             self.url = fix_url( self.LastfmURL + '&method=artist.getImages&artist=' + self.NAME.replace('&','THISISANAMPERSAND').replace(' ', 'THISISASPACE') ).replace('THISISANAMPERSAND', '%26').replace('THISISASPACE', '+')
             log( 'asking for images from: %s' %self.url )
         elif site == 'fanarttv':
@@ -723,18 +725,18 @@ class Main:
 
 
     def _get_musicbrainz_xml( self, theartist, xmlfilename, mboptions ):
-        wait_time = 5
         mburl = 'http://www.musicbrainz.org/ws/2/artist/'
         mbquery = mburl + fix_url( mboptions ).replace(' ', '+').replace('%2B', '+').replace('&','%26').replace('%3A', ':')
         log( 'getting results from musicbrainz using: ' + mbquery)
         for x in range(1, 5):
             if not save_url( mbquery, xmlfilename, User_Agent=__addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )' ):
+                wait_time = random.randint(2,5)
                 log('site unreachable, waiting %s seconds to try again.' % wait_time)
                 self._wait( wait_time )
             if xbmcvfs.exists( xmlfilename ):
                 break
         if not xbmcvfs.exists( xmlfilename ):
-            log( 'No musicbrainz ID found for %s.' % theartist )
+            log( 'No musicbrainz information downloaded for %s.' % theartist )
             xbmcvfs.delete( xmlfilename )
             return ''
         try:
@@ -796,6 +798,11 @@ class Main:
             log( 'parsing musicbrainz response for muiscbrainz ID' )
             for element in xmldata.getiterator():
                 if self._playback_stopped_or_changed():
+                    try:
+                        xbmcvfs.delete( xmlfilename )
+                        xbmcvfs.delete( xmlfilename2 )
+                    except:
+                        pass
                     return ''
                 if element.tag == "{http://musicbrainz.org/ns/mmd-2.0#}artist":
                     mbid = element.attrib.get('id')
@@ -812,16 +819,28 @@ class Main:
                         xbmcvfs.delete( xmlfilename )
                         return ''
                     if self._playback_stopped_or_changed():
+                        try:
+                            xbmcvfs.delete( xmlfilename )
+                            xbmcvfs.delete( xmlfilename2 )
+                        except:
+                            pass
                         return ''
                     for element2 in xmldata2.getiterator():
                         if element2.tag == "{http://musicbrainz.org/ns/mmd-2.0#}title":
                             mb_title = element2.text
                             try:
-                                playing_song = xbmc.Player().getMusicInfoTag().getTitle().decode('utf-8')
-                                playing_album = xbmc.Player().getMusicInfoTag().getAlbum().decode('utf-8')
+                                playing_song = xbmc.Player().getMusicInfoTag().getTitle()
                             except RuntimeError:
                                 playing_song = ''
+                            try:
+                                playing_album = xbmc.Player().getMusicInfoTag().getAlbum().decode('utf-8')
+                            except RuntimeError:
                                 playing_album = ''
+                            if theartist == playing_song[0:(playing_song.find('-'))-1]:
+                                playing_song = playing_song[(playing_song.find('-'))+2:].decode('utf-8')
+                            else:
+                                playing_song = playing_song.decode('utf-8')
+                            log( 'comparing musicbrainz: %s with local: %s' % (mb_title, playing_song) )
                             if playing_song.startswith( mb_title ) or playing_album.startswith( mb_title ):
                                 log( 'found matching song or album, this must be the right artist' )
                                 cached_mb_info = True
@@ -989,12 +1008,9 @@ class Main:
                         if element.attrib.get('name') == "original":
                             width = element.attrib.get('width')
                             height = element.attrib.get('height')
-                            log( 'the width is %s and the height is %s' % (width, height) )
                             if ( int(width) >= self.minwidth ) and ( int(height) >= self.minheight ):
-                                log( 'got passed the minimum width and height check' )
                                 if(self.HDASPECTONLY == 'true'):
                                     aspect_ratio = float(width)/float(height)
-                                    log( 'the aspect ratio of the image is ' + str(aspect_ratio) )
                                     if(aspect_ratio > 1.770 and aspect_ratio < 1.787):
                                         data.append(element.text)
                                 else:
