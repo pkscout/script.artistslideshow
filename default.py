@@ -843,19 +843,19 @@ class Main:
                                 playing_song = playing_song[(playing_song.find('-'))+2:].decode('utf-8')
                             else:
                                 playing_song = playing_song.decode('utf-8')
-                            log( 'comparing musicbrainz: %s with local: %s' % (mb_title, playing_song) )
-                            if playing_song.startswith( mb_title ) or playing_album.startswith( mb_title ):
+                            log( 'comparing musicbrainz: %s with local song: %s and local album %s' % (mb_title, playing_song, playing_album) )
+                            if playing_song.lower().startswith( mb_title.lower() ) or playing_album.lower().startswith( mb_title.lower() ):
                                 log( 'found matching song or album, this must be the right artist' )
                                 cached_mb_info = True
                                 break
                             else:
-                                log( 'this song does not match. trying the next one' )
+                                log( 'this song/album does not match. trying the next one' )
                                 cached_mb_info = False
                     if cached_mb_info:
                         break
                     else:
                         mbid = ''
-                        log( 'no matching song found from this artist. trying the next artist' )
+                        log( 'no matching song/album found from this artist. trying the next artist' )
             try:
                 xbmcvfs.delete( xmlfilename )
                 xbmcvfs.delete( xmlfilename2 )
