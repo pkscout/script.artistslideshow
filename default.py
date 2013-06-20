@@ -196,13 +196,16 @@ def download(src, dst, dst2):
             urllib.urlretrieve( src, tmpname )
         except:
             log( 'site unreachable at ' + src )
+            return False
         if os.path.getsize(tmpname) > 999:
             log( 'copying file to transition directory' )
             xbmcvfs.copy(tmpname, dst2)
             log( 'moving file to cache directory' )
             xbmcvfs.rename(tmpname, dst)
+            return True
         else:
             xbmcvfs.delete(tmpname)
+            return False
 
 def writeFile( data, filename ):
     the_file = open (filename, 'w')
