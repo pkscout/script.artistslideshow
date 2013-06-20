@@ -15,7 +15,7 @@
 
 
 import xbmc, xbmcaddon, os, xbmcgui, xbmcvfs
-import codecs, random, re, sys, time, unicodedata, urllib2, urlparse, socket, shutil
+import codecs, random, re, sys, time, unicodedata, urllib, urllib2, urlparse, socket, shutil
 from elementtree import ElementTree as xmltree
 if sys.version_info >= (2, 7):
     import json
@@ -192,17 +192,16 @@ def download(src, dst, dst2):
         tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
         if xbmcvfs.exists(tmpname):
             xbmcvfs.delete(tmpname)
-        if save_url( src, tmpname ):
-            if os.path.getsize(tmpname) > 999:
-                log( 'copying file to transition directory' )
-                xbmcvfs.copy(tmpname, dst2)
-                log( 'moving file to cache directory' )
-                xbmcvfs.rename(tmpname, dst)
-            else:
-                xbmcvfs.delete(tmpname)
-            return True
+        try:
+            urllib.urlretrieve( src, tmpname )
+        except:
+            log( 'site unreachable at ' + src )
+        if os.path.getsize(tmpname) > 999:
+            log( 'copying file to transition directory' )
+            xbmcvfs.copy(tmpname, dst2)
+            log( 'moving file to cache directory' )
+            xbmcvfs.rename(tmpname, dst)
         else:
-            return False
 
 def writeFile( data, filename ):
     the_file = open (filename, 'w')
