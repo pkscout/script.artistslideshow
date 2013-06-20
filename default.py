@@ -202,6 +202,7 @@ def download(src, dst, dst2):
             log( 'moving file to cache directory' )
             xbmcvfs.rename(tmpname, dst)
         else:
+            xbmcvfs.delete(tmpname)
 
 def writeFile( data, filename ):
     the_file = open (filename, 'w')
@@ -990,7 +991,10 @@ class Main:
                 serial_data = json.load(json_data)
                 json_data.close()
                 if site == 'fanarttv':
-                    fixed_data = dict(map(lambda (key, value): ('artistImages', value), serial_data.items()))
+                    try:
+                        fixed_data = dict(map(lambda (key, value): ('artistImages', value), serial_data.items()))
+                    except AttributeError:
+                        fixed_data = []
                 else:
                     fixed_data = serial_data
                 writeFile( dicttoxml( fixed_data ).encode('utf-8'), filename )
