@@ -148,6 +148,19 @@ def save_url( url, filename, *args, **kwargs ):
         return False
     return True
 
+def grab_url( url, *args, **kwargs ):
+    req = urllib2.Request(url=url)
+    for key, value in kwargs.items():
+        req.add_header(key.replace('_', '-'), value)
+    for header, value in req.headers.items():
+        log('url header %s is %s' % (header, value) )
+    try:
+        url_data = urllib2.urlopen( req ).read()
+    except urllib2.URLError:
+        log( 'site unreachable at ' + url )
+        return ''
+    return url_data
+
 def fix_url( url ):
     # turn string into unicode
     if not isinstance(url,unicode):
@@ -705,7 +718,7 @@ class Main:
             self.url = fix_url( self.LastfmURL + '&method=artist.getImages&artist=' + self.NAME.replace('&','THISISANAMPERSAND').replace(' ', 'THISISASPACE') ).replace('THISISANAMPERSAND', '%26').replace('THISISASPACE', '+')
             log( 'asking for images from: %s' %self.url )
         elif site == 'fanarttv':
-            mbid = self._get_musicbrainz_id( self.NAME )
+            mbid = self._get_musicbrainz_id()
             log( 'the returned mbid was ' + mbid )
             if len( mbid ) > 1:
                 self.url = self.fanarttvURL + mbid + self.fanarttvOPTIONS
@@ -713,7 +726,7 @@ class Main:
             else:
                 return []
         elif site == 'theaudiodb':
-            mbid = self._get_musicbrainz_id( self.NAME )
+            mbid = self._get_musicbrainz_id()
             log( 'the returned mbid was ' + str(mbid) )
             if len( mbid ) > 1:
                 self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + mbid
@@ -727,32 +740,53 @@ class Main:
         return images
 
 
-    def _get_musicbrainz_xml( self, theartist, xmlfilename, mboptions ):
-        mburl = 'http://www.musicbrainz.org/ws/2/artist/'
-        mbquery = mburl + fix_url( mboptions ).replace(' ', '+').replace('%2B', '+').replace('&','%26').replace('%3A', ':')
-        log( 'getting results from musicbrainz using: ' + mbquery)
-        for x in range(1, 5):
-            if not save_url( mbquery, xmlfilename, User_Agent=__addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )' ):
-                wait_time = random.randint(2,5)
-                log('site unreachable, waiting %s seconds to try again.' % wait_time)
-                self._wait( wait_time )
-            if xbmcvfs.exists( xmlfilename ):
-                break
-        if not xbmcvfs.exists( xmlfilename ):
-            log( 'No musicbrainz information downloaded for %s.' % theartist )
-            xbmcvfs.delete( xmlfilename )
-            return ''
-        try:
-            xmldata = xmltree.parse(xmlfilename).getroot()
-        except:
-            log('invalid or missing xml file')
-            xbmcvfs.delete( xmlfilename )
-            log( 'No musicbrainz ID found for %s.' % theartist )
-            return ''
-        return xmldata
- 
+    def _get_musicbrainz_info( self, mboptions, mbsearch ):
+        mbbase = 'http://www.musicbrainz.org/ws/2/'
+        theartist = self.NAME
+        mb_data = []
+        offset = 0
+        do_loop = True
+        while do_loop:
+            if mbsearch:
+                mbquery = mbbase + mboptions + fix_url( mbsearch ).replace(' ', '+').replace('%2B', '+').replace('&','%26').replace('%3A', ':')
+            else:
+                mbquery = mbbase + mboptions + '&offset=' + str(offset)
+            log( 'getting results from musicbrainz using: ' + mbquery)
+            for x in range(1, 5):
+                got_data = True
+                json_data = json.loads( grab_url(mbquery, User_Agent=__addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )') )
+                if not json_data:
+                    wait_time = random.randint(2,5)
+                    got_data = False
+                    log('site unreachable, waiting %s seconds to try again.' % wait_time)
+                    self._wait( wait_time )
+                if got_data:
+                    for one_item in ['artist', 'releases', 'works']:
+                        try:
+                            data_loaded = True
+                            if one_item <> 'artist':
+                               count_key = one_item[:-1] + '-count'
+                            else:
+                               count_key = one_item
+                               
+                            mb_data.extend( json_data[one_item] )
+                        except KeyError:
+                            data_loaded = False
+                        if data_loaded:
+                            break
+                    break
+                else:
+                    return mb_data
+            offset = offset + 100
+            if ( not mbsearch ) and ( int(json_data[count_key]) - offset > 0 ):
+                log( 'getting more data from musicbrainz' )
+            else:
+                do_loop = False
+        return mb_data
 
-    def _get_musicbrainz_id ( self, theartist ):
+
+    def _get_musicbrainz_id ( self ):
+        theartist = self.NAME
         log( 'Looking for musicbrainz ID in the XBMC JSON response' )
         response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["musicbrainzartistid"]},"id":1}' )
         try:
@@ -787,80 +821,63 @@ class Main:
             return ''
         if not cached_mb_info:
             log( 'querying musicbrainz.com for musicbrainz ID. This is about to get messy.' )
-            badSubstrings = ["the ", "The ", "THE ", "a ", "A ", "an ", "An ", "AN "]
+            badSubstrings = ["the ", "a ", "an "]
             searchartist = theartist
             for badSubstring in badSubstrings:
-                if searchartist.startswith(badSubstring):
+                if searchartist.lower().startswith(badSubstring):
                     searchartist = searchartist.replace(badSubstring, "")
-            xmlfilename = filename + '.xml'
-            mboptions = '?query=artist:%s' % searchartist
+            mboptions = 'artist/?fmt=json&query=' 
+            mbsearch = 'artist:%s' % searchartist
             query_start = time.time()
-            xmldata = self._get_musicbrainz_xml( theartist, xmlfilename, mboptions )
-            if len( xmldata ) == 0:
-                return ''
             log( 'parsing musicbrainz response for muiscbrainz ID' )
-            for element in xmldata.getiterator():
+            for artist in self._get_musicbrainz_info( mboptions, mbsearch ):
+                mbid=''
                 if self._playback_stopped_or_changed():
-                    try:
-                        xbmcvfs.delete( xmlfilename )
-                        xbmcvfs.delete( xmlfilename2 )
-                    except:
-                        pass
                     return ''
-                if element.tag == "{http://musicbrainz.org/ns/mmd-2.0#}artist":
-                    mbid = element.attrib.get('id')
+                if artist['name'].lower() == theartist.lower():
+                    mbid = artist['id']
                     log( 'found a potential musicbrainz ID: ' + mbid )
-                    log( "checking this artist's songs/albums against currently playing song/album" )
-                    mboptions2 = mbid + '?inc=recordings+releases+release-groups+works'
-                    xmlfilename2 = filename + '.2.xml'
-                    query_elapsed = time.time() - query_start
-                    if query_elapsed < 1:
-                        self._wait(1)
-                    query_start = time.time()
-                    xmldata2 = self._get_musicbrainz_xml( theartist, xmlfilename2, mboptions2 )
-                    if len( xmldata2 ) == 0:
-                        xbmcvfs.delete( xmlfilename )
-                        return ''
-                    if self._playback_stopped_or_changed():
-                        try:
-                            xbmcvfs.delete( xmlfilename )
-                            xbmcvfs.delete( xmlfilename2 )
-                        except:
-                            pass
-                        return ''
-                    for element2 in xmldata2.getiterator():
-                        if element2.tag == "{http://musicbrainz.org/ns/mmd-2.0#}title":
-                            mb_title = element2.text
-                            try:
-                                playing_song = xbmc.Player().getMusicInfoTag().getTitle()
-                            except RuntimeError:
-                                playing_song = ''
-                            try:
-                                playing_album = xbmc.Player().getMusicInfoTag().getAlbum().decode('utf-8')
-                            except RuntimeError:
-                                playing_album = ''
-                            if theartist == playing_song[0:(playing_song.find('-'))-1]:
-                                playing_song = playing_song[(playing_song.find('-'))+2:].decode('utf-8')
-                            else:
-                                playing_song = playing_song.decode('utf-8')
-                            log( 'comparing musicbrainz: %s with local song: %s and local album %s' % (mb_title, playing_song, playing_album) )
-                            if playing_song.lower().startswith( mb_title.lower() ) or playing_album.lower().startswith( mb_title.lower() ):
-                                log( 'found matching song or album, this must be the right artist' )
+                    try:
+                        playing_album = xbmc.Player().getMusicInfoTag().getAlbum()
+                    except RuntimeError:
+                        playing_album = ''
+                    if playing_album:
+                        log( "checking this artist's albums against currently playing album" )
+                        query_elapsed = time.time() - query_start
+                        if query_elapsed < 1:
+                            self._wait(1)
+                        query_start = time.time()
+                        mboptions = 'release?artist=' + mbid + '&limit=100&fmt=json'
+                        for album in self._get_musicbrainz_info( mboptions, '' ):
+                            log( 'comparing musicbrainz: %s with local album: %s' % (album['title'], playing_album) )
+                            if album['title'].lower().startswith( playing_album.lower() ):
+                                log( 'found matching album, this is probably the right artist' )
                                 cached_mb_info = True
                                 break
-                            else:
-                                log( 'this song/album does not match. trying the next one' )
-                                cached_mb_info = False
+                    if not cached_mb_info:
+                        try:
+                            playing_song = xbmc.Player().getMusicInfoTag().getTitle()
+                        except RuntimeError:
+                            playing_song = ''
+                        if theartist == playing_song[0:(playing_song.find('-'))-1]:
+                            playing_song = playing_song[(playing_song.find('-'))+2:]
+                        if playing_song:
+                            log( "checking this artist's songs against currently playing song" )
+                            query_elapsed = time.time() - query_start
+                            if query_elapsed < 1:
+                                self._wait(1)
+                            query_start = time.time()
+                            mboptions = 'work?artist=' + mbid + '&limit=100&fmt=json'
+                            for song in self._get_musicbrainz_info( mboptions, '' ):
+                                log( 'comparing musicbrainz: %s with local song: %s' % (song['title'], playing_song) )
+                                if song['title'].lower().startswith( playing_song.lower() ):
+                                    log( 'found matching song, this is hopefully the right artist' )
+                                    cached_mb_info = True
+                                    break
                     if cached_mb_info:
                         break
                     else:
-                        mbid = ''
                         log( 'no matching song/album found from this artist. trying the next artist' )
-            try:
-                xbmcvfs.delete( xmlfilename )
-                xbmcvfs.delete( xmlfilename2 )
-            except:
-                pass
             if cached_mb_info:
                 log( 'musicbrainzid is %s. writing out to cache file.' % mbid )
                 writeFile( mbid, filename )
@@ -869,11 +886,12 @@ class Main:
                 log( 'No musicbrainz ID found for %s.' % theartist )
                 return ''            
 
+                                
     def _get_artistinfo( self ):
         log( 'checking for local artist bio data' )
         bio = self._get_local_data( 'bio' )
         if bio == []:
-            mbid = self._get_musicbrainz_id( self.NAME )
+            mbid = self._get_musicbrainz_id()
             log( 'the returned mbid was ' + mbid )
             if len( mbid ) > 1:
                 self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + mbid
