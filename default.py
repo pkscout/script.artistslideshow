@@ -794,7 +794,7 @@ class Main:
             return ''
         if not cached_mb_info:
             log( 'Looking for musicbrainz ID in the musicbrainz.nfo file' )
-            filename = os.path.join( self.CacheDir, 'musicbrainz.nfo' )
+            filename = os.path.join( self.CacheDir, '_musicbrainz.nfo' )
             if xbmcvfs.exists( filename ):
                 mbid = readFile( filename )
                 if not mbid:
@@ -885,7 +885,7 @@ class Main:
             self.biography = cleanText(bio[0])
         self.albums = self._get_local_data( 'albums' )
         if self.albums == []:
-            theaudiodb_id = readFile( os.path.join(self.CacheDir, 'theaudiodbid.nfo') )
+            theaudiodb_id = readFile( os.path.join(self.CacheDir, '_theaudiodbid.nfo') )
             if theaudiodb_id:
                 self.url = self.theaudiodbURL + self.theaudiodbALBUMURL + theaudiodb_id
                 log( 'trying to get artist albumns from ' + self.url )
@@ -910,7 +910,6 @@ class Main:
         elif item == "albums":
             filenames.append( os.path.join( local_path, 'artistsalbums.nfo' ) )
         elif item == "bio":
-            filenames.append( os.path.join( local_path, 'theaudiodbartistbio.nfo' ) )
             filenames.append( os.path.join( local_path, 'artistbio.nfo' ) )
         found_xml = True
         for filename in filenames:
@@ -955,23 +954,23 @@ class Main:
             if site == "lastfm":
                 filename = os.path.join( self.CacheDir, 'artistimageslastfm.nfo')
             elif site == "fanarttv":
-                filename = os.path.join( self.CacheDir, 'artistimagesfanarttv.nfo')
+                filename = os.path.join( self.CacheDir, '_artistimagesfanarttv.nfo')
             elif site == "theaudiodb":
-                filename = os.path.join( self.CacheDir, 'theaudiodbartistbio.nfo')
-                id_filename = os.path.join( self.CacheDir, 'theaudiodbid.nfo')
+                filename = os.path.join( self.CacheDir, '_theaudiodbartistbio.nfo')
+                id_filename = os.path.join( self.CacheDir, '_theaudiodbid.nfo')
             elif site == "htbackdrops":
                 filename = os.path.join( self.CacheDir, 'artistimageshtbackdrops.nfo')
         elif item == "bio":
             if site == "theaudiodb":
-                filename = os.path.join( self.CacheDir, 'theaudiodbartistbio.nfo')
-                id_filename = os.path.join( self.CacheDir, 'theaudiodbid.nfo')
+                filename = os.path.join( self.CacheDir, '_theaudiodbartistbio.nfo')
+                id_filename = os.path.join( self.CacheDir, '_theaudiodbid.nfo')
             elif site == "lastfm":
                 filename = os.path.join( self.CacheDir, 'artistbio.nfo')
         elif item == "similar":
             filename = os.path.join( self.CacheDir, 'artistsimilar.nfo')
         elif item == "albums":
             if site == "theaudiodb":
-                filename = os.path.join( self.CacheDir, 'theaudiodbartistsalbums.nfo')
+                filename = os.path.join( self.CacheDir, '_theaudiodbartistsalbums.nfo')
             elif site == "lastfm":
                 filename = os.path.join( self.CacheDir, 'artistsalbums.nfo')
         if xbmcvfs.exists( filename ):
