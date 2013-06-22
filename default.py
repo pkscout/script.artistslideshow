@@ -1,9 +1,13 @@
 # *  Credits:
 # *
+# *  original Artist Slideshow code by ronie
+# *  updates and additions since v1.3.0 by pkscuot
+# *
 # *  divingmule for script.image.lastfm.slideshow
 # *  grajen3 for script.ImageCacher
+# *  sfaxman for smartUnicode
 # *
-# *  code of both scripts is used in script.artistslideshow
+# *  code from all scripts/examples are used in script.artistslideshow
 # *
 # *  Musicbrainz python library by Kenneth Reitz
 # *  see resource/musicbrainzngs/copying for copyright and use restrictions
