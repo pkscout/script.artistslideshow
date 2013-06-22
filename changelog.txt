@@ -1,3 +1,6 @@
+v.1.5.3.007
+- musicbrainz lookup ignores anything after '(' in title of local song or local album
+
 v.1.5.3.006
 - cleaned up musicbrainz parsing code
 - added logic to better follow musicbrainz rules for API load

@@ -765,7 +765,7 @@ class Main:
         mboptions = type + '?artist=' + mbid + '&limit=100&fmt=json'
         for thing in self._get_musicbrainz_info( mboptions, '', type + 's', query_times ):
             title = smartUTF8( thing['title'] )
-            playing_title = smartUTF8( playing_thing )
+            playing_title = smartUTF8( playing_thing )[:playing_thing.find('(')-2]
             log( 'comparing musicbrainz %s: %s with local %s: %s' % (type, title, type, playing_title) )
             if title.lower().startswith( playing_title.lower() ):
                 log( 'found matching %s, this should be the right artist' % type )
