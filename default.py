@@ -723,7 +723,7 @@ class Main:
         query_start = time.time()
         while do_loop:
             if mbsearch:
-                mbquery = mbbase + mboptions + urllib.quote_plus( smartUTF8(mbsearch), ':' )
+                mbquery = mbbase + mboptions + urllib.quote_plus( smartUTF8(mbsearch), ':!"' )
             else:
                 mbquery = mbbase + mboptions + '&offset=' + str(offset)
             log( 'getting results from musicbrainz using: ' + mbquery)
@@ -815,7 +815,7 @@ class Main:
                 if searchartist.lower().startswith(badSubstring):
                     searchartist = searchartist.replace(badSubstring, "")
             mboptions = 'artist/?fmt=json&query=' 
-            mbsearch = 'artist:%s' % searchartist
+            mbsearch = 'artist:"%s"' % searchartist
             query_times = {'last':0, 'current':time.time()}
             log( 'parsing musicbrainz response for muiscbrainz ID' )
             for artist in self._get_musicbrainz_info( mboptions, mbsearch, 'artist', query_times ):
