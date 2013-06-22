@@ -1,3 +1,12 @@
+v.1.5.3.006
+- cleaned up musicbrainz parsing code
+- added logic to better follow musicbrainz rules for API load
+- fixed featured artist parsing
+- brought some sanity to the unicode and url encoding of the last.fm urls
+- fixed corrupt image downloads on Windows
+- added check for local artist against musicbrainz aliases
+- general code cleanup
+
 v.1.5.3.005
 - completely rewrote musicbrainz lookup (again)
 

@@ -107,8 +107,7 @@ def getCacheThumbName(url, CachePath):
     thumbpath = os.path.join(CachePath, thumb.encode("utf-8"))
     return thumbpath
 
-def smart_unicode(s):
-    #"""credit : sfaxman"""
+def smartUnicode(s):
     if not s:
         return ''
     try:
@@ -129,30 +128,24 @@ def smart_unicode(s):
             s = unicode(s, 'ISO-8859-1')
     return s
 
-def smart_utf8(s):
-    return smart_unicode(s).encode('utf-8')
+def smartUTF8(s):
+    return smartUnicode(s).encode('utf-8')
 
-def save_url( url, filename, *args, **kwargs ):
-    req = urllib2.Request(url=url)
-    for key, value in kwargs.items():
-        req.add_header(key.replace('_', '-'), value)
-    for header, value in req.headers.items():
-        log('url header %s is %s' % (header, value) )
-    try:
-        data = urllib2.urlopen( req ).read()
-    except urllib2.URLError:
-        log( 'site unreachable at ' + url )
-        return False
-    try:
-        thefile = open( filename, 'w' )
-        thefile.write( data )
-        thefile.close()
-    except IOError:
-        log( 'unable to write data to %s for %s' % (filename, url) )
+def saveURL( url, filename, *args, **kwargs ):
+    data = grabURL( url, *args, **kwargs )
+    if data:
+        try:
+            thefile = open( filename, 'wb' )
+            thefile.write( data )
+            thefile.close()
+        except IOError:
+            log( 'unable to write data to %s from %s' % (filename, url) )
+            return False
+    else:
         return False
     return True
 
-def grab_url( url, *args, **kwargs ):
+def grabURL( url, *args, **kwargs ):
     req = urllib2.Request(url=url)
     for key, value in kwargs.items():
         req.add_header(key.replace('_', '-'), value)
@@ -164,35 +157,6 @@ def grab_url( url, *args, **kwargs ):
         log( 'site unreachable at ' + url )
         return ''
     return url_data
-
-def fix_url( url ):
-    # turn string into unicode
-    if not isinstance(url,unicode):
-        url = url.decode('utf8')
-    # parse it
-    parsed = urlparse.urlsplit(url)
-    # divide the netloc further
-    userpass,at,hostport = parsed.netloc.rpartition('@')
-    user,colon1,pass_ = userpass.partition(':')
-    host,colon2,port = hostport.partition(':')
-    # encode each component
-    scheme = parsed.scheme.encode('utf8')
-    user = urllib2.quote(user.encode('utf8'))
-    colon1 = colon1.encode('utf8')
-    pass_ = urllib2.quote(pass_.encode('utf8'))
-    at = at.encode('utf8')
-    host = host.encode('idna')
-    colon2 = colon2.encode('utf8')
-    port = port.encode('utf8')
-    path = '/'.join(  # could be encoded slashes!
-        urllib2.quote(urllib2.unquote(pce).encode('utf8'),'')
-        for pce in parsed.path.split('/')
-    )
-    query = urllib2.quote(urllib2.unquote(parsed.query).encode('utf8'),'=&?/')
-    fragment = urllib2.quote(urllib2.unquote(parsed.fragment).encode('utf8'))
-    # put it back together
-    netloc = ''.join((user,colon1,pass_,at,host,colon2,port))
-    return urlparse.urlunsplit((scheme,netloc,path,query,fragment))
 
 def cleanText(text):
     text = re.sub('<a href="http://www.last.fm/music/.*</a>.','',text)
@@ -209,10 +173,7 @@ def download(src, dst, dst2):
         tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
         if xbmcvfs.exists(tmpname):
             xbmcvfs.delete(tmpname)
-        try:
-            urllib.urlretrieve( src, tmpname )
-        except:
-            log( 'site unreachable at ' + src )
+        if not saveURL( src, tmpname ):
             return False
         if os.path.getsize(tmpname) > 999:
             log( 'copying file to transition directory' )
@@ -378,7 +339,7 @@ class Main:
             log('set progress path to %s' % self.PROGRESSPATH)
         else:
             self.PROGRESSPATH = ''
-        if len ( __addon__.getSetting( "fanart_folder" ) ) > 0:
+        if __addon__.getSetting( "fanart_folder" ):
             self.FANARTFOLDER = __addon__.getSetting( "fanart_folder" ).decode("utf-8")
             log('set fanart folder to %s' % self.FANARTFOLDER)
         else:
@@ -445,7 +406,7 @@ class Main:
         self.FirstImage = True
         cached_image_info = False
         min_refresh = 9.9
-        if len(self.NAME) == 0:
+        if not self.NAME:
             log('no artist name provided')
             return
         if(self.PRIORITY == '2' and self.LocalImagesFound):
@@ -483,7 +444,7 @@ class Main:
                 if self.NOTIFICATIONTYPE == "1":
                     self._set_property("ArtistSlideshow", self.InitDir)
                     if not cached_image_info:
-                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smart_utf8(__language__(30300)), smart_utf8(__language__(30301)), 5000, smart_utf8(__addonicon__))
+                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(__language__(30300)), smartUTF8(__language__(30301)), 5000, smartUTF8(__addonicon__))
                         xbmc.executebuiltin(command)
                 elif self.NOTIFICATIONTYPE == "2":
                     if not cached_image_info:
@@ -547,7 +508,7 @@ class Main:
                 if self.ARTISTNUM == 1:
                     self._refresh_image_directory()
                     if self.NOTIFICATIONTYPE == "1" and not cached_image_info:
-                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smart_utf8(__language__(30304)), smart_utf8(__language__(30305)), 5000, smart_utf8(__addonicon__))
+                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(__language__(30304)), smartUTF8(__language__(30305)), 5000, smartUTF8(__addonicon__))
                         xbmc.executebuiltin(command)
                 if self.TOTALARTISTS > 1:
                     self._merge_images()
@@ -565,7 +526,7 @@ class Main:
                     log('clearing ArtistSlideshow property')
                     self._set_property("ArtistSlideshow", self.InitDir)
                     if self.NOTIFICATIONTYPE == "1" and not cached_image_info:
-                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smart_utf8(__language__(30302)), smart_utf8(__language__(30303)), 10000, smart_utf8(__addonicon__))
+                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(__language__(30302)), smartUTF8(__language__(30303)), 10000, smartUTF8(__addonicon__))
                         xbmc.executebuiltin(command)
                     if( self.ARTISTINFO == "true" and not self._playback_stopped_or_changed() ):
                         self._get_artistinfo()
@@ -608,7 +569,11 @@ class Main:
 
 
     def _get_featured_artists( self, data ):
-        return self._split_artists( data.replace('ft.','feat.').split('feat.')[-1] )
+        the_split = data.replace('ft.','feat.').split('feat.')
+        if len( the_split ) > 1:
+            return self._split_artists( the_split[-1] )
+        else:
+            return []
     
 
     def _get_current_artist( self ):
@@ -620,7 +585,7 @@ class Main:
                 artists = json.loads(response)['result']['item']['artist']
             except KeyError:
                 artists = []
-            if( len( artists ) == 0 ):
+            if not artists:
                 log( 'No artist name returned from JSON call, assuming this is an internet stream' )
                 try:
                     playing_song = xbmc.Player().getMusicInfoTag().getTitle()
@@ -631,14 +596,15 @@ class Main:
             try:
                 featured_artists = self._get_featured_artists( xbmc.Player().getMusicInfoTag().getTitle() )
             except RuntimeError:
-                featured_artists = ''
+                featured_artists = []
         elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
             response = xbmc.getInfoLabel( self.SKINARTIST )
             artists = self._split_artists( response )
             featured_artists = self._get_featured_artists( xbmc.getInfoLabel( self.SKINTITLE ) )
-        if len( featured_artists ) > 1:
-            artists.append( featured_artists )
-        return [a.strip(' ()') for a in artists]
+        if featured_artists:
+            for one_artist in featured_artists:
+                artists.append( one_artist.strip(' ()') )
+        return artists
 
 
     def _playback_stopped_or_changed( self ):
@@ -650,7 +616,7 @@ class Main:
 
     def _get_local_images( self ):
         self.LocalImagesFound = False
-        if len(self.NAME) == 0:
+        if not self.NAME:
             log('no artist name provided')
             return
         self.CacheDir = os.path.join( self.LOCALARTISTPATH, self.NAME, self.FANARTFOLDER )
@@ -718,13 +684,12 @@ class Main:
 
     def _get_images( self, site ):
         if site == "lastfm":
-#            self.info = 'artist.getImages'
-            self.url = fix_url( self.LastfmURL + '&method=artist.getImages&artist=' + self.NAME.replace('&','THISISANAMPERSAND').replace(' ', 'THISISASPACE') ).replace('THISISANAMPERSAND', '%26').replace('THISISASPACE', '+')
+            self.url = self.LastfmURL + '&method=artist.getImages&artist=' + urllib.quote_plus( smartUTF8(self.NAME) )
             log( 'asking for images from: %s' %self.url )
         elif site == 'fanarttv':
             mbid = self._get_musicbrainz_id()
             log( 'the returned mbid was ' + mbid )
-            if len( mbid ) > 1:
+            if mbid:
                 self.url = self.fanarttvURL + mbid + self.fanarttvOPTIONS
                 log( 'asking for images from: %s' %self.url )
             else:
@@ -732,7 +697,7 @@ class Main:
         elif site == 'theaudiodb':
             mbid = self._get_musicbrainz_id()
             log( 'the returned mbid was ' + str(mbid) )
-            if len( mbid ) > 1:
+            if mbid:
                 self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + mbid
                 log( 'asking for images from: %s' %self.url )
             else:
@@ -744,49 +709,68 @@ class Main:
         return images
 
 
-    def _get_musicbrainz_info( self, mboptions, mbsearch ):
+    def _get_musicbrainz_info( self, mboptions, mbsearch, type, query_times ):
         mbbase = 'http://www.musicbrainz.org/ws/2/'
         theartist = self.NAME
         mb_data = []
         offset = 0
         do_loop = True
+        elapsed_time = query_times['current'] - query_times['last']
+        if elapsed_time < 1:
+            self._wait( 1 - elapsed_time )
+        elif self._playback_stopped_or_changed():
+            return []        
+        query_start = time.time()
         while do_loop:
             if mbsearch:
-                mbquery = mbbase + mboptions + fix_url( mbsearch ).replace(' ', '+').replace('%2B', '+').replace('&','%26').replace('%3A', ':')
+                mbquery = mbbase + mboptions + urllib.quote_plus( smartUTF8(mbsearch), ':' )
             else:
                 mbquery = mbbase + mboptions + '&offset=' + str(offset)
             log( 'getting results from musicbrainz using: ' + mbquery)
             for x in range(1, 5):
-                got_data = True
-                json_data = json.loads( grab_url(mbquery, User_Agent=__addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )') )
+                json_data = json.loads( grabURL(mbquery, User_Agent=__addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )') )
+                if self._playback_stopped_or_changed():
+                    return []       
                 if not json_data:
                     wait_time = random.randint(2,5)
-                    got_data = False
                     log('site unreachable, waiting %s seconds to try again.' % wait_time)
                     self._wait( wait_time )
-                if got_data:
-                    for one_item in ['artist', 'releases', 'works']:
-                        try:
-                            data_loaded = True
-                            if one_item <> 'artist':
-                               count_key = one_item[:-1] + '-count'
-                            else:
-                               count_key = one_item
-                               
-                            mb_data.extend( json_data[one_item] )
-                        except KeyError:
-                            data_loaded = False
-                        if data_loaded:
-                            break
-                    break
                 else:
-                    return mb_data
+                    try:
+                        mb_data.extend( json_data[type] )
+                    except KeyError:
+                        pass
+                    break
             offset = offset + 100
-            if ( not mbsearch ) and ( int(json_data[count_key]) - offset > 0 ):
+            try:
+                total_items = int(json_data[type[:-1] + '-count'])
+            except KeyError:
+                total_items = 0
+            if (not mbsearch) and (total_items - offset > 0):
                 log( 'getting more data from musicbrainz' )
+                query_elapsed = time.time() - query_start
+                if query_elapsed < 1:
+                    self._wait(1 - query_elapsed)
+                elif self._playback_stopped_or_changed():
+                    return []        
             else:
                 do_loop = False
         return mb_data
+
+
+    def _parse_musicbrainz_info( self, type, mbid, playing_thing, query_times ):
+        if self._playback_stopped_or_changed():
+            return False
+        log( "checking this artist's " + type + "s against currently playing " + type )
+        mboptions = type + '?artist=' + mbid + '&limit=100&fmt=json'
+        for thing in self._get_musicbrainz_info( mboptions, '', type + 's', query_times ):
+            title = smartUTF8( thing['title'] )
+            playing_title = smartUTF8( playing_thing )
+            log( 'comparing musicbrainz %s: %s with local %s: %s' % (type, title, type, playing_title) )
+            if title.lower().startswith( playing_title.lower() ):
+                log( 'found matching %s, this should be the right artist' % type )
+                return True
+        return False
 
 
     def _get_musicbrainz_id ( self ):
@@ -797,7 +781,7 @@ class Main:
             mbid = json.loads(response)['result']['item']['muiscbrainzartistid']
         except (IndexError, KeyError):
             mbid = ''
-        if len( mbid ) == 0:
+        if not mbid:
             cached_mb_info = False
             log( 'no musicbrainz ID found in XBMC JSON response' )
         else:
@@ -811,7 +795,7 @@ class Main:
             filename = os.path.join( self.CacheDir, 'musicbrainz.nfo' )
             if xbmcvfs.exists( filename ):
                 mbid = readFile( filename )
-                if len(mbid) == 0:
+                if not mbid:
                     log( 'no musicbrainz ID found in musicbrainz.nfo file' )
                     cached_mb_info = False
                 else:
@@ -832,13 +816,21 @@ class Main:
                     searchartist = searchartist.replace(badSubstring, "")
             mboptions = 'artist/?fmt=json&query=' 
             mbsearch = 'artist:%s' % searchartist
-            query_start = time.time()
+            query_times = {'last':0, 'current':time.time()}
             log( 'parsing musicbrainz response for muiscbrainz ID' )
-            for artist in self._get_musicbrainz_info( mboptions, mbsearch ):
+            for artist in self._get_musicbrainz_info( mboptions, mbsearch, 'artist', query_times ):
                 mbid=''
                 if self._playback_stopped_or_changed():
                     return ''
-                if artist['name'].lower() == theartist.lower():
+                aliases = []
+                try:
+                    all_names = artist['aliases']
+                except KeyError:
+                    all_names = []
+                if all_names:
+                    for one_name in all_names:
+                        aliases.append( one_name['name'].lower() )
+                if artist['name'].lower() == theartist.lower() or theartist.lower() in aliases:
                     mbid = artist['id']
                     log( 'found a potential musicbrainz ID: ' + mbid )
                     try:
@@ -846,18 +838,8 @@ class Main:
                     except RuntimeError:
                         playing_album = ''
                     if playing_album:
-                        log( "checking this artist's albums against currently playing album" )
-                        query_elapsed = time.time() - query_start
-                        if query_elapsed < 1:
-                            self._wait(1)
-                        query_start = time.time()
-                        mboptions = 'release?artist=' + mbid + '&limit=100&fmt=json'
-                        for album in self._get_musicbrainz_info( mboptions, '' ):
-                            log( 'comparing musicbrainz: %s with local album: %s' % (album['title'], playing_album) )
-                            if album['title'].lower().startswith( playing_album.lower() ):
-                                log( 'found matching album, this is probably the right artist' )
-                                cached_mb_info = True
-                                break
+                        query_times = {'last':query_times['current'], 'current':time.time()}
+                        cached_mb_info = self._parse_musicbrainz_info( 'release', mbid, playing_album, query_times )
                     if not cached_mb_info:
                         try:
                             playing_song = xbmc.Player().getMusicInfoTag().getTitle()
@@ -866,18 +848,8 @@ class Main:
                         if theartist == playing_song[0:(playing_song.find('-'))-1]:
                             playing_song = playing_song[(playing_song.find('-'))+2:]
                         if playing_song:
-                            log( "checking this artist's songs against currently playing song" )
-                            query_elapsed = time.time() - query_start
-                            if query_elapsed < 1:
-                                self._wait(1)
-                            query_start = time.time()
-                            mboptions = 'work?artist=' + mbid + '&limit=100&fmt=json'
-                            for song in self._get_musicbrainz_info( mboptions, '' ):
-                                log( 'comparing musicbrainz: %s with local song: %s' % (song['title'], playing_song) )
-                                if song['title'].lower().startswith( playing_song.lower() ):
-                                    log( 'found matching song, this is hopefully the right artist' )
-                                    cached_mb_info = True
-                                    break
+                            query_times = {'last':query_times['current'], 'current':time.time()}
+                            cached_mb_info = self._parse_musicbrainz_info( 'work', mbid, playing_song, query_times )
                     if cached_mb_info:
                         break
                     else:
@@ -897,12 +869,12 @@ class Main:
         if bio == []:
             mbid = self._get_musicbrainz_id()
             log( 'the returned mbid was ' + mbid )
-            if len( mbid ) > 1:
+            if mbid:
                 self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + mbid
                 log( 'trying to get artist bio from ' + self.url )
                 bio = self._get_data( 'theaudiodb', 'bio' )
         if bio == []:
-            self.url = fix_url( self.LastfmURL + '&method=artist.getInfo&artist=' + self.NAME.replace('&','THISISANAMPERSAND').replace(' ', 'THISISASPACE') + '&lang=' + self.LANGUAGE ).replace('THISISANAMPERSAND', '%26').replace('THISISASPACE', '+')
+            self.url = self.LastfmURL + '&method=artist.getInfo&artist=' + urllib.quote_plus( smartUTF8(self.NAME) )
             log( 'trying to get artist bio from ' + self.url )
             bio = self._get_data('lastfm', 'bio')
         if bio == []:
@@ -912,17 +884,17 @@ class Main:
         self.albums = self._get_local_data( 'albums' )
         if self.albums == []:
             theaudiodb_id = readFile( os.path.join(self.CacheDir, 'theaudiodbid.nfo') )
-            if len( theaudiodb_id ) > 1:
+            if theaudiodb_id:
                 self.url = self.theaudiodbURL + self.theaudiodbALBUMURL + theaudiodb_id
                 log( 'trying to get artist albumns from ' + self.url )
                 self.albums = self._get_data('theaudiodb', 'albums')
         if self.albums == []:
-            self.url = fix_url( self.LastfmURL + '&method=artist.getTopAlbums&artist=' + self.NAME.replace('&','THISISANAMPERSAND').replace(' ','THISISASPACE') + '&lang=' + self.LANGUAGE ).replace('THISISANAMPERSAND', '%26').replace('THISISASPACE', '+')
+            self.url = self.LastfmURL + '&method=artist.getTopAlbums&artist=' + urllib.quote_plus( smartUTF8(self.NAME) )
             log( 'trying to get artist albums from ' + self.url )
             self.albums = self._get_data('lastfm', 'albums')
         self.similar = self._get_local_data( 'similar' )
         if self.similar == []:
-            self.url = fix_url( self.LastfmURL + '&method=artist.getSimilar&artist=' + self.NAME.replace('&','THISISANAMPERSAND').replace(' ', 'THISISASPACE') + '&lang=' + self.LANGUAGE ).replace('THISISANAMPERSAND', '%26').replace('THISISASPACE', '+')
+            self.url = self.LastfmURL + '&method=artist.getSimilar&artist=' + urllib.quote_plus( smartUTF8(self.NAME) )
             self.similar = self._get_data('lastfm', 'similar')
         self._set_properties()
 
@@ -1008,21 +980,21 @@ class Main:
                 log('outdated cached info found for %s ' % item)
         if ForceUpdate:
             log('downloading artist %s info from %s' % (item, site))
-            if not save_url( self.url, filename ):
-                return data
             if site == 'fanarttv' or site == 'theaudiodb':
                 #converts the JSON response to XML
-                json_data=open( filename, 'r' )
-                serial_data = json.load(json_data)
-                json_data.close()
-                if site == 'fanarttv':
-                    try:
-                        fixed_data = dict(map(lambda (key, value): ('artistImages', value), serial_data.items()))
-                    except AttributeError:
-                        fixed_data = []
+                json_data = json.loads( grabURL( self.url ) )
+                if json_data:
+                    if site == 'fanarttv':
+                        try:
+                            json_data = dict(map(lambda (key, value): ('artistImages', value), json_data.items()))
+                        except AttributeError:
+                            return_data
+                    writeFile( dicttoxml( json_data ).encode('utf-8'), filename )
+                    json_data = ''
                 else:
-                    fixed_data = serial_data
-                writeFile( dicttoxml( fixed_data ).encode('utf-8'), filename )
+                    return data
+            elif not saveURL( self.url, filename ):
+                return data
         try:
             xmldata = xmltree.parse(filename).getroot()
         except:
