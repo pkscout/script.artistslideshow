@@ -386,6 +386,7 @@ class Main:
         log( 'external call is set to ' + xbmc.getInfoLabel( self.EXTERNALCALL ) )
         self.NAME = ''
         self.ALLARTISTS = []
+        self.MBID = ''
         self.LocalImagesFound = False
         self.CachedImagesFound = False
         self.ImageDownloaded = False
@@ -634,6 +635,7 @@ class Main:
 
     def _playback_stopped_or_changed( self ):
         if ( set(self.ALLARTISTS) <> set(self._get_current_artist()) or self.EXTERNALCALLSTATUS != xbmc.getInfoLabel(self.EXTERNALCALL) ):
+            self.MBID = ''
             return True
         else:
             return False
@@ -712,18 +714,18 @@ class Main:
             self.url = self.LastfmURL + '&method=artist.getImages&artist=' + urllib.quote_plus( smartUTF8(self.NAME) )
             log( 'asking for images from: %s' %self.url )
         elif site == 'fanarttv':
-            mbid = self._get_musicbrainz_id()
-            log( 'the returned mbid was ' + mbid )
-            if mbid:
-                self.url = self.fanarttvURL + mbid + self.fanarttvOPTIONS
+            self._get_musicbrainz_id()
+            log( 'the returned mbid was ' + self.MBID )
+            if self.MBID:
+                self.url = self.fanarttvURL + self.MBID + self.fanarttvOPTIONS
                 log( 'asking for images from: %s' %self.url )
             else:
                 return []
         elif site == 'theaudiodb':
-            mbid = self._get_musicbrainz_id()
-            log( 'the returned mbid was ' + str(mbid) )
-            if mbid:
-                self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + mbid
+            self._get_musicbrainz_id()
+            log( 'the returned mbid was ' + self.MBID )
+            if self.MBID:
+                self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + self.MBID
                 log( 'asking for images from: %s' %self.url )
             else:
                 return []
@@ -801,7 +803,10 @@ class Main:
 
 
     def _get_musicbrainz_id ( self ):
+        if self.MBID:
+            return
         theartist = self.NAME
+        mbid = ''
         log( 'Looking for musicbrainz ID in the XBMC JSON response' )
         response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["musicbrainzartistid"]},"id":1}' )
         try:
@@ -812,10 +817,10 @@ class Main:
             log( 'no musicbrainz ID found in XBMC JSON response' )
         else:
             log( 'musicbrainz ID found in XBMC JSON response' )
-            return mbid
+            self.MBID = mbid
+            return
         if self._playback_stopped_or_changed():
-            writeFile( '', filename )
-            return ''
+            return
         log( 'Looking for musicbrainz ID in the musicbrainz.nfo file' )
         filename = os.path.join( self.CacheDir, '_musicbrainz.nfo' )
         if xbmcvfs.exists( filename ):
@@ -823,17 +828,19 @@ class Main:
             if not mbid:
                 if time.time() - os.path.getmtime(filename) < 1209600:
                     log( 'no musicbrainz ID found in musicbrainz.nfo file' )
-                    return ''
+                    self.MBID = ''
+                    return
                 else:
                     log( 'no musicbrainz ID found in musicbrainz.nfo file, trying lookup again' )
             else:
                 log( 'musicbrainz ID found in musicbrainz.nfo file' )
-                return mbid
+                self.MBID = mbid
+                return
         else:
             log( 'no musicbrainz.nfo file found' )
         if self._playback_stopped_or_changed():
             writeFile( '', filename )
-            return ''
+            return
         log( 'querying musicbrainz.com for musicbrainz ID. This is about to get messy.' )
         badSubstrings = ["the ", "a ", "an "]
         searchartist = theartist
@@ -846,7 +853,7 @@ class Main:
         log( 'parsing musicbrainz response for muiscbrainz ID' )
         cached_mb_info = False
         for artist in self._get_musicbrainz_info( mboptions, mbsearch, 'artist', query_times ):
-            mbid=''
+            mbid = ''
             if self._playback_stopped_or_changed():
                 return ''
             aliases = []
@@ -882,23 +889,23 @@ class Main:
                 else:
                     log( 'no matching song/album found from this artist. trying the next artist' )
         if cached_mb_info:
-            log( 'musicbrainzid is %s. writing out to cache file.' % mbid )
-            writeFile( mbid, filename )
-            return mbid
+            log( 'musicbrainzid for %s is %s. writing out to cache file.' % (theartist, mbid) )
         else:
-            log( 'No musicbrainz ID found for %s.' % theartist )
-            writeFile( '', filename )
-            return ''            
+            mbid = ''
+            log( 'No musicbrainz ID found for %s. writing empty cache file.' % theartist )
+        writeFile( mbid, filename )
+        self.MBID = mbid
+        return
 
                                 
     def _get_artistinfo( self ):
         log( 'checking for local artist bio data' )
         bio = self._get_local_data( 'bio' )
         if bio == []:
-            mbid = self._get_musicbrainz_id()
-            log( 'the returned mbid was ' + mbid )
-            if mbid:
-                self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + mbid
+            self._get_musicbrainz_id()
+            log( 'the returned mbid was ' + self.MBID )
+            if self.MBID:
+                self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + self.MBID
                 log( 'trying to get artist bio from ' + self.url )
                 bio = self._get_data( 'theaudiodb', 'bio' )
         if bio == []:
@@ -1132,6 +1139,7 @@ class Main:
 
 
     def _clear_properties( self ):
+        self.MBID = ''
         self._set_property( "ArtistSlideshow", self.InitDir )
         self._clean_dir( self.MergeDir )
         self._set_property( "ArtistSlideshow.ArtistBiography" )
