@@ -153,9 +153,12 @@ def grabURL( url, *args, **kwargs ):
         log('url header %s is %s' % (header, value) )
     try:
         url_data = urllib2.urlopen( req ).read()
-    except urllib2.URLError:
+    except urllib2.URLError, urllib2.HTTPError:
         log( 'site unreachable at ' + url )
         return ''
+    except socket.error:
+        log( 'error while downloading from ' + url )
+        return ''    
     return url_data
 
 def cleanText(text):
