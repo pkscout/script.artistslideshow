@@ -1,7 +1,10 @@
 v.1.5.3.007
 - musicbrainz lookup ignores anything after '(' in title of local song or local album
-- fixed punctuation of musicbrainz search
+- fixed structure of musicbrainz search to produce better results
 - added advanced feature to exclude files from download
+- now save musicbrainz ID in memory to reduce drive reads
+- additional error catching in URL downloads
+- updated cache manager to leave .nfo files intact
 
 v.1.5.3.006
 - cleaned up musicbrainz parsing code
