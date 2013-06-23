@@ -755,7 +755,10 @@ class Main:
                 mbquery = mbbase + mboptions + '&offset=' + str(offset)
             log( 'getting results from musicbrainz using: ' + mbquery)
             for x in range(1, 5):
-                json_data = json.loads( grabURL(mbquery, User_Agent=__addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )') )
+                try:
+                    json_data = json.loads( grabURL(mbquery, User_Agent=__addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )') )
+                except ValueError:
+                    json_data = []
                 if self._playback_stopped_or_changed():
                     return []       
                 if not json_data:
