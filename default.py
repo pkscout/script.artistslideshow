@@ -19,7 +19,7 @@
 
 
 import xbmc, xbmcaddon, os, xbmcgui, xbmcvfs
-import codecs, random, re, sys, time, unicodedata, urllib, urllib2, urlparse, socket, shutil
+import codecs, ntpath, random, re, sys, time, unicodedata, urllib, urllib2, urlparse, socket, shutil
 from elementtree import ElementTree as xmltree
 if sys.version_info >= (2, 7):
     import json
@@ -167,6 +167,22 @@ def cleanText(text):
     text = re.sub('&lt;','<',text)
     text = re.sub('User-contributed text is available under the Creative Commons By-SA License and may also be available under the GNU FDL.','',text)
     return text.strip()
+
+def path_leaf(path):
+    path, filename = ntpath.split(path)
+    return {"path":path, "filename":filename}
+
+def excluded(item):
+    item_split = path_leaf(item)
+    exclusion_file = os.path.join(item_split['path'], '_exclusions.nfo')
+    if xbmcvfs.exists( exclusion_file ):
+        exclusions = readFile( exclusion_file )
+        if item_split['filename'] in exclusions:
+            return True
+        else:
+            return False
+    else:
+        writeFile( '', exclusion_file )
 
 def download(src, dst, dst2):
     if (not xbmc.abortRequested):
@@ -475,6 +491,8 @@ class Main:
                 if download(url, path, path2):
                     log('downloaded %s to %s' % (url, path) )
                     self.ImageDownloaded=True
+            elif excluded( path ):
+                xbmcvfs.delete( path )
             if self.ImageDownloaded:
                 if( self._playback_stopped_or_changed() and self.ARTISTNUM == 1 ):
                     self._set_property("ArtistSlideshow", self.CacheDir)
