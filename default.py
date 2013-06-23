@@ -187,19 +187,22 @@ def excluded(item):
 def download(src, dst, dst2):
     if (not xbmc.abortRequested):
         tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
-        if xbmcvfs.exists(tmpname):
-            xbmcvfs.delete(tmpname)
-        if not saveURL( src, tmpname ):
-            return False
-        if os.path.getsize(tmpname) > 999:
-            log( 'copying file to transition directory' )
-            xbmcvfs.copy(tmpname, dst2)
-            log( 'moving file to cache directory' )
-            xbmcvfs.rename(tmpname, dst)
-            return True
+        if not excluded( dst ):
+            if xbmcvfs.exists(tmpname):
+                xbmcvfs.delete(tmpname)
+            if not saveURL( src, tmpname ):
+                return False
+            if os.path.getsize(tmpname) > 999:
+                log( 'copying file to transition directory' )
+                xbmcvfs.copy(tmpname, dst2)
+                log( 'moving file to cache directory' )
+                xbmcvfs.rename(tmpname, dst)
+                return True
+            else:
+                xbmcvfs.delete(tmpname)
+                return False
         else:
-            xbmcvfs.delete(tmpname)
-            return False
+            return False 
 
 def writeFile( data, filename ):
     the_file = open (filename, 'w')
