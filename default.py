@@ -815,7 +815,7 @@ class Main:
         response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["musicbrainzartistid"]},"id":1}' )
         try:
             mbid = json.loads(response)['result']['item']['muiscbrainzartistid']
-        except (IndexError, KeyError):
+        except (IndexError, KeyError, ValueError):
             mbid = ''
         if not mbid:
             log( 'no musicbrainz ID found in XBMC JSON response' )
@@ -1020,7 +1020,10 @@ class Main:
             log('downloading artist %s info from %s' % (item, site))
             if site == 'fanarttv' or site == 'theaudiodb':
                 #converts the JSON response to XML
-                json_data = json.loads( grabURL( self.url ) )
+                try:
+                    json_data = json.loads( grabURL( self.url ) )
+                except ValueError:
+                    json_data = []
                 if json_data:
                     if site == 'fanarttv':
                         try:
