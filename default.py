@@ -575,8 +575,9 @@ class Main:
         except:
             old_files = []
         for old_file in old_files:
-            xbmcvfs.delete( '%s/%s' % (dir_path, old_file) )
-            log( 'deleting file %s/%s' % (dir_path, old_file) )
+            if not old_file.endswith( '.nfo' ):
+                xbmcvfs.delete( os.path.join(dir_path, old_file) )
+                log( 'deleting file ' + old_file )
 
 
     def _refresh_image_directory( self ):
