@@ -134,16 +134,12 @@ def smartUTF8(s):
 def saveURL( url, filename, *args, **kwargs ):
     data = grabURL( url, *args, **kwargs )
     if data:
-        try:
-            thefile = open( filename, 'wb' )
-            thefile.write( data )
-            thefile.close()
-        except IOError:
-            log( 'unable to write data to %s from %s' % (filename, url) )
+        if writeFile( data, filename ):
+            return True
+        else:
             return False
     else:
         return False
-    return True
 
 def grabURL( url, *args, **kwargs ):
     req = urllib2.Request(url=url)
