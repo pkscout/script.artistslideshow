@@ -153,8 +153,12 @@ def grabURL( url, *args, **kwargs ):
         log( 'site unreachable at ' + url )
         return ''
     except socket.error:
-        log( 'error while downloading from ' + url )
-        return ''    
+        log( 'timeout error while downloading from ' + url )
+        return ''
+    except Exception, e:
+        log( 'unknown error while downloading from ' + url )
+        log( e )
+        return ''
     return url_data
 
 def cleanText(text):
@@ -204,15 +208,32 @@ def download(src, dst, dst2):
             return False 
 
 def writeFile( data, filename ):
-    the_file = open (filename, 'w')
-    the_file.write( data )
-    the_file.close()
+    try:
+        thefile = open( filename, 'wb' )
+        thefile.write( data )
+        thefile.close()
+    except IOError:
+        log( 'unable to write data to %s from %s' % (filename, url) )
+        return False
+    except Exception, e:
+        log( 'unknown error while writing data to %s from %s' % (filename, url) )
+        log( e )
+        return False
+    return True
 
 def readFile( filename ):
     if xbmcvfs.exists( filename):
-        the_file = open (filename, 'r')
-        data = the_file.read()
-        the_file.close()
+        try:
+            the_file = open (filename, 'r')
+            data = the_file.read()
+            the_file.close()
+        except IOError:
+            log( 'unable to rea data from ' + filename )
+            return ''
+        except Exception, e:
+            log( 'unknown error while reading data from ' + filename )
+            log( e )
+            return ''
         return data
     else:
         return ''
@@ -306,7 +327,9 @@ class Main:
     def _parse_argv( self ):
         try:
             params = dict( arg.split( "=" ) for arg in sys.argv[ 1 ].split( "&" ) )
-        except:
+        except Exception, e:
+            log( 'unexpected error while parsing arguments' )
+            log( e )
             params = {}
         self.WINDOWID = params.get( "windowid", "12006")
         log( 'window id is set to %s' % self.WINDOWID )
@@ -323,11 +346,15 @@ class Main:
         self.LASTFM = __addon__.getSetting( "lastfm" )
         try:
             self.minwidth = int(__addon__.getSetting( "minwidth" ))
-        except:
+        except Exception, e:
+            log( 'unexpected error while parsing arguments' )
+            log( e )
             self.minwidth = 0
         try:
             self.minheight = int(__addon__.getSetting( "minheight" ))
-        except:
+        except Exception, e:
+            log( 'unexpected error while parsing arguments' )
+            log( e )
             self.minheight = 0
         self.HDASPECTONLY = __addon__.getSetting( "hd_aspect_only" )
         self.FANARTTV = __addon__.getSetting( "fanarttv" )
@@ -349,7 +376,9 @@ class Main:
         self.RESTRICTCACHE = __addon__.getSetting( "restrict_cache" )
         try:
             self.maxcachesize = int(__addon__.getSetting( "max_cache_size" )) * 1000000
-        except:
+        except Exception, e:
+            log( 'unexpected error while parsing arguments' )
+            log( e )
             self.maxcachesize = 1024 * 1000000
         self.NOTIFICATIONTYPE = __addon__.getSetting( "show_progress" )
         if self.NOTIFICATIONTYPE == "2":
@@ -569,7 +598,9 @@ class Main:
     def _clean_dir( self, dir_path ):
         try:
             old_files = os.listdir( dir_path )
-        except:
+        except Exception, e:
+            log( 'unexpected error while parsing arguments' )
+            log( e )
             old_files = []
         for old_file in old_files:
             if not old_file.endswith( '.nfo' ):
@@ -607,6 +638,10 @@ class Main:
                 artists = json.loads(response)['result']['item']['artist']
             except KeyError:
                 artists = []
+            except Exception, e:
+                log( 'unexpected error getting JSON back from XBMC' )
+                log( e )
+                artists = []
             if not artists:
                 log( 'No artist name returned from JSON call, assuming this is an internet stream' )
                 try:
@@ -614,10 +649,18 @@ class Main:
                     playingartist = playing_song[0:(playing_song.find('-'))-1]
                 except RuntimeError:
                     playingartist = ''
+                except Exception, e:
+                    log( 'unexpected error gettting playing song back from XBMC' )
+                    log( e )
+                    playingartist = ''
                 artists = self._split_artists( playingartist )
             try:
                 featured_artists = self._get_featured_artists( xbmc.Player().getMusicInfoTag().getTitle() )
             except RuntimeError:
+                featured_artists = []
+            except Exception, e:
+                log( 'unexpected error getting playing sone back from XBMC' )
+                log( e )
                 featured_artists = []
         elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
             response = xbmc.getInfoLabel( self.SKINARTIST )
@@ -647,6 +690,10 @@ class Main:
         try:
             files = os.listdir(self.CacheDir)
         except OSError:
+            files = []
+        except Exception, e:
+            log( 'unexpected error getting directory list' )
+            log( e )
             files = []
         for file in files:
             if(file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')):
@@ -755,6 +802,10 @@ class Main:
                     json_data = json.loads( grabURL(mbquery, User_Agent=__addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )') )
                 except ValueError:
                     json_data = []
+                except Exception, e:
+                    log( 'unexpected error getting JSON data from ' + mbquery )
+                    log( e )
+                    json_data = []
                 if self._playback_stopped_or_changed():
                     return []       
                 if not json_data:
@@ -765,12 +816,19 @@ class Main:
                     try:
                         mb_data.extend( json_data[type] )
                     except KeyError:
-                        pass
+                        log( 'no valid value for %s found in JSON data' % type )
+                    except Exception, e:
+                        log( 'unexpected error while parsing JSON data' )
+                        log( e )
                     break
             offset = offset + 100
             try:
                 total_items = int(json_data[type[:-1] + '-count'])
             except KeyError:
+                total_items = 0
+            except Exception, e:
+                log( 'unexpected error getting JSON data from ' + mbquery )
+                log( e )
                 total_items = 0
             if (not mbsearch) and (total_items - offset > 0):
                 log( 'getting more data from musicbrainz' )
@@ -812,6 +870,10 @@ class Main:
         try:
             mbid = json.loads(response)['result']['item']['muiscbrainzartistid']
         except (IndexError, KeyError, ValueError):
+            mbid = ''
+        except Exception, e:
+            log( 'unexpected error getting JSON data from XBMC response' )
+            log( e )
             mbid = ''
         if not mbid:
             log( 'no musicbrainz ID found in XBMC JSON response' )
@@ -861,6 +923,10 @@ class Main:
                 all_names = artist['aliases']
             except KeyError:
                 all_names = []
+            except Exception, e:
+                log( 'unexpected error getting JSON data from XBMC response' )
+                log( e )
+                all_names = []
             if all_names:
                 for one_name in all_names:
                     aliases.append( one_name['name'].lower() )
@@ -871,6 +937,10 @@ class Main:
                     playing_album = xbmc.Player().getMusicInfoTag().getAlbum()
                 except RuntimeError:
                     playing_album = ''
+                except Exception, e:
+                    log( 'unexpected error getting album name from XBMC' )
+                    log( e )
+                    playing_album = ''
                 if playing_album:
                     query_times = {'last':query_times['current'], 'current':time.time()}
                     cached_mb_info = self._parse_musicbrainz_info( 'release', mbid, playing_album, query_times )
@@ -878,6 +948,10 @@ class Main:
                     try:
                         playing_song = xbmc.Player().getMusicInfoTag().getTitle()
                     except RuntimeError:
+                        playing_song = ''
+                    except Exception, e:
+                        log( 'unexpected error getting song name from XBMC' )
+                        log( e )
                         playing_song = ''
                     if theartist == playing_song[0:(playing_song.find('-'))-1]:
                         playing_song = playing_song[(playing_song.find('-'))+2:]
@@ -949,8 +1023,9 @@ class Main:
             log( 'checking filename ' + filename )
             try:
                 xmldata = xmltree.parse(filename).getroot()
-            except:
+            except Exception, e:
                 log('invalid or missing local xml file for %s' % item)
+                log( e )
                 found_xml = False
             if found_xml:
                 break
@@ -1020,12 +1095,19 @@ class Main:
                     json_data = json.loads( grabURL( self.url ) )
                 except ValueError:
                     json_data = []
+                except Exception, e:
+                    log( 'unexpected error parsing JSON data' )
+                    log( e )
                 if json_data:
                     if site == 'fanarttv':
                         try:
                             json_data = dict(map(lambda (key, value): ('artistImages', value), json_data.items()))
                         except AttributeError:
                             return_data
+                        except Exception, e:
+                            log( 'unexpected error fixing fanart.tv JSON data' )
+                            log( e )
+                            return data
                     writeFile( dicttoxml( json_data ).encode('utf-8'), filename )
                     json_data = ''
                 else:
@@ -1034,8 +1116,9 @@ class Main:
                 return data
         try:
             xmldata = xmltree.parse(filename).getroot()
-        except:
+        except Exception, e:
             log('invalid or missing xml file')
+            log( e )
             xbmcvfs.delete(filename)
             return data
         if item == "images":
@@ -1157,9 +1240,9 @@ class Main:
     def _set_property( self, property_name, value=""):
       try:
         self.WINDOW.setProperty(property_name, value)
-      except:
-        pass
+      except Exception, e:
         log(" *************** Exception: Couldn't set propery " + property_name + " value " + value)
+        log( e )
 
 
 if ( __name__ == "__main__" ):
@@ -1167,7 +1250,8 @@ if ( __name__ == "__main__" ):
     slideshow = Main()
     try:
         slideshow._set_property("ArtistSlideshow.CleanupComplete", "True")
-    except:
-        pass
+    except Exception, e:
+        log( 'unexpected error while setting property.' )
+        log( e )
 
 log('script stopped')
