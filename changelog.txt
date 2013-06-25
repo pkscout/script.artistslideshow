@@ -3,7 +3,7 @@ v.1.5.3.007
 - fixed structure of musicbrainz search to produce better results
 - added advanced feature to exclude files from download
 - now save musicbrainz ID in memory to reduce drive reads
-- additional error catching in URL downloads
+- additional error catching across the board
 - updated cache manager to leave .nfo files intact
 
 v.1.5.3.006
