@@ -1,3 +1,6 @@
+v.1.5.3.008
+- fixed for error regression in removing beginning articles from artist name for search
+
 v.1.5.3.007
 - musicbrainz lookup ignores anything after '(' in title of local song or local album
 - fixed structure of musicbrainz search to produce better results

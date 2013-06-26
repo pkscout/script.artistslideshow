@@ -904,11 +904,11 @@ class Main:
             writeFile( '', filename )
             return
         log( 'querying musicbrainz.com for musicbrainz ID. This is about to get messy.' )
-        badSubstrings = ["the ", "a ", "an "]
+        badSubstrings = ["the ", "The ", "THE ", "a ", "A ", "an ", "An ", "AN "]
         searchartist = theartist
         for badSubstring in badSubstrings:
-            if searchartist.lower().startswith(badSubstring):
-                searchartist = searchartist.replace(badSubstring, "")
+            if theartist.startswith(badSubstring):
+                searchartist = theartist.replace(badSubstring, "")
         mboptions = 'artist/?fmt=json&query=' 
         mbsearch = 'artist:"%s"' % searchartist
         query_times = {'last':0, 'current':time.time()}
