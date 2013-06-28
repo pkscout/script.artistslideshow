@@ -817,9 +817,11 @@ class Main:
                         mb_data.extend( json_data[type] )
                     except KeyError:
                         log( 'no valid value for %s found in JSON data' % type )
+                        offset = -100
                     except Exception, e:
                         log( 'unexpected error while parsing JSON data' )
                         log( e )
+                        offset = -100
                     break
             offset = offset + 100
             try:
@@ -932,7 +934,7 @@ class Main:
                     aliases.append( one_name['name'].lower() )
             if artist['name'].lower() == theartist.lower() or theartist.lower() in aliases:
                 mbid = artist['id']
-                log( 'found a potential musicbrainz ID: ' + mbid )
+                log( 'found a potential musicbrainz ID of %s for %s' % (mbid, theartist) )
                 try:
                     playing_album = xbmc.Player().getMusicInfoTag().getAlbum()
                 except RuntimeError:
@@ -942,6 +944,7 @@ class Main:
                     log( e )
                     playing_album = ''
                 if playing_album:
+                    log( 'checking album name against releases in musicbrainz' )
                     query_times = {'last':query_times['current'], 'current':time.time()}
                     cached_mb_info = self._parse_musicbrainz_info( 'release', mbid, playing_album, query_times )
                 if not cached_mb_info:
@@ -956,14 +959,19 @@ class Main:
                     if theartist == playing_song[0:(playing_song.find('-'))-1]:
                         playing_song = playing_song[(playing_song.find('-'))+2:]
                     if playing_song:
+                        log( 'checking song name against recordings in musicbrainz' )
                         query_times = {'last':query_times['current'], 'current':time.time()}
-                        cached_mb_info = self._parse_musicbrainz_info( 'work', mbid, playing_song, query_times )
+                        cached_mb_info = self._parse_musicbrainz_info( 'recording', mbid, playing_song, query_times )
+                        if not cached_mb_info:
+                            log( 'checking song name against works in musicbrainz' )
+                            query_times = {'last':query_times['current'], 'current':time.time()}
+                            cached_mb_info = self._parse_musicbrainz_info( 'work', mbid, playing_song, query_times )
                 if cached_mb_info:
                     break
                 else:
-                    log( 'no matching song/album found from this artist. trying the next artist' )
+                    log( 'No matching song/album found for %s. Trying the next artist.' % theartist )
         if cached_mb_info:
-            log( 'musicbrainzid for %s is %s. writing out to cache file.' % (theartist, mbid) )
+            log( 'Musicbrainz ID for %s is %s. writing out to cache file.' % (theartist, mbid) )
         else:
             mbid = ''
             log( 'No musicbrainz ID found for %s. writing empty cache file.' % theartist )
