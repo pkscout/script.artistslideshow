@@ -1,7 +1,9 @@
-v.1.5.3.008
-- fixed for error regression in removing beginning articles from artist name for search
+v.1.5.3.009
 - widened tolerance on 16:9 proportion check from last.fm
 - musicbrainz lookup now validates artist based on releases, recordings, then works
+
+v.1.5.3.008
+- fixed for error regression in removing beginning articles from artist name for search
 
 v.1.5.3.007
 - musicbrainz lookup ignores anything after '(' in title of local song or local album
