@@ -1131,7 +1131,8 @@ class Main:
                             if ( int(width) >= self.minwidth ) and ( int(height) >= self.minheight ):
                                 if(self.HDASPECTONLY == 'true'):
                                     aspect_ratio = float(width)/float(height)
-                                    if(aspect_ratio > 1.770 and aspect_ratio < 1.787):
+                                    if(aspect_ratio > 1.76 and aspect_ratio < 1.79):
+                                        log( 'aspect ration is %s. Close enough to 16:9, downloading this image' % str(aspect_ratio) )
                                         data.append(element.text)
                                 else:
                                     data.append(element.text)
