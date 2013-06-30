@@ -293,19 +293,19 @@ class Main:
             log('current artist is %s' % artist)
             self.ARTISTNUM += 1
             self.NAME = artist
-            if(self.USEOVERRIDE == 'true'):
+            if self.USEOVERRIDE == 'true':
                 log('using override directory for images')
                 self._set_property("ArtistSlideshow", self.OVERRIDEPATH)
                 if(self.ARTISTNUM == 1):
                     self._set_cachedir()
                     self._get_artistinfo()
-            elif(self.PRIORITY == '1' and not self.LOCALARTISTPATH == ''):
+            elif self.PRIORITY == '1' and not self.LOCALARTISTPATH:
                 log('looking for local artwork')
                 self._get_local_images()
                 if(not self.LocalImagesFound):
                     log('no local artist artwork found, start download')
                     self._start_download()
-            elif(self.PRIORITY == '2' and not self.LOCALARTISTPATH == ''):
+            elif self.PRIORITY == '2' and not self.LOCALARTISTPATH:
                 log('looking for local artwork')
                 self._get_local_images()
                 log('start download')
@@ -313,10 +313,10 @@ class Main:
             else:
                 log('start download')
                 self._start_download()
-                if(not (self.CachedImagesFound or self.ImageDownloaded)):
+                if not (self.CachedImagesFound or self.ImageDownloaded):
                     log('no remote artist artwork found, looking for local artwork')
                     self._get_local_images()
-        if(not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded or self.MergedImagesFound)):
+        if not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded or self.MergedImagesFound):
             if (self.USEFALLBACK == 'true'):
                 log('no images found for artist, using fallback slideshow')
                 log('fallbackdir = ' + self.FALLBACKPATH)
@@ -441,7 +441,6 @@ class Main:
 
     def _set_cachedir( self ):
         CacheName = xbmc.getCacheThumbName(self.NAME).replace('.tbn', '')
-        #CacheName = self.NAME
         self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, )).decode("utf-8")
         checkDir(self.CacheDir)
 
@@ -457,7 +456,7 @@ class Main:
         if not self.NAME:
             log('no artist name provided')
             return
-        if(self.PRIORITY == '2' and self.LocalImagesFound):
+        if self.PRIORITY == '2' and self.LocalImagesFound:
             pass
             #self.CacheDir was successfully set in _get_local_images
         else:
@@ -480,7 +479,7 @@ class Main:
         else:
             last_time = 0
             if self.ARTISTNUM == 1:
-                for cache_file in ['_artistimagesfanarttv', '_theaudiodbartistbio', 'artistimageshtbackdrops.nfo', 'artistimageslastfm.nfo']:
+                for cache_file in ['_artistimagesfanarttv.nfo', '_theaudiodbartistbio.nfo', 'artistimageshtbackdrops.nfo', 'artistimageslastfm.nfo']:
                     filename = os.path.join( self.CacheDir, cache_file.decode("utf-8") )
                     if xbmcvfs.exists( filename ):
                         if time.time() - os.path.getmtime(filename) < 1209600:
