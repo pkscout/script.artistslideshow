@@ -892,8 +892,7 @@ class Main:
             if not mbid:
                 if time.time() - os.path.getmtime(filename) < 1209600:
                     log( 'no musicbrainz ID found in musicbrainz.nfo file' )
-                    self.MBID = ''
-                    return
+                    return ''
                 else:
                     log( 'no musicbrainz ID found in musicbrainz.nfo file, trying lookup again' )
             else:
@@ -919,7 +918,6 @@ class Main:
             mbid = ''
             if self._playback_stopped_or_changed():
                 return ''
-            aliases = []
             try:
                 all_names = artist['aliases']
             except KeyError:
@@ -929,6 +927,7 @@ class Main:
                 log( e )
                 all_names = []
             if all_names:
+                aliases = []
                 for one_name in all_names:
                     aliases.append( one_name['name'].lower() )
             if artist['name'].lower() == theartist.lower() or theartist.lower() in aliases:
