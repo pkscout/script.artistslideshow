@@ -19,7 +19,7 @@
 
 
 import xbmc, xbmcaddon, os, xbmcgui, xbmcvfs
-import codecs, ntpath, random, re, sys, time, unicodedata, urllib, urllib2, urlparse, socket, shutil
+import codecs, itertools, ntpath, random, re, sys, time, unicodedata, urllib, urllib2, urlparse, socket, shutil
 from elementtree import ElementTree as xmltree
 if sys.version_info >= (2, 7):
     import json
@@ -263,7 +263,7 @@ class Main:
                 time.sleep(0.5)
                 if xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
                     if( xbmc.Player().isPlayingAudio() == True or xbmc.getInfoLabel( self.EXTERNALCALL ) != '' ):
-                        if set( self.ALLARTISTS ) <> set( self._get_current_artist() ):
+                        if set( self.ALLARTISTS ) <> set( self._get_current_artists() ):
                             self._clear_properties()
                             self.UsingFallback = False
                             self._use_correct_artwork()
@@ -284,20 +284,20 @@ class Main:
 
     def _use_correct_artwork( self ):
         self._clean_dir( self.MergeDir )
-        artists = self._get_current_artist()
-        self.ALLARTISTS = artists
+        self.ALLARTISTS = self._get_current_artists()
         self.ARTISTNUM = 0
-        self.TOTALARTISTS = len(artists)
+        self.TOTALARTISTS = len( self.ALLARTISTS )
         self.MergedImagesFound = False
-        for artist in artists:
+        for artist, mbid in self._get_current_artists_info( 'withmbid' ):
             log('current artist is %s' % artist)
             self.ARTISTNUM += 1
             self.NAME = artist
+            self.MBID = mbid
             if self.USEOVERRIDE == 'true':
                 log('using override directory for images')
                 self._set_property("ArtistSlideshow", self.OVERRIDEPATH)
                 if(self.ARTISTNUM == 1):
-                    self._set_cachedir()
+                    self._set_cachedir( self.NAME )
                     self._get_artistinfo()
             elif self.PRIORITY == '1' and not self.LOCALARTISTPATH:
                 log('looking for local artwork')
@@ -327,16 +327,19 @@ class Main:
     def _parse_argv( self ):
         try:
             params = dict( arg.split( "=" ) for arg in sys.argv[ 1 ].split( "&" ) )
+        except IndexError:
+            params = {}        
         except Exception, e:
             log( 'unexpected error while parsing arguments' )
             log( e )
             params = {}
         self.WINDOWID = params.get( "windowid", "12006")
         log( 'window id is set to %s' % self.WINDOWID )
-        self.ARTISTFIELD = params.get( "artistfield", "" )
-        log( 'artist field is set to %s' % self.ARTISTFIELD )
-        self.TITLEFIELD = params.get( "titlefield", "" )
-        log( 'title field is set to %s' % self.TITLEFIELD )
+        self.PASSEDFIELDS = {}
+        self.FIELDLIST = ['artistfield', 'titlefield', 'albumfield', 'mbidfield']
+        for item in self.FIELDLIST:
+            self.PASSEDFIELDS[item] = params.get( item, '' )
+            log( '%s is set to %s' % (item, self.PASSEDFIELDS[item]) )
         self.DAEMON = params.get( "daemon", "False" )
         if self.DAEMON == "True":
             log('daemonizing')
@@ -346,14 +349,18 @@ class Main:
         self.LASTFM = __addon__.getSetting( "lastfm" )
         try:
             self.minwidth = int(__addon__.getSetting( "minwidth" ))
+        except ValueError:
+            self.minwidth = 0        
         except Exception, e:
-            log( 'unexpected error while parsing arguments' )
+            log( 'unexpected error while parsing last.fm width setting' )
             log( e )
             self.minwidth = 0
         try:
             self.minheight = int(__addon__.getSetting( "minheight" ))
+        except ValueError:
+            self.minheight = 0        
         except Exception, e:
-            log( 'unexpected error while parsing arguments' )
+            log( 'unexpected error while parsing last.fm height setting' )
             log( e )
             self.minheight = 0
         self.HDASPECTONLY = __addon__.getSetting( "hd_aspect_only" )
@@ -376,8 +383,10 @@ class Main:
         self.RESTRICTCACHE = __addon__.getSetting( "restrict_cache" )
         try:
             self.maxcachesize = int(__addon__.getSetting( "max_cache_size" )) * 1000000
+        except ValueError:
+            self.maxcachesize = 1024 * 1000000
         except Exception, e:
-            log( 'unexpected error while parsing arguments' )
+            log( 'unexpected error while parsing maxcachesize setting' )
             log( e )
             self.maxcachesize = 1024 * 1000000
         self.NOTIFICATIONTYPE = __addon__.getSetting( "show_progress" )
@@ -395,15 +404,13 @@ class Main:
 
     def _init_vars( self ):
         self.WINDOW = xbmcgui.Window( int(self.WINDOWID) )
+        self.SKININFO = {}
         self._set_property( "ArtistSlideshow.CleanupComplete" )
-        if( self.ARTISTFIELD == '' ):
-            self.SKINARTIST = ''
-        else:
-            self.SKINARTIST = "Window(%s).Property(%s)" % ( self.WINDOWID, self.ARTISTFIELD )
-        if( self.TITLEFIELD == '' ):
-            self.SKINTITLE = ''
-        else:
-            self.SKINTITLE = "Window(%s).Property(%s)" % ( self.WINDOWID, self.TITLEFIELD )
+        for item in self.FIELDLIST:
+            if self.PASSEDFIELDS[item]:
+                self.SKININFO[item[0:-5]] = "Window(%s).Property(%s)" % ( self.WINDOWID, self.PASSEDFIELDS[item] )
+            else:
+                self.SKININFO[item[0:-5]] = ''
         self.ARTISTSLIDESHOW = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshow" )
         self.ARTISTSLIDESHOWRUNNING = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshowRunning" )
         self.EXTERNALCALL = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshow.ExternalCall" )
@@ -439,8 +446,8 @@ class Main:
         checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow' % __addonname__ ).decode("utf-8"))
         checkDir(xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode("utf-8"))
 
-    def _set_cachedir( self ):
-        CacheName = xbmc.getCacheThumbName(self.NAME).replace('.tbn', '')
+    def _set_cachedir( self, theartist ):
+        CacheName = xbmc.getCacheThumbName(theartist).replace('.tbn', '')
         self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, )).decode("utf-8")
         checkDir(self.CacheDir)
 
@@ -460,7 +467,7 @@ class Main:
             pass
             #self.CacheDir was successfully set in _get_local_images
         else:
-            self._set_cachedir()
+            self._set_cachedir( self.NAME )
         log('cachedir = %s' % self.CacheDir)
 
         files = os.listdir(self.CacheDir)
@@ -598,7 +605,7 @@ class Main:
         try:
             old_files = os.listdir( dir_path )
         except Exception, e:
-            log( 'unexpected error while parsing arguments' )
+            log( 'unexpected error while getting directory list' )
             log( e )
             old_files = []
         for old_file in old_files:
@@ -626,23 +633,34 @@ class Main:
             return self._split_artists( the_split[-1] )
         else:
             return []
-    
 
-    def _get_current_artist( self ):
+
+    def _get_current_artists( self ):
+        current_artists = []
+        for artist, mbid in self._get_current_artists_info( 'withoutmbid'):
+            current_artists.append( artist )
+        return current_artists
+
+
+    def _get_current_artists_info( self, type ):
         featured_artists = ''
         artists = []
         if( xbmc.Player().isPlayingAudio() == True ):
-            response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist"]},"id":1}' )
+            response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "musicbrainzartistid"]},"id":1}' )
             try:
-                artists = json.loads(response)['result']['item']['artist']
+                artist_names = json.loads(response)['result']['item']['artist']
             except KeyError:
-                artists = []
+                artist_names = []
+            try:
+                mbids = json.loads(response)['result']['item']['muiscbrainzartistid']
+            except (IndexError, KeyError, ValueError):
+                mbids = []
             except Exception, e:
                 log( 'unexpected error getting JSON back from XBMC' )
                 log( e )
-                artists = []
-            if not artists:
-                log( 'No artist name returned from JSON call, assuming this is an internet stream' )
+                mbids = []
+            if not artist_names:
+                log( 'No artist names returned from JSON call, assuming this is an internet stream' )
                 try:
                     playing_song = xbmc.Player().getMusicInfoTag().getTitle()
                     playingartist = playing_song[0:(playing_song.find('-'))-1]
@@ -652,7 +670,7 @@ class Main:
                     log( 'unexpected error gettting playing song back from XBMC' )
                     log( e )
                     playingartist = ''
-                artists = self._split_artists( playingartist )
+                artist_names = self._split_artists( playingartist )
             try:
                 featured_artists = self._get_featured_artists( xbmc.Player().getMusicInfoTag().getTitle() )
             except RuntimeError:
@@ -661,18 +679,25 @@ class Main:
                 log( 'unexpected error getting playing sone back from XBMC' )
                 log( e )
                 featured_artists = []
-        elif( not xbmc.getInfoLabel( self.SKINARTIST ) == '' ):
-            response = xbmc.getInfoLabel( self.SKINARTIST )
-            artists = self._split_artists( response )
-            featured_artists = self._get_featured_artists( xbmc.getInfoLabel( self.SKINTITLE ) )
+        elif xbmc.getInfoLabel( self.SKININFO['artist'] ):
+            artist_names = self._split_artists( xbmc.getInfoLabel(self.SKININFO['artist']) )
+            mbids = xbmc.getInfoLabel( self.SKININFO['mbid'] ).split( ',' )
+            featured_artists = self._get_featured_artists( xbmc.getInfoLabel( self.SKININFO['title'] ) )
         if featured_artists:
             for one_artist in featured_artists:
-                artists.append( one_artist.strip(' ()') )
+                artist_names.append( one_artist.strip(' ()') )            
+        for artist_name, mbid in itertools.izip_longest( artist_names, mbids, fillvalue='' ):
+            if artist_name:
+                if not mbid and type == 'withmbid':
+                    mbid = self._get_musicbrainz_id( artist_name )
+                else:
+                    mbid = ''
+                artists.append( (artist_name, mbid) )
         return artists
 
 
     def _playback_stopped_or_changed( self ):
-        if ( set(self.ALLARTISTS) <> set(self._get_current_artist()) or self.EXTERNALCALLSTATUS != xbmc.getInfoLabel(self.EXTERNALCALL) ):
+        if set( self.ALLARTISTS ) <> set( self._get_current_artists() ) or self.EXTERNALCALLSTATUS != xbmc.getInfoLabel( self.EXTERNALCALL ):
             self.MBID = ''
             return True
         else:
@@ -756,16 +781,12 @@ class Main:
             self.url = self.LastfmURL + '&method=artist.getImages&artist=' + urllib.quote_plus( smartUTF8(self.NAME) )
             log( 'asking for images from: %s' %self.url )
         elif site == 'fanarttv':
-            self._get_musicbrainz_id()
-            log( 'the returned mbid was ' + self.MBID )
             if self.MBID:
                 self.url = self.fanarttvURL + self.MBID + self.fanarttvOPTIONS
                 log( 'asking for images from: %s' %self.url )
             else:
                 return []
         elif site == 'theaudiodb':
-            self._get_musicbrainz_id()
-            log( 'the returned mbid was ' + self.MBID )
             if self.MBID:
                 self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + self.MBID
                 log( 'asking for images from: %s' %self.url )
@@ -861,30 +882,10 @@ class Main:
         return False
 
 
-    def _get_musicbrainz_id ( self ):
-        if self.MBID:
-            return
-        theartist = self.NAME
+    def _get_musicbrainz_id ( self, theartist ):
         mbid = ''
-        log( 'Looking for musicbrainz ID in the XBMC JSON response' )
-        response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["musicbrainzartistid"]},"id":1}' )
-        try:
-            mbid = json.loads(response)['result']['item']['muiscbrainzartistid']
-        except (IndexError, KeyError, ValueError):
-            mbid = ''
-        except Exception, e:
-            log( 'unexpected error getting JSON data from XBMC response' )
-            log( e )
-            mbid = ''
-        if not mbid:
-            log( 'no musicbrainz ID found in XBMC JSON response' )
-        else:
-            log( 'musicbrainz ID found in XBMC JSON response' )
-            self.MBID = mbid
-            return
-        if self._playback_stopped_or_changed():
-            return
         log( 'Looking for musicbrainz ID in the musicbrainz.nfo file' )
+        self._set_cachedir( theartist )
         filename = os.path.join( self.CacheDir, '_musicbrainz.nfo' )
         if xbmcvfs.exists( filename ):
             mbid = readFile( filename )
@@ -897,13 +898,12 @@ class Main:
                     log( 'no musicbrainz ID found in musicbrainz.nfo file, trying lookup again' )
             else:
                 log( 'musicbrainz ID found in musicbrainz.nfo file' )
-                self.MBID = mbid
-                return
+                return mbid
         else:
             log( 'no musicbrainz.nfo file found' )
         if self._playback_stopped_or_changed():
             writeFile( '', filename )
-            return
+            return ''
         log( 'querying musicbrainz.com for musicbrainz ID. This is about to get messy.' )
         badSubstrings = ["the ", "The ", "THE ", "a ", "A ", "an ", "An ", "AN "]
         searchartist = theartist
@@ -937,11 +937,11 @@ class Main:
                 try:
                     playing_album = xbmc.Player().getMusicInfoTag().getAlbum()
                 except RuntimeError:
-                    playing_album = ''
+                    #if nothing is playing, assume the information was passed by another add-on
+                    playing_album = xbmc.getInfoLabel( self.SKININFO['album'] )
                 except Exception, e:
                     log( 'unexpected error getting album name from XBMC' )
                     log( e )
-                    playing_album = ''
                 if playing_album:
                     log( 'checking album name against releases in musicbrainz' )
                     query_times = {'last':query_times['current'], 'current':time.time()}
@@ -950,15 +950,15 @@ class Main:
                     try:
                         playing_song = xbmc.Player().getMusicInfoTag().getTitle()
                     except RuntimeError:
-                        playing_song = ''
+                        playing_song = xbmc.getInfoLabel( self.SKININFO['title'] )
                     except Exception, e:
                         log( 'unexpected error getting song name from XBMC' )
                         log( e )
                         playing_song = ''
-                    if theartist == playing_song[0:(playing_song.find('-'))-1]:
-                        playing_song = playing_song[(playing_song.find('-'))+2:]
                     if playing_song:
                         log( 'checking song name against recordings in musicbrainz' )
+                        if theartist == playing_song[0:(playing_song.find('-'))-1]:
+                            playing_song = playing_song[(playing_song.find('-'))+2:]
                         query_times = {'last':query_times['current'], 'current':time.time()}
                         cached_mb_info = self._parse_musicbrainz_info( 'recording', mbid, playing_song, query_times )
                         if not cached_mb_info:
@@ -975,16 +975,13 @@ class Main:
             mbid = ''
             log( 'No musicbrainz ID found for %s. writing empty cache file.' % theartist )
         writeFile( mbid, filename )
-        self.MBID = mbid
-        return
+        return mbid
 
                                 
     def _get_artistinfo( self ):
         log( 'checking for local artist bio data' )
         bio = self._get_local_data( 'bio' )
         if bio == []:
-            self._get_musicbrainz_id()
-            log( 'the returned mbid was ' + self.MBID )
             if self.MBID:
                 self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + self.MBID
                 log( 'trying to get artist bio from ' + self.url )
