@@ -288,8 +288,11 @@ class Main:
         self.ARTISTNUM = 0
         self.TOTALARTISTS = len( self.ALLARTISTS )
         self.MergedImagesFound = False
-        for artist, mbid in self._get_current_artists_info( 'withmbid' ):
-            log('current artist is %s' % artist)
+        all_artists_info = self._get_current_artists_info( 'withmbid' )
+        for artist, mbid in all_artists_info:
+            log( 'using artist %s with mbid of %s' % (artist, mbid) )
+        for artist, mbid in all_artists_info:
+            log( 'current artist is %s with a mbid of %s' % (artist, mbid) )
             self.ARTISTNUM += 1
             self.NAME = artist
             self.MBID = mbid
@@ -644,12 +647,18 @@ class Main:
 
     def _get_current_artists_info( self, type ):
         featured_artists = ''
-        artists = []
+        artist_names = []
+        artists_info = []
+        mbids = []
         if( xbmc.Player().isPlayingAudio() == True ):
             response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "musicbrainzartistid"]},"id":1}' )
             try:
                 artist_names = json.loads(response)['result']['item']['artist']
-            except KeyError:
+            except (IndexError, KeyError, ValueError):
+                artist_names = []
+            except Exception, e:
+                log( 'unexpected error getting JSON back from XBMC' )
+                log( e )
                 artist_names = []
             try:
                 mbids = json.loads(response)['result']['item']['muiscbrainzartistid']
@@ -659,30 +668,32 @@ class Main:
                 log( 'unexpected error getting JSON back from XBMC' )
                 log( e )
                 mbids = []
+            try:
+                playing_song = xbmc.Player().getMusicInfoTag().getTitle()
+            except RuntimeError:
+                playing_song = ''
+            except Exception, e:
+                log( 'unexpected error gettting playing song back from XBMC' )
+                log( e )
+                playing_song = ''
             if not artist_names:
                 log( 'No artist names returned from JSON call, assuming this is an internet stream' )
                 try:
-                    playing_song = xbmc.Player().getMusicInfoTag().getTitle()
                     playingartist = playing_song[0:(playing_song.find('-'))-1]
                 except RuntimeError:
                     playingartist = ''
+                    playing_song = ''
                 except Exception, e:
                     log( 'unexpected error gettting playing song back from XBMC' )
                     log( e )
                     playingartist = ''
+                    playing_song = ''
                 artist_names = self._split_artists( playingartist )
-            try:
-                featured_artists = self._get_featured_artists( xbmc.Player().getMusicInfoTag().getTitle() )
-            except RuntimeError:
-                featured_artists = []
-            except Exception, e:
-                log( 'unexpected error getting playing sone back from XBMC' )
-                log( e )
-                featured_artists = []
+            featured_artists = self._get_featured_artists( playing_song )
         elif xbmc.getInfoLabel( self.SKININFO['artist'] ):
             artist_names = self._split_artists( xbmc.getInfoLabel(self.SKININFO['artist']) )
             mbids = xbmc.getInfoLabel( self.SKININFO['mbid'] ).split( ',' )
-            featured_artists = self._get_featured_artists( xbmc.getInfoLabel( self.SKININFO['title'] ) )
+            featured_artists = self._get_featured_artists( xbmc.getInfoLabel(self.SKININFO['title']) )
         if featured_artists:
             for one_artist in featured_artists:
                 artist_names.append( one_artist.strip(' ()') )            
@@ -692,8 +703,8 @@ class Main:
                     mbid = self._get_musicbrainz_id( artist_name )
                 else:
                     mbid = ''
-                artists.append( (artist_name, mbid) )
-        return artists
+                artists_info.append( (artist_name, mbid) )
+        return artists_info
 
 
     def _playback_stopped_or_changed( self ):
@@ -926,8 +937,8 @@ class Main:
                 log( 'unexpected error getting JSON data from XBMC response' )
                 log( e )
                 all_names = []
+            aliases = []
             if all_names:
-                aliases = []
                 for one_name in all_names:
                     aliases.append( one_name['name'].lower() )
             if artist['name'].lower() == theartist.lower() or theartist.lower() in aliases:
