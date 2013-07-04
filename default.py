@@ -299,13 +299,13 @@ class Main:
                 if(self.ARTISTNUM == 1):
                     self._set_cachedir( self.NAME )
                     self._get_artistinfo()
-            elif self.PRIORITY == '1' and not self.LOCALARTISTPATH:
+            elif self.PRIORITY == '1' and self.LOCALARTISTPATH:
                 log('looking for local artwork')
                 self._get_local_images()
                 if(not self.LocalImagesFound):
                     log('no local artist artwork found, start download')
                     self._start_download()
-            elif self.PRIORITY == '2' and not self.LOCALARTISTPATH:
+            elif self.PRIORITY == '2' and self.LOCALARTISTPATH:
                 log('looking for local artwork')
                 self._get_local_images()
                 log('start download')
