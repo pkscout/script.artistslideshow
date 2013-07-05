@@ -3,6 +3,7 @@ v.1.5.3.009
 - musicbrainz lookup now validates artist based on releases, recordings, then works
 - updated musicbrainz search to better deal with featured artists
 - updated musicbrainz search to work with add-ons that call AS remotely
+- fixed bug where cached images wouldn't be merged for featured artists
 
 v.1.5.3.008
 - fixed for error regression in removing beginning articles from artist name for search

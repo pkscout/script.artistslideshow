@@ -810,6 +810,37 @@ class Main:
         return images
 
 
+    def _get_playing_item( self, item ):
+        got_item = False
+        playing_item = ''
+        max_trys = 3
+        num_trys = 1
+        while not got_item:
+            try:
+                if item == 'album':
+                    playing_item = xbmc.Player().getMusicInfoTag().getAlbum()
+                elif item == 'title':
+                    playing_item = xbmc.Player().getMusicInfoTag().getTitle()                
+                got_item = True
+            except RuntimeError:
+                got_title = False
+            except Exception, e:
+                got_title = False
+                log( 'unexpected error getting %s from XBMC' % item )
+                log( e )
+            if num_trys > max_trys:
+                break
+            else:
+                num_trys = num_trys + 1
+                self._wait(1)
+                if self._playback_stopped_or_changed():
+                    break
+        #if nothing is playing, assume the information was passed by another add-on
+        if not playing_item:
+            playing_item = xbmc.getInfoLabel( self.SKININFO[item] )
+        return playing_item
+
+
     def _get_musicbrainz_info( self, mboptions, mbsearch, type, query_times ):
         mbbase = 'http://www.musicbrainz.org/ws/2/'
         theartist = self.NAME
@@ -882,8 +913,8 @@ class Main:
         mboptions = type + '?artist=' + mbid + '&limit=100&fmt=json'
         for thing in self._get_musicbrainz_info( mboptions, '', type + 's', query_times ):
             title = smartUTF8( thing['title'] )
-            if playing_thing.find('(') > 0:
-                playing_title = smartUTF8( playing_thing[:playing_thing.find('(')-2] )
+            if playing_thing.rfind('(') > 0:
+                playing_title = smartUTF8( playing_thing[:playing_thing.rfind('(')-2] )
             else:
                 playing_title = smartUTF8( playing_thing )
             log( 'comparing musicbrainz %s: %s with local %s: %s' % (type, title, type, playing_title) )
@@ -894,6 +925,7 @@ class Main:
 
 
     def _get_musicbrainz_id ( self, theartist ):
+        log( 'Looking for a musicbrainz ID for artist ' + theartist )
         mbid = ''
         log( 'Looking for musicbrainz ID in the musicbrainz.nfo file' )
         self._set_cachedir( theartist )
@@ -944,27 +976,13 @@ class Main:
             if artist['name'].lower() == theartist.lower() or theartist.lower() in aliases:
                 mbid = artist['id']
                 log( 'found a potential musicbrainz ID of %s for %s' % (mbid, theartist) )
-                try:
-                    playing_album = xbmc.Player().getMusicInfoTag().getAlbum()
-                except RuntimeError:
-                    #if nothing is playing, assume the information was passed by another add-on
-                    playing_album = xbmc.getInfoLabel( self.SKININFO['album'] )
-                except Exception, e:
-                    log( 'unexpected error getting album name from XBMC' )
-                    log( e )
+                playing_album = self._get_playing_item( 'album' )
                 if playing_album:
                     log( 'checking album name against releases in musicbrainz' )
                     query_times = {'last':query_times['current'], 'current':time.time()}
                     cached_mb_info = self._parse_musicbrainz_info( 'release', mbid, playing_album, query_times )
                 if not cached_mb_info:
-                    try:
-                        playing_song = xbmc.Player().getMusicInfoTag().getTitle()
-                    except RuntimeError:
-                        playing_song = xbmc.getInfoLabel( self.SKININFO['title'] )
-                    except Exception, e:
-                        log( 'unexpected error getting song name from XBMC' )
-                        log( e )
-                        playing_song = ''
+                    playing_song = self._get_playing_item( 'title' )
                     if playing_song:
                         log( 'checking song name against recordings in musicbrainz' )
                         if theartist == playing_song[0:(playing_song.find('-'))-1]:
