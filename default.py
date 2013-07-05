@@ -283,7 +283,6 @@ class Main:
 
 
     def _use_correct_artwork( self ):
-        self._clean_dir( self.MergeDir )
         self.ALLARTISTS = self._get_current_artists()
         self.ARTISTNUM = 0
         self.TOTALARTISTS = len( self.ALLARTISTS )
@@ -319,6 +318,8 @@ class Main:
                 if not (self.CachedImagesFound or self.ImageDownloaded):
                     log('no remote artist artwork found, looking for local artwork')
                     self._get_local_images()
+            self.LASTARTISTREFRESH = time.time()
+            log( 'Last artist refresh time is ' + str(self.LASTARTISTREFRESH) )
         if not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded or self.MergedImagesFound):
             if (self.USEFALLBACK == 'true'):
                 log('no images found for artist, using fallback slideshow')
@@ -427,7 +428,8 @@ class Main:
         self.ImageDownloaded = False
         self.DownloadedAllImages = False
         self.UsingFallback = False
-        self.BlankDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode("utf-8")
+        self.MINREFRESH = 9.9
+        self.TransitionDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode("utf-8")
         self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % __addonname__ ).decode("utf-8")
         self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode("utf-8")
         LastfmApiKey = 'afe7e856e4f4089fc90f841980ea1ada'
@@ -462,7 +464,6 @@ class Main:
         self.ImageDownloaded = False
         self.FirstImage = True
         cached_image_info = False
-        min_refresh = 9.9
         if not self.NAME:
             log('no artist name provided')
             return
@@ -514,7 +515,7 @@ class Main:
         sourcelist.append( ['lastfm', self.LASTFM] )
         sourcelist.append( ['fanarttv', self.FANARTTV] )
         sourcelist.append( ['theaudiodb', self.THEAUDIODB] )
-        sourcelist.append( ['htbackdrops', self.HTBACKDROPS] )
+#        sourcelist.append( ['htbackdrops', self.HTBACKDROPS] )
         imagelist = []
         for source in sourcelist:
             log( ' checking the source %s with a value of %s.' % (source[0], source[1]) )
@@ -523,11 +524,9 @@ class Main:
         log('downloading images')
         for url in imagelist:
             if( self._playback_stopped_or_changed() ):
-                self._set_property("ArtistSlideshow", self.CacheDir)
-                self._clean_dir( self.BlankDir )
                 return
             path = getCacheThumbName(url, self.CacheDir)
-            path2 = getCacheThumbName(url, self.BlankDir)
+            path2 = getCacheThumbName(url, self.TransitionDir)
             if not xbmcvfs.exists(path):
                 if download(url, path, path2):
                     log('downloaded %s to %s' % (url, path) )
@@ -537,16 +536,16 @@ class Main:
             if self.ImageDownloaded:
                 if( self._playback_stopped_or_changed() and self.ARTISTNUM == 1 ):
                     self._set_property("ArtistSlideshow", self.CacheDir)
-                    self._clean_dir( self.BlankDir )
+                    self._clean_dir( self.TransitionDir )
                     return
                 if not self.CachedImagesFound:
                     self.CachedImagesFound = True
                     if self.ARTISTINFO == "true" and self.ARTISTNUM == 1:
                         self._get_artistinfo()
                 wait_elapsed = time.time() - last_time
-                if( wait_elapsed > min_refresh ):
+                if( wait_elapsed > self.MINREFRESH ):
                     if( not (self.FirstImage and not self.CachedImagesFound) ):
-                        self._wait( min_refresh - (wait_elapsed % min_refresh) )
+                        self._wait( self.MINREFRESH - (wait_elapsed % self.MINREFRESH) )
                     if( not self._playback_stopped_or_changed() and self.ARTISTNUM == 1 ):
                         self._refresh_image_directory()
                     last_time = time.time()
@@ -557,12 +556,12 @@ class Main:
             self.DownloadedAllImages = True
             if( self._playback_stopped_or_changed() ):
                 self._set_property("ArtistSlideshow", self.CacheDir)
-                self._clean_dir( self.BlankDir )
+                self._clean_dir( self.TransitionDir )
                 return
             log( 'cleaning up from refreshing slideshow' )
             wait_elapsed = time.time() - last_time
-            if( wait_elapsed < min_refresh ):
-                self._wait( min_refresh - wait_elapsed )
+            if( wait_elapsed < self.MINREFRESH ):
+                self._wait( self.MINREFRESH - wait_elapsed )
             if( not self._playback_stopped_or_changed() ):
                 if self.ARTISTNUM == 1:
                     self._refresh_image_directory()
@@ -571,11 +570,11 @@ class Main:
                         xbmc.executebuiltin(command)
                 if self.TOTALARTISTS > 1:
                     self._merge_images()
-            if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode("utf-8") == self.BlankDir and self.ARTISTNUM == 1):
-                self._wait( min_refresh )
+            if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode("utf-8") == self.TransitionDir and self.ARTISTNUM == 1):
+                self._wait( self.MINREFRESH )
                 if( not self._playback_stopped_or_changed() ):
                     self._refresh_image_directory()
-            self._clean_dir( self.BlankDir )
+            self._clean_dir( self.TransitionDir )
 
         if not self.ImageDownloaded:
             log('no images downloaded')
@@ -589,8 +588,8 @@ class Main:
                         xbmc.executebuiltin(command)
                     if( self.ARTISTINFO == "true" and not self._playback_stopped_or_changed() ):
                         self._get_artistinfo()
-        elif self.TOTALARTISTS > 1:
-            self._merge_images()
+            elif self.TOTALARTISTS > 1:
+                self._merge_images()
 
 
     def _wait( self, wait_time ):
@@ -618,12 +617,12 @@ class Main:
 
 
     def _refresh_image_directory( self ):
-        if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode("utf-8") == self.BlankDir):
+        if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode("utf-8") == self.TransitionDir):
             self._set_property("ArtistSlideshow", self.CacheDir)
             log( 'switching slideshow to ' + self.CacheDir )
         else:
-            self._set_property("ArtistSlideshow", self.BlankDir)
-            log( 'switching slideshow to ' + self.BlankDir )
+            self._set_property("ArtistSlideshow", self.TransitionDir)
+            log( 'switching slideshow to ' + self.TransitionDir )
 
 
     def _split_artists( self, response):
@@ -709,7 +708,7 @@ class Main:
 
     def _playback_stopped_or_changed( self ):
         if set( self.ALLARTISTS ) <> set( self._get_current_artists() ) or self.EXTERNALCALLSTATUS != xbmc.getInfoLabel( self.EXTERNALCALL ):
-            self.MBID = ''
+            self._clear_properties()
             return True
         else:
             return False
@@ -744,14 +743,22 @@ class Main:
 
 
     def _merge_images( self ):
+        log( 'merging files from primary directory %s into merge directory %s' % (self.CacheDir, self.MergeDir) )
         self.MergedImagesFound = True
         files = os.listdir(self.CacheDir)
         for file in files:
             if(file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')):
                 xbmcvfs.copy(os.path.join(self.CacheDir, file), os.path.join(self.MergeDir, file))
         if self.ARTISTNUM == self.TOTALARTISTS:
-            self._wait( 9.8 )
-            self._set_property("ArtistSlideshow", self.MergeDir)
+            wait_elapsed = time.time() - self.LASTARTISTREFRESH
+            log( 'elapsed wait time is ' + str(wait_elapsed) )
+            if( wait_elapsed > self.MINREFRESH ):
+                self._wait( self.MINREFRESH - (wait_elapsed % self.MINREFRESH) )
+            else:
+                self._wait( self.MINREFRESH - 1.2 - wait_elapsed )
+            if not self._playback_stopped_or_changed():
+                log( 'switching slideshow to merge directory' )
+                self._set_property("ArtistSlideshow", self.MergeDir)
 
 
     def _trim_cache( self ):
@@ -1261,6 +1268,7 @@ class Main:
         self.MBID = ''
         self._set_property( "ArtistSlideshow", self.InitDir )
         self._clean_dir( self.MergeDir )
+        self._clean_dir( self.TransitionDir )
         self._set_property( "ArtistSlideshow.ArtistBiography" )
         for count in range( 50 ):
             self._set_property( "ArtistSlideshow.%d.SimilarName" % ( count + 1 ) )
