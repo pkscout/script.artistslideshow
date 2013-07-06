@@ -1133,7 +1133,7 @@ class Main:
                         try:
                             json_data = dict(map(lambda (key, value): ('artistImages', value), json_data.items()))
                         except AttributeError:
-                            return_data
+                            return data
                         except Exception, e:
                             log( 'unexpected error fixing fanart.tv JSON data' )
                             log( e )
