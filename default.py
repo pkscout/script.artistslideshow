@@ -13,7 +13,6 @@
 # *  see resource/musicbrainzngs/copying for copyright and use restrictions
 # *  
 # *  Last.fm:      http://www.last.fm/
-# *  htbackdrops:  http://www.htbackdrops.com/ (depreciated)
 # *  fanart.tv:    http://www.fanart.tv
 # *  theaudiodb:   http://www.theaudiodb.com
 
@@ -287,10 +286,6 @@ class Main:
         self.ARTISTNUM = 0
         self.TOTALARTISTS = len( self.ALLARTISTS )
         self.MergedImagesFound = False
-        all_artists_info = self._get_current_artists_info( 'withmbid' )
-        for artist, mbid in all_artists_info:
-            log( 'using artist %s with mbid of %s' % (artist, mbid) )
-        for artist, mbid in all_artists_info:
             log( 'current artist is %s with a mbid of %s' % (artist, mbid) )
             self.ARTISTNUM += 1
             self.NAME = artist
@@ -299,7 +294,6 @@ class Main:
                 log('using override directory for images')
                 self._set_property("ArtistSlideshow", self.OVERRIDEPATH)
                 if(self.ARTISTNUM == 1):
-                    self._set_cachedir( self.NAME )
                     self._get_artistinfo()
             elif self.PRIORITY == '1' and self.LOCALARTISTPATH:
                 log('looking for local artwork')
@@ -370,7 +364,6 @@ class Main:
         self.HDASPECTONLY = __addon__.getSetting( "hd_aspect_only" )
         self.FANARTTV = __addon__.getSetting( "fanarttv" )
         self.THEAUDIODB = __addon__.getSetting( "theaudiodb" )
-        self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
         self.ARTISTINFO = __addon__.getSetting( "artistinfo" )
         self.LANGUAGE = __addon__.getSetting( "language" )
         for language in LANGUAGES:
@@ -433,12 +426,9 @@ class Main:
         self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % __addonname__ ).decode("utf-8")
         self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode("utf-8")
         LastfmApiKey = 'afe7e856e4f4089fc90f841980ea1ada'
-        HtbackdropsApiKey = '96d681ea0dcb07ad9d27a347e64b652a'
         fanarttvApiKey = '7a93c84fe1c9999e6f0fec206a66b0f5'
         theaudiodbApiKey = '193621276b2d731671156g'
         self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/?autocorrect=1&api_key=' + LastfmApiKey
-        self.HtbackdropsQueryURL = 'http://htbackdrops.com/api/' + HtbackdropsApiKey + '/searchXML?default_operator=and&fields=title&aid=1'
-        self.HtbackdropsDownloadURL = 'http://htbackdrops.com/api/' + HtbackdropsApiKey + '/download/'
         self.fanarttvURL = 'http://api.fanart.tv/webservice/artist/%s/' % fanarttvApiKey
         self.fanarttvOPTIONS = '/json/artistbackground/'
         self.theaudiodbURL = 'http://www.theaudiodb.com/api/v1/json/%s/' % theaudiodbApiKey
@@ -515,7 +505,6 @@ class Main:
         sourcelist.append( ['lastfm', self.LASTFM] )
         sourcelist.append( ['fanarttv', self.FANARTTV] )
         sourcelist.append( ['theaudiodb', self.THEAUDIODB] )
-#        sourcelist.append( ['htbackdrops', self.HTBACKDROPS] )
         imagelist = []
         for source in sourcelist:
             log( ' checking the source %s with a value of %s.' % (source[0], source[1]) )
@@ -779,7 +768,7 @@ class Main:
                     cache_size = cache_size + self._get_folder_size( cache_root + folder )
                     log( 'looking at folder %s cache size is now %s' % (folder, cache_size) )
                     if( cache_size > self.maxcachesize and not first_folder ):
-                        self._clean_dir( cache_root + folder )
+                        self._clean_dir( os.path.join(cache_root, folder) )
                         log( 'deleted files in folder %s' % folder )
                     first_folder = False
                 self.LastCacheTrim = now
@@ -810,9 +799,6 @@ class Main:
                 log( 'asking for images from: %s' %self.url )
             else:
                 return []
-        elif site == "htbackdrops":
-            self.url = self.HtbackdropsQueryURL + '&keywords=' + self.NAME.replace('&','%26').replace(' ', '+') + '&dmin_w=' + str( self.minwidth ) + '&dmin_h=' + str( self.minheight )
-            log( 'asking for images from: %s' %self.url )
         images = self._get_data(site, 'images')
         return images
 
@@ -1186,10 +1172,6 @@ class Main:
                             data.append(element.text)
                     if element.tag == 'idArtist' and not xbmcvfs.exists( id_filename ):
                         writeFile( element.text, id_filename )
-            elif site == "htbackdrops":
-                for element in xmldata.getiterator():
-                    if element.tag == "id":
-                        data.append(self.HtbackdropsDownloadURL + str( element.text ) + '/fullsize')
         elif item == "bio":
             if site == "theaudiodb":
                 for element in xmldata.getiterator():
