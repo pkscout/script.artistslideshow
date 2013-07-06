@@ -1,3 +1,8 @@
+v.1.5.3.010
+- stripped out all htbackdrops.com code
+- set new location for .nfo files separate from image files
+- added migration code to move old .nfo files to new locations and names
+
 v.1.5.3.009
 - widened tolerance on 16:9 proportion check from last.fm
 - musicbrainz lookup now validates artist based on releases, recordings, then works

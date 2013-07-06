@@ -244,6 +244,7 @@ class Main:
         self._get_settings()
         self._init_vars()
         self._make_dirs()
+        self._migrate()
         if xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
             log('script already running')
         else:
@@ -286,10 +287,12 @@ class Main:
         self.ARTISTNUM = 0
         self.TOTALARTISTS = len( self.ALLARTISTS )
         self.MergedImagesFound = False
+        for artist, mbid in self._get_current_artists_info( 'withmbid' ):
             log( 'current artist is %s with a mbid of %s' % (artist, mbid) )
             self.ARTISTNUM += 1
             self.NAME = artist
             self.MBID = mbid
+            self._set_infodir( self.NAME )
             if self.USEOVERRIDE == 'true':
                 log('using override directory for images')
                 self._set_property("ArtistSlideshow", self.OVERRIDEPATH)
@@ -434,6 +437,55 @@ class Main:
         self.theaudiodbURL = 'http://www.theaudiodb.com/api/v1/json/%s/' % theaudiodbApiKey
         self.theaudiodbARTISTURL = 'artist-mb.php?i='
         self.theaudiodbALBUMURL = 'album.php?i='
+
+
+    def _move_info_files( self, old_loc, new_loc, type ):
+        log( 'attempting to move from %s to %s' % (old_loc, new_loc) )
+        os.chdir( old_loc.decode("utf-8") )
+        for folder in os.listdir( old_loc.decode("utf-8") ):
+            if type == 'cache':
+                old_folder = os.path.join( old_loc.decode("utf-8"), folder.decode("utf-8") )
+                new_folder = os.path.join( new_loc.decode("utf-8"), folder.decode("utf-8") )
+            elif type == 'local':
+                old_folder = os.path.join( old_loc.decode("utf-8"), folder.decode("utf-8"), self.FANARTFOLDER.decode("utf-8") )
+                new_folder = os.path.join( new_loc.decode("utf-8"), xbmc.getCacheThumbName(folder).replace('.tbn', '').decode("utf-8") )
+            try:
+                old_files = os.listdir( old_folder )
+            except Exception, e:
+                log( 'unexpected error while getting directory list' )
+                log( e )
+                old_files = []
+            exclude_path = os.path.join( old_folder.decode("utf-8"), '_exclusions.nfo' )
+            if old_files and type == 'cache' and not xbmcvfs.exists(exclude_path):
+                writeFile( '', exclude_path )
+            for old_file in old_files:
+                if old_file.endswith( '.nfo' ) and not old_file == '_exclusions.nfo':
+                    checkDir( new_folder )
+                    new_file = old_file.strip('_')
+                    if new_file == 'artistimagesfanarttv.nfo':
+                        new_file = 'fanarttvartistimages.nfo'
+                    elif new_file == 'artistimageslastfm.nfo':
+                        new_file = 'lastfmartistimages.nfo'
+                    elif new_file == 'artistbio.nfo':
+                        new_file = 'lastfmartistbio.nfo'
+                    elif new_file == 'artistsalbums.nfo':
+                        new_file = 'lastfmartistalbums.nfo'
+                    elif new_file == 'artistsimilar.nfo':
+                        new_file = 'lastfmartistsimilar.nfo'
+                    xbmcvfs.rename( os.path.join(old_folder, old_file), os.path.join(new_folder, new_file) )
+                    log( 'moving %s to %s' % (old_file, os.path.join(new_folder, new_file)) )
+
+
+    def _migrate( self ):
+        #this is a one time process to move and rename all the .nfo files to the new location
+        root_path = xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ).decode("utf-8")
+        new_loc = os.path.join( root_path, 'ArtistInformation' )
+        check_file = os.path.join( root_path, 'migrationcheck.nfo' )
+        if not readFile( check_file ):
+            self._move_info_files( os.path.join(root_path, 'ArtistSlideshow'), new_loc, 'cache' )
+            if self.LOCALARTISTPATH:
+                self._move_info_files( self.LOCALARTISTPATH, new_loc, 'local' )
+            writeFile( '1.5.4', check_file )
 
     def _make_dirs( self ):
         checkDir(xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ).decode("utf-8"))
