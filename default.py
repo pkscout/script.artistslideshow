@@ -213,10 +213,10 @@ def writeFile( data, filename ):
         thefile.write( data )
         thefile.close()
     except IOError:
-        log( 'unable to write data to %s from %s' % (filename, url) )
+        log( 'unable to write data to ' + filename )
         return False
     except Exception, e:
-        log( 'unknown error while writing data to %s from %s' % (filename, url) )
+        log( 'unknown error while writing data to ' + filename, url )
         log( e )
         return False
     return True
