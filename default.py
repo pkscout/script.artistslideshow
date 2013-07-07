@@ -315,8 +315,6 @@ class Main:
                 if not (self.CachedImagesFound or self.ImageDownloaded):
                     log('no remote artist artwork found, looking for local artwork')
                     self._get_local_images()
-            self.LASTARTISTREFRESH = time.time()
-            log( 'Last artist refresh time is ' + str(self.LASTARTISTREFRESH) )
         if not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded or self.MergedImagesFound):
             if (self.USEFALLBACK == 'true'):
                 log('no images found for artist, using fallback slideshow')
@@ -531,13 +529,13 @@ class Main:
         if self.CachedImagesFound:
             log('cached images found')
             cached_image_info = True
-            last_time = time.time()
+            self.LASTARTISTREFRESH = time.time()
             if self.ARTISTNUM == 1:
                 self._set_property("ArtistSlideshow", self.CacheDir)
                 if self.ARTISTINFO == "true":
                     self._get_artistinfo()
         else:
-            last_time = 0
+            self.LASTARTISTREFRESH = 0
             if self.ARTISTNUM == 1:
                 for cache_file in ['fanarttvartistimages.nfo', 'theaudiodbartistbio.nfo', 'lastfmartistimages.nfo']:
                     filename = os.path.join( self.InfoDir, cache_file.decode("utf-8") )
@@ -584,19 +582,19 @@ class Main:
             if self.ImageDownloaded:
                 if( self._playback_stopped_or_changed() and self.ARTISTNUM == 1 ):
                     self._set_property("ArtistSlideshow", self.CacheDir)
+                    self.LASTARTISTREFRESH = time.time()
                     self._clean_dir( self.TransitionDir )
                     return
                 if not self.CachedImagesFound:
                     self.CachedImagesFound = True
                     if self.ARTISTINFO == "true" and self.ARTISTNUM == 1:
                         self._get_artistinfo()
-                wait_elapsed = time.time() - last_time
+                wait_elapsed = time.time() - self.LASTARTISTREFRESH
                 if( wait_elapsed > self.MINREFRESH ):
                     if( not (self.FirstImage and not self.CachedImagesFound) ):
                         self._wait( self.MINREFRESH - (wait_elapsed % self.MINREFRESH) )
                     if( not self._playback_stopped_or_changed() and self.ARTISTNUM == 1 ):
                         self._refresh_image_directory()
-                    last_time = time.time()
                 self.FirstImage = False
 
         if self.ImageDownloaded:
@@ -604,10 +602,11 @@ class Main:
             self.DownloadedAllImages = True
             if( self._playback_stopped_or_changed() ):
                 self._set_property("ArtistSlideshow", self.CacheDir)
+                self.LASTARTISTREFRESH = time.time()
                 self._clean_dir( self.TransitionDir )
                 return
             log( 'cleaning up from refreshing slideshow' )
-            wait_elapsed = time.time() - last_time
+            wait_elapsed = time.time() - self.LASTARTISTREFRESH
             if( wait_elapsed < self.MINREFRESH ):
                 self._wait( self.MINREFRESH - wait_elapsed )
             if( not self._playback_stopped_or_changed() ):
@@ -671,6 +670,8 @@ class Main:
         else:
             self._set_property("ArtistSlideshow", self.TransitionDir)
             log( 'switching slideshow to ' + self.TransitionDir )
+        self.LASTARTISTREFRESH = time.time()
+        log( 'Last slideshow refresh time is ' + str(self.LASTARTISTREFRESH) )
 
 
     def _split_artists( self, response):
@@ -799,11 +800,10 @@ class Main:
                 xbmcvfs.copy(os.path.join(self.CacheDir, file), os.path.join(self.MergeDir, file))
         if self.ARTISTNUM == self.TOTALARTISTS:
             wait_elapsed = time.time() - self.LASTARTISTREFRESH
-            log( 'elapsed wait time is ' + str(wait_elapsed) )
             if( wait_elapsed > self.MINREFRESH ):
                 self._wait( self.MINREFRESH - (wait_elapsed % self.MINREFRESH) )
             else:
-                self._wait( self.MINREFRESH - 1.2 - wait_elapsed )
+                self._wait( self.MINREFRESH - (wait_elapsed + 2) )  #not sure why there needs to be a manual adjustment here
             if not self._playback_stopped_or_changed():
                 log( 'switching slideshow to merge directory' )
                 self._set_property("ArtistSlideshow", self.MergeDir)
