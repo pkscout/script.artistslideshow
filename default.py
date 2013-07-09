@@ -1037,7 +1037,7 @@ class Main:
                     playing_song = self._get_playing_item( 'title' )
                     if playing_song:
                         log( 'checking song name against recordings in musicbrainz' )
-                        if theartist == playing_song[0:(playing_song.find('-'))-1]:
+                        if smartUTF8( theartist ) == playing_song[0:(playing_song.find('-'))-1]:
                             playing_song = playing_song[(playing_song.find('-'))+2:]
                         query_times = {'last':query_times['current'], 'current':time.time()}
                         cached_mb_info = self._parse_musicbrainz_info( 'recording', mbid, playing_song, query_times )
