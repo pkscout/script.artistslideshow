@@ -1,3 +1,6 @@
+v.1.5.3.012
+- adjustments to Unicode decoding during migration to avoid double decoding a string
+
 v.1.5.3.011
 - added check for non-existent directory during migration
 

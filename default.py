@@ -103,7 +103,7 @@ def checkDir(path):
 
 def getCacheThumbName(url, CachePath):
     thumb = xbmc.getCacheThumbName(url)
-    thumbpath = os.path.join(CachePath, thumb.encode("utf-8"))
+    thumbpath = os.path.join(CachePath, thumb.encode('utf-8'))
     return thumbpath
 
 def smartUnicode(s):
@@ -372,12 +372,12 @@ class Main:
                 self.LANGUAGE = language[1]
                 log('language = %s' % self.LANGUAGE)
                 break
-        self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" ).decode("utf-8")
+        self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" ).decode('utf-8')
         self.PRIORITY = __addon__.getSetting( "priority" )
         self.USEFALLBACK = __addon__.getSetting( "fallback" )
-        self.FALLBACKPATH = __addon__.getSetting( "fallback_path" ).decode("utf-8")
+        self.FALLBACKPATH = __addon__.getSetting( "fallback_path" ).decode('utf-8')
         self.USEOVERRIDE = __addon__.getSetting( "slideshow" )
-        self.OVERRIDEPATH = __addon__.getSetting( "slideshow_path" ).decode("utf-8")
+        self.OVERRIDEPATH = __addon__.getSetting( "slideshow_path" ).decode('utf-8')
         self.RESTRICTCACHE = __addon__.getSetting( "restrict_cache" )
         try:
             self.maxcachesize = int(__addon__.getSetting( "max_cache_size" )) * 1000000
@@ -389,12 +389,12 @@ class Main:
             self.maxcachesize = 1024 * 1000000
         self.NOTIFICATIONTYPE = __addon__.getSetting( "show_progress" )
         if self.NOTIFICATIONTYPE == "2":
-            self.PROGRESSPATH = __addon__.getSetting( "progress_path" ).decode("utf-8")
+            self.PROGRESSPATH = __addon__.getSetting( "progress_path" ).decode('utf-8')
             log('set progress path to %s' % self.PROGRESSPATH)
         else:
             self.PROGRESSPATH = ''
         if __addon__.getSetting( "fanart_folder" ):
-            self.FANARTFOLDER = __addon__.getSetting( "fanart_folder" ).decode("utf-8")
+            self.FANARTFOLDER = __addon__.getSetting( "fanart_folder" ).decode('utf-8')
             log('set fanart folder to %s' % self.FANARTFOLDER)
         else:
             self.FANARTFOLDER = 'extrafanart'
@@ -423,9 +423,9 @@ class Main:
         self.DownloadedAllImages = False
         self.UsingFallback = False
         self.MINREFRESH = 9.9
-        self.TransitionDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode("utf-8")
-        self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % __addonname__ ).decode("utf-8")
-        self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode("utf-8")
+        self.TransitionDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode('utf-8')
+        self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % __addonname__ ).decode('utf-8')
+        self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode('utf-8')
         LastfmApiKey = 'afe7e856e4f4089fc90f841980ea1ada'
         fanarttvApiKey = '7a93c84fe1c9999e6f0fec206a66b0f5'
         theaudiodbApiKey = '193621276b2d731671156g'
@@ -440,8 +440,8 @@ class Main:
     def _move_info_files( self, old_loc, new_loc, type ):
         log( 'attempting to move from %s to %s' % (old_loc, new_loc) )
         try:
-            os.chdir( old_loc.decode("utf-8") )
-            folders = os.listdir( old_loc.decode("utf-8") )
+            os.chdir( old_loc )
+            folders = os.listdir( old_loc )
         except OSError:
             log( 'no directory found: ' + old_loc )
             return
@@ -451,18 +451,18 @@ class Main:
             return
         for folder in folders:
             if type == 'cache':
-                old_folder = os.path.join( old_loc.decode("utf-8"), folder.decode("utf-8") )
-                new_folder = os.path.join( new_loc.decode("utf-8"), folder.decode("utf-8") )
+                old_folder = os.path.join( old_loc, folder.decode('utf-8') )
+                new_folder = os.path.join( new_loc, folder.decode('utf-8') )
             elif type == 'local':
-                old_folder = os.path.join( old_loc.decode("utf-8"), folder.decode("utf-8"), self.FANARTFOLDER.decode("utf-8") )
-                new_folder = os.path.join( new_loc.decode("utf-8"), xbmc.getCacheThumbName(folder).replace('.tbn', '').decode("utf-8") )
+                old_folder = os.path.join( old_loc, folder.decode('utf-8'), self.FANARTFOLDER )
+                new_folder = os.path.join( new_loc, xbmc.getCacheThumbName(folder).replace('.tbn', '').decode('utf-8') )
             try:
                 old_files = os.listdir( old_folder )
             except Exception, e:
                 log( 'unexpected error while getting directory list' )
                 log( e )
                 old_files = []
-            exclude_path = os.path.join( old_folder.decode("utf-8"), '_exclusions.nfo' )
+            exclude_path = os.path.join( old_folder, '_exclusions.nfo' )
             if old_files and type == 'cache' and not xbmcvfs.exists(exclude_path):
                 writeFile( '', exclude_path )
             for old_file in old_files:
@@ -485,7 +485,7 @@ class Main:
 
     def _migrate( self ):
         #this is a one time process to move and rename all the .nfo files to the new location
-        root_path = xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ).decode("utf-8")
+        root_path = xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ).decode('utf-8')
         new_loc = os.path.join( root_path, 'ArtistInformation' )
         check_file = os.path.join( root_path, 'migrationcheck.nfo' )
         if not readFile( check_file ):
@@ -495,21 +495,21 @@ class Main:
             writeFile( '1.5.4', check_file )
 
     def _make_dirs( self ):
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ).decode("utf-8"))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/temp' % __addonname__ ).decode("utf-8"))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow' % __addonname__ ).decode("utf-8"))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistInformation' % __addonname__ ).decode("utf-8"))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode("utf-8"))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ).decode('utf-8'))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/temp' % __addonname__ ).decode('utf-8'))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow' % __addonname__ ).decode('utf-8'))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistInformation' % __addonname__ ).decode('utf-8'))
+        checkDir(xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode('utf-8'))
 
     def _set_cachedir( self, theartist ):
         CacheName = xbmc.getCacheThumbName(theartist).replace('.tbn', '')
-        self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, )).decode("utf-8")
+        self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, )).decode('utf-8')
         checkDir(self.CacheDir)
 
 
     def _set_infodir( self, theartist ):
         CacheName = xbmc.getCacheThumbName(theartist).replace('.tbn', '')
-        self.InfoDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistInformation/%s/' % ( __addonname__ , CacheName, )).decode("utf-8")
+        self.InfoDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistInformation/%s/' % ( __addonname__ , CacheName, )).decode('utf-8')
         checkDir(self.InfoDir)
 
 
@@ -547,7 +547,7 @@ class Main:
             self.LASTARTISTREFRESH = 0
             if self.ARTISTNUM == 1:
                 for cache_file in ['fanarttvartistimages.nfo', 'theaudiodbartistbio.nfo', 'lastfmartistimages.nfo']:
-                    filename = os.path.join( self.InfoDir, cache_file.decode("utf-8") )
+                    filename = os.path.join( self.InfoDir, cache_file.decode('utf-8') )
                     if xbmcvfs.exists( filename ):
                         if time.time() - os.path.getmtime(filename) < 1209600:
                             log('cached %s found' % filename)
@@ -626,7 +626,7 @@ class Main:
                         xbmc.executebuiltin(command)
                 if self.TOTALARTISTS > 1:
                     self._merge_images()
-            if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode("utf-8") == self.TransitionDir and self.ARTISTNUM == 1):
+            if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode('utf-8') == self.TransitionDir and self.ARTISTNUM == 1):
                 self._wait( self.MINREFRESH )
                 if( not self._playback_stopped_or_changed() ):
                     self._refresh_image_directory()
@@ -673,7 +673,7 @@ class Main:
 
 
     def _refresh_image_directory( self ):
-        if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode("utf-8") == self.TransitionDir):
+        if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode('utf-8') == self.TransitionDir):
             self._set_property("ArtistSlideshow", self.CacheDir)
             log( 'switching slideshow to ' + self.CacheDir )
         else:
@@ -824,7 +824,7 @@ class Main:
             cache_trim_delay = 0   #delay time is in seconds
             if( now - self.LastCacheTrim > cache_trim_delay ):
                 log(' trimming the cache down to %s bytes' % self.maxcachesize )
-                cache_root = xbmc.translatePath( 'special://profile/addon_data/%s/ArtistSlideshow/' % __addonname__ ).decode("utf-8")
+                cache_root = xbmc.translatePath( 'special://profile/addon_data/%s/ArtistSlideshow/' % __addonname__ ).decode('utf-8')
                 os.chdir( cache_root )
                 folders = os.listdir( cache_root )
                 folders.sort( key=lambda x: os.path.getmtime(x), reverse=True )
