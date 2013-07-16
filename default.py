@@ -439,8 +439,17 @@ class Main:
 
     def _move_info_files( self, old_loc, new_loc, type ):
         log( 'attempting to move from %s to %s' % (old_loc, new_loc) )
-        os.chdir( old_loc.decode("utf-8") )
-        for folder in os.listdir( old_loc.decode("utf-8") ):
+        try:
+            os.chdir( old_loc.decode("utf-8") )
+            folders = os.listdir( old_loc.decode("utf-8") )
+        except OSError:
+            log( 'no directory found: ' + old_loc )
+            return
+        except Exception, e:
+            log( 'unexpected error while getting directory list' )
+            log( e )
+            return
+        for folder in folders:
             if type == 'cache':
                 old_folder = os.path.join( old_loc.decode("utf-8"), folder.decode("utf-8") )
                 new_folder = os.path.join( new_loc.decode("utf-8"), folder.decode("utf-8") )

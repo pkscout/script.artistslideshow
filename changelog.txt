@@ -1,3 +1,6 @@
+v.1.5.3.011
+- added check for non-existent directory during migration
+
 v.1.5.3.010
 - stripped out all htbackdrops.com code
 - set new location for .nfo files separate from image files
