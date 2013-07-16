@@ -451,11 +451,11 @@ class Main:
             return
         for folder in folders:
             if type == 'cache':
-                old_folder = os.path.join( old_loc, folder.decode('utf-8') )
-                new_folder = os.path.join( new_loc, folder.decode('utf-8') )
+                old_folder = os.path.join( old_loc, folder )
+                new_folder = os.path.join( new_loc, folder )
             elif type == 'local':
-                old_folder = os.path.join( old_loc, folder.decode('utf-8'), self.FANARTFOLDER )
-                new_folder = os.path.join( new_loc, xbmc.getCacheThumbName(folder).replace('.tbn', '').decode('utf-8') )
+                old_folder = os.path.join( old_loc, folder, self.FANARTFOLDER )
+                new_folder = os.path.join( new_loc, xbmc.getCacheThumbName(folder).replace('.tbn', '') )
             try:
                 old_files = os.listdir( old_folder )
             except Exception, e:
