@@ -15,6 +15,8 @@
 # *  Last.fm:      http://www.last.fm/
 # *  fanart.tv:    http://www.fanart.tv
 # *  theaudiodb:   http://www.theaudiodb.com
+# *  htbackdrops:  http://www.htbackdrops.org
+
 
 
 import xbmc, xbmcaddon, os, xbmcgui, xbmcvfs
@@ -365,6 +367,7 @@ class Main:
         self.HDASPECTONLY = __addon__.getSetting( "hd_aspect_only" )
         self.FANARTTV = __addon__.getSetting( "fanarttv" )
         self.THEAUDIODB = __addon__.getSetting( "theaudiodb" )
+        self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
         self.ARTISTINFO = __addon__.getSetting( "artistinfo" )
         self.LANGUAGE = __addon__.getSetting( "language" )
         for language in LANGUAGES:
@@ -429,12 +432,16 @@ class Main:
         LastfmApiKey = 'afe7e856e4f4089fc90f841980ea1ada'
         fanarttvApiKey = '7a93c84fe1c9999e6f0fec206a66b0f5'
         theaudiodbApiKey = '193621276b2d731671156g'
+        HtbackdropsApiKey = '96d681ea0dcb07ad9d27a347e64b652a'
         self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/?autocorrect=1&api_key=' + LastfmApiKey
         self.fanarttvURL = 'http://api.fanart.tv/webservice/artist/%s/' % fanarttvApiKey
         self.fanarttvOPTIONS = '/json/artistbackground/'
         self.theaudiodbURL = 'http://www.theaudiodb.com/api/v1/json/%s/' % theaudiodbApiKey
         self.theaudiodbARTISTURL = 'artist-mb.php?i='
         self.theaudiodbALBUMURL = 'album.php?i='
+        self.HtbackdropsQueryURL = 'http://htbackdrops.org/api/' + HtbackdropsApiKey + '/searchXML?default_operator=and&fields=title&aid=1'
+        self.HtbackdropsDownloadURL = 'http://htbackdrops.org/api/' + HtbackdropsApiKey + '/download/'
+
 
 
     def _move_info_files( self, old_loc, new_loc, type ):
@@ -471,6 +478,8 @@ class Main:
                     new_file = old_file.strip('_')
                     if new_file == 'artistimagesfanarttv.nfo':
                         new_file = 'fanarttvartistimages.nfo'
+                    elif new_file == 'artistimageshtbackdrops.nfo':
+                        new_file = 'htbackdropsartistimages.nfo'
                     elif new_file == 'artistimageslastfm.nfo':
                         new_file = 'lastfmartistimages.nfo'
                     elif new_file == 'artistbio.nfo':
@@ -546,7 +555,7 @@ class Main:
         else:
             self.LASTARTISTREFRESH = 0
             if self.ARTISTNUM == 1:
-                for cache_file in ['fanarttvartistimages.nfo', 'theaudiodbartistbio.nfo', 'lastfmartistimages.nfo']:
+                for cache_file in ['fanarttvartistimages.nfo', 'theaudiodbartistbio.nfo', 'lastfmartistimages.nfo', 'htbackdropsartistimages.nfo']:
                     filename = os.path.join( self.InfoDir, cache_file.decode('utf-8') )
                     if xbmcvfs.exists( filename ):
                         if time.time() - os.path.getmtime(filename) < 1209600:
@@ -571,6 +580,7 @@ class Main:
         sourcelist.append( ['lastfm', self.LASTFM] )
         sourcelist.append( ['fanarttv', self.FANARTTV] )
         sourcelist.append( ['theaudiodb', self.THEAUDIODB] )
+        sourcelist.append( ['htbackdrops', self.HTBACKDROPS] )
         imagelist = []
         for source in sourcelist:
             log( ' checking the source %s with a value of %s.' % (source[0], source[1]) )
@@ -867,6 +877,9 @@ class Main:
                 log( 'asking for images from: %s' %self.url )
             else:
                 return []
+        elif site == "htbackdrops":
+            self.url = self.HtbackdropsQueryURL + '&keywords=' + self.NAME.replace('&','%26').replace(' ', '+') + '&dmin_w=' + str( self.minwidth ) + '&dmin_h=' + str( self.minheight )
+            log( 'asking for images from: %s' %self.url )
         images = self._get_data(site, 'images')
         return images
 
@@ -1159,6 +1172,8 @@ class Main:
             elif site == "theaudiodb":
                 filename = os.path.join( self.InfoDir, 'theaudiodbartistbio.nfo')
                 id_filename = os.path.join( self.InfoDir, 'theaudiodbid.nfo')
+            elif site == "htbackdrops":
+                filename = os.path.join( self.InfoDir, 'htbackdropsartistimages.nfo')
         elif item == "bio":
             if site == "theaudiodb":
                 filename = os.path.join( self.InfoDir, 'theaudiodbartistbio.nfo')
@@ -1238,6 +1253,10 @@ class Main:
                             data.append(element.text)
                     if element.tag == 'idArtist' and not xbmcvfs.exists( id_filename ):
                         writeFile( element.text, id_filename )
+            elif site == "htbackdrops":
+                for element in xmldata.getiterator():
+                    if element.tag == "id":
+                        data.append(self.HtbackdropsDownloadURL + str( element.text ) + '/fullsize')
         elif item == "bio":
             if site == "theaudiodb":
                 for element in xmldata.getiterator():
