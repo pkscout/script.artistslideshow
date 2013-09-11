@@ -790,15 +790,7 @@ class Main:
 
 
     def _playback_stopped_or_changed( self ):
-        try:
-            playing_file = xbmc.Player().getPlayingFile()
-        except RuntimeError:
-            return True
-        except Exception, e:
-            log( 'unexpected error getting playing file back from XBMC' )
-            log( e )
-            return True
-        if playing_file != self.LASTPLAYINGFILE or self.EXTERNALCALLSTATUS != xbmc.getInfoLabel( self.EXTERNALCALL ):
+        if set( self.ALLARTISTS ) <> set( self._get_current_artists() ) or self.EXTERNALCALLSTATUS != xbmc.getInfoLabel( self.EXTERNALCALL ):
             self._clear_properties()
             return True
         else:
