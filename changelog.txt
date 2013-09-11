@@ -1,3 +1,6 @@
+v.1.5.5
+- fix for SpotifyMC stuttering when using Artist Slideshow
+
 v.1.5.4
 - artist bio and album list now come from theaudiodb.com by default (Last.fm as fallback)
 - added download of images from fanart.tv
