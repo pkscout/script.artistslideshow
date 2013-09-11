@@ -1,4 +1,4 @@
-v.1.5.5
+v.1.5.5.001
 - fix for SpotifyMC stuttering when using Artist Slideshow
 
 v.1.5.4
