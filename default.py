@@ -163,13 +163,13 @@ def grabURL( url, *args, **kwargs ):
     return url_data
 
 def cleanText(text):
-    text = re.sub('<a href="http://www.last.fm/music/.*</a>.','',text)
-    text = re.sub('<(.|\n|\r)*?>','',text)
+    text = re.sub('<a [^>]*>|</a>|<span[^>]*>|</span>','',text)
     text = re.sub('&quot;','"',text)
     text = re.sub('&amp;','&',text)
     text = re.sub('&gt;','>',text)
     text = re.sub('&lt;','<',text)
     text = re.sub('User-contributed text is available under the Creative Commons By-SA License and may also be available under the GNU FDL.','',text)
+    text = re.sub('Read more about .* on Last.fm.','',text)
     return text.strip()
 
 def path_leaf(path):

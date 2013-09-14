@@ -1,5 +1,8 @@
+v.1.5.5.002
+- adjusted artist bio cleanup to better handle HTML code (thx to scott967)
+
 v.1.5.5.001
-- fix for SpotifyMC stuttering when using Artist Slideshow
+- fix for SpotifyMC stuttering when using Artist Slideshow (thx to McMuzz4)
 
 v.1.5.4
 - artist bio and album list now come from theaudiodb.com by default (Last.fm as fallback)
