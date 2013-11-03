@@ -19,9 +19,10 @@
 
 
 
-import xbmc, xbmcaddon, os, xbmcgui, xbmcvfs
-import codecs, itertools, ntpath, random, re, sys, time, unicodedata, urllib, urllib2, urlparse, socket, shutil
-from elementtree import ElementTree as xmltree
+import xbmc, xbmcaddon, xbmcgui, xbmcvfs
+import codecs, itertools, ntpath, os, random, re, shutil, socket, sys, time
+import unicodedata, urllib, urllib2, urlparse
+import xml.etree.ElementTree as xmltree
 if sys.version_info >= (2, 7):
     import json
 else:
