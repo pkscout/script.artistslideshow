@@ -3,7 +3,6 @@
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>
 		<import addon="xbmc.addon" version="12.0.0"/>
-		<import addon="xbmc.gui" version="4.0.0"/>
 	</requires>
 	<extension point="xbmc.python.script" library="default.py">
 		<provides>executable</provides>
@@ -12,7 +11,10 @@
 		<website>http://wiki.xbmc.org/index.php?title=Add-on:Artist_Slideshow</website>
 		<forum>http://forum.xbmc.org/showthread.php?t=124880</forum>
 		<source>https://github.com/pkscout/script.artistslideshow</source>
+		<license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
 		<email>artistslideshow.xbmc@gmail.com</email>
+		<disclaimer></disclaimer>
+		<language></language>
 		<summary lang="ar">حمل صور و معلومات إضافية للفنان المغني حاليا</summary>
 		<summary lang="be">Download images and additional info of the currently playing artist</summary>
 		<summary lang="bg">Сваля изображения и допълнителна инф. за изпълнителя на текущата песен</summary>
