@@ -1,4 +1,4 @@
-v.1.5.6.1
+v.1.5.7
 - removed image support for last.fm (API call removed by last.fm)
 - changed to using built in ElementTree
 - added xbmc.gui and xbmc.addon as required dependency and set version for Frodo
