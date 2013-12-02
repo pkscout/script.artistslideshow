@@ -403,6 +403,7 @@ class Main:
         self.NAME = ''
         self.ALLARTISTS = []
         self.MBID = ''
+        self.VARIOUSARTISTSMBID = '89ad4ac3-39f7-470e-963a-56509c546377'
         self.LASTPLAYINGFILE = ''
         self.LASTJSONRESPONSE = ''
         self.LocalImagesFound = False
@@ -1016,6 +1017,11 @@ class Main:
         if self._playback_stopped_or_changed():
             writeFile( '', filename )
             return ''
+        # this is here to account for songs or albums that have the artist 'Various Artists'
+        # because AS chokes when trying to find this artist on MusicBrainz
+        if theartist.lower() == 'various artists':
+            writeFile( self.VARIOUSARTISTSMBID, filename)
+            return self.VARIOUSARTISTSMBID
         log( 'querying musicbrainz.com for musicbrainz ID. This is about to get messy.' )
         badSubstrings = ["the ", "The ", "THE ", "a ", "A ", "an ", "An ", "AN "]
         searchartist = theartist

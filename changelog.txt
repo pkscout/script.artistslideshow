@@ -1,3 +1,6 @@
+v.1.5.8.2
+- songs tagged with artist of various artists download artwork correctly from fanart.tv
+
 v.1.5.8.1
 - fixed issue where artwork wouldn't update with streaming media
 
