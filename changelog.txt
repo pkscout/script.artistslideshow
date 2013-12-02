@@ -1,3 +1,6 @@
+v.1.5.8.1
+- fixed issue where artwork wouldn't update with streaming media
+
 v.1.5.8
 - fixed crashes when using htbackdrops as an image source
 

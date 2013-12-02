@@ -702,7 +702,9 @@ class Main:
         mbids = []
         if( xbmc.Player().isPlayingAudio() == True ):
             try:
-                playing_file = xbmc.Player().getPlayingFile()
+                #playing_file = xbmc.Player().getPlayingFile()
+                playing_file = xbmc.Player().getPlayingFile() + ' - ' + xbmc.Player().getMusicInfoTag().getArtist() + ' - ' + xbmc.Player().getMusicInfoTag().getTitle()
+                log( 'playing file is ' + playing_file )
             except RuntimeError:
                 return artists_info
             except Exception, e:
