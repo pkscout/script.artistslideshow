@@ -495,16 +495,20 @@ class Main:
         checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistInformation' % __addonname__ ).decode('utf-8'))
         checkDir(xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode('utf-8'))
 
-    def _set_cachedir( self, theartist ):
+
+    def _set_thedir(self, theartist, dirtype):
         CacheName = xbmc.getCacheThumbName(theartist).replace('.tbn', '')
-        self.CacheDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow/%s/' % ( __addonname__ , CacheName, )).decode('utf-8')
-        checkDir(self.CacheDir)
+        thedir = xbmc.translatePath('special://profile/addon_data/%s/%s/%s/' % ( __addonname__ , dirtype, CacheName, )).decode('utf-8')
+        checkDir(thedir)
+        return thedir
+
+
+    def _set_cachedir( self, theartist ):
+        self.CacheDir = self._set_thedir( theartist, "ArtistSlideshow" )
 
 
     def _set_infodir( self, theartist ):
-        CacheName = xbmc.getCacheThumbName(theartist).replace('.tbn', '')
-        self.InfoDir = xbmc.translatePath('special://profile/addon_data/%s/ArtistInformation/%s/' % ( __addonname__ , CacheName, )).decode('utf-8')
-        checkDir(self.InfoDir)
+        self.InfoDir = self._set_thedir( theartist, "ArtistInformation" )
 
 
     def _start_download( self ):
