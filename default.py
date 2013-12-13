@@ -1095,7 +1095,7 @@ class Main:
                 log( 'trying to get artist bio from ' + self.url )
                 bio = self._get_data( 'theaudiodb', 'bio' )
         if bio == []:
-            self.url = self.LastfmURL + '&method=artist.getInfo&artist=' + urllib.quote_plus( smartUTF8(self.NAME) )
+            self.url = self.LastfmURL + '&lang=' + self.LANGUAGE + '&method=artist.getInfo&artist=' + urllib.quote_plus( smartUTF8(self.NAME) )
             log( 'trying to get artist bio from ' + self.url )
             bio = self._get_data('lastfm', 'bio')
         if bio == []:
