@@ -406,6 +406,7 @@ class Main:
         self.VARIOUSARTISTSMBID = '89ad4ac3-39f7-470e-963a-56509c546377'
         self.LASTPLAYINGFILE = ''
         self.LASTJSONRESPONSE = ''
+        self.LASTARTISTREFRESH = 0
         self.LocalImagesFound = False
         self.CachedImagesFound = False
         self.ImageDownloaded = False
