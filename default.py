@@ -17,12 +17,11 @@
 # *  theaudiodb:   http://www.theaudiodb.com
 # *  htbackdrops:  http://www.htbackdrops.org
 
-
-
 import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 import codecs, itertools, ntpath, os, random, re, shutil, socket, sys, time
 import unicodedata, urllib, urllib2, urlparse
 import xml.etree.ElementTree as xmltree
+from resources.dicttoxml import dicttoxml
 if sys.version_info >= (2, 7):
     import json
 else:
@@ -34,12 +33,6 @@ __addonversion__ = __addon__.getAddonInfo('version')
 __addonpath__    = __addon__.getAddonInfo('path').decode('utf-8')
 __addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ )
 __language__     = __addon__.getLocalizedString
-
-# to be able to import libraries from the artistslideshow addon directory
-sys.path.append( os.path.join( __addonpath__, "resources" ) )
-sys.path.append( os.path.join( __addonpath__, "resources/dicttoxml" ) )
-
-from dicttoxml import dicttoxml
 
 socket.setdefaulttimeout(10)
 
