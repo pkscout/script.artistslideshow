@@ -987,7 +987,7 @@ class Main:
             else:
                 playing_title = smartUTF8( playing_thing )
             log( 'comparing musicbrainz %s: %s with local %s: %s' % (type, title, type, playing_title) )
-            if title.lower().startswith( playing_title.lower() ):
+            if title.lower().startswith( playing_title.lower() ) or playing_title.lower().startswith( title.lower() ):
                 log( 'found matching %s, this should be the right artist' % type )
                 return True
         return False
@@ -1212,7 +1212,7 @@ class Main:
                             log( 'unexpected error fixing fanart.tv JSON data' )
                             log( e )
                             return data
-                    writeFile( dicttoxml( json_data ).encode('utf-8'), filename )
+                    writeFile( dicttoxml.dicttoxml( json_data ).encode('utf-8'), filename )
                     json_data = ''
                 else:
                     return data
