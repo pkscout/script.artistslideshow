@@ -21,7 +21,7 @@ import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 import codecs, itertools, ntpath, os, random, re, shutil, socket, sys, time
 import unicodedata, urllib, urllib2, urlparse
 import xml.etree.ElementTree as xmltree
-from resources.dicttoxml.dicttoxml import dicttoxml
+from resources.dicttoxml import dicttoxml
 if sys.version_info >= (2, 7):
     import json
 else:
@@ -1212,7 +1212,7 @@ class Main:
                             log( 'unexpected error fixing fanart.tv JSON data' )
                             log( e )
                             return data
-                    writeFile( dicttoxml( json_data ).encode('utf-8'), filename )
+                    writeFile( dicttoxml.dicttoxml( json_data ).encode('utf-8'), filename )
                     json_data = ''
                 else:
                     return data
