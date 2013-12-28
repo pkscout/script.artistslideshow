@@ -211,7 +211,7 @@ def writeFile( data, filename ):
         log( 'unable to write data to ' + filename )
         return False
     except Exception, e:
-        log( 'unknown error while writing data to ' + filename, url )
+        log( 'unknown error while writing data to ' + filename )
         log( e )
         return False
     return True
