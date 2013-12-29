@@ -22,6 +22,7 @@ import codecs, itertools, ntpath, os, random, re, shutil, socket, sys, time
 import unicodedata, urllib, urllib2, urlparse
 import xml.etree.ElementTree as xmltree
 from resources.dicttoxml.dicttoxml import dicttoxml
+from resources.fix_utf8.fix_utf8 import smartUTF8
 if sys.version_info >= (2, 7):
     import json
 else:
@@ -101,30 +102,6 @@ def getCacheThumbName(url, CachePath):
     thumb = xbmc.getCacheThumbName(url)
     thumbpath = os.path.join(CachePath, thumb.encode('utf-8'))
     return thumbpath
-
-def smartUnicode(s):
-    if not s:
-        return ''
-    try:
-        if not isinstance(s, basestring):
-            if hasattr(s, '__unicode__'):
-                s = unicode(s)
-            else:
-                s = unicode(str(s), 'UTF-8')
-        elif not isinstance(s, unicode):
-            s = unicode(s, 'UTF-8')
-    except:
-        if not isinstance(s, basestring):
-            if hasattr(s, '__unicode__'):
-                s = unicode(s)
-            else:
-                s = unicode(str(s), 'ISO-8859-1')
-        elif not isinstance(s, unicode):
-            s = unicode(s, 'ISO-8859-1')
-    return s
-
-def smartUTF8(s):
-    return smartUnicode(s).encode('utf-8')
 
 def saveURL( url, filename, *args, **kwargs ):
     data = grabURL( url, *args, **kwargs )
