@@ -1,16 +1,11 @@
-v.1.5.8.4
+v.1.5.9
 - fixed crash when merging images from multiple artists
-- changed the way local module imports are done to follow best practice
-- added some additional logic to MusicBrainz ID lookup
-
-v.1.5.8.3
 - fixed last.fm support so it requests results in the desired language
-
-v.1.5.8.2
-- songs tagged with artist of various artists download artwork correctly from fanart.tv
-
-v.1.5.8.1
 - fixed issue where artwork wouldn't update with streaming media
+- songs tagged with artist of various artists download artwork correctly from fanart.tv
+- added some additional logic to MusicBrainz ID lookup
+- updated language files
+- changed the way local module imports are done to follow best practice
 
 v.1.5.8
 - fixed crashes when using htbackdrops as an image source
