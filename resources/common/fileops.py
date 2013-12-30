@@ -1,4 +1,4 @@
-import os, xbmc, xbmcvfs
+import ntpath, os, urllib2, xbmc, xbmcvfs
 
 def checkDir(path):
     if not xbmcvfs.exists(path):
@@ -8,6 +8,44 @@ def getCacheThumbName(url, CachePath):
     thumb = xbmc.getCacheThumbName(url)
     thumbpath = os.path.join(CachePath, thumb.encode('utf-8'))
     return thumbpath
+
+def path_leaf(path):
+    path, filename = ntpath.split(path)
+    return {"path":path, "filename":filename}
+
+
+def saveURL( url, filename, *args, **kwargs ):
+    data, log_lines = grabURL( url, *args, **kwargs )
+    if data:
+        success, log_lines2 = writeFile( data, filename )
+        log_lines.extend( log_lines2 )
+        if success:
+            return True, log_lines
+        else:
+            return False, log_lines
+    else:
+        return False, log_lines
+
+def grabURL( url, *args, **kwargs ):
+    log_lines = []
+    req = urllib2.Request(url=url)
+    for key, value in kwargs.items():
+        req.add_header(key.replace('_', '-'), value)
+    for header, value in req.headers.items():
+        log_lines.append( 'url header %s is %s' % (header, value) )
+    try:
+        url_data = urllib2.urlopen( req ).read()
+    except urllib2.URLError, urllib2.HTTPError:
+        log_lines.append( 'site unreachable at ' + url )
+        return '', log_lines
+    except socket.error:
+        log_lines.append( 'timeout error while downloading from ' + url )
+        return '', log_lines
+    except Exception, e:
+        log_lines.append( 'unknown error while downloading from ' + url )
+        log_lines.append( e )
+        return '', log_lines
+    return url_data, log_lines
 
 def writeFile( data, filename ):
     log_lines = []
@@ -26,21 +64,22 @@ def writeFile( data, filename ):
         log_lines.append( e )
         return (False, log_lines)
     log_lines.append( 'successfuly wrote data to ' + filename )
-    return (True, log_lines)
+    return True, log_lines
 
 def readFile( filename ):
+    log_lines = []
     if xbmcvfs.exists( filename):
         try:
             the_file = open (filename, 'r')
             data = the_file.read()
             the_file.close()
         except IOError:
-            lw.log( 'unable to read data from ' + filename, xbmc.LOGDEBUG )
-            return ''
+            log_lines.append( 'unable to read data from ' + filename )
+            return '', log_lines
         except Exception, e:
-            lw.log( 'unknown error while reading data from ' + filename, xbmc.LOGDEBUG )
-            lw.log( e, xbmc.LOGDEBUG )
-            return ''
-        return data
+            log_lines.append( 'unknown error while reading data from ' + filename )
+            log_lines.append( e )
+            return '', log_lines
+        return data, log_lines
     else:
-        return ''
+        return '', log_lines
