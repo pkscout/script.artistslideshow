@@ -17,8 +17,11 @@
 # *  theaudiodb:   http://www.theaudiodb.com
 # *  htbackdrops:  http://www.htbackdrops.org
 
+# took out codecs, shutil
+
+
 import xbmc, xbmcaddon, xbmcgui, xbmcvfs
-import codecs, itertools, os, random, re, shutil, socket, sys, time, urllib
+import itertools, os, random, re, socket, sys, time, urllib
 import xml.etree.ElementTree as xmltree
 from resources.dicttoxml.dicttoxml import dicttoxml
 from resources.common.fix_utf8 import smartUTF8
