@@ -22,7 +22,7 @@ import codecs, itertools, ntpath, os, random, re, shutil, socket, sys, time
 import unicodedata, urllib, urllib2, urlparse
 import xml.etree.ElementTree as xmltree
 from resources.dicttoxml.dicttoxml import dicttoxml
-from resources.fix_utf8.fix_utf8 import smartUTF8
+from resources.common.fix_utf8 import smartUTF8
 if sys.version_info >= (2, 7):
     import json
 else:

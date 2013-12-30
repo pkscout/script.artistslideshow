@@ -1,3 +1,5 @@
+import unicodedata
+
 def smartUnicode(s):
     if not s:
         return ''

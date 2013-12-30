@@ -1,3 +1,6 @@
+v.1.5.9.1
+- code refactoring
+
 v.1.5.9
 - fixed crash when merging images from multiple artists
 - fixed last.fm support so it requests results in the desired language
