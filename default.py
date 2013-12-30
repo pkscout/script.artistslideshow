@@ -17,9 +17,8 @@
 # *  theaudiodb:   http://www.theaudiodb.com
 # *  htbackdrops:  http://www.htbackdrops.org
 
-# took out codecs, shutil
 
-
+# took out codecs, shutil, urlparse
 import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 import itertools, os, random, re, socket, sys, time, urllib
 import xml.etree.ElementTree as xmltree
@@ -369,7 +368,7 @@ class Main:
         self.InfoDir = self._set_thedir( theartist, "ArtistInformation" )
 
 
-    def _cleanText( self, text ):
+    def _clean_text( self, text ):
         text = re.sub('<a [^>]*>|</a>|<span[^>]*>|</span>','',text)
         text = re.sub('&quot;','"',text)
         text = re.sub('&amp;','&',text)
@@ -1014,7 +1013,7 @@ class Main:
         if bio == []:
             self.biography = ''
         else:
-            self.biography = self._cleanText(bio[0])
+            self.biography = self._clean_text(bio[0])
         self.albums = self._get_local_data( 'albums' )
         if self.albums == []:
             theaudiodb_id, log_lines = readFile( os.path.join(self.InfoDir, 'theaudiodbid.nfo') )
@@ -1255,14 +1254,15 @@ class Main:
             self._set_property( "ArtistSlideshow.%d.AlbumName" % ( count + 1 ) )
             self._set_property( "ArtistSlideshow.%d.AlbumThumb" % ( count + 1 ) )
 
-    #sets a property (or clears it if no value is supplied)
-    #does not crash if e.g. the window no longer exists.
+
     def _set_property( self, property_name, value=""):
-      try:
-        self.WINDOW.setProperty(property_name, value)
-      except Exception, e:
-        lw.log( " *************** Exception: Couldn't set propery " + property_name + " value " + value, xbmc.LOGDEBUG )
-        lw.log( e, xbmc.LOGDEBUG )
+        #sets a property (or clears it if no value is supplied)
+        #does not crash if e.g. the window no longer exists.
+        try:
+          self.WINDOW.setProperty(property_name, value)
+        except Exception, e:
+          lw.log( " *************** Exception: Couldn't set propery " + property_name + " value " + value, xbmc.LOGDEBUG )
+          lw.log( e, xbmc.LOGDEBUG )
 
 
 if ( __name__ == "__main__" ):
