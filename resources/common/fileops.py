@@ -9,7 +9,7 @@ def getCacheThumbName(url, CachePath):
     thumbpath = os.path.join(CachePath, thumb.encode('utf-8'))
     return thumbpath
 
-def path_leaf(path):
+def pathLeaf(path):
     path, filename = ntpath.split(path)
     return {"path":path, "filename":filename}
 

@@ -20,11 +20,11 @@
 
 # took out codecs, shutil, urlparse
 import xbmc, xbmcaddon, xbmcgui, xbmcvfs
-import itertools, os, random, re, socket, sys, time, urllib
+import imghdr, itertools, os, random, re, socket, sys, time, urllib
 import xml.etree.ElementTree as xmltree
 from resources.dicttoxml.dicttoxml import dicttoxml
 from resources.common.fix_utf8 import smartUTF8
-from resources.common.fileops import checkDir, getCacheThumbName, path_leaf, grabURL, saveURL, writeFile, readFile
+from resources.common.fileops import checkDir, getCacheThumbName, pathLeaf, grabURL, saveURL, writeFile, readFile
 from resources.common.xlogger import Logger
 if sys.version_info >= (2, 7):
     import json
@@ -185,10 +185,13 @@ class Main:
                 if not success:
                     return False
                 if os.path.getsize(tmpname) > 999:
+                    new_ext = '.' + imghdr.what( tmpname ).replace( 'jpeg', 'jpg' )
+                    if not new_ext:
+                       new_ext = '.tbn'
                     lw.log( 'copying file to transition directory', xbmc.LOGDEBUG )
-                    xbmcvfs.copy(tmpname, dst2)
+                    xbmcvfs.copy( tmpname, dst2.replace( '.tbn', new_ext ) )
                     lw.log( 'moving file to cache directory', xbmc.LOGDEBUG )
-                    xbmcvfs.rename(tmpname, dst)
+                    xbmcvfs.rename( tmpname, dst.replace( '.tbn', new_ext ) )
                     return True
                 else:
                     xbmcvfs.delete(tmpname)
@@ -198,7 +201,7 @@ class Main:
     
 
     def _excluded( self, item ):
-        item_split = path_leaf(item)
+        item_split = pathLeaf(item)
         exclusion_file = os.path.join(item_split['path'], '_exclusions.nfo')
         if xbmcvfs.exists( exclusion_file ):
             exclusions, log_lines = readFile( exclusion_file )
@@ -584,7 +587,7 @@ class Main:
             lw.log( e, xbmc.LOGDEBUG )
             files = []
         for file in files:
-            if(file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')):
+            if file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png'):
                 self.LocalImagesFound = True
         if self.LocalImagesFound:
             lw.log( 'local images found', xbmc.LOGDEBUG )
@@ -895,7 +898,7 @@ class Main:
                 self._set_property("ArtistSlideshow", self.MergeDir)
 
 
-    def _migrate( self ):
+    def _migrate_info_files( self ):
         #this is a one time process to move and rename all the .nfo files to the new location
         new_loc = os.path.join( self.DATAROOT, 'ArtistInformation' )
         self._move_info_files( os.path.join(root_path, 'ArtistSlideshow'), new_loc, 'cache' )
@@ -909,7 +912,7 @@ class Main:
         self._rename_tbn_files( os.path.join( self.DATAROOT, 'ArtistSlideshow' ), 'cache' )
         if self.LOCALARTISTPATH:
             self._rename_tbn_files( self.LOCALARTISTPATH, 'local' )
-        self._update_check_file( '1.6.0', 'renaming of tbn files compete' )
+        #self._update_check_file( '1.6.0', 'renaming of tbn files compete' )
 
 
     def _move_info_files( self, old_loc, new_loc, type ):
@@ -1020,7 +1023,8 @@ class Main:
 
 
     def _rename_tbn_files( self, loc, type ): pass
-
+    #rename .tbn files based on image type
+    
 
     def _set_cachedir( self, theartist ):
         self.CacheDir = self._set_thedir( theartist, "ArtistSlideshow" )
@@ -1080,7 +1084,7 @@ class Main:
 
         files = os.listdir(self.CacheDir)
         for file in files:
-            if file.lower().endswith('tbn') or (self.PRIORITY == '2' and self.LocalImagesFound):
+            if (file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')) or (self.PRIORITY == '2' and self.LocalImagesFound):
                 self.CachedImagesFound = True
 
         if self.CachedImagesFound:
