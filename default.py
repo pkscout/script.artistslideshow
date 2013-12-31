@@ -177,6 +177,7 @@ class Main:
     def _download( self, src, dst, dst2 ):
         if (not xbmc.abortRequested):
             tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
+            lw.log( 'the tmpname is ' + tmpname )
             if not self._excluded( dst ):
                 if xbmcvfs.exists(tmpname):
                     xbmcvfs.delete(tmpname)
@@ -185,13 +186,10 @@ class Main:
                 if not success:
                     return False
                 if os.path.getsize(tmpname) > 999:
-                    new_ext = '.' + imghdr.what( tmpname ).replace( 'jpeg', 'jpg' )
-                    if not new_ext:
-                       new_ext = '.tbn'
-                    lw.log( 'copying file to transition directory', xbmc.LOGDEBUG )
-                    xbmcvfs.copy( tmpname, dst2.replace( '.tbn', new_ext ) )
-                    lw.log( 'moving file to cache directory', xbmc.LOGDEBUG )
-                    xbmcvfs.rename( tmpname, dst.replace( '.tbn', new_ext ) )
+                    lw.log( 'copying %s to %s' % (tmpname, dst2), xbmc.LOGDEBUG )
+                    xbmcvfs.copy( tmpname, dst2 + self._set_image_ext( tmpname ) )
+                    lw.log( 'moving %s to %s' % (tmpname, dst2), xbmc.LOGDEBUG )
+                    xbmcvfs.rename( tmpname, dst + self._set_image_ext( tmpname ) )
                     return True
                 else:
                     xbmcvfs.delete(tmpname)
@@ -1022,8 +1020,41 @@ class Main:
         lw.log( 'Last slideshow refresh time is ' + str(self.LASTARTISTREFRESH), xbmc.LOGDEBUG )
 
 
-    def _rename_tbn_files( self, loc, type ): pass
-    #rename .tbn files based on image type
+    def _rename_tbn_files( self, loc, type ):
+        lw.log( 'attempting to rename .tbn files with correct extension', xbmc.LOGDEBUG )
+        lw.log( 'from location: ' + loc, xbmc.LOGDEBUG )
+        try:
+            os.chdir( loc )
+            folders = os.listdir( loc )
+        except OSError:
+            lw.log( 'no directory found: ' + loc, xbmc.LOGDEBUG )
+            return
+        except Exception, e:
+            lw.log( 'unexpected error while getting directory list', xbmc.LOGDEBUG )
+            lw.log( e, xbmc.LOGDEBUG )
+            return
+        for folder in folders:
+            lw.log( 'checking ' + folder )
+            if type == 'cache':
+                thepath = os.path.join( loc, folder )
+            elif type == 'local':
+                thepath = os.path.join( loc, folder, self.FANARTFOLDER )
+            try:
+                os.chdir( thepath )
+                files = os.listdir( thepath )
+            except Exception, e:
+                lw.log( 'unexpected error while getting file list', xbmc.LOGDEBUG )
+                lw.log( e, xbmc.LOGDEBUG )
+                files = []
+            for file in files:
+                if file.endswith( '.tbn' ):
+                    old_path = os.path.join( thepath, file )
+                    #new_ext = '.' + imghdr.what( filename ).replace( 'jpeg', 'jpg' )
+                    new_file = file.replace( '.tbn', self._set_image_ext( old_path ) )
+                    new_path = os.path.join( thepath, new_file )
+                    xbmcvfs.rename( old_path, new_path )
+                    lw.log( 'renaming %s to %s' % (old_path, new_path), xbmc.LOGDEBUG )
+        lw.log( 'finished renaming .tbn files with correct extension', xbmc.LOGDEBUG )
     
 
     def _set_cachedir( self, theartist ):
@@ -1032,6 +1063,15 @@ class Main:
 
     def _set_infodir( self, theartist ):
         self.InfoDir = self._set_thedir( theartist, "ArtistInformation" )
+
+
+    def _set_image_ext( self, filename ):
+        lw.log( 'checking ' + filename, xbmc.LOGDEBUG )
+        new_ext = '.' + imghdr.what( filename ).replace( 'jpeg', 'jpg' )
+        if new_ext == '.':
+            new_ext = '.tbn'
+        lw.log( 'file %s needs an extension of %s' % (filename, new_ext), xbmc.LOGDEBUG )        
+        return new_ext
 
 
     def _set_properties( self ):
