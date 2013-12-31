@@ -99,7 +99,7 @@ class Main:
         self._get_settings()
         self._init_vars()
         self._make_dirs()
-        self._migrate()
+        self._upgrade()
         if xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
             lw.log( 'script already running', xbmc.LOGDEBUG )
         else:
@@ -825,6 +825,8 @@ class Main:
 
 
     def _init_vars( self ):
+        self.DATAROOT = xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ).decode('utf-8')
+        self.CHECKFILE = os.path.join( self.DATAROOT, 'migrationcheck.nfo' )
         self.WINDOW = xbmcgui.Window( int(self.WINDOWID) )
         self.SKININFO = {}
         self._set_property( "ArtistSlideshow.CleanupComplete" )
@@ -869,11 +871,10 @@ class Main:
 
 
     def _make_dirs( self ):
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ).decode('utf-8'))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/temp' % __addonname__ ).decode('utf-8'))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistSlideshow' % __addonname__ ).decode('utf-8'))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/ArtistInformation' % __addonname__ ).decode('utf-8'))
-        checkDir(xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode('utf-8'))
+        checkDir( self.DATAROOT )
+        thedirs = ['temp', 'ArtistSlideShow', 'ArtistInformation', 'transition']
+        for onedir in thedirs:
+            checkDir( os.path.join( self.DATAROOT, onedir ) )
 
 
     def _merge_images( self ):
@@ -896,17 +897,19 @@ class Main:
 
     def _migrate( self ):
         #this is a one time process to move and rename all the .nfo files to the new location
-        root_path = xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ).decode('utf-8')
-        new_loc = os.path.join( root_path, 'ArtistInformation' )
-        check_file = os.path.join( root_path, 'migrationcheck.nfo' )
-        data, log_lines = readFile( check_file )
-        lw.log( log_lines, xbmc.LOGDEBUG )
-        if not data:
-            self._move_info_files( os.path.join(root_path, 'ArtistSlideshow'), new_loc, 'cache' )
-            if self.LOCALARTISTPATH:
-                self._move_info_files( self.LOCALARTISTPATH, new_loc, 'local' )
-            success, log_lines = writeFile( '1.5.4', check_file )
-            lw.log( log_lines, xbmc.LOGDEBUG )
+        new_loc = os.path.join( self.DATAROOT, 'ArtistInformation' )
+        self._move_info_files( os.path.join(root_path, 'ArtistSlideshow'), new_loc, 'cache' )
+        if self.LOCALARTISTPATH:
+            self._move_info_files( self.LOCALARTISTPATH, new_loc, 'local' )
+        self._update_check_file( '1.5.4', 'migration of artist info files complete' )
+
+
+    def _migrate_tbn_files( self ):
+        #one time process to rename all the tbn files to the appropriate extensions based on image type
+        self._rename_tbn_files( os.path.join( self.DATAROOT, 'ArtistSlideshow' ), 'cache' )
+        if self.LOCALARTISTPATH:
+            self._rename_tbn_files( self.LOCALARTISTPATH, 'local' )
+        self._update_check_file( '1.6.0', 'renaming of tbn files compete' )
 
 
     def _move_info_files( self, old_loc, new_loc, type ):
@@ -1014,6 +1017,9 @@ class Main:
             lw.log( 'switching slideshow to ' + self.TransitionDir, xbmc.LOGDEBUG )
         self.LASTARTISTREFRESH = time.time()
         lw.log( 'Last slideshow refresh time is ' + str(self.LASTARTISTREFRESH), xbmc.LOGDEBUG )
+
+
+    def _rename_tbn_files( self, loc, type ): pass
 
 
     def _set_cachedir( self, theartist ):
@@ -1253,6 +1259,23 @@ class Main:
                 lw.log( 'fallbackdir = ' + self.FALLBACKPATH, xbmc.LOGDEBUG )
                 self.UsingFallback = True
                 self._set_property("ArtistSlideshow", self.FALLBACKPATH)
+
+
+    def _update_check_file( self, version, message ):
+        success, log_lines = writeFile( version, self.CHECKFILE )
+        lw.log( log_lines, xbmc.LOGDEBUG )
+        if success:
+            lw.log( message, xbmc.LOGDEBUG )
+
+
+    def _upgrade( self ):
+        #this is where any code goes for one time upgrade routines
+        data, log_lines = readFile( self.CHECKFILE )
+        lw.log( log_lines, xbmc.LOGDEBUG )
+        if not data:
+            self._migrate_info_files()
+        if data == '1.5.4':
+            self._migrate_tbn_files()
 
 
     def _wait( self, wait_time ):
