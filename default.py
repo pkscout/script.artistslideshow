@@ -18,18 +18,19 @@
 # *  htbackdrops:  http://www.htbackdrops.org
 
 
-# took out codecs, shutil, urlparse
 import xbmc, xbmcaddon, xbmcgui, xbmcvfs
-import imghdr, itertools, os, random, re, socket, sys, time, urllib
+import itertools, os, random, re, socket, sys, time, urllib
 import xml.etree.ElementTree as xmltree
-from resources.dicttoxml.dicttoxml import dicttoxml
-from resources.common.fix_utf8 import smartUTF8
-from resources.common.fileops import checkDir, getCacheThumbName, pathLeaf, grabURL, saveURL, writeFile, readFile
-from resources.common.xlogger import Logger
 if sys.version_info >= (2, 7):
     import json
 else:
     import simplejson as json
+
+from resources.dicttoxml.dicttoxml import dicttoxml
+from resources.common.fix_utf8 import smartUTF8
+from resources.common.fileops import checkDir, pathLeaf, grabURL, saveURL, writeFile, readFile
+from resources.common.transforms import getImageType, itemHash, itemHashwithPath
+from resources.common.xlogger import Logger
 
 __addon__        = xbmcaddon.Addon()
 __addonname__    = __addon__.getAddonInfo('id')
@@ -187,9 +188,9 @@ class Main:
                     return False
                 if os.path.getsize(tmpname) > 999:
                     lw.log( 'copying %s to %s' % (tmpname, dst2), xbmc.LOGDEBUG )
-                    xbmcvfs.copy( tmpname, dst2 + self._set_image_ext( tmpname ) )
+                    xbmcvfs.copy( tmpname, dst2 + getImageType( tmpname ) )
                     lw.log( 'moving %s to %s' % (tmpname, dst2), xbmc.LOGDEBUG )
-                    xbmcvfs.rename( tmpname, dst + self._set_image_ext( tmpname ) )
+                    xbmcvfs.rename( tmpname, dst + getImageType( tmpname ) )
                     return True
                 else:
                     xbmcvfs.delete(tmpname)
@@ -910,7 +911,7 @@ class Main:
         self._rename_tbn_files( os.path.join( self.DATAROOT, 'ArtistSlideshow' ), 'cache' )
         if self.LOCALARTISTPATH:
             self._rename_tbn_files( self.LOCALARTISTPATH, 'local' )
-        #self._update_check_file( '1.6.0', 'renaming of tbn files compete' )
+        self._update_check_file( '1.6.0', 'renaming of tbn files compete' )
 
 
     def _move_info_files( self, old_loc, new_loc, type ):
@@ -931,7 +932,7 @@ class Main:
                 new_folder = os.path.join( new_loc, folder )
             elif type == 'local':
                 old_folder = os.path.join( old_loc, folder, self.FANARTFOLDER )
-                new_folder = os.path.join( new_loc, xbmc.getCacheThumbName(folder).replace('.tbn', '') )
+                new_folder = os.path.join( new_loc, itemHash(folder) )
             try:
                 old_files = os.listdir( old_folder )
             except Exception, e:
@@ -1050,7 +1051,7 @@ class Main:
                 if file.endswith( '.tbn' ):
                     old_path = os.path.join( thepath, file )
                     #new_ext = '.' + imghdr.what( filename ).replace( 'jpeg', 'jpg' )
-                    new_file = file.replace( '.tbn', self._set_image_ext( old_path ) )
+                    new_file = file.replace( '.tbn', getImageType( old_path ) )
                     new_path = os.path.join( thepath, new_file )
                     xbmcvfs.rename( old_path, new_path )
                     lw.log( 'renaming %s to %s' % (old_path, new_path), xbmc.LOGDEBUG )
@@ -1063,15 +1064,6 @@ class Main:
 
     def _set_infodir( self, theartist ):
         self.InfoDir = self._set_thedir( theartist, "ArtistInformation" )
-
-
-    def _set_image_ext( self, filename ):
-        lw.log( 'checking ' + filename, xbmc.LOGDEBUG )
-        new_ext = '.' + imghdr.what( filename ).replace( 'jpeg', 'jpg' )
-        if new_ext == '.':
-            new_ext = '.tbn'
-        lw.log( 'file %s needs an extension of %s' % (filename, new_ext), xbmc.LOGDEBUG )        
-        return new_ext
 
 
     def _set_properties( self ):
@@ -1095,7 +1087,7 @@ class Main:
 
 
     def _set_thedir(self, theartist, dirtype):
-        CacheName = xbmc.getCacheThumbName(theartist).replace('.tbn', '')
+        CacheName = itemHash(theartist)
         thedir = xbmc.translatePath('special://profile/addon_data/%s/%s/%s/' % ( __addonname__ , dirtype, CacheName, )).decode('utf-8')
         checkDir(thedir)
         return thedir
@@ -1172,8 +1164,8 @@ class Main:
         for url in imagelist:
             if( self._playback_stopped_or_changed() ):
                 return
-            path = getCacheThumbName(url, self.CacheDir)
-            path2 = getCacheThumbName(url, self.TransitionDir)
+            path = itemHashwithPath( url, self.CacheDir )
+            path2 = itemHashwithPath( url, self.TransitionDir )
             if not xbmcvfs.exists(path):
                 if self._download(url, path, path2):
                     lw.log( 'downloaded %s to %s' % (url, path) , xbmc.LOGDEBUG )

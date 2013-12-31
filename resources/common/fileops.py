@@ -4,11 +4,6 @@ def checkDir(path):
     if not xbmcvfs.exists(path):
         xbmcvfs.mkdirs(path)
 
-def getCacheThumbName(url, CachePath):
-    thumb = xbmc.getCacheThumbName(url).replace('.tbn', '')
-    thumbpath = os.path.join(CachePath, thumb.encode('utf-8'))
-    return thumbpath
-
 def pathLeaf(path):
     path, filename = ntpath.split(path)
     return {"path":path, "filename":filename}
