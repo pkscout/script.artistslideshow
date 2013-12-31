@@ -5,14 +5,13 @@ def checkDir(path):
         xbmcvfs.mkdirs(path)
 
 def getCacheThumbName(url, CachePath):
-    thumb = xbmc.getCacheThumbName(url)
+    thumb = xbmc.getCacheThumbName(url).replace('.tbn', '')
     thumbpath = os.path.join(CachePath, thumb.encode('utf-8'))
     return thumbpath
 
 def pathLeaf(path):
     path, filename = ntpath.split(path)
     return {"path":path, "filename":filename}
-
 
 def saveURL( url, filename, *args, **kwargs ):
     data, log_lines = grabURL( url, *args, **kwargs )

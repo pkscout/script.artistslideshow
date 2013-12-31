@@ -39,7 +39,8 @@ class Logger():
                 #loop through the items and put them into comma separated list
                 line = self.parseListorTuple(arg, 0)
             else:
-                line = 'no appropriate action found for class ' + argclass
+                line = arg
+                #line = 'no appropriate action found for class ' + argclass
             if type(line).__name__=='unicode':
                 line = line.encode('utf-8')
             xbmc.log("%s %s" % (__log_preamble__, line.__str__()), log_level)
