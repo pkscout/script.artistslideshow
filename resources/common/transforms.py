@@ -9,7 +9,10 @@ def itemHashwithPath(item, thepath):
     return thumbpath
     
 def getImageType( filename ):
-    new_ext = '.' + imghdr.what( filename ).replace( 'jpeg', 'jpg' )
+    try:
+        new_ext = '.' + imghdr.what( filename ).replace( 'jpeg', 'jpg' )
+    except Exception, e:
+        new_ext = '.'
     if new_ext == '.':
         new_ext = '.tbn'
     return new_ext
