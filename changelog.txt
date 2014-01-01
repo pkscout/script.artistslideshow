@@ -1,3 +1,6 @@
+v.1.5.9.2
+- fixed crash when calling grabURL
+
 v.1.5.9.1
 - image downloads now done in original format instead of .tbn files
 - one time migration routine run to rename all .tbn files to correct format
