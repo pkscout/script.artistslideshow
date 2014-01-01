@@ -19,7 +19,7 @@
 
 
 import xbmc, xbmcaddon, xbmcgui, xbmcvfs
-import itertools, os, random, re, socket, sys, time, urllib
+import itertools, os, random, re, sys, time, urllib
 import xml.etree.ElementTree as xmltree
 if sys.version_info >= (2, 7):
     import json
@@ -39,7 +39,6 @@ __addonpath__    = __addon__.getAddonInfo('path').decode('utf-8')
 __addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ )
 __language__     = __addon__.getLocalizedString
 
-socket.setdefaulttimeout(10)
 lw = Logger('[Artist Slideshow]')
 
 LANGUAGES = (

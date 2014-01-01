@@ -1,4 +1,6 @@
-import ntpath, os, urllib2, xbmc, xbmcvfs
+import ntpath, os, socket, urllib2, xbmc, xbmcvfs
+
+socket.setdefaulttimeout(10)
 
 def checkDir(path):
     if not xbmcvfs.exists(path):
