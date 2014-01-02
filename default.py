@@ -186,9 +186,9 @@ class Main:
                 if not success:
                     return False
                 if os.path.getsize(tmpname) > 999:
-                    lw.log( 'copying %s to %s' % (tmpname, dst2), xbmc.LOGDEBUG )
+                    lw.log( 'copying %s to %s' % (tmpname, dst2 + getImageType( tmpname )), xbmc.LOGDEBUG )
                     xbmcvfs.copy( tmpname, dst2 + getImageType( tmpname ) )
-                    lw.log( 'moving %s to %s' % (tmpname, dst2), xbmc.LOGDEBUG )
+                    lw.log( 'moving %s to %s' % (tmpname, dst2+ getImageType( tmpname )), xbmc.LOGDEBUG )
                     xbmcvfs.rename( tmpname, dst + getImageType( tmpname ) )
                     return True
                 else:
@@ -1168,7 +1168,7 @@ class Main:
             if not xbmcvfs.exists(path):
                 if self._download(url, path, path2):
                     lw.log( 'downloaded %s to %s' % (url, path) , xbmc.LOGDEBUG )
-                    self.ImageDownloaded=True
+                    self.ImageDownloaded = True
             elif self._excluded( path ):
                 xbmcvfs.delete( path )
             if self.ImageDownloaded:
