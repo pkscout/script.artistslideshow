@@ -899,7 +899,7 @@ class Main:
     def _migrate_info_files( self ):
         #this is a one time process to move and rename all the .nfo files to the new location
         new_loc = os.path.join( self.DATAROOT, 'ArtistInformation' )
-        self._move_info_files( os.path.join(root_path, 'ArtistSlideshow'), new_loc, 'cache' )
+        self._move_info_files( os.path.join(self.DATAROOT, 'ArtistSlideshow'), new_loc, 'cache' )
         if self.LOCALARTISTPATH:
             self._move_info_files( self.LOCALARTISTPATH, new_loc, 'local' )
         self._update_check_file( '1.5.4', 'migration of artist info files complete' )
