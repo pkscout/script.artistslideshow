@@ -1,3 +1,7 @@
+v.1.5.9.4
+- fixed crash when logging strange objects
+- fixed attempts to copy temp file over existing file
+
 v.1.5.9.3
 - fixed crash when attempting to migrate .nfo files
 

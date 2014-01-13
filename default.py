@@ -177,7 +177,7 @@ class Main:
     def _download( self, src, dst, dst2 ):
         if (not xbmc.abortRequested):
             tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
-            lw.log( 'the tmpname is ' + tmpname )
+            lw.log( 'the tmpname is ' + tmpname, xbmc.LOGDEBUG )
             if not self._excluded( dst ):
                 if xbmcvfs.exists(tmpname):
                     xbmcvfs.delete(tmpname)
@@ -185,14 +185,20 @@ class Main:
                 lw.log( log_lines, xbmc.LOGDEBUG )
                 if not success:
                     return False
-                if os.path.getsize(tmpname) > 999:
-                    lw.log( 'copying %s to %s' % (tmpname, dst2 + getImageType( tmpname )), xbmc.LOGDEBUG )
-                    xbmcvfs.copy( tmpname, dst2 + getImageType( tmpname ) )
-                    lw.log( 'moving %s to %s' % (tmpname, dst2+ getImageType( tmpname )), xbmc.LOGDEBUG )
-                    xbmcvfs.rename( tmpname, dst + getImageType( tmpname ) )
-                    return True
+                if os.path.getsize( tmpname ) > 999:
+                    image_ext = getImageType( tmpname )
+                    if not xbmcvfs.exists ( dst + image_ext ):
+                        lw.log( 'copying %s to %s' % (tmpname, dst2 + image_ext), xbmc.LOGDEBUG )
+                        xbmcvfs.copy( tmpname, dst2 + image_ext )
+                        lw.log( 'moving %s to %s' % (tmpname, dst + image_ext), xbmc.LOGDEBUG )
+                        xbmcvfs.rename( tmpname, dst + image_ext )
+                        return True
+                    else:
+                        lw.log( 'image already exists, deleting temporary file', xbmc.LOGDEBUG )
+                        xbmcvfs.delete( tmpname )
+                        return False
                 else:
-                    xbmcvfs.delete(tmpname)
+                    xbmcvfs.delete( tmpname )
                     return False
             else:
                 return False 
