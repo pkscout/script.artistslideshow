@@ -27,7 +27,6 @@ class Logger():
                     line = line + delims[count] + ' ' + grouping
                 except Exception, e:
                     xbmc.log( __log_preamble__ + 'unexpected error concatinating log lines', xbmc.LOGDEBUG )
-                    xbmc.log( __log_preamble__ + e, xbmc.LOGDEBUG )
         return line
         
     def log(self, *args):
