@@ -28,7 +28,8 @@ else:
 
 from resources.dicttoxml.dicttoxml import dicttoxml
 from resources.common.fix_utf8 import smartUTF8
-from resources.common.fileops import checkDir, pathLeaf, grabURL, saveURL, writeFile, readFile
+from resources.common.fileops import checkDir, pathLeaf, saveURL, grabURL, writeFile, readFile
+from resources.common.url import URL
 from resources.common.transforms import getImageType, itemHash, itemHashwithPath
 from resources.common.xlogger import Logger
 
@@ -39,7 +40,8 @@ __addonpath__    = __addon__.getAddonInfo('path').decode('utf-8')
 __addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ )
 __language__     = __addon__.getLocalizedString
 
-lw = Logger('[Artist Slideshow]')
+lw = Logger( '[Artist Slideshow]' )
+mb = URL( 'json', {"User-Agent": __addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )'}, 10 )
 
 LANGUAGES = (
 # Full Language name[0]         ISO 639-1[1]   Script Language[2]
@@ -101,16 +103,16 @@ class Main:
         self._make_dirs()
         self._upgrade()
         if xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
-            lw.log( 'script already running', xbmc.LOGDEBUG )
+            lw.log( ['script already running'] )
         else:
             self.LastCacheTrim = 0
             self._set_property("ArtistSlideshowRunning", "True")
             if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
-                lw.log( 'no music playing', xbmc.LOGDEBUG )
+                lw.log( ['no music playing'] )
                 if( self.DAEMON == "False" ):
                     self._set_property("ArtistSlideshowRunning")
             else:
-                lw.log( 'first song started', xbmc.LOGDEBUG )
+                lw.log( ['first song started'] )
                 time.sleep(1) # it may take some time for xbmc to read tag info after playback started
                 self._use_correct_artwork()
                 self._trim_cache()
@@ -125,7 +127,7 @@ class Main:
                             self._trim_cache()
                         elif(not (self.DownloadedAllImages or self.UsingFallback)):
                             if(not (self.LocalImagesFound and self.PRIORITY == '1')):
-                                lw.log( 'same artist playing, continue download', xbmc.LOGDEBUG )
+                                lw.log( ['same artist playing, continue download'] )
                                 self._use_correct_artwork()
                     else:
                         time.sleep(2) # doublecheck if playback really stopped
@@ -141,13 +143,12 @@ class Main:
         try:
             old_files = os.listdir( dir_path )
         except Exception, e:
-            lw.log( 'unexpected error while getting directory list', xbmc.LOGDEBUG )
-            lw.log( e, xbmc.LOGDEBUG )
+            lw.log( ['unexpected error while getting directory list', e] )
             old_files = []
         for old_file in old_files:
             if not old_file.endswith( '.nfo' ):
                 xbmcvfs.delete( os.path.join(dir_path, old_file) )
-                lw.log( 'deleting file ' + old_file, xbmc.LOGDEBUG )
+                lw.log( ['deleting file ' + old_file] )
 
 
     def _clean_text( self, text ):
@@ -177,24 +178,24 @@ class Main:
     def _download( self, src, dst, dst2 ):
         if (not xbmc.abortRequested):
             tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
-            lw.log( 'the tmpname is ' + tmpname, xbmc.LOGDEBUG )
+            lw.log( ['the tmpname is ' + tmpname] )
             if not self._excluded( dst ):
                 if xbmcvfs.exists(tmpname):
                     xbmcvfs.delete(tmpname)
                 success, log_lines = saveURL( src, tmpname )
-                lw.log( log_lines, xbmc.LOGDEBUG )
+                lw.log( log_lines )
                 if not success:
                     return False
                 if os.path.getsize( tmpname ) > 999:
                     image_ext = getImageType( tmpname )
                     if not xbmcvfs.exists ( dst + image_ext ):
-                        lw.log( 'copying %s to %s' % (tmpname, dst2 + image_ext), xbmc.LOGDEBUG )
+                        lw.log( ['copying %s to %s' % (tmpname, dst2 + image_ext)] )
                         xbmcvfs.copy( tmpname, dst2 + image_ext )
-                        lw.log( 'moving %s to %s' % (tmpname, dst + image_ext), xbmc.LOGDEBUG )
+                        lw.log( ['moving %s to %s' % (tmpname, dst + image_ext)] )
                         xbmcvfs.rename( tmpname, dst + image_ext )
                         return True
                     else:
-                        lw.log( 'image already exists, deleting temporary file', xbmc.LOGDEBUG )
+                        lw.log( ['image already exists, deleting temporary file'] )
                         xbmcvfs.delete( tmpname )
                         return False
                 else:
@@ -209,27 +210,27 @@ class Main:
         exclusion_file = os.path.join(item_split['path'], '_exclusions.nfo')
         if xbmcvfs.exists( exclusion_file ):
             exclusions, log_lines = readFile( exclusion_file )
-            lw.log( log_lines, xbmc.LOGDEBUG )
+            lw.log( log_lines )
             if item_split['filename'] in exclusions:
                 return True
             else:
                 return False
         else:
             success, log_lines = writeFile( '', exclusion_file )
-            lw.log( log_lines, xbmc.LOGDEBUG )
+            lw.log( log_lines )
 
     
     def _get_artistinfo( self ):
-        lw.log( 'checking for local artist bio data', xbmc.LOGDEBUG )
+        lw.log( ['checking for local artist bio data'] )
         bio = self._get_local_data( 'bio' )
         if bio == []:
             if self.MBID:
                 self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + self.MBID
-                lw.log( 'trying to get artist bio from ' + self.url, xbmc.LOGDEBUG )
+                lw.log( ['trying to get artist bio from ' + self.url] )
                 bio = self._get_data( 'theaudiodb', 'bio' )
         if bio == []:
             self.url = self.LastfmURL + '&lang=' + self.LANGUAGE + '&method=artist.getInfo&artist=' + urllib.quote_plus( smartUTF8(self.NAME) )
-            lw.log( 'trying to get artist bio from ' + self.url, xbmc.LOGDEBUG )
+            lw.log( ['trying to get artist bio from ' + self.url] )
             bio = self._get_data('lastfm', 'bio')
         if bio == []:
             self.biography = ''
@@ -238,14 +239,14 @@ class Main:
         self.albums = self._get_local_data( 'albums' )
         if self.albums == []:
             theaudiodb_id, log_lines = readFile( os.path.join(self.InfoDir, 'theaudiodbid.nfo') )
-            lw.log( log_lines, xbmc.LOGDEBUG )
+            lw.log( log_lines )
             if theaudiodb_id:
                 self.url = self.theaudiodbURL + self.theaudiodbALBUMURL + theaudiodb_id
-                lw.log( 'trying to get artist albumns from ' + self.url, xbmc.LOGDEBUG )
+                lw.log( ['trying to get artist albumns from ' + self.url] )
                 self.albums = self._get_data('theaudiodb', 'albums')
         if self.albums == []:
             self.url = self.LastfmURL + '&method=artist.getTopAlbums&artist=' + urllib.quote_plus( smartUTF8(self.NAME) )
-            lw.log( 'trying to get artist albums from ' + self.url, xbmc.LOGDEBUG )
+            lw.log( ['trying to get artist albums from ' + self.url] )
             self.albums = self._get_data('lastfm', 'albums')
         self.similar = self._get_local_data( 'similar' )
         if self.similar == []:
@@ -270,12 +271,11 @@ class Main:
             try:
                 #playing_file = xbmc.Player().getPlayingFile()
                 playing_file = xbmc.Player().getPlayingFile() + ' - ' + xbmc.Player().getMusicInfoTag().getArtist() + ' - ' + xbmc.Player().getMusicInfoTag().getTitle()
-                lw.log( 'playing file is ' + playing_file, xbmc.LOGDEBUG )
+                lw.log( ['playing file is ' + playing_file] )
             except RuntimeError:
                 return artists_info
             except Exception, e:
-                lw.log( 'unexpected error getting playing file back from XBMC', xbmc.LOGDEBUG )
-                lw.log( e, xbmc.LOGDEBUG )
+                lw.log( ['unexpected error getting playing file back from XBMC', e] )
                 return artists_info
             if playing_file != self.LASTPLAYINGFILE:
                 # if the same file is playing, use cached JSON response instead of doing a new query
@@ -289,35 +289,31 @@ class Main:
             except (IndexError, KeyError, ValueError):
                 artist_names = []
             except Exception, e:
-                lw.log( 'unexpected error getting JSON back from XBMC', xbmc.LOGDEBUG )
-                lw.log( e, xbmc.LOGDEBUG )
+                lw.log( ['unexpected error getting JSON back from XBMC', e] )
                 artist_names = []
             try:
                 mbids = json.loads(response)['result']['item']['muiscbrainzartistid']
             except (IndexError, KeyError, ValueError):
                 mbids = []
             except Exception, e:
-                lw.log( 'unexpected error getting JSON back from XBMC', xbmc.LOGDEBUG )
-                lw.log( e, xbmc.LOGDEBUG )
+                lw.log( ['unexpected error getting JSON back from XBMC', e] )
                 mbids = []
             try:
                 playing_song = xbmc.Player().getMusicInfoTag().getTitle()
             except RuntimeError:
                 playing_song = ''
             except Exception, e:
-                lw.log( 'unexpected error gettting playing song back from XBMC', xbmc.LOGDEBUG )
-                lw.log( e, xbmc.LOGDEBUG )
+                lw.log( ['unexpected error gettting playing song back from XBMC', e] )
                 playing_song = ''
             if not artist_names:
-                lw.log( 'No artist names returned from JSON call, assuming this is an internet stream', xbmc.LOGDEBUG )
+                lw.log( ['No artist names returned from JSON call, assuming this is an internet stream'] )
                 try:
                     playingartist = playing_song[0:(playing_song.find('-'))-1]
                 except RuntimeError:
                     playingartist = ''
                     playing_song = ''
                 except Exception, e:
-                    lw.log( 'unexpected error gettting playing song back from XBMC', xbmc.LOGDEBUG )
-                    lw.log( e, xbmc.LOGDEBUG )
+                    lw.log( ['unexpected error gettting playing song back from XBMC', e] )
                     playingartist = ''
                     playing_song = ''
                 artist_names = self._split_artists( playingartist )
@@ -365,23 +361,22 @@ class Main:
                 filename = os.path.join( self.InfoDir, 'lastfmartistalbums.nfo')
         if xbmcvfs.exists( filename ):
             if time.time() - os.path.getmtime(filename) < 1209600:
-                lw.log( 'cached artist %s info found' % item, xbmc.LOGDEBUG )
+                lw.log( ['cached artist %s info found' % item] )
                 ForceUpdate = False
             else:
-                lw.log( 'outdated cached info found for %s ' % item, xbmc.LOGDEBUG )
+                lw.log( ['outdated cached info found for %s ' % item] )
         if ForceUpdate:
-            lw.log( 'downloading artist %s info from %s' % (item, site), xbmc.LOGDEBUG )
+            lw.log( ['downloading artist %s info from %s' % (item, site)] )
             if site == 'fanarttv' or site == 'theaudiodb':
                 #converts the JSON response to XML
                 try:
                     url_data, log_lines = grabURL( self.url )
-                    lw.log( log_lines, xbmc.LOGDEBUG )
+                    lw.log( log_lines )
                     json_data = json.loads( url_data )
                 except ValueError:
                     json_data = []
                 except Exception, e:
-                    lw.log( 'unexpected error parsing JSON data', xbmc.LOGDEBUG )
-                    lw.log( e, xbmc.LOGDEBUG )
+                    lw.log( ['unexpected error parsing JSON data', e] )
                 if json_data:
                     if site == 'fanarttv':
                         try:
@@ -389,24 +384,22 @@ class Main:
                         except AttributeError:
                             return data
                         except Exception, e:
-                            lw.log( 'unexpected error fixing fanart.tv JSON data', xbmc.LOGDEBUG )
-                            lw.log( e, xbmc.LOGDEBUG )
+                            lw.log( ['unexpected error fixing fanart.tv JSON data', e] )
                             return data
                     success, log_lines = writeFile( dicttoxml( json_data ).encode('utf-8'), filename )
-                    lw.log( log_lines, xbmc.LOGDEBUG )
+                    lw.log( log_lines )
                     json_data = ''
                 else:
                     return data
             else:
                 success, log_lines = saveURL( self.url, filename )
-                lw.log( log_lines, xbmc.LOGDEBUG )
+                lw.log( log_lines )
                 if not success:
                     return data
         try:
             xmldata = xmltree.parse(filename).getroot()
         except Exception, e:
-            lw.log( 'invalid or missing xml file', xbmc.LOGDEBUG )
-            lw.log( e, xbmc.LOGDEBUG )
+            lw.log( ['invalid or missing xml file', e] )
             xbmcvfs.delete(filename)
             return data
         if item == "images":
@@ -421,7 +414,7 @@ class Main:
                             data.append(element.text)
                     if element.tag == 'idArtist' and not xbmcvfs.exists( id_filename ):
                         success, log_lines = writeFile( element.text, id_filename )
-                        lw.log( log_lines, xbmc.LOGDEBUG )
+                        lw.log( log_lines )
             elif site == "htbackdrops":
                 for element in xmldata.getiterator():
                     if element.tag == "id":
@@ -436,7 +429,7 @@ class Main:
                         data.append(bio)            
                     if element.tag == 'idArtist' and not xbmcvfs.exists( id_filename ):
                         success, log_lines = writeFile( element.text, id_filename )
-                        lw.log( log_lines, xbmc.LOGDEBUG )
+                        lw.log( log_lines )
             if site == "lastfm":
                 for element in xmldata.getiterator():
                     if element.tag == "content":
@@ -487,7 +480,7 @@ class Main:
                                 image = ''
                             data.append( ( name , image ) )
         if data == '':
-            lw.log( 'no %s found on %s' % (item, site), xbmc.LOGDEBUG )
+            lw.log( ['no %s found on %s' % (item, site)] )
         return data
 
 
@@ -512,18 +505,18 @@ class Main:
         if site == 'fanarttv':
             if self.MBID:
                 self.url = self.fanarttvURL + self.MBID + self.fanarttvOPTIONS
-                lw.log( 'asking for images from: %s' %self.url, xbmc.LOGDEBUG )
+                lw.log( ['asking for images from: %s' %self.url] )
             else:
                 return []
         elif site == 'theaudiodb':
             if self.MBID:
                 self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + self.MBID
-                lw.log( 'asking for images from: %s' %self.url, xbmc.LOGDEBUG )
+                lw.log( ['asking for images from: %s' %self.url] )
             else:
                 return []
         elif site == "htbackdrops":
             self.url = self.HtbackdropsQueryURL + '&keywords=' + self.NAME.replace('&','%26').replace(' ', '+')
-            lw.log( 'asking for images from: %s' %self.url, xbmc.LOGDEBUG )
+            lw.log( ['asking for images from: %s' %self.url] )
         images = self._get_data(site, 'images')
         return images
 
@@ -540,12 +533,11 @@ class Main:
             filenames.append( os.path.join( local_path, 'artistbio.nfo' ) )
         found_xml = True
         for filename in filenames:
-            lw.log( 'checking filename ' + filename, xbmc.LOGDEBUG )
+            lw.log( ['checking filename ' + filename] )
             try:
                 xmldata = xmltree.parse(filename).getroot()
             except Exception, e:
-                lw.log( 'invalid or missing local xml file for %s' % item, xbmc.LOGDEBUG )
-                lw.log( e, xbmc.LOGDEBUG )
+                lw.log( ['invalid or missing local xml file for %s' % item, e] )
                 found_xml = False
             if found_xml:
                 break
@@ -571,30 +563,29 @@ class Main:
                         image = os.path.join( local_path, item, image_text )
                     data.append( ( name , image ) )
         if data == '':
-            lw.log( 'no %s found in local xml file' % item, xbmc.LOGDEBUG )
+            lw.log( ['no %s found in local xml file' % item] )
         return data
 
 
     def _get_local_images( self ):
         self.LocalImagesFound = False
         if not self.NAME:
-            lw.log( 'no artist name provided', xbmc.LOGDEBUG )
+            lw.log( ['no artist name provided'] )
             return
         self.CacheDir = os.path.join( self.LOCALARTISTPATH, self.NAME, self.FANARTFOLDER )
-        lw.log( 'cachedir = %s' % self.CacheDir, xbmc.LOGDEBUG )
+        lw.log( ['cachedir = %s' % self.CacheDir] )
         try:
             files = os.listdir(self.CacheDir)
         except OSError:
             files = []
         except Exception, e:
-            lw.log( 'unexpected error getting directory list', xbmc.LOGDEBUG )
-            lw.log( e, xbmc.LOGDEBUG )
+            lw.log( ['unexpected error getting directory list', e] )
             files = []
         for file in files:
             if file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png'):
                 self.LocalImagesFound = True
         if self.LocalImagesFound:
-            lw.log( 'local images found', xbmc.LOGDEBUG )
+            lw.log( ['local images found'] )
             if self.ARTISTNUM == 1:
                 self._set_property("ArtistSlideshow", self.CacheDir)
                 if self.ARTISTINFO == "true":
@@ -605,44 +596,44 @@ class Main:
 
     def _get_musicbrainz_id ( self, theartist ):
         mbid = ''
-        lw.log( 'Looking for a musicbrainz ID for artist ' + theartist, xbmc.LOGDEBUG )
-        lw.log( 'Looking for musicbrainz ID in the musicbrainz.nfo file', xbmc.LOGDEBUG )
+        lw.log( ['Looking for a musicbrainz ID for artist ' + theartist, 'Looking for musicbrainz ID in the musicbrainz.nfo file'] )
         self._set_infodir( theartist )
         filename = os.path.join( self.InfoDir, 'musicbrainz.nfo' )
         if xbmcvfs.exists( filename ):
             mbid, log_lines = readFile( filename )
-            lw.log( log_lines, xbmc.LOGDEBUG )
+            lw.log( log_lines )
             if not mbid:
                 if time.time() - os.path.getmtime(filename) < 1209600:
-                    lw.log( 'no musicbrainz ID found in musicbrainz.nfo file', xbmc.LOGDEBUG )
+                    lw.log( ['no musicbrainz ID found in musicbrainz.nfo file'] )
                     return ''
                 else:
-                    lw.log( 'no musicbrainz ID found in musicbrainz.nfo file, trying lookup again', xbmc.LOGDEBUG )
+                    lw.log( ['no musicbrainz ID found in musicbrainz.nfo file, trying lookup again'] )
             else:
-                lw.log( 'musicbrainz ID found in musicbrainz.nfo file', xbmc.LOGDEBUG )
+                lw.log( ['musicbrainz ID found in musicbrainz.nfo file'] )
                 return mbid
         else:
-            lw.log( 'no musicbrainz.nfo file found', xbmc.LOGDEBUG )
+            lw.log( ['no musicbrainz.nfo file found'] )
         if self._playback_stopped_or_changed():
             success, log_lines = writeFile( '', filename )
-            lw.log( log_lines, xbmc.LOGDEBUG )
+            lw.log( log_lines )
             return ''
         # this is here to account for songs or albums that have the artist 'Various Artists'
         # because AS chokes when trying to find this artist on MusicBrainz
         if theartist.lower() == 'various artists':
             success, log_lines = writeFile( self.VARIOUSARTISTSMBID, filename)
-            lw.log( log_lines, xbmc.LOGDEBUG )
+            lw.log( log_lines )
             return self.VARIOUSARTISTSMBID
-        lw.log( 'querying musicbrainz.com for musicbrainz ID. This is about to get messy.', xbmc.LOGDEBUG )
+        lw.log( ['querying musicbrainz.com for musicbrainz ID. This is about to get messy.'] )
         badSubstrings = ["the ", "The ", "THE ", "a ", "A ", "an ", "An ", "AN "]
         searchartist = theartist
         for badSubstring in badSubstrings:
             if theartist.startswith(badSubstring):
                 searchartist = theartist.replace(badSubstring, "")
-        mboptions = 'artist/?fmt=json&query=' 
+#        mboptions = 'artist/?fmt=json&query='
+        mboptions = {"fmt":"json"} 
         mbsearch = 'artist:"%s"' % searchartist
         query_times = {'last':0, 'current':time.time()}
-        lw.log( 'parsing musicbrainz response for muiscbrainz ID', xbmc.LOGDEBUG )
+        lw.log( ['parsing musicbrainz response for muiscbrainz ID'] )
         cached_mb_info = False
         for artist in self._get_musicbrainz_info( mboptions, mbsearch, 'artist', query_times ):
             mbid = ''
@@ -653,8 +644,7 @@ class Main:
             except KeyError:
                 all_names = []
             except Exception, e:
-                lw.log( 'unexpected error getting JSON data from XBMC response', xbmc.LOGDEBUG )
-                lw.log( e, xbmc.LOGDEBUG )
+                lw.log( ['unexpected error getting JSON data from XBMC response', e] )
                 all_names = []
             aliases = []
             if all_names:
@@ -662,35 +652,35 @@ class Main:
                     aliases.append( one_name['name'].lower() )
             if artist['name'].lower() == theartist.lower() or theartist.lower() in aliases:
                 mbid = artist['id']
-                lw.log( 'found a potential musicbrainz ID of %s for %s' % (mbid, theartist), xbmc.LOGDEBUG )
+                lw.log( ['found a potential musicbrainz ID of %s for %s' % (mbid, theartist)] )
                 playing_album = self._get_playing_item( 'album' )
                 if playing_album:
-                    lw.log( 'checking album name against releases in musicbrainz', xbmc.LOGDEBUG )
+                    lw.log( ['checking album name against releases in musicbrainz'] )
                     query_times = {'last':query_times['current'], 'current':time.time()}
                     cached_mb_info = self._parse_musicbrainz_info( 'release', mbid, playing_album, query_times )
                 if not cached_mb_info:
                     playing_song = self._get_playing_item( 'title' )
                     if playing_song:
-                        lw.log( 'checking song name against recordings in musicbrainz', xbmc.LOGDEBUG )
+                        lw.log( ['checking song name against recordings in musicbrainz'] )
                         if smartUTF8( theartist ) == playing_song[0:(playing_song.find('-'))-1]:
                             playing_song = playing_song[(playing_song.find('-'))+2:]
                         query_times = {'last':query_times['current'], 'current':time.time()}
                         cached_mb_info = self._parse_musicbrainz_info( 'recording', mbid, playing_song, query_times )
                         if not cached_mb_info:
-                            lw.log( 'checking song name against works in musicbrainz', xbmc.LOGDEBUG )
+                            lw.log( ['checking song name against works in musicbrainz'] )
                             query_times = {'last':query_times['current'], 'current':time.time()}
                             cached_mb_info = self._parse_musicbrainz_info( 'work', mbid, playing_song, query_times )
                 if cached_mb_info:
                     break
                 else:
-                    lw.log( 'No matching song/album found for %s. Trying the next artist.' % theartist, xbmc.LOGDEBUG )
+                    lw.log( ['No matching song/album found for %s. Trying the next artist.' % theartist] )
         if cached_mb_info:
-            lw.log( 'Musicbrainz ID for %s is %s. writing out to cache file.' % (theartist, mbid), xbmc.LOGDEBUG )
+            lw.log( ['Musicbrainz ID for %s is %s. writing out to cache file.' % (theartist, mbid)] )
         else:
             mbid = ''
-            lw.log( 'No musicbrainz ID found for %s. writing empty cache file.' % theartist, xbmc.LOGDEBUG )
+            lw.log( ['No musicbrainz ID found for %s. writing empty cache file.' % theartist] )
         success, log_lines = writeFile( mbid, filename )
-        lw.log( log_lines, xbmc.LOGDEBUG )
+        lw.log( log_lines )
         return mbid
 
                                 
@@ -708,36 +698,29 @@ class Main:
         query_start = time.time()
         while do_loop:
             if mbsearch:
-                mbquery = mbbase + mboptions + urllib.quote_plus( smartUTF8(mbsearch), ':!"' )
+                mbquery = mbbase + type
+                mboptions['query'] = urllib.quote_plus( smartUTF8(mbsearch), ':!"' )
             else:
-                mbquery = mbbase + mboptions + '&offset=' + str(offset)
-            lw.log(  'getting results from musicbrainz using: ' + mbquery, xbmc.LOGDEBUG )
+                mbquery = mbbase + type[:-1]
+                mboptions['offset'] = str(offset)
+            lw.log( ['getting results from musicbrainz using: ' + mbquery] )
             for x in range(1, 5):
-                try:
-                    url_data, log_lines = grabURL(mbquery, User_Agent=__addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )')
-                    lw.log( log_lines, xbmc.LOGDEBUG )
-                    json_data = json.loads( url_data )
-                except ValueError:
-                    json_data = []
-                except Exception, e:
-                    lw.log( 'unexpected error getting JSON data from ' + mbquery, xbmc.LOGDEBUG )
-                    lw.log( e, xbmc.LOGDEBUG )
-                    json_data = []
+                success, log_lines, json_data = mb.Get( mbquery, params=mboptions )
+                lw.log( log_lines )
                 if self._playback_stopped_or_changed():
                     return []       
-                if not json_data:
+                if not success:
                     wait_time = random.randint(2,5)
-                    lw.log( 'site unreachable, waiting %s seconds to try again.' % wait_time, xbmc.LOGDEBUG )
+                    lw.log( ['site unreachable, waiting %s seconds to try again.' % wait_time] )
                     self._wait( wait_time )
                 else:
                     try:
                         mb_data.extend( json_data[type] )
                     except KeyError:
-                        lw.log( 'no valid value for %s found in JSON data' % type, xbmc.LOGDEBUG )
+                        lw.log( ['no valid value for %s found in JSON data' % type] )
                         offset = -100
                     except Exception, e:
-                        lw.log( 'unexpected error while parsing JSON data', xbmc.LOGDEBUG )
-                        lw.log( e, xbmc.LOGDEBUG )
+                        lw.log( ['unexpected error while parsing JSON data', e] )
                         offset = -100
                     break
             offset = offset + 100
@@ -746,11 +729,10 @@ class Main:
             except KeyError:
                 total_items = 0
             except Exception, e:
-                lw.log( 'unexpected error getting JSON data from ' + mbquery, xbmc.LOGDEBUG )
-                lw.log( e, xbmc.LOGDEBUG )
+                lw.log( ['unexpected error getting JSON data from ' + mbquery, e] )
                 total_items = 0
             if (not mbsearch) and (total_items - offset > 0):
-                lw.log( 'getting more data from musicbrainz', xbmc.LOGDEBUG )
+                lw.log( ['getting more data from musicbrainz'] )
                 query_elapsed = time.time() - query_start
                 if query_elapsed < 1:
                     self._wait(1 - query_elapsed)
@@ -777,8 +759,7 @@ class Main:
                 got_title = False
             except Exception, e:
                 got_title = False
-                lw.log( 'unexpected error getting %s from XBMC' % item, xbmc.LOGDEBUG )
-                lw.log( e, xbmc.LOGDEBUG )
+                lw.log( ['unexpected error getting %s from XBMC' % item, e] )
             if num_trys > max_trys:
                 break
             else:
@@ -801,7 +782,7 @@ class Main:
         for language in LANGUAGES:
             if self.LANGUAGE == language[2]:
                 self.LANGUAGE = language[1]
-                lw.log( 'language = %s' % self.LANGUAGE, xbmc.LOGDEBUG )
+                lw.log( ['language = %s' % self.LANGUAGE] )
                 break
         self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" ).decode('utf-8')
         self.PRIORITY = __addon__.getSetting( "priority" )
@@ -815,18 +796,17 @@ class Main:
         except ValueError:
             self.maxcachesize = 1024 * 1000000
         except Exception, e:
-            lw.log( 'unexpected error while parsing maxcachesize setting', xbmc.LOGDEBUG )
-            lw.log( e, xbmc.LOGDEBUG )
+            lw.log( ['unexpected error while parsing maxcachesize setting', e] )
             self.maxcachesize = 1024 * 1000000
         self.NOTIFICATIONTYPE = __addon__.getSetting( "show_progress" )
         if self.NOTIFICATIONTYPE == "2":
             self.PROGRESSPATH = __addon__.getSetting( "progress_path" ).decode('utf-8')
-            lw.log( 'set progress path to %s' % self.PROGRESSPATH, xbmc.LOGDEBUG )
+            lw.log( ['set progress path to %s' % self.PROGRESSPATH] )
         else:
             self.PROGRESSPATH = ''
         if __addon__.getSetting( "fanart_folder" ):
             self.FANARTFOLDER = __addon__.getSetting( "fanart_folder" ).decode('utf-8')
-            lw.log( 'set fanart folder to %s' % self.FANARTFOLDER, xbmc.LOGDEBUG )
+            lw.log( ['set fanart folder to %s' % self.FANARTFOLDER] )
         else:
             self.FANARTFOLDER = 'extrafanart'
 
@@ -846,7 +826,7 @@ class Main:
         self.ARTISTSLIDESHOWRUNNING = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshowRunning" )
         self.EXTERNALCALL = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshow.ExternalCall" )
         self.EXTERNALCALLSTATUS = xbmc.getInfoLabel( self.EXTERNALCALL )
-        lw.log( 'external call is set to ' + xbmc.getInfoLabel( self.EXTERNALCALL ), xbmc.LOGDEBUG )
+        lw.log( ['external call is set to ' + xbmc.getInfoLabel( self.EXTERNALCALL )] )
         self.NAME = ''
         self.ALLARTISTS = []
         self.MBID = ''
@@ -885,7 +865,7 @@ class Main:
 
 
     def _merge_images( self ):
-        lw.log( 'merging files from primary directory %s into merge directory %s' % (self.CacheDir, self.MergeDir), xbmc.LOGDEBUG )
+        lw.log( ['merging files from primary directory %s into merge directory %s' % (self.CacheDir, self.MergeDir)] )
         self.MergedImagesFound = True
         files = os.listdir(self.CacheDir)
         for file in files:
@@ -898,7 +878,7 @@ class Main:
             else:
                 self._wait( self.MINREFRESH - (wait_elapsed + 2) )  #not sure why there needs to be a manual adjustment here
             if not self._playback_stopped_or_changed():
-                lw.log( 'switching slideshow to merge directory', xbmc.LOGDEBUG )
+                lw.log( ['switching slideshow to merge directory'] )
                 self._set_property("ArtistSlideshow", self.MergeDir)
 
 
@@ -920,16 +900,15 @@ class Main:
 
 
     def _move_info_files( self, old_loc, new_loc, type ):
-        lw.log( 'attempting to move from %s to %s' % (old_loc, new_loc), xbmc.LOGDEBUG )
+        lw.log( ['attempting to move from %s to %s' % (old_loc, new_loc)] )
         try:
             os.chdir( old_loc )
             folders = os.listdir( old_loc )
         except OSError:
-            lw.log( 'no directory found: ' + old_loc, xbmc.LOGDEBUG )
+            lw.log( ['no directory found: ' + old_loc] )
             return
         except Exception, e:
-            lw.log( 'unexpected error while getting directory list', xbmc.LOGDEBUG )
-            lw.log( e, xbmc.LOGDEBUG )
+            lw.log( ['unexpected error while getting directory list', e] )
             return
         for folder in folders:
             if type == 'cache':
@@ -941,13 +920,12 @@ class Main:
             try:
                 old_files = os.listdir( old_folder )
             except Exception, e:
-                lw.log( 'unexpected error while getting directory list', xbmc.LOGDEBUG )
-                lw.log( e, xbmc.LOGDEBUG )
+                lw.log( ['unexpected error while getting directory list', e] )
                 old_files = []
             exclude_path = os.path.join( old_folder, '_exclusions.nfo' )
             if old_files and type == 'cache' and not xbmcvfs.exists(exclude_path):
                 success, log_lines = writeFile( '', exclude_path )
-                lw.log( log_lines, xbmc.LOGDEBUG )
+                lw.log( log_lines )
             for old_file in old_files:
                 if old_file.endswith( '.nfo' ) and not old_file == '_exclusions.nfo':
                     checkDir( new_folder )
@@ -965,7 +943,7 @@ class Main:
                     elif new_file == 'artistsimilar.nfo':
                         new_file = 'lastfmartistsimilar.nfo'
                     xbmcvfs.rename( os.path.join(old_folder, old_file), os.path.join(new_folder, new_file) )
-                    lw.log( 'moving %s to %s' % (old_file, os.path.join(new_folder, new_file)), xbmc.LOGDEBUG )
+                    lw.log( ['moving %s to %s' % (old_file, os.path.join(new_folder, new_file))] )
 
 
     def _parse_argv( self ):
@@ -974,35 +952,35 @@ class Main:
         except IndexError:
             params = {}        
         except Exception, e:
-            lw.log( 'unexpected error while parsing arguments', xbmc.LOGDEBUG )
-            lw.log( e, xbmc.LOGDEBUG )
+            lw.log( ['unexpected error while parsing arguments', e] )
             params = {}
         self.WINDOWID = params.get( "windowid", "12006")
-        lw.log( 'window id is set to %s' % self.WINDOWID, xbmc.LOGDEBUG )
+        lw.log( ['window id is set to %s' % self.WINDOWID] )
         self.PASSEDFIELDS = {}
         self.FIELDLIST = ['artistfield', 'titlefield', 'albumfield', 'mbidfield']
         for item in self.FIELDLIST:
             self.PASSEDFIELDS[item] = params.get( item, '' )
-            lw.log( '%s is set to %s' % (item, self.PASSEDFIELDS[item]), xbmc.LOGDEBUG )
+            lw.log( ['%s is set to %s' % (item, self.PASSEDFIELDS[item])] )
         self.DAEMON = params.get( "daemon", "False" )
         if self.DAEMON == "True":
-            lw.log( 'daemonizing', xbmc.LOGDEBUG )
+            lw.log( ['daemonizing'] )
 
 
     def _parse_musicbrainz_info( self, type, mbid, playing_thing, query_times ):
         if self._playback_stopped_or_changed():
             return False
-        lw.log( "checking this artist's " + type + "s against currently playing " + type, xbmc.LOGDEBUG )
-        mboptions = type + '?artist=' + mbid + '&limit=100&fmt=json'
+        lw.log( ["checking this artist's " + type + "s against currently playing " + type] )
+#        mboptions = type + '?artist=' + mbid + '&limit=100&fmt=json'
+        mboptions = {"artist":mbid, "limit":"100", "fmt":"json"}
         for thing in self._get_musicbrainz_info( mboptions, '', type + 's', query_times ):
             title = smartUTF8( thing['title'] )
             if playing_thing.rfind('(') > 0:
                 playing_title = smartUTF8( playing_thing[:playing_thing.rfind('(')-2] )
             else:
                 playing_title = smartUTF8( playing_thing )
-            lw.log( 'comparing musicbrainz %s: %s with local %s: %s' % (type, title, type, playing_title), xbmc.LOGDEBUG )
+            lw.log( ['comparing musicbrainz %s: %s with local %s: %s' % (type, title, type, playing_title)] )
             if title.lower().startswith( playing_title.lower() ) or playing_title.lower().startswith( title.lower() ):
-                lw.log( 'found matching %s, this should be the right artist' % type, xbmc.LOGDEBUG )
+                lw.log( ['found matching %s, this should be the right artist' % type] )
                 return True
         return False
 
@@ -1018,29 +996,27 @@ class Main:
     def _refresh_image_directory( self ):
         if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode('utf-8') == self.TransitionDir):
             self._set_property("ArtistSlideshow", self.CacheDir)
-            lw.log( 'switching slideshow to ' + self.CacheDir, xbmc.LOGDEBUG )
+            lw.log( ['switching slideshow to ' + self.CacheDir] )
         else:
             self._set_property("ArtistSlideshow", self.TransitionDir)
-            lw.log( 'switching slideshow to ' + self.TransitionDir, xbmc.LOGDEBUG )
+            lw.log( ['switching slideshow to ' + self.TransitionDir] )
         self.LASTARTISTREFRESH = time.time()
-        lw.log( 'Last slideshow refresh time is ' + str(self.LASTARTISTREFRESH), xbmc.LOGDEBUG )
+        lw.log( ['Last slideshow refresh time is ' + str(self.LASTARTISTREFRESH)] )
 
 
     def _rename_tbn_files( self, loc, type ):
-        lw.log( 'attempting to rename .tbn files with correct extension', xbmc.LOGDEBUG )
-        lw.log( 'from location: ' + loc, xbmc.LOGDEBUG )
+        lw.log( ['attempting to rename .tbn files with correct extension', 'from location: ' + loc] )
         try:
             os.chdir( loc )
             folders = os.listdir( loc )
         except OSError:
-            lw.log( 'no directory found: ' + loc, xbmc.LOGDEBUG )
+            lw.log( ['no directory found: ' + loc] )
             return
         except Exception, e:
-            lw.log( 'unexpected error while getting directory list', xbmc.LOGDEBUG )
-            lw.log( e, xbmc.LOGDEBUG )
+            lw.log( ['unexpected error while getting directory list', e] )
             return
         for folder in folders:
-            lw.log( 'checking ' + folder )
+            lw.log( ['checking ' + folder] )
             if type == 'cache':
                 thepath = os.path.join( loc, folder )
             elif type == 'local':
@@ -1049,8 +1025,7 @@ class Main:
                 os.chdir( thepath )
                 files = os.listdir( thepath )
             except Exception, e:
-                lw.log( 'unexpected error while getting file list', xbmc.LOGDEBUG )
-                lw.log( e, xbmc.LOGDEBUG )
+                lw.log( ['unexpected error while getting file list', e] )
                 files = []
             for file in files:
                 if file.endswith( '.tbn' ):
@@ -1059,8 +1034,8 @@ class Main:
                     new_file = file.replace( '.tbn', getImageType( old_path ) )
                     new_path = os.path.join( thepath, new_file )
                     xbmcvfs.rename( old_path, new_path )
-                    lw.log( 'renaming %s to %s' % (old_path, new_path), xbmc.LOGDEBUG )
-        lw.log( 'finished renaming .tbn files with correct extension', xbmc.LOGDEBUG )
+                    lw.log( ['renaming %s to %s' % (old_path, new_path)] )
+        lw.log( ['finished renaming .tbn files with correct extension'] )
     
 
     def _set_cachedir( self, theartist ):
@@ -1087,8 +1062,7 @@ class Main:
         try:
           self.WINDOW.setProperty(property_name, value)
         except Exception, e:
-          lw.log( " *************** Exception: Couldn't set propery " + property_name + " value " + value, xbmc.LOGDEBUG )
-          lw.log( e, xbmc.LOGDEBUG )
+          lw.log( ["Exception: Couldn't set propery " + property_name + " value " + value , e])
 
 
     def _set_thedir(self, theartist, dirtype):
@@ -1110,14 +1084,14 @@ class Main:
         self.FirstImage = True
         cached_image_info = False
         if not self.NAME:
-            lw.log( 'no artist name provided', xbmc.LOGDEBUG )
+            lw.log( ['no artist name provided'] )
             return
         if self.PRIORITY == '2' and self.LocalImagesFound:
             pass
             #self.CacheDir was successfully set in _get_local_images
         else:
             self._set_cachedir( self.NAME )
-        lw.log( 'cachedir = %s' % self.CacheDir, xbmc.LOGDEBUG )
+        lw.log( ['cachedir = %s' % self.CacheDir] )
 
         files = os.listdir(self.CacheDir)
         for file in files:
@@ -1125,7 +1099,7 @@ class Main:
                 self.CachedImagesFound = True
 
         if self.CachedImagesFound:
-            lw.log( 'cached images found', xbmc.LOGDEBUG )
+            lw.log( ['cached images found'] )
             cached_image_info = True
             self.LASTARTISTREFRESH = time.time()
             if self.ARTISTNUM == 1:
@@ -1139,10 +1113,10 @@ class Main:
                     filename = os.path.join( self.InfoDir, cache_file.decode('utf-8') )
                     if xbmcvfs.exists( filename ):
                         if time.time() - os.path.getmtime(filename) < 1209600:
-                            lw.log( 'cached %s found' % filename, xbmc.LOGDEBUG )
+                            lw.log( ['cached %s found' % filename] )
                             cached_image_info = True
                         else:
-                           lw.log( 'outdated %s found' % filename, xbmc.LOGDEBUG )
+                           lw.log( ['outdated %s found' % filename] )
                            cached_image_info = False
                 if self.NOTIFICATIONTYPE == "1":
                     self._set_property("ArtistSlideshow", self.InitDir)
@@ -1162,10 +1136,10 @@ class Main:
         sourcelist.append( ['htbackdrops', self.HTBACKDROPS] )
         imagelist = []
         for source in sourcelist:
-            lw.log( ' checking the source %s with a value of %s.' % (source[0], source[1]), xbmc.LOGDEBUG )
+            lw.log( ['checking the source %s with a value of %s.' % (source[0], source[1])] )
             if source[1] == "true":
                 imagelist.extend( self._get_images(source[0]) )
-        lw.log( 'downloading images', xbmc.LOGDEBUG )
+        lw.log( ['downloading images'] )
         for url in imagelist:
             if( self._playback_stopped_or_changed() ):
                 return
@@ -1173,7 +1147,7 @@ class Main:
             path2 = itemHashwithPath( url, self.TransitionDir )
             if not xbmcvfs.exists(path):
                 if self._download(url, path, path2):
-                    lw.log( 'downloaded %s to %s' % (url, path) , xbmc.LOGDEBUG )
+                    lw.log( ['downloaded %s to %s' % (url, path)]  )
                     self.ImageDownloaded = True
             elif self._excluded( path ):
                 xbmcvfs.delete( path )
@@ -1196,14 +1170,14 @@ class Main:
                 self.FirstImage = False
 
         if self.ImageDownloaded:
-            lw.log( 'finished downloading images', xbmc.LOGDEBUG )
+            lw.log( ['finished downloading images'] )
             self.DownloadedAllImages = True
             if( self._playback_stopped_or_changed() ):
                 self._set_property("ArtistSlideshow", self.CacheDir)
                 self.LASTARTISTREFRESH = time.time()
                 self._clean_dir( self.TransitionDir )
                 return
-            lw.log( 'cleaning up from refreshing slideshow', xbmc.LOGDEBUG )
+            lw.log( ['cleaning up from refreshing slideshow'] )
             wait_elapsed = time.time() - self.LASTARTISTREFRESH
             if( wait_elapsed < self.MINREFRESH ):
                 self._wait( self.MINREFRESH - wait_elapsed )
@@ -1222,11 +1196,11 @@ class Main:
             self._clean_dir( self.TransitionDir )
 
         if not self.ImageDownloaded:
-            lw.log( 'no images downloaded', xbmc.LOGDEBUG )
+            lw.log( ['no images downloaded'] )
             self.DownloadedAllImages = True
             if not self.CachedImagesFound:
                 if self.ARTISTNUM == 1:
-                    lw.log( 'clearing ArtistSlideshow property', xbmc.LOGDEBUG )
+                    lw.log( ['clearing ArtistSlideshow property'] )
                     self._set_property("ArtistSlideshow", self.InitDir)
                     if self.NOTIFICATIONTYPE == "1" and not cached_image_info:
                         command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(__language__(30302)), smartUTF8(__language__(30303)), 10000, smartUTF8(__addonicon__))
@@ -1242,7 +1216,7 @@ class Main:
             now = time.time()
             cache_trim_delay = 0   #delay time is in seconds
             if( now - self.LastCacheTrim > cache_trim_delay ):
-                lw.log( ' trimming the cache down to %s bytes' % self.maxcachesize , xbmc.LOGDEBUG )
+                lw.log( ['trimming the cache down to %s bytes' % self.maxcachesize]  )
                 cache_root = xbmc.translatePath( 'special://profile/addon_data/%s/ArtistSlideshow/' % __addonname__ ).decode('utf-8')
                 os.chdir( cache_root )
                 folders = os.listdir( cache_root )
@@ -1253,10 +1227,10 @@ class Main:
                     if( self._playback_stopped_or_changed() ):
                         break
                     cache_size = cache_size + self._get_folder_size( cache_root + folder )
-                    lw.log( 'looking at folder %s cache size is now %s' % (folder, cache_size), xbmc.LOGDEBUG )
+                    lw.log( ['looking at folder %s cache size is now %s' % (folder, cache_size)] )
                     if( cache_size > self.maxcachesize and not first_folder ):
                         self._clean_dir( os.path.join(cache_root, folder) )
-                        lw.log( 'deleted files in folder %s' % folder, xbmc.LOGDEBUG )
+                        lw.log( ['deleted files in folder %s' % folder] )
                     first_folder = False
                 self.LastCacheTrim = now
 
@@ -1267,52 +1241,52 @@ class Main:
         self.TOTALARTISTS = len( self.ALLARTISTS )
         self.MergedImagesFound = False
         for artist, mbid in self._get_current_artists_info( 'withmbid' ):
-            lw.log( 'current artist is %s with a mbid of %s' % (artist, mbid), xbmc.LOGDEBUG )
+            lw.log( ['current artist is %s with a mbid of %s' % (artist, mbid)] )
             self.ARTISTNUM += 1
             self.NAME = artist
             self.MBID = mbid
             self._set_infodir( self.NAME )
             if self.USEOVERRIDE == 'true':
-                lw.log( 'using override directory for images', xbmc.LOGDEBUG )
+                lw.log( ['using override directory for images'] )
                 self._set_property("ArtistSlideshow", self.OVERRIDEPATH)
                 if(self.ARTISTNUM == 1):
                     self._get_artistinfo()
             elif self.PRIORITY == '1' and self.LOCALARTISTPATH:
-                lw.log( 'looking for local artwork', xbmc.LOGDEBUG )
+                lw.log( ['looking for local artwork'] )
                 self._get_local_images()
                 if(not self.LocalImagesFound):
-                    lw.log( 'no local artist artwork found, start download', xbmc.LOGDEBUG )
+                    lw.log( ['no local artist artwork found, start download'] )
                     self._start_download()
             elif self.PRIORITY == '2' and self.LOCALARTISTPATH:
-                lw.log( 'looking for local artwork', xbmc.LOGDEBUG )
+                lw.log( ['looking for local artwork'] )
                 self._get_local_images()
-                lw.log( 'start download', xbmc.LOGDEBUG )
+                lw.log( ['start download'] )
                 self._start_download()
             else:
-                lw.log( 'start download', xbmc.LOGDEBUG )
+                lw.log( ['start download'] )
                 self._start_download()
                 if not (self.CachedImagesFound or self.ImageDownloaded):
-                    lw.log( 'no remote artist artwork found, looking for local artwork', xbmc.LOGDEBUG )
+                    lw.log( ['no remote artist artwork found, looking for local artwork'] )
                     self._get_local_images()
         if not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded or self.MergedImagesFound):
             if (self.USEFALLBACK == 'true'):
-                lw.log( 'no images found for artist, using fallback slideshow', xbmc.LOGDEBUG )
-                lw.log( 'fallbackdir = ' + self.FALLBACKPATH, xbmc.LOGDEBUG )
+                lw.log( ['no images found for artist, using fallback slideshow'] )
+                lw.log( ['fallbackdir = ' + self.FALLBACKPATH] )
                 self.UsingFallback = True
                 self._set_property("ArtistSlideshow", self.FALLBACKPATH)
 
 
     def _update_check_file( self, version, message ):
         success, log_lines = writeFile( version, self.CHECKFILE )
-        lw.log( log_lines, xbmc.LOGDEBUG )
+        lw.log( log_lines )
         if success:
-            lw.log( message, xbmc.LOGDEBUG )
+            lw.log( [message] )
 
 
     def _upgrade( self ):
         #this is where any code goes for one time upgrade routines
         data, log_lines = readFile( self.CHECKFILE )
-        lw.log( log_lines, xbmc.LOGDEBUG )
+        lw.log( log_lines )
         if not data:
             self._migrate_info_files()
         if data == '1.5.4':
@@ -1331,12 +1305,11 @@ class Main:
 
 
 if ( __name__ == "__main__" ):
-    lw.log( 'script version %s started' % __addonversion__, xbmc.LOGDEBUG )
+    lw.log( ['script version %s started' % __addonversion__] )
     slideshow = Main()
     try:
         slideshow._set_property("ArtistSlideshow.CleanupComplete", "True")
     except Exception, e:
-        lw.log( 'unexpected error while setting property.', xbmc.LOGDEBUG )
-        lw.log( e, xbmc.LOGDEBUG )
+        lw.log( ['unexpected error while setting property.', e] )
 
-lw.log( 'script stopped', xbmc.LOGDEBUG )
+lw.log( ['script stopped'] )
