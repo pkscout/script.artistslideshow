@@ -28,7 +28,7 @@ else:
 
 from resources.dicttoxml.dicttoxml import dicttoxml
 from resources.common.fix_utf8 import smartUTF8
-from resources.common.fileops import checkDir, pathLeaf, saveURL, grabURL, writeFile, readFile
+from resources.common.fileops import checkDir, pathLeaf, writeFile, readFile
 from resources.common.url import URL
 from resources.common.transforms import getImageType, itemHash, itemHashwithPath
 from resources.common.xlogger import Logger
@@ -40,8 +40,11 @@ __addonpath__    = __addon__.getAddonInfo('path').decode('utf-8')
 __addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ )
 __language__     = __addon__.getLocalizedString
 
-lw = Logger( '[Artist Slideshow]' )
-mb = URL( 'json', {"User-Agent": __addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )'}, 10 )
+lw      = Logger( '[Artist Slideshow]' )
+mbURL   = URL( 'json',{"User-Agent": __addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )'} )
+JSONURL = URL( 'json' )
+txtURL  = URL( 'text' )
+imgURL  = URL( 'binary' )
 
 LANGUAGES = (
 # Full Language name[0]         ISO 639-1[1]   Script Language[2]
@@ -182,8 +185,11 @@ class Main:
             if not self._excluded( dst ):
                 if xbmcvfs.exists(tmpname):
                     xbmcvfs.delete(tmpname)
-                success, log_lines = saveURL( src, tmpname )
+                success, log_lines, url_data = imgURL.Get( src )
                 lw.log( log_lines )
+                if success:
+                    success, log_lines = writeFile( url_data, tmpname )
+                    lw.log( log_lines )
                 if not success:
                     return False
                 if os.path.getsize( tmpname ) > 999:
@@ -209,7 +215,7 @@ class Main:
         item_split = pathLeaf(item)
         exclusion_file = os.path.join(item_split['path'], '_exclusions.nfo')
         if xbmcvfs.exists( exclusion_file ):
-            exclusions, log_lines = readFile( exclusion_file )
+            log_lines, exclusions = readFile( exclusion_file )
             lw.log( log_lines )
             if item_split['filename'] in exclusions:
                 return True
@@ -238,7 +244,7 @@ class Main:
             self.biography = self._clean_text(bio[0])
         self.albums = self._get_local_data( 'albums' )
         if self.albums == []:
-            theaudiodb_id, log_lines = readFile( os.path.join(self.InfoDir, 'theaudiodbid.nfo') )
+            log_lines, theaudiodb_id = readFile( os.path.join(self.InfoDir, 'theaudiodbid.nfo') )
             lw.log( log_lines )
             if theaudiodb_id:
                 self.url = self.theaudiodbURL + self.theaudiodbALBUMURL + theaudiodb_id
@@ -369,15 +375,9 @@ class Main:
             lw.log( ['downloading artist %s info from %s' % (item, site)] )
             if site == 'fanarttv' or site == 'theaudiodb':
                 #converts the JSON response to XML
-                try:
-                    url_data, log_lines = grabURL( self.url )
-                    lw.log( log_lines )
-                    json_data = json.loads( url_data )
-                except ValueError:
-                    json_data = []
-                except Exception, e:
-                    lw.log( ['unexpected error parsing JSON data', e] )
-                if json_data:
+                success, log_lines, json_data = JSONURL.Get( self.url )
+                lw.log( log_lines )
+                if success:
                     if site == 'fanarttv':
                         try:
                             json_data = dict(map(lambda (key, value): ('artistImages', value), json_data.items()))
@@ -392,8 +392,11 @@ class Main:
                 else:
                     return data
             else:
-                success, log_lines = saveURL( self.url, filename )
+                success, log_lines, url_data = txtURL.Get( self.url )
                 lw.log( log_lines )
+                if success:
+                    success, log_lines = writeFile( url_data, filename )
+                    lw.log( log_lines )
                 if not success:
                     return data
         try:
@@ -600,7 +603,7 @@ class Main:
         self._set_infodir( theartist )
         filename = os.path.join( self.InfoDir, 'musicbrainz.nfo' )
         if xbmcvfs.exists( filename ):
-            mbid, log_lines = readFile( filename )
+            log_lines, mbid = readFile( filename )
             lw.log( log_lines )
             if not mbid:
                 if time.time() - os.path.getmtime(filename) < 1209600:
@@ -705,7 +708,7 @@ class Main:
                 mboptions['offset'] = str(offset)
             lw.log( ['getting results from musicbrainz using: ' + mbquery] )
             for x in range(1, 5):
-                success, log_lines, json_data = mb.Get( mbquery, params=mboptions )
+                success, log_lines, json_data = mbURL.Get( mbquery, params=mboptions )
                 lw.log( log_lines )
                 if self._playback_stopped_or_changed():
                     return []       
@@ -1285,7 +1288,7 @@ class Main:
 
     def _upgrade( self ):
         #this is where any code goes for one time upgrade routines
-        data, log_lines = readFile( self.CHECKFILE )
+        log_lines, data = readFile( self.CHECKFILE )
         lw.log( log_lines )
         if not data:
             self._migrate_info_files()
