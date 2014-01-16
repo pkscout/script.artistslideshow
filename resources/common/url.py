@@ -1,16 +1,12 @@
 import requests
     
-__timeout__    = 10
-__headers__    = ''
-__returntype__ = 'text'
-
 
 class URL():
+
     def __init__( self, returntype='text', headers='', timeout=10 ):
-        global __timeout__, __headers__, __returntype__
-        __timeout__ = timeout
-        __headers__ = headers
-        __returntype__ = returntype
+        self.timeout = timeout
+        self.headers = headers
+        self.returntype = returntype
 
     
     def Get( self, url, **kwargs ):
@@ -33,11 +29,11 @@ class URL():
         urldata = ''
         try:
             if urltype == "get":
-                urldata = requests.get( url, params=params, timeout=__timeout__ )
+                urldata = requests.get( url, params=params, timeout=self.timeout )
             elif urltype == "post":
-                urldata = requests.post( url, params=params, data=data, headers=__headers__, timeout=__timeout__ )
+                urldata = requests.post( url, params=params, data=data, headers=self.headers, timeout=self.timeout )
             elif urltype == "delete":
-                urldata = requests.delete( url, params=params, data=data, headers=__headers__, timeout=__timeout__ )
+                urldata = requests.delete( url, params=params, data=data, headers=self.headers, timeout=self.timeout )
             loglines.append( "the url is: " + urldata.url )
         except requests.exceptions.ConnectionError, e:
             loglines.append( 'site unreachable at ' + url )
@@ -53,11 +49,12 @@ class URL():
             loglines.append( e )
         if urldata:
             success = True
-            if __returntype__ == 'text':
-                data = urldata.text()
-            elif __returntype__ == 'binary':
-                data = urldata.content()
-            elif __returntype__ == 'json':
+            loglines.append( 'returning URL as ' + self.returntype )
+            if self.returntype == 'text':
+                data = urldata.text
+            elif self.returntype == 'binary':
+                data = urldata.content
+            elif self.returntype == 'json':
                 data = urldata.json()
                 if data == None:
                     data = []
@@ -77,7 +74,7 @@ class URL():
         try:
             data = kwargs['data']
         except:
-            if __returntype__ == 'json':
+            if self.returntype == 'json':
                 data = []
             else:
                 data = ''
