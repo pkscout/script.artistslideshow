@@ -1,3 +1,5 @@
+#v.0.1.0
+
 import xbmc
 
 #this class creates an object used to log stuff to the xbmc log file
