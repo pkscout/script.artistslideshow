@@ -1,4 +1,4 @@
-#v.0.1.0
+#v.0.1.1
 
 import requests
     
@@ -27,7 +27,7 @@ class URL():
     
     
     def _urlcall( self, url, params, data, urltype ):
-        loglines = []
+        loglines = []        
         urldata = ''
         try:
             if urltype == "get":
@@ -37,6 +37,10 @@ class URL():
             elif urltype == "delete":
                 urldata = requests.delete( url, params=params, data=data, headers=self.headers, timeout=self.timeout )
             loglines.append( "the url is: " + urldata.url )
+            loglines.append( 'the params are: ')
+            loglines.append( params )
+            loglines.append( 'the data are: ')
+            loglines.append( data )
         except requests.exceptions.ConnectionError, e:
             loglines.append( 'site unreachable at ' + url )
             loglines.append( e )
@@ -52,14 +56,15 @@ class URL():
         if urldata:
             success = True
             loglines.append( 'returning URL as ' + self.returntype )
-            if self.returntype == 'text':
-                data = urldata.text
-            elif self.returntype == 'binary':
-                data = urldata.content
-            elif self.returntype == 'json':
-                data = urldata.json()
-                if data == None:
-                    data = []
+            try:
+                if self.returntype == 'text':
+                    data = urldata.text
+                elif self.returntype == 'binary':
+                    data = urldata.content
+                elif self.returntype == 'json':
+                    data = urldata.json()
+            except:
+                data = urldata
         else:
             success = False
             data = ''
