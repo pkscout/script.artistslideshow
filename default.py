@@ -20,12 +20,11 @@
 
 import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 import itertools, os, random, re, sys, time, urllib
-import xml.etree.ElementTree as xmltree
+import xml.etree.ElementTree as _xmltree
 if sys.version_info >= (2, 7):
-    import json
+    import json as _json
 else:
-    import simplejson as json
-
+    import simplejson as _json
 from resources.dicttoxml.dicttoxml import dicttoxml
 from resources.common.fix_utf8 import smartUTF8
 from resources.common.fileops import checkDir, pathLeaf, writeFile, readFile
@@ -185,11 +184,11 @@ class Main:
             if not self._excluded( dst ):
                 if xbmcvfs.exists(tmpname):
                     xbmcvfs.delete(tmpname)
-                success, log_lines, url_data = imgURL.Get( src )
-                lw.log( log_lines )
+                success, loglines, urldata = imgURL.Get( src, params=self.params )
+                lw.log( loglines )
                 if success:
-                    success, log_lines = writeFile( url_data, tmpname )
-                    lw.log( log_lines )
+                    success, loglines = writeFile( urldata, tmpname )
+                    lw.log( loglines )
                 if not success:
                     return False
                 if os.path.getsize( tmpname ) > 999:
@@ -215,15 +214,15 @@ class Main:
         item_split = pathLeaf(item)
         exclusion_file = os.path.join(item_split['path'], '_exclusions.nfo')
         if xbmcvfs.exists( exclusion_file ):
-            log_lines, exclusions = readFile( exclusion_file )
-            lw.log( log_lines )
+            loglines, exclusions = readFile( exclusion_file )
+            lw.log( loglines )
             if item_split['filename'] in exclusions:
                 return True
             else:
                 return False
         else:
-            success, log_lines = writeFile( '', exclusion_file )
-            lw.log( log_lines )
+            success, loglines = writeFile( '', exclusion_file )
+            lw.log( loglines )
 
     
     def _get_artistinfo( self ):
@@ -231,11 +230,14 @@ class Main:
         bio = self._get_local_data( 'bio' )
         if bio == []:
             if self.MBID:
-                self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + self.MBID
+                self.url = self.theaudiodbARTISTURL
+                self.params['i'] = self.MBID
                 lw.log( ['trying to get artist bio from ' + self.url] )
                 bio = self._get_data( 'theaudiodb', 'bio' )
         if bio == []:
-            self.url = self.LastfmURL + '&lang=' + self.LANGUAGE + '&method=artist.getInfo&artist=' + urllib.quote_plus( smartUTF8(self.NAME) )
+            self.url = self.LastfmURL
+            additionalparams = {'lang=':self.LANGUAGE, 'method':'artist.getInfo', 'artist': urllib.quote_plus( smartUTF8(self.NAME) )}
+            self.params = dict( self.LastfmPARAMS.items() + additionalparams.items() )
             lw.log( ['trying to get artist bio from ' + self.url] )
             bio = self._get_data('lastfm', 'bio')
         if bio == []:
@@ -244,19 +246,24 @@ class Main:
             self.biography = self._clean_text(bio[0])
         self.albums = self._get_local_data( 'albums' )
         if self.albums == []:
-            log_lines, theaudiodb_id = readFile( os.path.join(self.InfoDir, 'theaudiodbid.nfo') )
-            lw.log( log_lines )
+            loglines, theaudiodb_id = readFile( os.path.join(self.InfoDir, 'theaudiodbid.nfo') )
+            lw.log( loglines )
             if theaudiodb_id:
-                self.url = self.theaudiodbURL + self.theaudiodbALBUMURL + theaudiodb_id
+                self.url = self.theaudiodbALBUMURL
+                self.params['i'] = theaudiodb_id
                 lw.log( ['trying to get artist albumns from ' + self.url] )
                 self.albums = self._get_data('theaudiodb', 'albums')
         if self.albums == []:
-            self.url = self.LastfmURL + '&method=artist.getTopAlbums&artist=' + urllib.quote_plus( smartUTF8(self.NAME) )
+            self.url = self.LastfmURL
+            additionalparams = {'method':'artist.getTopAlbums', 'artist':urllib.quote_plus( smartUTF8( self.NAME ) )} 
+            self.params = dict( self.LastfmPARAMS.items() + additionalparams.items() )
             lw.log( ['trying to get artist albums from ' + self.url] )
             self.albums = self._get_data('lastfm', 'albums')
         self.similar = self._get_local_data( 'similar' )
         if self.similar == []:
-            self.url = self.LastfmURL + '&method=artist.getSimilar&artist=' + urllib.quote_plus( smartUTF8(self.NAME) )
+            self.url = self.LastfmURL
+            additionalparams = {'method':'artist.getSimilar', 'artist':urllib.quote_plus( smartUTF8(self.NAME) )} 
+            self.params = dict( self.LastfmPARAMS.items() + additionalparams.items() )
             self.similar = self._get_data('lastfm', 'similar')
         self._set_properties()
 
@@ -291,14 +298,14 @@ class Main:
             else:
                 response = self.LASTJSONRESPONSE
             try:
-                artist_names = json.loads(response)['result']['item']['artist']
+                artist_names = _json.loads(response)['result']['item']['artist']
             except (IndexError, KeyError, ValueError):
                 artist_names = []
             except Exception, e:
                 lw.log( ['unexpected error getting JSON back from XBMC', e] )
                 artist_names = []
             try:
-                mbids = json.loads(response)['result']['item']['muiscbrainzartistid']
+                mbids = _json.loads(response)['result']['item']['muiscbrainzartistid']
             except (IndexError, KeyError, ValueError):
                 mbids = []
             except Exception, e:
@@ -375,8 +382,9 @@ class Main:
             lw.log( ['downloading artist %s info from %s' % (item, site)] )
             if site == 'fanarttv' or site == 'theaudiodb':
                 #converts the JSON response to XML
-                success, log_lines, json_data = JSONURL.Get( self.url )
-                lw.log( log_lines )
+                success, loglines, json_data = JSONURL.Get( self.url, params=self.params )
+                self.params = {}
+                lw.log( loglines )
                 if success:
                     if site == 'fanarttv':
                         try:
@@ -386,21 +394,22 @@ class Main:
                         except Exception, e:
                             lw.log( ['unexpected error fixing fanart.tv JSON data', e] )
                             return data
-                    success, log_lines = writeFile( dicttoxml( json_data ).encode('utf-8'), filename )
-                    lw.log( log_lines )
+                    success, loglines = writeFile( dicttoxml( json_data ).encode('utf-8'), filename )
+                    lw.log( loglines )
                     json_data = ''
                 else:
                     return data
             else:
-                success, log_lines, url_data = txtURL.Get( self.url )
-                lw.log( log_lines )
+                success, loglines, urldata = txtURL.Get( self.url, params=self.params )
+                self.params = {}
+                lw.log( loglines )
                 if success:
-                    success, log_lines = writeFile( url_data, filename )
-                    lw.log( log_lines )
+                    success, loglines = writeFile( urldata, filename )
+                    lw.log( loglines )
                 if not success:
                     return data
         try:
-            xmldata = xmltree.parse(filename).getroot()
+            xmldata = _xmltree.parse(filename).getroot()
         except Exception, e:
             lw.log( ['invalid or missing xml file', e] )
             xbmcvfs.delete(filename)
@@ -416,8 +425,8 @@ class Main:
                         if element.text:
                             data.append(element.text)
                     if element.tag == 'idArtist' and not xbmcvfs.exists( id_filename ):
-                        success, log_lines = writeFile( element.text, id_filename )
-                        lw.log( log_lines )
+                        success, loglines = writeFile( element.text, id_filename )
+                        lw.log( loglines )
             elif site == "htbackdrops":
                 for element in xmldata.getiterator():
                     if element.tag == "id":
@@ -431,8 +440,8 @@ class Main:
                             bio = ''
                         data.append(bio)            
                     if element.tag == 'idArtist' and not xbmcvfs.exists( id_filename ):
-                        success, log_lines = writeFile( element.text, id_filename )
-                        lw.log( log_lines )
+                        success, loglines = writeFile( element.text, id_filename )
+                        lw.log( loglines )
             if site == "lastfm":
                 for element in xmldata.getiterator():
                     if element.tag == "content":
@@ -513,12 +522,15 @@ class Main:
                 return []
         elif site == 'theaudiodb':
             if self.MBID:
-                self.url = self.theaudiodbURL + self.theaudiodbARTISTURL + self.MBID
+                self.url = self.theaudiodbARTISTURL
+                self.params['i'] = self.MBID
                 lw.log( ['asking for images from: %s' %self.url] )
             else:
                 return []
         elif site == "htbackdrops":
-            self.url = self.HtbackdropsQueryURL + '&keywords=' + self.NAME.replace('&','%26').replace(' ', '+')
+            self.url = self.HtbackdropsQueryURL
+            additionalparams = {'keywords':self.NAME.replace('&','%26').replace(' ', '+')}
+            self.params = dict( self.HtbackdropsPARAMS.items() + additionalparams.items() )
             lw.log( ['asking for images from: %s' %self.url] )
         images = self._get_data(site, 'images')
         return images
@@ -538,7 +550,7 @@ class Main:
         for filename in filenames:
             lw.log( ['checking filename ' + filename] )
             try:
-                xmldata = xmltree.parse(filename).getroot()
+                xmldata = _xmltree.parse(filename).getroot()
             except Exception, e:
                 lw.log( ['invalid or missing local xml file for %s' % item, e] )
                 found_xml = False
@@ -603,8 +615,8 @@ class Main:
         self._set_infodir( theartist )
         filename = os.path.join( self.InfoDir, 'musicbrainz.nfo' )
         if xbmcvfs.exists( filename ):
-            log_lines, mbid = readFile( filename )
-            lw.log( log_lines )
+            loglines, mbid = readFile( filename )
+            lw.log( loglines )
             if not mbid:
                 if time.time() - os.path.getmtime(filename) < 1209600:
                     lw.log( ['no musicbrainz ID found in musicbrainz.nfo file'] )
@@ -617,14 +629,14 @@ class Main:
         else:
             lw.log( ['no musicbrainz.nfo file found'] )
         if self._playback_stopped_or_changed():
-            success, log_lines = writeFile( '', filename )
-            lw.log( log_lines )
+            success, loglines = writeFile( '', filename )
+            lw.log( loglines )
             return ''
         # this is here to account for songs or albums that have the artist 'Various Artists'
         # because AS chokes when trying to find this artist on MusicBrainz
         if theartist.lower() == 'various artists':
-            success, log_lines = writeFile( self.VARIOUSARTISTSMBID, filename)
-            lw.log( log_lines )
+            success, loglines = writeFile( self.VARIOUSARTISTSMBID, filename)
+            lw.log( loglines )
             return self.VARIOUSARTISTSMBID
         lw.log( ['querying musicbrainz.com for musicbrainz ID. This is about to get messy.'] )
         badSubstrings = ["the ", "The ", "THE ", "a ", "A ", "an ", "An ", "AN "]
@@ -682,8 +694,8 @@ class Main:
         else:
             mbid = ''
             lw.log( ['No musicbrainz ID found for %s. writing empty cache file.' % theartist] )
-        success, log_lines = writeFile( mbid, filename )
-        lw.log( log_lines )
+        success, loglines = writeFile( mbid, filename )
+        lw.log( loglines )
         return mbid
 
                                 
@@ -708,8 +720,8 @@ class Main:
                 mboptions['offset'] = str(offset)
             lw.log( ['getting results from musicbrainz using: ' + mbquery] )
             for x in range(1, 5):
-                success, log_lines, json_data = mbURL.Get( mbquery, params=mboptions )
-                lw.log( log_lines )
+                success, loglines, json_data = mbURL.Get( mbquery, params=mboptions )
+                lw.log( loglines )
                 if self._playback_stopped_or_changed():
                     return []       
                 if not success:
@@ -850,13 +862,16 @@ class Main:
         fanarttvApiKey = '7a93c84fe1c9999e6f0fec206a66b0f5'
         theaudiodbApiKey = '193621276b2d731671156g'
         HtbackdropsApiKey = '96d681ea0dcb07ad9d27a347e64b652a'
-        self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/?autocorrect=1&api_key=' + LastfmApiKey
+        self.params = {}
+        self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/'
+        self.LastfmPARAMS = {'autocorrect':'1', 'api_key':LastfmApiKey}
         self.fanarttvURL = 'http://api.fanart.tv/webservice/artist/%s/' % fanarttvApiKey
         self.fanarttvOPTIONS = '/json/artistbackground/'
-        self.theaudiodbURL = 'http://www.theaudiodb.com/api/v1/json/%s/' % theaudiodbApiKey
-        self.theaudiodbARTISTURL = 'artist-mb.php?i='
-        self.theaudiodbALBUMURL = 'album.php?i='
-        self.HtbackdropsQueryURL = 'http://htbackdrops.org/api/' + HtbackdropsApiKey + '/searchXML?default_operator=and&fields=title&aid=1'
+        theaudiodbURL = 'http://www.theaudiodb.com/api/v1/json/%s/' % theaudiodbApiKey
+        self.theaudiodbARTISTURL = theaudiodbURL + 'artist-mb.php'
+        self.theaudiodbALBUMURL = theaudiodbURL + 'album.php'
+        self.HtbackdropsQueryURL = 'http://htbackdrops.org/api/%s/searchXML' % HtbackdropsApiKey
+        self.HtbackdropsPARAMS =  {'default_operator':'and', 'fields':'title', 'aid':'1'}
         self.HtbackdropsDownloadURL = 'http://htbackdrops.org/api/' + HtbackdropsApiKey + '/download/'
 
 
@@ -927,8 +942,8 @@ class Main:
                 old_files = []
             exclude_path = os.path.join( old_folder, '_exclusions.nfo' )
             if old_files and type == 'cache' and not xbmcvfs.exists(exclude_path):
-                success, log_lines = writeFile( '', exclude_path )
-                lw.log( log_lines )
+                success, loglines = writeFile( '', exclude_path )
+                lw.log( loglines )
             for old_file in old_files:
                 if old_file.endswith( '.nfo' ) and not old_file == '_exclusions.nfo':
                     checkDir( new_folder )
@@ -1280,16 +1295,16 @@ class Main:
 
 
     def _update_check_file( self, version, message ):
-        success, log_lines = writeFile( version, self.CHECKFILE )
-        lw.log( log_lines )
+        success, loglines = writeFile( version, self.CHECKFILE )
+        lw.log( loglines )
         if success:
             lw.log( [message] )
 
 
     def _upgrade( self ):
         #this is where any code goes for one time upgrade routines
-        log_lines, data = readFile( self.CHECKFILE )
-        lw.log( log_lines )
+        loglines, data = readFile( self.CHECKFILE )
+        lw.log( loglines )
         if not data:
             self._migrate_info_files()
         if data == '1.5.4':

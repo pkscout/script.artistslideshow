@@ -1,3 +1,6 @@
+v.1.5.9.6
+- finished converting URLs to requests module style
+
 v.1.5.9.5
 - switched to using requests module and new commonlib for URL handling
 - updated xlogger commonlib
