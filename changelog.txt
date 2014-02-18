@@ -1,3 +1,7 @@
+v.1.6.2
+- fixed undefined global error when importing requests2 module
+- corrected string numbers to fit in specified developer range
+
 v.1.6.1
 - fixed crash when installing on clean install of XBMC
 
