@@ -1,8 +1,6 @@
-v.1.6.1.2
--fix for bug that passes back socket.timeout instead of requests.exception.Timeout
-
-v.1.6.1.1
-- fixed undefined global error when importing requests2 module
+v.1.6.2
+- fixed crash from undefined global error in url.py
+- fix for bug that causes crash on socket.timeout in url.py
 - corrected string numbers to fit in specified developer range
 
 v.1.6.1
