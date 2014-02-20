@@ -1,6 +1,7 @@
-#v.0.1.4
+#v.0.1.5
 
 import requests2 as _requests
+import socket
     
 
 class URL():
@@ -45,6 +46,9 @@ class URL():
             loglines.append( 'site unreachable at ' + url )
             loglines.append( e )
         except _requests.exceptions.Timeout, e:
+            loglines.append( 'timeout error while downloading from ' + url )
+            loglines.append( e )
+        except socket.timeout, e:
             loglines.append( 'timeout error while downloading from ' + url )
             loglines.append( e )
         except _requests.exceptions.HTTPError, e:
