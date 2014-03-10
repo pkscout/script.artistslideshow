@@ -1,3 +1,6 @@
+v.1.6.2.3
+- additional changes to get more consistent results from external sites
+
 v.1.6.2.2
 - fixed crash when viewing artists with extended characters in their name
 - fixed bad searches with artists with extended characters in their name
