@@ -539,7 +539,7 @@ class Main:
     def _get_local_data( self, item ):
         data = []
         filenames = []
-        local_path = os.path.join( self.LOCALARTISTPATH, self.NAME, 'override' )
+        local_path = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8'), 'override' )
         if item == "similar":
             filenames.append( os.path.join( local_path, 'artistsimilar.nfo' ) )
         elif item == "albums":
