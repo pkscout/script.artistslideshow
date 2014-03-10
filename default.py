@@ -236,7 +236,7 @@ class Main:
                 bio = self._get_data( 'theaudiodb', 'bio' )
         if bio == []:
             self.url = self.LastfmURL
-            additionalparams = {'lang=':self.LANGUAGE, 'method':'artist.getInfo', 'artist':self.NAME}  
+            additionalparams = {'lang':self.LANGUAGE, 'method':'artist.getInfo', 'artist':self.NAME}  
             self.params = dict( self.LastfmPARAMS.items() + additionalparams.items() )
             lw.log( ['trying to get artist bio from ' + self.url] )
             bio = self._get_data('lastfm', 'bio')

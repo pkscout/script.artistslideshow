@@ -1,3 +1,6 @@
+v.1.6.2.5
+- fix for AS not requesting correct language for bio from Last.FM
+
 v.1.6.2.4
 - fixed another crash when viewing artists with extended characters in their name
 
