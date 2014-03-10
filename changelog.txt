@@ -1,3 +1,7 @@
+v.1.6.2.2
+- fixed crash when viewing artists with extended characters in their name
+- fixed bad searches with artists with extended characters in their name
+
 v.1.6.2.1
 - fixed crash when unexpected http response code returned from web site
 

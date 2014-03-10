@@ -18,7 +18,7 @@
 # *  htbackdrops:  http://www.htbackdrops.org
 
 import xbmc, xbmcaddon, xbmcgui, xbmcvfs
-import itertools, os, random, re, sys, time, urllib
+import itertools, os, random, re, sys, time, unicodedata, urllib
 import xml.etree.ElementTree as _xmltree
 if sys.version_info >= (2, 7):
     import json as _json
@@ -39,7 +39,8 @@ __addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ )
 __language__     = __addon__.getLocalizedString
 
 lw      = Logger( '[Artist Slideshow]' )
-mbURL   = URL( 'json',{"User-Agent": __addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )'} )
+mbURL   = URL( 'json',{"User-Agent": __addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )', "content-type":
+"text/html; charset=UTF-8"} )
 JSONURL = URL( 'json' )
 txtURL  = URL( 'text' )
 imgURL  = URL( 'binary' )
@@ -235,7 +236,7 @@ class Main:
                 bio = self._get_data( 'theaudiodb', 'bio' )
         if bio == []:
             self.url = self.LastfmURL
-            additionalparams = {'lang=':self.LANGUAGE, 'method':'artist.getInfo', 'artist': urllib.quote_plus( smartUTF8(self.NAME) )}
+            additionalparams = {'lang=':self.LANGUAGE, 'method':'artist.getInfo', 'artist': urllib.quote_plus( unicodedata.normalize('NFKD', self.NAME).encode('ascii','ignore') )}  
             self.params = dict( self.LastfmPARAMS.items() + additionalparams.items() )
             lw.log( ['trying to get artist bio from ' + self.url] )
             bio = self._get_data('lastfm', 'bio')
@@ -254,14 +255,14 @@ class Main:
                 self.albums = self._get_data('theaudiodb', 'albums')
         if self.albums == []:
             self.url = self.LastfmURL
-            additionalparams = {'method':'artist.getTopAlbums', 'artist':urllib.quote_plus( smartUTF8( self.NAME ) )} 
+            additionalparams = {'method':'artist.getTopAlbums', 'artist':urllib.quote_plus( unicodedata.normalize('NFKD', self.NAME).encode('ascii','ignore') )} 
             self.params = dict( self.LastfmPARAMS.items() + additionalparams.items() )
             lw.log( ['trying to get artist albums from ' + self.url] )
             self.albums = self._get_data('lastfm', 'albums')
         self.similar = self._get_local_data( 'similar' )
         if self.similar == []:
             self.url = self.LastfmURL
-            additionalparams = {'method':'artist.getSimilar', 'artist':urllib.quote_plus( smartUTF8(self.NAME) )} 
+            additionalparams = {'method':'artist.getSimilar', 'artist':urllib.quote_plus( unicodedata.normalize('NFKD', self.NAME).encode('ascii','ignore') )} 
             self.params = dict( self.LastfmPARAMS.items() + additionalparams.items() )
             self.similar = self._get_data('lastfm', 'similar')
         self._set_properties()
@@ -586,7 +587,7 @@ class Main:
         if not self.NAME:
             lw.log( ['no artist name provided'] )
             return
-        self.CacheDir = os.path.join( self.LOCALARTISTPATH, self.NAME, self.FANARTFOLDER )
+        self.CacheDir = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8'), self.FANARTFOLDER )
         lw.log( ['cachedir = %s' % self.CacheDir] )
         try:
             files = os.listdir(self.CacheDir)
@@ -643,9 +644,8 @@ class Main:
         for badSubstring in badSubstrings:
             if theartist.startswith(badSubstring):
                 searchartist = theartist.replace(badSubstring, "")
-#        mboptions = 'artist/?fmt=json&query='
         mboptions = {"fmt":"json"} 
-        mbsearch = 'artist:"%s"' % searchartist
+        mbsearch = 'artist:"%s"' % unicodedata.normalize('NFKD', searchartist).encode('ascii','ignore')
         query_times = {'last':0, 'current':time.time()}
         lw.log( ['parsing musicbrainz response for muiscbrainz ID'] )
         cached_mb_info = False
@@ -932,7 +932,7 @@ class Main:
                 old_folder = os.path.join( old_loc, folder )
                 new_folder = os.path.join( new_loc, folder )
             elif type == 'local':
-                old_folder = os.path.join( old_loc, folder, self.FANARTFOLDER )
+                old_folder = os.path.join( old_loc, smartUTF8(folder).decode('utf-8'), self.FANARTFOLDER )
                 new_folder = os.path.join( new_loc, itemHash(folder) )
             try:
                 old_files = os.listdir( old_folder )
@@ -1306,6 +1306,7 @@ class Main:
         lw.log( loglines )
         if not data:
             self._migrate_info_files()
+        loglines, data = readFile( self.CHECKFILE )
         if data == '1.5.4':
             self._migrate_tbn_files()
 
