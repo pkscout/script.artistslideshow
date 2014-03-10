@@ -18,7 +18,7 @@
 # *  htbackdrops:  http://www.htbackdrops.org
 
 import xbmc, xbmcaddon, xbmcgui, xbmcvfs
-import itertools, os, random, re, sys, time, unicodedata, urllib
+import itertools, os, random, re, sys, time, unicodedata
 import xml.etree.ElementTree as _xmltree
 if sys.version_info >= (2, 7):
     import json as _json
@@ -713,7 +713,8 @@ class Main:
         while do_loop:
             if mbsearch:
                 mbquery = mbbase + type
-                mboptions['query'] = urllib.quote_plus( smartUTF8(mbsearch), ':!"' )
+#                mboptions['query'] = urllib.quote_plus( smartUTF8(mbsearch), ':!"' )
+                mboptions['query'] = mbsearch
             else:
                 mbquery = mbbase + type[:-1]
                 mboptions['offset'] = str(offset)
