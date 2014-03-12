@@ -877,7 +877,7 @@ class Main:
 
     def _make_dirs( self ):
         checkDir( self.DATAROOT )
-        thedirs = ['temp', 'ArtistSlideShow', 'ArtistInformation', 'transition']
+        thedirs = ['temp', 'ArtistSlideShow', 'ArtistInformation', 'transition', 'merge']
         for onedir in thedirs:
             checkDir( os.path.join( self.DATAROOT, onedir ) )
 
