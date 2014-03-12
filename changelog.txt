@@ -1,3 +1,6 @@
+v.1.6.2.6
+- updated language files
+
 v.1.6.2.5
 - fix for AS not requesting correct language for bio from Last.FM
 
