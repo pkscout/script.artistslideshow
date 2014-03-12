@@ -24,6 +24,10 @@ msgctxt "#30301"
 msgid "Downloading artist images"
 msgstr "Transferindo imagens do artista"
 
+msgctxt "#30302"
+msgid "Nothing Downloaded"
+msgstr "Não ocorreram transferências"
+
 msgctxt "#30303"
 msgid "No images found for artist"
 msgstr "Não foram encontradas imagens para o artista"
@@ -35,10 +39,6 @@ msgstr "Transferência Concluída"
 msgctxt "#30305"
 msgid "All artist images downloaded"
 msgstr "Foram transferidas todas as imagens do artista"
-
-msgctxt "#30329"
-msgid "Nothing Downloaded"
-msgstr "Não ocorreram transferências"
 
 msgctxt "#32000"
 msgid "Download"

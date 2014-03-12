@@ -24,6 +24,10 @@ msgctxt "#30301"
 msgid "Downloading artist images"
 msgstr "下载艺人图片"
 
+msgctxt "#30302"
+msgid "Nothing Downloaded"
+msgstr "未能下载"
+
 msgctxt "#30303"
 msgid "No images found for artist"
 msgstr "未找到艺人的图片"
@@ -35,10 +39,6 @@ msgstr "下载完成"
 msgctxt "#30305"
 msgid "All artist images downloaded"
 msgstr "所有艺人图片已下载"
-
-msgctxt "#30329"
-msgid "Nothing Downloaded"
-msgstr "未能下载"
 
 msgctxt "#32000"
 msgid "Download"

@@ -24,6 +24,10 @@ msgctxt "#30301"
 msgid "Downloading artist images"
 msgstr "Sto scaricando le immagini dell'artista"
 
+msgctxt "#30302"
+msgid "Nothing Downloaded"
+msgstr "Nulla di Scaricato"
+
 msgctxt "#30303"
 msgid "No images found for artist"
 msgstr "Nessuna immagine trovata per lìartista"
@@ -35,10 +39,6 @@ msgstr "Scaricamento Completato"
 msgctxt "#30305"
 msgid "All artist images downloaded"
 msgstr "Tutte le immagini dell'artista sono state scaricate"
-
-msgctxt "#30329"
-msgid "Nothing Downloaded"
-msgstr "Nulla di Scaricato"
 
 msgctxt "#32000"
 msgid "Download"

@@ -24,6 +24,10 @@ msgctxt "#30301"
 msgid "Downloading artist images"
 msgstr "아티스트 이미지 다운로드"
 
+msgctxt "#30302"
+msgid "Nothing Downloaded"
+msgstr "다운로드한 것 없음"
+
 msgctxt "#30303"
 msgid "No images found for artist"
 msgstr "아티스트 이미지 없음"
@@ -35,10 +39,6 @@ msgstr "다운로드 완료"
 msgctxt "#30305"
 msgid "All artist images downloaded"
 msgstr "모든 아티스트 이미지 다운로드됨"
-
-msgctxt "#30329"
-msgid "Nothing Downloaded"
-msgstr "다운로드한 것 없음"
 
 msgctxt "#32000"
 msgid "Download"
