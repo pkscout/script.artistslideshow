@@ -1,22 +1,11 @@
-v.1.6.2.6
-- fix for AS not showing images when merging multiple artists' images
-- updated language files
-
-v.1.6.2.5
-- fix for AS not requesting correct language for bio from Last.FM
-
-v.1.6.2.4
-- fixed another crash when viewing artists with extended characters in their name
-
-v.1.6.2.3
-- additional changes to get more consistent results from external sites
-
-v.1.6.2.2
+v.1.6.3
+- fixed AS not showing images when merging multiple artists' images
+- fixed AS not requesting correct language for bio from Last.FM
+- changes to get more consistent results from external sites
 - fixed crash when viewing artists with extended characters in their name
 - fixed bad searches with artists with extended characters in their name
-
-v.1.6.2.1
 - fixed crash when unexpected http response code returned from web site
+- updated language files
 
 v.1.6.2
 - fixed crash from undefined global error in url.py
