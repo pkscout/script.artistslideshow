@@ -1,3 +1,11 @@
+v.1.6.3.2
+- full support for remote file systems
+- fix for constant download of images
+- fix for exclusions file being ignored
+
+v.1.6.3.1
+- fix for images on remote servers
+
 v.1.6.3
 - fixed AS not showing images when merging multiple artists' images
 - fixed AS not requesting correct language for bio from Last.FM

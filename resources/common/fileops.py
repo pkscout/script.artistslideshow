@@ -1,4 +1,4 @@
-# v.0.1.0
+# v.0.2.0
 
 import ntpath, xbmcvfs
 
@@ -7,34 +7,33 @@ def checkDir(path):
     if not xbmcvfs.exists(path):
         xbmcvfs.mkdirs(path)
 
+def deleteFile( filename ):
+    log_lines = []
+    if xbmcvfs.exists( filename ):
+        try:
+            xbmcvfs.delete( filename )
+            log_lines.append( 'deleting file ' + filename )
+        except IOError:
+            log_lines.append( 'unable to delete ' + filename )
+            return False, log_lines
+        except Exception, e:
+            log_lines.append( 'unknown error while attempting to delete ' + filename )
+            log_lines.append( e )
+            return False, log_lines
+        return True, log_lines
+    else:
+        log_lines.append( '%s does not exist' % filename )
+        return False, log_lines
+
 def pathLeaf(path):
     path, filename = ntpath.split(path)
     return {"path":path, "filename":filename}
 
-def writeFile( data, filename ):
-    log_lines = []
-    if type(data).__name__=='unicode':
-        data = data.encode('utf-8')
-    try:
-        thefile = open( filename, 'wb' )
-        thefile.write( data )
-        thefile.close()
-    except IOError, e:
-        log_lines.append( 'unable to write data to ' + filename )
-        log_lines.append( e )
-        return False, log_lines
-    except Exception, e:
-        log_lines.append( 'unknown error while writing data to ' + filename )
-        log_lines.append( e )
-        return False, log_lines
-    log_lines.append( 'successfuly wrote data to ' + filename )
-    return True, log_lines
-
 def readFile( filename ):
     log_lines = []
-    if xbmcvfs.exists( filename):
+    if xbmcvfs.exists( filename ):
         try:
-            the_file = open (filename, 'r')
+            the_file = xbmcvfs.File( filename, 'r' )
             data = the_file.read()
             the_file.close()
         except IOError:
@@ -48,3 +47,22 @@ def readFile( filename ):
     else:
         log_lines.append( '%s does not exist' % filename )
         return log_lines, ''
+
+def writeFile( data, filename ):
+    log_lines = []
+    if type(data).__name__=='unicode':
+        data = data.encode('utf-8')
+    try:
+        thefile = xbmcvfs.File( filename, 'wb' )
+        thefile.write( data )
+        thefile.close()
+    except IOError, e:
+        log_lines.append( 'unable to write data to ' + filename )
+        log_lines.append( e )
+        return False, log_lines
+    except Exception, e:
+        log_lines.append( 'unknown error while writing data to ' + filename )
+        log_lines.append( e )
+        return False, log_lines
+    log_lines.append( 'successfuly wrote data to ' + filename )
+    return True, log_lines
