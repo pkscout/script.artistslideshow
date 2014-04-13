@@ -1,5 +1,6 @@
 v.1.6.3.3
 - fix for crash when attempting to delete temp file
+- added additional logging when creating directories
 
 v.1.6.3.2
 - full support for remote file systems
