@@ -182,7 +182,7 @@ class Main:
             lw.log( ['the tmpname is ' + tmpname] )
             if not self._excluded( dst ):
                 if xbmcvfs.exists(tmpname):
-                    success, loglines = deleteFile( path )
+                    success, loglines = deleteFile( tmpname )
                     lw.log( loglines )
                 success, loglines, urldata = imgURL.Get( src, params=self.params )
                 lw.log( loglines )
@@ -201,10 +201,12 @@ class Main:
                         return True
                     else:
                         lw.log( ['image already exists, deleting temporary file'] )
-                        deleteFile( tmpname )
+                        success, loglines = deleteFile( tmpname )
+                        lw.log( loglines )
                         return False
                 else:
-                    deleteFile( tmpname )
+                    success, loglines = deleteFile( tmpname )
+                    lw.log( loglines )
                     return False
             else:
                 return False 

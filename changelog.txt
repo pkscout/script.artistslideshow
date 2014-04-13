@@ -1,3 +1,6 @@
+v.1.6.3.3
+- fix for crash when attempting to delete temp file
+
 v.1.6.3.2
 - full support for remote file systems
 - fix for constant download of images
