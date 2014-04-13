@@ -880,10 +880,12 @@ class Main:
 
 
     def _make_dirs( self ):
-        checkDir( self.DATAROOT )
+        exists, loglines = checkDir( self.DATAROOT )
+        lw.log( loglines )
         thedirs = ['temp', 'ArtistSlideShow', 'ArtistInformation', 'transition', 'merge']
         for onedir in thedirs:
-            checkDir( os.path.join( self.DATAROOT, onedir ) )
+            exists, loglines = checkDir( os.path.join( self.DATAROOT, onedir ) )
+            lw.log( loglines )
 
 
     def _merge_images( self ):
@@ -949,7 +951,8 @@ class Main:
                 lw.log( loglines )
             for old_file in old_files:
                 if old_file.endswith( '.nfo' ) and not old_file == '_exclusions.nfo':
-                    checkDir( new_folder )
+                    exists, loglines = checkDir( new_folder )
+                    lw.log( loglines )
                     new_file = old_file.strip('_')
                     if new_file == 'artistimagesfanarttv.nfo':
                         new_file = 'fanarttvartistimages.nfo'
@@ -1086,7 +1089,8 @@ class Main:
     def _set_thedir(self, theartist, dirtype):
         CacheName = itemHash(theartist)
         thedir = xbmc.translatePath('special://profile/addon_data/%s/%s/%s/' % ( __addonname__ , dirtype, CacheName, )).decode('utf-8')
-        checkDir(thedir)
+        exists, loglines = checkDir( thedir )
+        lw.log( loglines )
         return thedir
 
 

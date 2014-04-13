@@ -1,11 +1,18 @@
-# v.0.2.0
+# v.0.3.0
 
 import ntpath, xbmcvfs
 
 
-def checkDir(path):
-    if not xbmcvfs.exists(path):
-        xbmcvfs.mkdirs(path)
+def checkDir( path ):
+    log_lines = []
+    log_lines.append( 'checking for directory ' + path )
+    if not xbmcvfs.exists( path ):
+        log_lines.append( 'directory does not exist, creating it' )
+        xbmcvfs.mkdirs( path )
+        return False, log_lines
+    else:
+        log_lines.append( 'directory exists' )
+        return True, log_lines
 
 def deleteFile( filename ):
     log_lines = []
