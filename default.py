@@ -882,7 +882,7 @@ class Main:
     def _make_dirs( self ):
         exists, loglines = checkDir( self.DATAROOT )
         lw.log( loglines )
-        thedirs = ['temp', 'ArtistSlideShow', 'ArtistInformation', 'transition', 'merge']
+        thedirs = ['temp', 'ArtistSlideshow', 'ArtistInformation', 'transition', 'merge']
         for onedir in thedirs:
             exists, loglines = checkDir( os.path.join( self.DATAROOT, onedir ) )
             lw.log( loglines )
