@@ -1,3 +1,6 @@
+v.1.6.3.5
+- fix for crash with access violation in random situations
+
 v.1.6.3.4
 - fix for duplicate ArtistSlideshow folder showing up on Linux
 

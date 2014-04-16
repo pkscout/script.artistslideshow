@@ -104,12 +104,12 @@ class Main:
         self._init_vars()
         self._make_dirs()
         self._upgrade()
-        if xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
+        if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
             lw.log( ['script already running'] )
         else:
             self.LastCacheTrim = 0
             self._set_property("ArtistSlideshowRunning", "True")
-            if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
+            if( xbmc.Player().isPlayingAudio() == False and self._get_infolabel( self.EXTERNALCALL ) == '' ):
                 lw.log( ['no music playing'] )
                 if( self.DAEMON == "False" ):
                     self._set_property("ArtistSlideshowRunning")
@@ -120,8 +120,8 @@ class Main:
                 self._trim_cache()
             while (not xbmc.abortRequested):
                 time.sleep(1)
-                if xbmc.getInfoLabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
-                    if( xbmc.Player().isPlayingAudio() == True or xbmc.getInfoLabel( self.EXTERNALCALL ) != '' ):
+                if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
+                    if( xbmc.Player().isPlayingAudio() == True or self._get_infolabel( self.EXTERNALCALL ) != '' ):
                         if set( self.ALLARTISTS ) <> set( self._get_current_artists() ):
                             self._clear_properties()
                             self.UsingFallback = False
@@ -133,7 +133,7 @@ class Main:
                                 self._use_correct_artwork()
                     else:
                         time.sleep(2) # doublecheck if playback really stopped
-                        if( xbmc.Player().isPlayingAudio() == False and xbmc.getInfoLabel( self.EXTERNALCALL ) == '' ):
+                        if( xbmc.Player().isPlayingAudio() == False and self._get_infolabel( self.EXTERNALCALL ) == '' ):
                             if ( self.DAEMON == "False" ):
                                 self._set_property( "ArtistSlideshowRunning" )
                 else:
@@ -335,10 +335,10 @@ class Main:
                     playing_song = ''
                 artist_names = self._split_artists( playingartist )
             featured_artists = self._get_featured_artists( playing_song )
-        elif xbmc.getInfoLabel( self.SKININFO['artist'] ):
-            artist_names = self._split_artists( xbmc.getInfoLabel(self.SKININFO['artist']) )
-            mbids = xbmc.getInfoLabel( self.SKININFO['mbid'] ).split( ',' )
-            featured_artists = self._get_featured_artists( xbmc.getInfoLabel(self.SKININFO['title']) )
+        elif self._get_infolabel( self.SKININFO['artist'] ):
+            artist_names = self._split_artists( self._get_infolabel(self.SKININFO['artist']) )
+            mbids = self._get_infolabel( self.SKININFO['mbid'] ).split( ',' )
+            featured_artists = self._get_featured_artists( self._get_infolabel(self.SKININFO['title']) )
         if featured_artists:
             for one_artist in featured_artists:
                 artist_names.append( one_artist.strip(' ()') )            
@@ -538,6 +538,15 @@ class Main:
             lw.log( ['asking for images from: %s' %self.url] )
         images = self._get_data(site, 'images')
         return images
+
+
+    def _get_infolabel( self, item ):
+        try:
+            infolabel = xbmc.getInfoLabel( item )
+        except:
+            lw.log( ['problem reading information from %s, returning blank' % item] )
+            infolabel = ''
+        return infolabel
 
 
     def _get_local_data( self, item ):
@@ -788,7 +797,7 @@ class Main:
                     break
         #if nothing is playing, assume the information was passed by another add-on
         if not playing_item:
-            playing_item = xbmc.getInfoLabel( self.SKININFO[item] )
+            playing_item = self._get_infolabel( self.SKININFO[item] )
         return playing_item
 
 
@@ -844,8 +853,8 @@ class Main:
         self.ARTISTSLIDESHOW = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshow" )
         self.ARTISTSLIDESHOWRUNNING = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshowRunning" )
         self.EXTERNALCALL = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshow.ExternalCall" )
-        self.EXTERNALCALLSTATUS = xbmc.getInfoLabel( self.EXTERNALCALL )
-        lw.log( ['external call is set to ' + xbmc.getInfoLabel( self.EXTERNALCALL )] )
+        self.EXTERNALCALLSTATUS = self._get_infolabel( self.EXTERNALCALL )
+        lw.log( ['external call is set to ' + self._get_infolabel( self.EXTERNALCALL )] )
         self.NAME = ''
         self.ALLARTISTS = []
         self.MBID = ''
@@ -1010,7 +1019,7 @@ class Main:
 
 
     def _playback_stopped_or_changed( self ):
-        if set( self.ALLARTISTS ) <> set( self._get_current_artists() ) or self.EXTERNALCALLSTATUS != xbmc.getInfoLabel( self.EXTERNALCALL ):
+        if set( self.ALLARTISTS ) <> set( self._get_current_artists() ) or self.EXTERNALCALLSTATUS != self._get_infolabel( self.EXTERNALCALL ):
             self._clear_properties()
             return True
         else:
@@ -1018,7 +1027,7 @@ class Main:
 
 
     def _refresh_image_directory( self ):
-        if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode('utf-8') == self.TransitionDir):
+        if( self._get_infolabel( self.ARTISTSLIDESHOW ).decode('utf-8') == self.TransitionDir):
             self._set_property("ArtistSlideshow", self.CacheDir)
             lw.log( ['switching slideshow to ' + self.CacheDir] )
         else:
@@ -1215,7 +1224,7 @@ class Main:
                         xbmc.executebuiltin(command)
                 if self.TOTALARTISTS > 1:
                     self._merge_images()
-            if( xbmc.getInfoLabel( self.ARTISTSLIDESHOW ).decode('utf-8') == self.TransitionDir and self.ARTISTNUM == 1):
+            if( self._get_infolabel( self.ARTISTSLIDESHOW ).decode('utf-8') == self.TransitionDir and self.ARTISTNUM == 1):
                 self._wait( self.MINREFRESH )
                 if( not self._playback_stopped_or_changed() ):
                     self._refresh_image_directory()
