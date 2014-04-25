@@ -1,3 +1,6 @@
+v.1.6.4.1
+- fixed crash when using cache manager to trim size of image cache
+
 v.1.6.4
 - added full support for remote file systems without mapping drive in OS
 - fix for crash with access violation in random situations
