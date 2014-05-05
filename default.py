@@ -1050,9 +1050,9 @@ class Main:
         for folder in folders:
             lw.log( ['checking ' + folder] )
             if type == 'cache':
-                thepath = os.path.join( loc, folder )
+                thepath = os.path.join( loc, smartUTF8(folder).decode('utf-8') )
             elif type == 'local':
-                thepath = os.path.join( loc, folder, self.FANARTFOLDER )
+                thepath = os.path.join( loc, smartUTF8(folder).decode('utf-8'), self.FANARTFOLDER )
             try:
                 dirs, files = xbmcvfs.listdir( thepath )
             except Exception, e:
