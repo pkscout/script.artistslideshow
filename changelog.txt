@@ -1,7 +1,5 @@
-v.1.6.4.2
-- fixed another freaking UTF8 problem
-
-v.1.6.4.1
+v.1.6.5
+- fixed crash during version migration process related to UTF8 characters
 - fixed crash when using cache manager to trim size of image cache
 
 v.1.6.4
