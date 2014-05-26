@@ -26,7 +26,7 @@ else:
     import simplejson as _json
 from resources.dicttoxml.dicttoxml import dicttoxml
 from resources.common.fix_utf8 import smartUTF8
-from resources.common.fileops import checkDir, pathLeaf, writeFile, readFile, deleteFile
+from resources.common.fileops import checkPath, writeFile, readFile, deleteFile
 from resources.common.url import URL
 from resources.common.transforms import getImageType, itemHash, itemHashwithPath
 from resources.common.xlogger import Logger
@@ -213,13 +213,13 @@ class Main:
     
 
     def _excluded( self, item ):
-        item_split = pathLeaf(item)
-        exclusion_file = os.path.join(item_split['path'], '_exclusions.nfo')
+        path, filename = os.path.split( item )
+        exclusion_file = os.path.join( path, '_exclusions.nfo' )
         if xbmcvfs.exists( exclusion_file ):
             loglines, exclusions = readFile( exclusion_file )
-            loglines.append( 'checking %s against %s' % (item_split['filename'], exclusions) )
+            loglines.append( 'checking %s against %s' % (filename, exclusions) )
             lw.log( loglines )
-            if item_split['filename'] in exclusions:
+            if filename in exclusions:
                 lw.log( ['exclusion found'] )
                 return True
             else:
@@ -889,11 +889,11 @@ class Main:
 
 
     def _make_dirs( self ):
-        exists, loglines = checkDir( self.DATAROOT )
+        exists, loglines = checkPath( self.DATAROOT )
         lw.log( loglines )
         thedirs = ['temp', 'ArtistSlideshow', 'ArtistInformation', 'transition', 'merge']
         for onedir in thedirs:
-            exists, loglines = checkDir( os.path.join( self.DATAROOT, onedir ) )
+            exists, loglines = checkPath( os.path.join( self.DATAROOT, onedir ) )
             lw.log( loglines )
 
 
@@ -960,7 +960,7 @@ class Main:
                 lw.log( loglines )
             for old_file in old_files:
                 if old_file.endswith( '.nfo' ) and not old_file == '_exclusions.nfo':
-                    exists, loglines = checkDir( new_folder )
+                    exists, loglines = checkPath( new_folder )
                     lw.log( loglines )
                     new_file = old_file.strip('_')
                     if new_file == 'artistimagesfanarttv.nfo':
@@ -1098,7 +1098,7 @@ class Main:
     def _set_thedir(self, theartist, dirtype):
         CacheName = itemHash(theartist)
         thedir = xbmc.translatePath('special://profile/addon_data/%s/%s/%s/' % ( __addonname__ , dirtype, CacheName, )).decode('utf-8')
-        exists, loglines = checkDir( thedir )
+        exists, loglines = checkPath( thedir )
         lw.log( loglines )
         return thedir
 
@@ -1178,13 +1178,14 @@ class Main:
                 return
             path = itemHashwithPath( url, self.CacheDir )
             path2 = itemHashwithPath( url, self.TransitionDir )
-            if not (pathLeaf( path )['filename'] in cachelist_str):
+            checkpath, checkfilename = os.path.split( path )
+            if not (checkfilename in cachelist_str):
                 if self._download(url, path, path2):
                     lw.log( ['downloaded %s to %s' % (url, path)]  )
                     self.ImageDownloaded = True
             elif self._excluded( path ):
-                indicies = [i for i, elem in enumerate(cachelist) if pathLeaf( path )['filename'] in elem]
-                success, loglines = deleteFile( os.path.join( pathLeaf( path )['path'], cachelist[indicies[0]] ) )
+                indicies = [i for i, elem in enumerate(cachelist) if checkfilename in elem]
+                success, loglines = deleteFile( os.path.join( checkpath, cachelist[indicies[0]] ) )
                 lw.log( loglines )
             if self.ImageDownloaded:
                 if( self._playback_stopped_or_changed() and self.ARTISTNUM == 1 ):
