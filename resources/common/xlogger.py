@@ -1,4 +1,4 @@
-#v.0.1.1
+#v.0.1.2
 
 try:
     import xbmc
