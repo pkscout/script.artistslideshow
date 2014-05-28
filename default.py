@@ -37,10 +37,11 @@ __addonversion__ = __addon__.getAddonInfo('version')
 __addonpath__    = __addon__.getAddonInfo('path').decode('utf-8')
 __addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ )
 __language__     = __addon__.getLocalizedString
+__preamble__     = '[Artist Slideshow]'
+__suppress__     = __addon__.getSetting( "suppress" ) 
 
-lw      = Logger( '[Artist Slideshow]' )
-mbURL   = URL( 'json',{"User-Agent": __addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )', "content-type":
-"text/html; charset=UTF-8"} )
+lw      = Logger( preamble='[Artist Slideshow]', suppress=__suppress__ )
+mbURL   = URL( 'json',{"User-Agent": __addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )', "content-type":"text/html; charset=UTF-8"} )
 JSONURL = URL( 'json' )
 txtURL  = URL( 'text' )
 imgURL  = URL( 'binary' )
@@ -1341,11 +1342,11 @@ class Main:
 
 
 if ( __name__ == "__main__" ):
-    lw.log( ['script version %s started' % __addonversion__] )
+    xbmc.log( '%s script version %s started' % (__preamble__, __addonversion__) )
+    xbmc.log( '%s log supression set to %s' % (__preamble__, __suppress__) )
     slideshow = Main()
     try:
         slideshow._set_property("ArtistSlideshow.CleanupComplete", "True")
     except Exception, e:
         lw.log( ['unexpected error while setting property.', e] )
-
-lw.log( ['script stopped'] )
+xbmc.log( '%s script stopped' % __preamble__ )

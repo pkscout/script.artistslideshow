@@ -21,5 +21,6 @@
         <setting id="show_progress" type="enum" label="32203" lvalues="32206|32207|32208" default="0" />
         <setting id="progress_path" type="folder" label="32204" default="" enable="eq(-1,2)"/>
 		<setting id="fanart_folder" type="text" label="32205" default="" />
+        <setting id="suppress" type="bool" label="32209" default="false" />
     </category>
 </settings>

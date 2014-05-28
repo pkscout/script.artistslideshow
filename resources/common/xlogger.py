@@ -9,8 +9,9 @@ except:
 
 #this class creates an object used to log stuff to the xbmc log file
 class Logger():
-    def __init__(self, preamble='', logfile='logfile.log'):
-        self.logpreamble = preamble
+    def __init__(self, preamble='', logfile='logfile.log', suppress='false'):
+        self.LOGPREAMBLE = preamble
+        self.SUPPRESS = suppress
         if LOGTYPE == 'file':
             self.logger = logging.getLogger( '_logger' )
             self.logger.setLevel( logging.DEBUG )
@@ -37,24 +38,25 @@ class Logger():
 
 
     def _output( self, line, loglevel ):
-        if LOGTYPE == 'file':
-            self._output_file( line )
-        else:
-            self._output_xbmc( line, loglevel )
+        if not self.SUPPRESS.lower() == 'true':
+            if LOGTYPE == 'file':
+                self._output_file( line )
+            else:
+                self._output_xbmc( line, loglevel )
 
                 
     def _output_file( self, line ):
         try:
-            self.logger.info( "%s %s" % (self.logpreamble, line.__str__()) )
+            self.logger.info( "%s %s" % (self.LOGPREAMBLE, line.__str__()) )
         except Exception, e:
-            self.logger.debug( "%s unable to output logline" % self.logpreamble )
-            self.logger.debug( "%s %s" % (self.logpreamble, e.__str__()) )
+            self.logger.debug( "%s unable to output logline" % self.LOGPREAMBLE )
+            self.logger.debug( "%s %s" % (self.LOGPREAMBLE, e.__str__()) )
 
 
     def _output_xbmc( self, line, loglevel ):
         try:
-            xbmc.log( "%s %s" % (self.logpreamble, line.__str__()), loglevel)
+            xbmc.log( "%s %s" % (self.LOGPREAMBLE, line.__str__()), loglevel)
         except Exception, e:
-            xbmc.log( "%s unable to output logline" % self.logpreamble, loglevel)
-            xbmc.log ("%s %s" % (self.logpreamble, e.__str__()), loglevel)    
+            xbmc.log( "%s unable to output logline" % self.LOGPREAMBLE, loglevel)
+            xbmc.log ("%s %s" % (self.LOGPREAMBLE, e.__str__()), loglevel)    
 
