@@ -38,9 +38,9 @@ __addonpath__    = __addon__.getAddonInfo('path').decode('utf-8')
 __addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ )
 __language__     = __addon__.getLocalizedString
 __preamble__     = '[Artist Slideshow]'
-__logging__     = __addon__.getSetting( "logging" ) 
+__logdebug__     = __addon__.getSetting( "logging" ) 
 
-lw      = Logger( preamble=__preamble__, logging=__logging__ )
+lw      = Logger( preamble=__preamble__, logdebug=__logdebug__ )
 mbURL   = URL( 'json',{"User-Agent": __addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )', "content-type":"text/html; charset=UTF-8"} )
 JSONURL = URL( 'json' )
 txtURL  = URL( 'text' )
@@ -1342,11 +1342,11 @@ class Main:
 
 
 if ( __name__ == "__main__" ):
-    xbmc.log( '%s script version %s started' % (__preamble__, __addonversion__), xbmc.LOGNOTICE )
-    xbmc.log( '%s logging set to %s' % (__preamble__, __logging__), xbmc.LOGNOTICE )
+    lw.log( ['script version %s started' % __addonversion__], xbmc.LOGNOTICE )
+    lw.log( ['debug logging set to %s' % __logdebug__], xbmc.LOGNOTICE )
     slideshow = Main()
     try:
         slideshow._set_property("ArtistSlideshow.CleanupComplete", "True")
     except Exception, e:
         lw.log( ['unexpected error while setting property.', e] )
-xbmc.log( '%s script stopped' % __preamble__, xbmc.LOGNOTICE )
+lw.log( ['script stopped'], xbmc.LOGNOTICE )
