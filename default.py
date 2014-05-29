@@ -40,7 +40,7 @@ __language__     = __addon__.getLocalizedString
 __preamble__     = '[Artist Slideshow]'
 __suppress__     = __addon__.getSetting( "suppress" ) 
 
-lw      = Logger( preamble='[Artist Slideshow]', suppress=__suppress__ )
+lw      = Logger( preamble=__preamble__, suppress=__suppress__ )
 mbURL   = URL( 'json',{"User-Agent": __addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )', "content-type":"text/html; charset=UTF-8"} )
 JSONURL = URL( 'json' )
 txtURL  = URL( 'text' )
@@ -1342,11 +1342,11 @@ class Main:
 
 
 if ( __name__ == "__main__" ):
-    xbmc.log( '%s script version %s started' % (__preamble__, __addonversion__) )
-    xbmc.log( '%s log supression set to %s' % (__preamble__, __suppress__) )
+    xbmc.log( '%s script version %s started' % (__preamble__, __addonversion__), xbmc.LOGNOTICE )
+    xbmc.log( '%s log suppression set to %s' % (__preamble__, __suppress__), xbmc.LOGNOTICE )
     slideshow = Main()
     try:
         slideshow._set_property("ArtistSlideshow.CleanupComplete", "True")
     except Exception, e:
         lw.log( ['unexpected error while setting property.', e] )
-xbmc.log( '%s script stopped' % __preamble__ )
+xbmc.log( '%s script stopped' % __preamble__, xbmc.LOGNOTICE )
