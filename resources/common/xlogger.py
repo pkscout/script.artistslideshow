@@ -1,4 +1,4 @@
-#v.0.1.2
+#v.0.1.3
 
 try:
     import xbmc
@@ -9,9 +9,9 @@ except:
 
 #this class creates an object used to log stuff to the xbmc log file
 class Logger():
-    def __init__(self, preamble='', logfile='logfile.log', suppress='false'):
+    def __init__(self, preamble='', logfile='logfile.log', logging='true'):
         self.LOGPREAMBLE = preamble
-        self.SUPPRESS = suppress
+        self.LOGGING = logging
         if LOGTYPE == 'file':
             self.logger = logging.getLogger( '_logger' )
             self.logger.setLevel( logging.DEBUG )
@@ -38,7 +38,7 @@ class Logger():
 
 
     def _output( self, line, loglevel ):
-        if not self.SUPPRESS.lower() == 'true':
+        if self.LOGGING.lower() == 'true':
             if LOGTYPE == 'file':
                 self._output_file( line )
             else:
