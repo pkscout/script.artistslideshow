@@ -14,6 +14,7 @@
         <setting id="fallback_path" type="folder" label="32103" default="" enable="eq(-1,true)" />
         <setting id="slideshow" type="bool" label="32106" default="false" />
         <setting id="slideshow_path" type="folder" label="32104" default="" enable="eq(-1,true)" />
+        <setting id="transparent" type="bool" label="32107" default="false" />
     </category>
     <category label="32200">
         <setting id="restrict_cache" type="bool" label="32201" default="false" />

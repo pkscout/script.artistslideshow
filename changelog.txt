@@ -1,5 +1,8 @@
+v.1.6.6~beta3
+- added option to use transparent image if no artwork found
+
 v.1.6.6~beta2
-- added option to suppress all logging
+- suppress all logging by default with option to turn debug logging on
 
 v.1.6.6~beta1
 - updates for new common libs

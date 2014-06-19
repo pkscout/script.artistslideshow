@@ -838,6 +838,10 @@ class Main:
             lw.log( ['set fanart folder to %s' % self.FANARTFOLDER] )
         else:
             self.FANARTFOLDER = 'extrafanart'
+        if __addon__.getSetting( "transparent" ) == 'true':
+            self.InitDir = xbmc.translatePath('%s/resources/transparent' % __addonpath__ ).decode('utf-8')
+        else:
+            self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode('utf-8')
 
 
     def _init_vars( self ):
@@ -871,7 +875,7 @@ class Main:
         self.MINREFRESH = 9.9
         self.TransitionDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode('utf-8')
         self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % __addonname__ ).decode('utf-8')
-        self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode('utf-8')
+        self._set_property("ArtistSlideshow", self.InitDir)
         LastfmApiKey = 'afe7e856e4f4089fc90f841980ea1ada'
         fanarttvApiKey = '7a93c84fe1c9999e6f0fec206a66b0f5'
         theaudiodbApiKey = '193621276b2d731671156g'
@@ -1161,7 +1165,7 @@ class Main:
                     else:
                         self._set_property("ArtistSlideshow", self.InitDir)
                 else:
-                      self._set_property("ArtistSlideshow", self.InitDir)
+                    self._set_property("ArtistSlideshow", self.InitDir)
         sourcelist = []
         sourcelist.append( ['fanarttv', self.FANARTTV] )
         sourcelist.append( ['theaudiodb', self.THEAUDIODB] )
@@ -1237,7 +1241,7 @@ class Main:
             self.DownloadedAllImages = True
             if not self.CachedImagesFound:
                 if self.ARTISTNUM == 1:
-                    lw.log( ['clearing ArtistSlideshow property'] )
+                    lw.log( ['setting slideshow directory to blank directory'] )
                     self._set_property("ArtistSlideshow", self.InitDir)
                     if self.NOTIFICATIONTYPE == "1" and not cached_image_info:
                         command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(__language__(30302)), smartUTF8(__language__(30303)), 10000, smartUTF8(__addonicon__))
