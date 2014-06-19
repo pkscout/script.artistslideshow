@@ -1096,6 +1096,7 @@ class Main:
         #does not crash if e.g. the window no longer exists.
         try:
           self.WINDOW.setProperty(property_name, value)
+          lw.log( ['%s set to %s' % (property_name, value)] )
         except Exception, e:
           lw.log( ["Exception: Couldn't set propery " + property_name + " value " + value , e])
 
