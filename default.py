@@ -894,6 +894,8 @@ class Main:
 
 
     def _make_dirs( self ):
+        exists, loglines = checkPath( self.InitDir )
+        lw.log( loglines )
         exists, loglines = checkPath( self.DATAROOT )
         lw.log( loglines )
         thedirs = ['temp', 'ArtistSlideshow', 'ArtistInformation', 'transition', 'merge']
@@ -1210,7 +1212,6 @@ class Main:
                     if( not self._playback_stopped_or_changed() and self.ARTISTNUM == 1 ):
                         self._refresh_image_directory()
                 self.FirstImage = False
-
         if self.ImageDownloaded:
             lw.log( ['finished downloading images'] )
             self.DownloadedAllImages = True
@@ -1236,7 +1237,6 @@ class Main:
                 if( not self._playback_stopped_or_changed() ):
                     self._refresh_image_directory()
             self._clean_dir( self.TransitionDir )
-
         if not self.ImageDownloaded:
             lw.log( ['no images downloaded'] )
             self.DownloadedAllImages = True

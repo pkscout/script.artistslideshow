@@ -1,3 +1,7 @@
+v.1.6.6~beta6
+- changed the way the transparent folder is created
+- added new Gotham only optional progress dialog for image downloads
+
 v.1.6.6~beta5
 - added placeholder.txt to transparent folder so that github will sync it
 
