@@ -839,8 +839,10 @@ class Main:
         else:
             self.FANARTFOLDER = 'extrafanart'
         if __addon__.getSetting( "transparent" ) == 'true':
+            self._set_property("ArtistSlideshowTransparent", 'true')
             self.InitDir = xbmc.translatePath('%s/resources/transparent' % __addonpath__ ).decode('utf-8')
         else:
+            self._set_property("ArtistSlideshowTransparent", '')
             self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode('utf-8')
 
 
