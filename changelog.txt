@@ -1,3 +1,6 @@
+v.1.6.8~beta1
+- moved creation of ArtistSlideshowTransparent to after Window creation
+
 v.1.6.7
 - fix for required xbmc python version
 
