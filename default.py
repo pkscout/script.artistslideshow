@@ -1,7 +1,7 @@
 # *  Credits:
 # *
 # *  original Artist Slideshow code by ronie
-# *  updates and additions since v1.3.0 by pkscuot
+# *  updates and additions since v1.3.0 by pkscout
 # *
 # *  divingmule for script.image.lastfm.slideshow
 # *  grajen3 for script.ImageCacher
@@ -838,12 +838,6 @@ class Main:
             lw.log( ['set fanart folder to %s' % self.FANARTFOLDER] )
         else:
             self.FANARTFOLDER = 'extrafanart'
-        if __addon__.getSetting( "transparent" ) == 'true':
-            self._set_property("ArtistSlideshowTransparent", 'true')
-            self.InitDir = xbmc.translatePath('%s/resources/transparent' % __addonpath__ ).decode('utf-8')
-        else:
-            self._set_property("ArtistSlideshowTransparent", '')
-            self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode('utf-8')
 
 
     def _init_vars( self ):
@@ -862,6 +856,12 @@ class Main:
         self.EXTERNALCALL = "Window(%s).Property(%s)" % ( self.WINDOWID, "ArtistSlideshow.ExternalCall" )
         self.EXTERNALCALLSTATUS = self._get_infolabel( self.EXTERNALCALL )
         lw.log( ['external call is set to ' + self._get_infolabel( self.EXTERNALCALL )] )
+        if __addon__.getSetting( "transparent" ) == 'true':
+            self._set_property("ArtistSlideshowTransparent", 'true')
+            self.InitDir = xbmc.translatePath('%s/resources/transparent' % __addonpath__ ).decode('utf-8')
+        else:
+            self._set_property("ArtistSlideshowTransparent", '')
+            self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode('utf-8')
         self.NAME = ''
         self.ALLARTISTS = []
         self.MBID = ''
