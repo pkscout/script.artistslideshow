@@ -862,6 +862,8 @@ class Main:
         else:
             self._set_property("ArtistSlideshowTransparent", '')
             self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode('utf-8')
+        if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) <> "True":
+            self._set_property("ArtistSlideshow", self.InitDir)
         self.NAME = ''
         self.ALLARTISTS = []
         self.MBID = ''
@@ -877,7 +879,6 @@ class Main:
         self.MINREFRESH = 9.9
         self.TransitionDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode('utf-8')
         self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % __addonname__ ).decode('utf-8')
-        self._set_property("ArtistSlideshow", self.InitDir)
         LastfmApiKey = 'afe7e856e4f4089fc90f841980ea1ada'
         fanarttvApiKey = '7a93c84fe1c9999e6f0fec206a66b0f5'
         theaudiodbApiKey = '193621276b2d731671156g'
