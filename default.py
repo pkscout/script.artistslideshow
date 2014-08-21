@@ -398,11 +398,9 @@ class Main:
                 if success:
                     if site == 'fanarttv':
                         try:
-                            json_data = dict(map(lambda (key, value): ('artistImages', value), json_data.items()))
-                        except AttributeError:
-                            return data
+                            json_data = json_data['artistbackground']
                         except Exception, e:
-                            lw.log( ['unexpected error fixing fanart.tv JSON data', e] )
+                            lw.log( ['error fixing fanart.tv JSON data', e] )
                             return data
                     success, loglines = writeFile( dicttoxml( json_data ).encode('utf-8'), filename )
                     lw.log( loglines )
@@ -526,7 +524,8 @@ class Main:
     def _get_images( self, site ):
         if site == 'fanarttv':
             if self.MBID:
-                self.url = self.fanarttvURL + self.MBID + self.fanarttvOPTIONS
+                self.url = self.fanarttvURL + self.MBID
+                self.params = self.fanarttvPARAMS
                 lw.log( ['asking for images from: %s' %self.url] )
             else:
                 return []
@@ -887,8 +886,8 @@ class Main:
         self.params = {}
         self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/'
         self.LastfmPARAMS = {'autocorrect':'1', 'api_key':LastfmApiKey}
-        self.fanarttvURL = 'http://api.fanart.tv/webservice/artist/%s/' % fanarttvApiKey
-        self.fanarttvOPTIONS = '/json/artistbackground/'
+        self.fanarttvURL = 'https://webservice.fanart.tv/v3/music/'
+        self.fanarttvPARAMS = {'api_key': fanarttvApiKey}
         theaudiodbURL = 'http://www.theaudiodb.com/api/v1/json/%s/' % theaudiodbApiKey
         self.theaudiodbARTISTURL = theaudiodbURL + 'artist-mb.php'
         self.theaudiodbALBUMURL = theaudiodbURL + 'album.php'

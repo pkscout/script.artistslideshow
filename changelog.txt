@@ -1,3 +1,7 @@
+v.1.6.9~beta1
+- update to current requests module (requests2 depreciated)
+- updated to v3 of fanart.tv API
+
 v.1.6.8
 - fix for crash when using smb path
 - cleaned up startup process to better deal with script being started twice
