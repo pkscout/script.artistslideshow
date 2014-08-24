@@ -1,3 +1,6 @@
+v.1.6.9~beta3
+- fixed htbackdrops call so it downloads all images when that setting is TRUE
+
 v.1.6.9~beta2
 - added option to download artist thumbnails from htbackdrops and fanart.tv
 - added option to use fanart.tv client API key

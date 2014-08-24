@@ -904,11 +904,11 @@ class Main:
         self.theaudiodbARTISTURL = theaudiodbURL + 'artist-mb.php'
         self.theaudiodbALBUMURL = theaudiodbURL + 'album.php'
         self.HtbackdropsQueryURL = 'http://htbackdrops.org/api/%s/searchXML' % HtbackdropsApiKey
+        self.HtbackdropsPARAMS = {'default_operator':'and', 'fields':'title'}
         if self.HTBACKDROPSALLIMAGES == 'true':
-            aid = '1,5'
+            self.HtbackdropsPARAMS.update( {'cid':'5'} )
         else:
-            aid = '1'
-        self.HtbackdropsPARAMS =  {'default_operator':'and', 'fields':'title', 'aid':aid}
+            self.HtbackdropsPARAMS.update( {'aid':'1'} )
         self.HtbackdropsDownloadURL = 'http://htbackdrops.org/api/' + HtbackdropsApiKey + '/download/'
 
 
