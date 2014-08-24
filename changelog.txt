@@ -1,3 +1,7 @@
+v.1.6.9~beta2
+- added option to download artist thumbnails from htbackdrops and fanart.tv
+- added option to use fanart.tv client API key
+
 v.1.6.9~beta1
 - update to current requests module (requests2 depreciated)
 - updated to v3 of fanart.tv API

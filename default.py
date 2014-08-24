@@ -398,11 +398,18 @@ class Main:
                 if success:
                     if site == 'fanarttv':
                         try:
-                            json_data = json_data['artistbackground']
+                            images = json_data['artistbackground']
                         except Exception, e:
-                            lw.log( ['error fixing fanart.tv JSON data', e] )
-                            return data
-                    success, loglines = writeFile( dicttoxml( json_data ).encode('utf-8'), filename )
+                            lw.log( ['error getting artist backgrounds from fanart.tv', e] )
+                            images = []
+                        if self.FANARTTVALLIMAGES == 'true':
+                            try:
+                                thumbs = json_data['artistthumb']
+                            except Exception, e:
+                                lw.log( ['error getting artist thumbs from fanart.tv', e] )
+                                thumbs = []
+                            images = images + thumbs
+                    success, loglines = writeFile( dicttoxml( images ).encode('utf-8'), filename )
                     lw.log( loglines )
                     json_data = ''
                 else:
@@ -808,8 +815,11 @@ class Main:
 
     def _get_settings( self ):
         self.FANARTTV = __addon__.getSetting( "fanarttv" )
+        self.FANARTTVALLIMAGES = __addon__.getSetting( "fanarttv_all" )
+        self.FANARTTVCLIENTAPIKEY = __addon__.getSetting( "fanarttv_clientapikey" )
         self.THEAUDIODB = __addon__.getSetting( "theaudiodb" )
         self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
+        self.HTBACKDROPSALLIMAGES = __addon__.getSetting( "htbackdrops_all" )
         self.ARTISTINFO = __addon__.getSetting( "artistinfo" )
         self.LANGUAGE = __addon__.getSetting( "language" )
         for language in LANGUAGES:
@@ -888,11 +898,17 @@ class Main:
         self.LastfmPARAMS = {'autocorrect':'1', 'api_key':LastfmApiKey}
         self.fanarttvURL = 'https://webservice.fanart.tv/v3/music/'
         self.fanarttvPARAMS = {'api_key': fanarttvApiKey}
+        if self.FANARTTVCLIENTAPIKEY:
+            self.fanarttvPARAMS.update( {'client_key': self.FANARTTVCLIENTAPIKEY} )
         theaudiodbURL = 'http://www.theaudiodb.com/api/v1/json/%s/' % theaudiodbApiKey
         self.theaudiodbARTISTURL = theaudiodbURL + 'artist-mb.php'
         self.theaudiodbALBUMURL = theaudiodbURL + 'album.php'
         self.HtbackdropsQueryURL = 'http://htbackdrops.org/api/%s/searchXML' % HtbackdropsApiKey
-        self.HtbackdropsPARAMS =  {'default_operator':'and', 'fields':'title', 'aid':'1'}
+        if self.HTBACKDROPSALLIMAGES == 'true':
+            aid = '1,5'
+        else:
+            aid = '1'
+        self.HtbackdropsPARAMS =  {'default_operator':'and', 'fields':'title', 'aid':aid}
         self.HtbackdropsDownloadURL = 'http://htbackdrops.org/api/' + HtbackdropsApiKey + '/download/'
 
 
