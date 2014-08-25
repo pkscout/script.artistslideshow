@@ -409,6 +409,8 @@ class Main:
                                 lw.log( ['error getting artist thumbs from fanart.tv', e] )
                                 thumbs = []
                             images = images + thumbs
+                    else:
+                        images = json_data
                     success, loglines = writeFile( dicttoxml( images ).encode('utf-8'), filename )
                     lw.log( loglines )
                     json_data = ''
