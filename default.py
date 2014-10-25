@@ -740,7 +740,6 @@ class Main:
         while do_loop:
             if mbsearch:
                 mbquery = mbbase + type
-#                mboptions['query'] = urllib.quote_plus( smartUTF8(mbsearch), ':!"' )
                 mboptions['query'] = mbsearch
             else:
                 mbquery = mbbase + type[:-1]
@@ -757,7 +756,11 @@ class Main:
                     self._wait( wait_time )
                 else:
                     try:
-                        mb_data.extend( json_data[type] )
+                        if type == 'artist':
+                            fixed_type = 'artists'
+                        else:
+                            fixed_type = type
+                        mb_data.extend( json_data[fixed_type] )
                     except KeyError:
                         lw.log( ['no valid value for %s found in JSON data' % type] )
                         offset = -100
