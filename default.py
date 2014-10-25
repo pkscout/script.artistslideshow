@@ -142,7 +142,7 @@ class Main:
                     self._clear_properties()
                     break
             try:
-                slideshow._set_property("ArtistSlideshow.CleanupComplete", "True")
+                self._set_property("ArtistSlideshow.CleanupComplete", "True")
             except Exception, e:
                 lw.log( ['unexpected error while setting property.', e] )
 
