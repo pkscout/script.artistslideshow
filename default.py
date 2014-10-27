@@ -531,6 +531,7 @@ class Main:
 
 
     def _get_images( self, site ):
+        foundimages = False
         if site == 'fanarttv':
             if self.MBID:
                 self.url = self.fanarttvURL + self.MBID
@@ -551,7 +552,6 @@ class Main:
                 baseparams = {'cid':'5'}
             else:
                 baseparams = {'aid':'1'}
-            foundimages = False
             if self.MBID:
                 additionalparams = {'mbid':self.MBID}
                 self.params = dict( baseparams.items() + additionalparams.items() )
@@ -566,7 +566,8 @@ class Main:
                 additionalparams = {'default_operator':'and', 'fields':'title', 'keywords':self.NAME.replace('&','%26')}
                 self.params = dict( baseparams.items() + additionalparams.items() )
                 lw.log( ['asking for images from: %s' %self.url] )
-                images = self._get_data(site, 'images')        
+        if not foundimages:
+            images = self._get_data(site, 'images')
         return images
 
 
