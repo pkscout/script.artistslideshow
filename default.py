@@ -547,10 +547,26 @@ class Main:
                 return []
         elif site == "htbackdrops":
             self.url = self.HtbackdropsQueryURL
-            additionalparams = {'keywords':self.NAME.replace('&','%26')}
-            self.params = dict( self.HtbackdropsPARAMS.items() + additionalparams.items() )
-            lw.log( ['asking for images from: %s' %self.url] )
-        images = self._get_data(site, 'images')
+            if self.HTBACKDROPSALLIMAGES == 'true':
+                baseparams = {'cid':'5'}
+            else:
+                baseparams = {'aid':'1'}
+            foundimages = False
+            if self.MBID:
+                additionalparams = {'mbid':self.MBID}
+                self.params = dict( baseparams.items() + additionalparams.items() )
+                lw.log( ['asking for images from: %s' %self.url] )
+                images = self._get_data(site, 'images')
+                if images:
+                	foundimages = True
+                else:
+                    success, loglines = deleteFile( os.path.join( self.InfoDir, 'htbackdropsartistimages.nfo') )
+                    lw.log( loglines ) 
+            if not foundimages:
+                additionalparams = {'default_operator':'and', 'fields':'title', 'keywords':self.NAME.replace('&','%26')}
+                self.params = dict( baseparams.items() + additionalparams.items() )
+                lw.log( ['asking for images from: %s' %self.url] )
+                images = self._get_data(site, 'images')        
         return images
 
 
@@ -676,7 +692,7 @@ class Main:
         query_times = {'last':0, 'current':time.time()}
         lw.log( ['parsing musicbrainz response for muiscbrainz ID'] )
         cached_mb_info = False
-        for artist in self._get_musicbrainz_info( mboptions, mbsearch, 'artist', query_times ):
+        for artist in self._get_musicbrainz_info( mboptions, mbsearch, 'artist', 'artists', query_times ):
             mbid = ''
             if self._playback_stopped_or_changed():
                 return ''
@@ -725,7 +741,7 @@ class Main:
         return mbid
 
                                 
-    def _get_musicbrainz_info( self, mboptions, mbsearch, type, query_times ):
+    def _get_musicbrainz_info( self, mboptions, mbsearch, type, response_type, query_times ):
         mbbase = 'http://www.musicbrainz.org/ws/2/'
         theartist = self.NAME
         mb_data = []
@@ -756,11 +772,7 @@ class Main:
                     self._wait( wait_time )
                 else:
                     try:
-                        if type == 'artist':
-                            fixed_type = 'artists'
-                        else:
-                            fixed_type = type
-                        mb_data.extend( json_data[fixed_type] )
+                        mb_data.extend( json_data[response_type] )
                     except KeyError:
                         lw.log( ['no valid value for %s found in JSON data' % type] )
                         offset = -100
@@ -909,11 +921,6 @@ class Main:
         self.theaudiodbARTISTURL = theaudiodbURL + 'artist-mb.php'
         self.theaudiodbALBUMURL = theaudiodbURL + 'album.php'
         self.HtbackdropsQueryURL = 'http://htbackdrops.org/api/%s/searchXML' % HtbackdropsApiKey
-        self.HtbackdropsPARAMS = {'default_operator':'and', 'fields':'title'}
-        if self.HTBACKDROPSALLIMAGES == 'true':
-            self.HtbackdropsPARAMS.update( {'cid':'5'} )
-        else:
-            self.HtbackdropsPARAMS.update( {'aid':'1'} )
         self.HtbackdropsDownloadURL = 'http://htbackdrops.org/api/' + HtbackdropsApiKey + '/download/'
 
 
@@ -1043,7 +1050,7 @@ class Main:
         lw.log( ["checking this artist's " + type + "s against currently playing " + type] )
 #        mboptions = type + '?artist=' + mbid + '&limit=100&fmt=json'
         mboptions = {"artist":mbid, "limit":"100", "fmt":"json"}
-        for thing in self._get_musicbrainz_info( mboptions, '', type + 's', query_times ):
+        for thing in self._get_musicbrainz_info( mboptions, '', type + 's', type + 's', query_times ):
             title = smartUTF8( thing['title'] )
             if playing_thing.rfind('(') > 0:
                 playing_title = smartUTF8( playing_thing[:playing_thing.rfind('(')-2] )

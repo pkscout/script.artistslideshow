@@ -1,3 +1,7 @@
+v.1.7.0~beta2
+- alternate method for addressing JSON format issue from MusicBrainz
+- added support for htbackdrops.org MusicBrainz ID search (falls back to old search method)
+
 v.1.7.0~beta1
 - fixed parsing error due to new JSON format from MusicBrainz
 - fixed error where window settings were not set properly at script exit
