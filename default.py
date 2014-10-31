@@ -949,7 +949,7 @@ class Main:
         dirs, files = xbmcvfs.listdir(self.CacheDir)
         for file in files:
             if(file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')):
-                xbmcvfs.copy(os.path.join(self.CacheDir, file), os.path.join(self.MergeDir, file))
+                xbmcvfs.copy(os.path.join(self.CacheDir, smartUTF8(file).decode('utf-8')), os.path.join(self.MergeDir, smartUTF8(file).decode('utf-8')))                
         if self.ARTISTNUM == self.TOTALARTISTS:
             wait_elapsed = time.time() - self.LASTARTISTREFRESH
             if( wait_elapsed > self.MINREFRESH ):
