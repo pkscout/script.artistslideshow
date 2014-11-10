@@ -1,4 +1,4 @@
-v.1.8.0
+v.1.8.1
 - updated for Helix
 - fixed crash at exist when artist images have unicode characters in name
 
