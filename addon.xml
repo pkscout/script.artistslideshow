@@ -2,7 +2,7 @@
 <addon id="script.artistslideshow" name="Artist Slideshow" version="1.8.0" provider-name="pkscout|ronie">
 	<requires>
 		<import addon="xbmc.python" version="2.19.0"/>
-		<import addon="xbmc.addon" version="14.0.0"/>
+		<import addon="xbmc.addon" version="13.0.0"/>
 		<import addon="script.module.requests" version="2.3.0"/>
 		<import addon="script.module.simplejson" version="3.3.0"/>
 	</requires>
