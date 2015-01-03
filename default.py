@@ -689,7 +689,7 @@ class Main:
             if theartist.startswith(badSubstring):
                 searchartist = theartist.replace(badSubstring, "")
         mboptions = {"fmt":"json"} 
-        mbsearch = 'artist:"%s"' % searchartist
+        mbsearch = 'alias:"%s"' % searchartist
         query_times = {'last':0, 'current':time.time()}
         lw.log( ['parsing musicbrainz response for muiscbrainz ID'] )
         cached_mb_info = False
