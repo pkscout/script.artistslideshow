@@ -155,7 +155,7 @@ class Main:
             old_files = []
         for old_file in old_files:
             if not old_file.endswith( '.nfo' ):
-                success, loglines = deleteFile( os.path.join(dir_path, old_file) )
+                success, loglines = deleteFile( os.path.join(dir_path, old_file.decode('utf-8')) )
 
 
     def _clean_text( self, text ):
