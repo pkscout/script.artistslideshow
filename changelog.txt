@@ -1,4 +1,4 @@
-v.1.8.4~beta1
+v.1.8.4
 - fixed another UTF-8 encoding issue
 
 v.1.8.3
