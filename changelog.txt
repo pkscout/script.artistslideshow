@@ -1,3 +1,7 @@
+v.1.8.5
+- disabled SSL cert verification so connections to self-signed certs will work
+  (fixes problem with fanart.tv)
+
 v.1.8.4
 - fixed another UTF-8 encoding issue
 
