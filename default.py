@@ -240,6 +240,15 @@ class Main:
         lw.log( ['checking for local artist bio data'] )
         bio = self._get_local_data( 'bio' )
         if bio == []:
+            response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "description"]},"id":1}' )
+            try:
+                bio = [_json.loads(response)['result']['item']['description']]
+            except (IndexError, KeyError, ValueError):
+                bio = []
+            except Exception, e:
+                lw.log( ['unexpected error getting JSON back from XBMC', e] )
+                bio = []
+        if bio == []:
             if self.MBID:
                 self.url = self.theaudiodbARTISTURL
                 self.params['i'] = self.MBID
@@ -491,7 +500,7 @@ class Main:
                         image = element.text
                         if not image:
                             image = ''
-                        data.append( ( name , image ) )            
+                        data.append( ( name , image + '/preview' ) )            
                         match = False
             if site == "lastfm":
                 match = False

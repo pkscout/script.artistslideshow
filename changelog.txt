@@ -1,3 +1,7 @@
+v.1.8.9~beta1
+- AS now grabs artist bio from Kodi db first and falls back to external download
+- AS now grabs 200x200 album image from theAudioDB instead of fullsize image
+
 v.1.8.8
 - updated cache logic to reduce API calls to external sites
 
