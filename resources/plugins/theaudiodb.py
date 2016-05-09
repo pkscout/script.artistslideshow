@@ -11,7 +11,8 @@ else:
 
 class objectConfig():
     def __init__( self ):
-        apikey = '193621276b2d731671156g'
+#o        apikey = '193621276b2d731671156g'
+        apikey = '293621276b2d731671156g'
         url = 'http://www.theaudiodb.com/api/v1/json/%s/' % apikey
         secsinweek = int( 7*24*60*60 )
         self.ARTISTURL = url + 'artist-mb.php'
@@ -176,6 +177,7 @@ class objectConfig():
                 self.loglines.extend( dloglines )
                 self.loglines.append( 'Deleted old cache file. New file will be download on next run.' )
                 json_data = ''
+        return json_data
 
 
     def _put_cache_time( self, cachefilepath ):

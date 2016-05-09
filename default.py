@@ -253,6 +253,7 @@ class Main:
         bio_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8') )
         bio_params['lang'] = self.LANGUAGE
         bio_params['artist'] = self.NAME
+        bio = ''
         for plugin_name in bio_plugins['names']:
             lw.log( ['checking %s for bio' % plugin_name] )
             bio, loglines = bio_plugins['objs'][plugin_name].getBio( bio_params )
@@ -269,6 +270,7 @@ class Main:
         album_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8') )
         album_params['lang'] = self.LANGUAGE
         album_params['artist'] = self.NAME
+        albums = []
         for plugin_name in album_plugins['names']:
             lw.log( ['checking %s for album info' % plugin_name] )
             albums, loglines = album_plugins['objs'][plugin_name].getAlbumList( album_params )
@@ -285,6 +287,7 @@ class Main:
         similar_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8') )
         similar_params['lang'] = self.LANGUAGE
         similar_params['artist'] = self.NAME
+        similar_artists = []
         for plugin_name in similar_plugins['names']:
             lw.log( ['checking %s for similar artist info' % plugin_name] )
             similar_artists, loglines = similar_plugins['objs'][plugin_name].getSimilarArtists( similar_params )
