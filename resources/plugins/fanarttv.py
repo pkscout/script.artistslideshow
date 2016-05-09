@@ -105,7 +105,7 @@ class objectConfig():
             self.loglines.extend( rloglines )
             try:
                 json_data = _json.loads( rawdata )
-            except _json.JSONDecodeError:
+            except ValueError:
                 success, dloglines = deleteFile( filepath )
                 self.loglines.extend( dloglines )
                 self.loglines.append( 'Deleted old cache file. New file will be download on next run.' )
