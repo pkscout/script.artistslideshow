@@ -30,6 +30,7 @@ from resources.common.fileops import checkPath, writeFile, readFile, deleteFile
 from resources.common.url import URL
 from resources.common.transforms import getImageType, itemHash, itemHashwithPath
 from resources.common.xlogger import Logger
+import resources.plugins
 
 __addon__        = xbmcaddon.Addon()
 __addonname__    = __addon__.getAddonInfo('id')
@@ -45,6 +46,35 @@ mbURL   = URL( 'json',{"User-Agent": __addonname__  + '/' + __addonversion__  + 
 JSONURL = URL( 'json' )
 txtURL  = URL( 'text' )
 imgURL  = URL( 'binary' )
+# this section imports all the scraper plugins, initializes, and sorts them
+bio_plugins = {'names':[], 'objs':{}}
+image_plugins = {'names':[], 'objs':{}}
+album_plugins = {'names':[], 'objs':{}}
+similar_plugins = {'names':[], 'objs':{}}
+for module in resources.plugins.__all__:
+    full_plugin = 'resources.plugins.' + module
+    __import__( full_plugin )
+    imp_plugin = sys.modules[ full_plugin ]
+    lw.log( ['loaded plugin ' + module] )
+    plugin = imp_plugin.objectConfig()
+    scrapers = plugin.provides()
+    if 'bio' in scrapers:
+        bio_plugins['objs'][module] = plugin
+        bio_plugins['names'].append( module )
+        lw.log( ['added %s to bio plugins' % module] )
+    if 'images' in scrapers:
+        image_plugins['objs'][module] = plugin
+        image_plugins['names'].append( module )
+        lw.log( ['added %s to image plugins' % module] )
+    if 'albums' in scrapers:
+        album_plugins['objs'][module] = plugin
+        album_plugins['names'].append( module )
+        lw.log( ['added %s to album info plugins' % module] )
+    if 'similar' in scrapers:
+        similar_plugins['objs'][module] = plugin
+        similar_plugins['names'].append( module )
+        lw.log( ['added %s to similar artist plugins' % module] )
+    
 
 LANGUAGES = (
 # Full Language name[0]         ISO 639-1[1]   Script Language[2]
@@ -186,105 +216,86 @@ class Main:
         if (not xbmc.abortRequested):
             tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
             lw.log( ['the tmpname is ' + tmpname] )
-            if not self._excluded( dst ):
-                if xbmcvfs.exists(tmpname):
-                    success, loglines = deleteFile( tmpname )
-                    lw.log( loglines )
-                success, loglines, urldata = imgURL.Get( src, params=self.params )
+            if xbmcvfs.exists(tmpname):
+                success, loglines = deleteFile( tmpname )
                 lw.log( loglines )
-                if success:
-                    success, loglines = writeFile( urldata, tmpname )
-                    lw.log( loglines )
-                if not success:
-                    return False
-                if xbmcvfs.Stat( tmpname ).st_size() > 999:
-                    image_ext = getImageType( tmpname )
-                    if not xbmcvfs.exists ( dst + image_ext ):
-                        lw.log( ['copying %s to %s' % (tmpname, dst2 + image_ext)] )
-                        xbmcvfs.copy( tmpname, dst2 + image_ext )
-                        lw.log( ['moving %s to %s' % (tmpname, dst + image_ext)] )
-                        xbmcvfs.rename( tmpname, dst + image_ext )
-                        return True
-                    else:
-                        lw.log( ['image already exists, deleting temporary file'] )
-                        success, loglines = deleteFile( tmpname )
-                        lw.log( loglines )
-                        return False
+            success, loglines, urldata = imgURL.Get( src, params=self.params )
+            lw.log( loglines )
+            if success:
+                success, loglines = writeFile( urldata, tmpname )
+                lw.log( loglines )
+            if not success:
+                return False
+            if xbmcvfs.Stat( tmpname ).st_size() > 999:
+                image_ext = getImageType( tmpname )
+                if not xbmcvfs.exists ( dst + image_ext ):
+                    lw.log( ['copying %s to %s' % (tmpname, dst2 + image_ext)] )
+                    xbmcvfs.copy( tmpname, dst2 + image_ext )
+                    lw.log( ['moving %s to %s' % (tmpname, dst + image_ext)] )
+                    xbmcvfs.rename( tmpname, dst + image_ext )
+                    return True
                 else:
+                    lw.log( ['image already exists, deleting temporary file'] )
                     success, loglines = deleteFile( tmpname )
                     lw.log( loglines )
                     return False
             else:
-                return False 
-    
-
-    def _excluded( self, item ):
-        path, filename = os.path.split( item )
-        exclusion_file = os.path.join( path, '_exclusions.nfo' )
-        if xbmcvfs.exists( exclusion_file ):
-            loglines, exclusions = readFile( exclusion_file )
-            loglines.append( 'checking %s against %s' % (filename, exclusions) )
-            lw.log( loglines )
-            if filename in exclusions:
-                lw.log( ['exclusion found'] )
-                return True
-            else:
+                success, loglines = deleteFile( tmpname )
+                lw.log( loglines )
                 return False
-        else:
-            success, loglines = writeFile( '', exclusion_file )
-            lw.log( loglines )
-            return False
-
     
+
     def _get_artistinfo( self ):
-        lw.log( ['checking for local artist bio data'] )
-        bio = self._get_local_data( 'bio' )
-        if bio == []:
-            response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "description"]},"id":1}' )
-            try:
-                bio = [_json.loads(response)['result']['item']['description']]
-            except (IndexError, KeyError, ValueError):
-                bio = []
-            except Exception, e:
-                lw.log( ['unexpected error getting JSON back from XBMC', e] )
-                bio = []
-        if bio == []:
-            if self.MBID:
-                self.url = self.theaudiodbARTISTURL
-                self.params['i'] = self.MBID
-                lw.log( ['trying to get artist bio from ' + self.url] )
-                bio = self._get_data( 'theaudiodb', 'bio' )
-        if bio == []:
-            self.url = self.LastfmURL
-            additionalparams = {'lang':self.LANGUAGE, 'method':'artist.getInfo', 'artist':self.NAME}  
-            self.params = dict( self.LastfmPARAMS.items() + additionalparams.items() )
-            lw.log( ['trying to get artist bio from ' + self.url] )
-            bio = self._get_data('lastfm', 'bio')
-        if bio == []:
-            self.biography = ''
-        else:
-            self.biography = self._clean_text(bio[0])
-        self.albums = self._get_local_data( 'albums' )
-        if self.albums == []:
-            loglines, theaudiodb_id = readFile( os.path.join(self.InfoDir, 'theaudiodbid.nfo') )
+        bio = ''
+        bio_params = {}
+        bio_params['mbid'] = self.MBID
+        bio_params['infodir'] = self.InfoDir
+        bio_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8') )
+        bio_params['lang'] = self.LANGUAGE
+        bio_params['artist'] = self.NAME
+        for plugin_name in bio_plugins['names']:
+            lw.log( ['checking %s for bio' % plugin_name] )
+            bio, loglines = bio_plugins['objs'][plugin_name].getBio( bio_params )
             lw.log( loglines )
-            if theaudiodb_id:
-                self.url = self.theaudiodbALBUMURL
-                self.params['i'] = theaudiodb_id
-                lw.log( ['trying to get artist albumns from ' + self.url] )
-                self.albums = self._get_data('theaudiodb', 'albums')
-        if self.albums == []:
-            self.url = self.LastfmURL
-            additionalparams = {'method':'artist.getTopAlbums', 'artist':self.NAME} 
-            self.params = dict( self.LastfmPARAMS.items() + additionalparams.items() )
-            lw.log( ['trying to get artist albums from ' + self.url] )
-            self.albums = self._get_data('lastfm', 'albums')
-        self.similar = self._get_local_data( 'similar' )
-        if self.similar == []:
-            self.url = self.LastfmURL
-            additionalparams = {'method':'artist.getSimilar', 'artist':self.NAME} 
-            self.params = dict( self.LastfmPARAMS.items() + additionalparams.items() )
-            self.similar = self._get_data('lastfm', 'similar')
+            if bio:
+                lw.log( ['got a bio from %s, so stop looking' % plugin_name] )
+                break
+        if bio:
+            self.biography = self._clean_text(bio)
+        else:
+            self.biography = ''
+        album_params = {}
+        album_params['infodir'] = self.InfoDir
+        album_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8') )
+        album_params['lang'] = self.LANGUAGE
+        album_params['artist'] = self.NAME
+        for plugin_name in album_plugins['names']:
+            lw.log( ['checking %s for album info' % plugin_name] )
+            albums, loglines = album_plugins['objs'][plugin_name].getAlbumList( album_params )
+            lw.log( loglines )
+            if not albums == []:
+                lw.log( ['got album list from %s, so stop looking' % plugin_name] )
+                break
+        if albums == []:
+            self.albums = []
+        else:
+            self.albums = albums
+        similar_params = {}
+        similar_params['infodir'] = self.InfoDir
+        similar_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8') )
+        similar_params['lang'] = self.LANGUAGE
+        similar_params['artist'] = self.NAME
+        for plugin_name in similar_plugins['names']:
+            lw.log( ['checking %s for similar artist info' % plugin_name] )
+            similar_artists, loglines = similar_plugins['objs'][plugin_name].getSimilarArtists( similar_params )
+            lw.log( loglines )
+            if not similar_artists == []:
+                lw.log( ['got similar artist list from %s, so stop looking' % plugin_name] )
+                break
+        if  similar_artists == []:
+            self.similar = []
+        else:
+            self.similar = similar_artists
         self._set_properties()
 
 
@@ -367,162 +378,6 @@ class Main:
         return artists_info
 
 
-    def _get_data( self, site, item ):
-        data = []
-        ForceUpdate = True
-        if item == "images":
-            if site == "fanarttv":
-                filename = os.path.join( self.InfoDir, 'fanarttvartistimages.nfo')
-            elif site == "theaudiodb":
-                filename = os.path.join( self.InfoDir, 'theaudiodbartistbio.nfo')
-                id_filename = os.path.join( self.InfoDir, 'theaudiodbid.nfo')
-            elif site == "htbackdrops":
-                filename = os.path.join( self.InfoDir, 'htbackdropsartistimages.nfo')
-        elif item == "bio":
-            if site == "theaudiodb":
-                filename = os.path.join( self.InfoDir, 'theaudiodbartistbio.nfo')
-                id_filename = os.path.join( self.InfoDir, 'theaudiodbid.nfo')
-            elif site == "lastfm":
-                filename = os.path.join( self.InfoDir, 'lastfmartistbio.nfo')
-        elif item == "similar":
-            filename = os.path.join( self.InfoDir, 'lastfmartistsimilar.nfo')
-        elif item == "albums":
-            if site == "theaudiodb":
-                filename = os.path.join( self.InfoDir, 'theaudiodbartistsalbums.nfo')
-            elif site == "lastfm":
-                filename = os.path.join( self.InfoDir, 'lastfmartistalbums.nfo')
-        if xbmcvfs.exists( filename ):
-            if time.time() - os.path.getmtime(filename) < 1209600:
-                lw.log( ['cached artist %s info found' % item] )
-                ForceUpdate = False
-            else:
-                lw.log( ['outdated cached info found for %s ' % item] )
-        if ForceUpdate:
-            lw.log( ['downloading artist %s info from %s' % (item, site)] )
-            if site == 'fanarttv' or site == 'theaudiodb':
-                #converts the JSON response to XML
-                success, loglines, json_data = JSONURL.Get( self.url, params=self.params )
-                self.params = {}
-                lw.log( loglines )
-                if success:
-                    if site == 'fanarttv':
-                        try:
-                            images = json_data['artistbackground']
-                        except Exception, e:
-                            lw.log( ['error getting artist backgrounds from fanart.tv', e] )
-                            images = []
-                        if self.FANARTTVALLIMAGES == 'true':
-                            try:
-                                thumbs = json_data['artistthumb']
-                            except Exception, e:
-                                lw.log( ['error getting artist thumbs from fanart.tv', e] )
-                                thumbs = []
-                            images = images + thumbs
-                    else:
-                        images = json_data
-                    success, loglines = writeFile( dicttoxml( images ).encode('utf-8'), filename )
-                    lw.log( loglines )
-                    json_data = ''
-                else:
-                    return data
-            else:
-                success, loglines, urldata = txtURL.Get( self.url, params=self.params )
-                self.params = {}
-                lw.log( loglines )
-                if success:
-                    success, loglines = writeFile( urldata, filename )
-                    lw.log( loglines )
-                if not success:
-                    return data
-        loglines, rawxml = readFile( filename )
-        lw.log( loglines )
-        if rawxml:
-            xmldata = _xmltree.fromstring( rawxml )
-        else:
-            deleteFile( filename )
-            return data
-        if item == "images":
-            if site == "fanarttv":
-                for element in xmldata.getiterator():
-                    if element.tag == "url":
-                        data.append(element.text)
-            elif site == "theaudiodb":
-                for element in xmldata.getiterator():
-                    if element.tag.startswith( "strArtistFanart" ):
-                        if element.text:
-                            data.append(element.text)
-                    if element.tag == 'idArtist' and not xbmcvfs.exists( id_filename ):
-                        success, loglines = writeFile( element.text, id_filename )
-                        lw.log( loglines )
-            elif site == "htbackdrops":
-                for element in xmldata.getiterator():
-                    if element.tag == "id":
-                        data.append(self.HtbackdropsDownloadURL + str( element.text ) + '/fullsize')
-        elif item == "bio":
-            if site == "theaudiodb":
-                for element in xmldata.getiterator():
-                    if element.tag == "strBiography" + self.LANGUAGE.upper():
-                        bio = element.text
-                        if not bio:
-                            bio = ''
-                        data.append(bio)            
-                    if element.tag == 'idArtist' and not xbmcvfs.exists( id_filename ):
-                        success, loglines = writeFile( element.text, id_filename )
-                        lw.log( loglines )
-            if site == "lastfm":
-                for element in xmldata.getiterator():
-                    if element.tag == "content":
-                        bio = element.text
-                        if not bio:
-                            bio = ''
-                        data.append(bio)
-        elif item == "similar":
-            if site == "lastfm":
-                for element in xmldata.getiterator():
-                    if element.tag == "name":
-                        name = element.text
-                        name.encode('ascii', 'ignore')
-                    elif element.tag == "image":
-                        if element.attrib.get('size') == "mega":
-                            image = element.text
-                            if not image:
-                                image = ''
-                            data.append( ( name , image ) )
-        elif item == "albums":
-            if site == "theaudiodb":
-                match = False
-                for element in xmldata.getiterator():
-                    if element.tag == "strAlbum":
-                        name = element.text
-                        name.encode('ascii', 'ignore')
-                        match = True
-                    elif element.tag == "strAlbumThumb" and match:
-                        image = element.text
-                        if not image:
-                            image = ''
-                        data.append( ( name , image + '/preview' ) )            
-                        match = False
-            if site == "lastfm":
-                match = False
-                for element in xmldata.getiterator():
-                    if element.tag == "name":
-                        if match:
-                            match = False
-                        else:
-                            name = element.text
-                            name.encode('ascii', 'ignore')
-                            match = True
-                    elif element.tag == "image":
-                        if element.attrib.get('size') == "extralarge":
-                            image = element.text
-                            if not image:
-                                image = ''
-                            data.append( ( name , image ) )
-        if data == '':
-            lw.log( ['no %s found on %s' % (item, site)] )
-        return data
-
-
     def _get_featured_artists( self, data ):
         the_split = data.replace('ft.','feat.').split('feat.')
         if len( the_split ) > 1:
@@ -540,44 +395,23 @@ class Main:
         return total_size
 
 
-    def _get_images( self, site ):
-        foundimages = False
-        if site == 'fanarttv':
-            if self.MBID:
-                self.url = self.fanarttvURL + self.MBID
-                self.params = self.fanarttvPARAMS
-                lw.log( ['asking for images from: %s' %self.url] )
-            else:
-                return []
-        elif site == 'theaudiodb':
-            if self.MBID:
-                self.url = self.theaudiodbARTISTURL
-                self.params['i'] = self.MBID
-                lw.log( ['asking for images from: %s' %self.url] )
-            else:
-                return []
-        elif site == "htbackdrops":
-            self.url = self.HtbackdropsQueryURL
-            if self.HTBACKDROPSALLIMAGES == 'true':
-                baseparams = {'cid':'5'}
-            else:
-                baseparams = {'aid':'1'}
-            if self.MBID:
-                additionalparams = {'mbid':self.MBID}
-                self.params = dict( baseparams.items() + additionalparams.items() )
-                lw.log( ['asking for images from: %s' %self.url] )
-                images = self._get_data(site, 'images')
-                if images:
-                	foundimages = True
-                else:
-                    success, loglines = deleteFile( os.path.join( self.InfoDir, 'htbackdropsartistimages.nfo') )
-                    lw.log( loglines ) 
-            if not foundimages:
-                additionalparams = {'default_operator':'and', 'fields':'title', 'keywords':self.NAME.replace('&','%26')}
-                self.params = dict( baseparams.items() + additionalparams.items() )
-                lw.log( ['asking for images from: %s' %self.url] )
-        if not foundimages:
-            images = self._get_data(site, 'images')
+    def _get_image_list( self ):
+        images = []
+        image_params = {}
+        image_params['mbid'] = self.MBID
+        image_params['lang'] = self.LANGUAGE
+        image_params['artist'] = self.NAME
+        image_params['infodir'] = self.InfoDir
+        image_params['exclusionsfile'] = os.path.join( self.CacheDir, "_exclusions.nfo" )
+        for plugin_name in image_plugins['names']:
+            image_list = []
+            lw.log( ['checking %s for images' % plugin_name] )
+            image_params['enabled'] = __addon__.getSetting( plugin_name )
+            image_params['getall'] = __addon__.getSetting( plugin_name + "_all" )
+            image_params['clientapikey'] = __addon__.getSetting( plugin_name + "_clientapikey" )
+            image_list, loglines = image_plugins['objs'][plugin_name].getImageList( image_params )
+            lw.log( loglines )
+            images.extend( image_list )
         return images
 
 
@@ -836,12 +670,6 @@ class Main:
 
 
     def _get_settings( self ):
-        self.FANARTTV = __addon__.getSetting( "fanarttv" )
-        self.FANARTTVALLIMAGES = __addon__.getSetting( "fanarttv_all" )
-        self.FANARTTVCLIENTAPIKEY = __addon__.getSetting( "fanarttv_clientapikey" )
-        self.THEAUDIODB = __addon__.getSetting( "theaudiodb" )
-        self.HTBACKDROPS = __addon__.getSetting( "htbackdrops" )
-        self.HTBACKDROPSALLIMAGES = __addon__.getSetting( "htbackdrops_all" )
         self.ARTISTINFO = __addon__.getSetting( "artistinfo" )
         self.LANGUAGE = __addon__.getSetting( "language" )
         for language in LANGUAGES:
@@ -911,22 +739,7 @@ class Main:
         self.MINREFRESH = 9.9
         self.TransitionDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode('utf-8')
         self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % __addonname__ ).decode('utf-8')
-        LastfmApiKey = 'afe7e856e4f4089fc90f841980ea1ada'
-        fanarttvApiKey = '7a93c84fe1c9999e6f0fec206a66b0f5'
-        theaudiodbApiKey = '193621276b2d731671156g'
-        HtbackdropsApiKey = '96d681ea0dcb07ad9d27a347e64b652a'
         self.params = {}
-        self.LastfmURL = 'http://ws.audioscrobbler.com/2.0/'
-        self.LastfmPARAMS = {'autocorrect':'1', 'api_key':LastfmApiKey}
-        self.fanarttvURL = 'http://webservice.fanart.tv/v3/music/'
-        self.fanarttvPARAMS = {'api_key': fanarttvApiKey}
-        if self.FANARTTVCLIENTAPIKEY:
-            self.fanarttvPARAMS.update( {'client_key': self.FANARTTVCLIENTAPIKEY} )
-        theaudiodbURL = 'http://www.theaudiodb.com/api/v1/json/%s/' % theaudiodbApiKey
-        self.theaudiodbARTISTURL = theaudiodbURL + 'artist-mb.php'
-        self.theaudiodbALBUMURL = theaudiodbURL + 'album.php'
-        self.HtbackdropsQueryURL = 'http://htbackdrops.org/api/%s/searchXML' % HtbackdropsApiKey
-        self.HtbackdropsDownloadURL = 'http://htbackdrops.org/api/' + HtbackdropsApiKey + '/download/'
 
 
     def _init_window( self ):
@@ -937,13 +750,13 @@ class Main:
 
 
     def _make_dirs( self ):
-        exists, loglines = checkPath( self.InitDir )
+        exists, loglines = checkPath( os.path.join( self.InitDir, '' ) )
         lw.log( loglines )
-        exists, loglines = checkPath( self.DATAROOT )
+        exists, loglines = checkPath( os.path.join( self.DATAROOT, '' ) )
         lw.log( loglines )
         thedirs = ['temp', 'ArtistSlideshow', 'ArtistInformation', 'transition', 'merge']
         for onedir in thedirs:
-            exists, loglines = checkPath( os.path.join( self.DATAROOT, onedir ) )
+            exists, loglines = checkPath( os.path.join( self.DATAROOT, onedir, '' ) )
             lw.log( loglines )
 
 
@@ -1178,57 +991,34 @@ class Main:
         else:
             self._set_cachedir( self.NAME )
         lw.log( ['cachedir = %s' % self.CacheDir] )
-
+        if self.ARTISTNUM == 1 and self.ARTISTINFO == "true":
+            self._get_artistinfo()
         dirs, files = xbmcvfs.listdir(self.CacheDir)
         for file in files:
             if (file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')) or (self.PRIORITY == '2' and self.LocalImagesFound):
                 self.CachedImagesFound = True
-
         if self.CachedImagesFound:
             lw.log( ['cached images found'] )
             cached_image_info = True
             self.LASTARTISTREFRESH = time.time()
             if self.ARTISTNUM == 1:
                 self._set_artwork_skininfo( self.CacheDir )
-                if self.ARTISTINFO == "true":
-                    self._get_artistinfo()
         else:
             self.LASTARTISTREFRESH = 0
             if self.ARTISTNUM == 1:
-                for cache_file in ['fanarttvartistimages.nfo', 'theaudiodbartistbio.nfo', 'htbackdropsartistimages.nfo']:
-                    filename = os.path.join( self.InfoDir, cache_file.decode('utf-8') )
-                    if xbmcvfs.exists( filename ):
-                        if time.time() - os.path.getmtime(filename) < 1209600:
-                            lw.log( ['cached %s found' % filename] )
-                            cached_image_info = True
-                        else:
-                           lw.log( ['outdated %s found' % filename] )
-                           cached_image_info = False
                 if self.NOTIFICATIONTYPE == "1":
                     self._set_property("ArtistSlideshow", self.InitDir)
-                    if not cached_image_info:
-                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(__language__(30300)), smartUTF8(__language__(30301)), 5000, smartUTF8(__addonicon__))
-                        xbmc.executebuiltin(command)
+                    command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(__language__(30300)), smartUTF8(__language__(30301)), 5000, smartUTF8(__addonicon__))
+                    xbmc.executebuiltin(command)
                 elif self.NOTIFICATIONTYPE == "2":
-                    if not cached_image_info:
-                        self._set_property("ArtistSlideshow", self.PROGRESSPATH)
-                    else:
-                        self._set_property("ArtistSlideshow", self.InitDir)
+                    self._set_property("ArtistSlideshow", self.PROGRESSPATH)
                 else:
                     self._set_property("ArtistSlideshow", self.InitDir)
-        sourcelist = []
-        sourcelist.append( ['fanarttv', self.FANARTTV] )
-        sourcelist.append( ['theaudiodb', self.THEAUDIODB] )
-        sourcelist.append( ['htbackdrops', self.HTBACKDROPS] )
-        imagelist = []
-        for source in sourcelist:
-            lw.log( ['checking the source %s with a value of %s.' % (source[0], source[1])] )
-            if source[1] == "true" and not cached_image_info:
-                imagelist.extend( self._get_images(source[0]) )
         lw.log( ['downloading images'] )
         folders, cachelist = xbmcvfs.listdir( self.CacheDir )
         cachelist_str = ''.join(str(e) for e in cachelist)
-        for url in imagelist:
+        for url in self._get_image_list():
+            lw.log( ['the url to check is ' + url] )
             if( self._playback_stopped_or_changed() ):
                 return
             path = itemHashwithPath( url, self.CacheDir )
@@ -1238,10 +1028,6 @@ class Main:
                 if self._download(url, path, path2):
                     lw.log( ['downloaded %s to %s' % (url, path)]  )
                     self.ImageDownloaded = True
-            elif self._excluded( path ):
-                indicies = [i for i, elem in enumerate(cachelist) if checkfilename in elem]
-                success, loglines = deleteFile( os.path.join( checkpath, cachelist[indicies[0]] ) )
-                lw.log( loglines )
             if self.ImageDownloaded:
                 if( self._playback_stopped_or_changed() and self.ARTISTNUM == 1 ):
                     self._set_artwork_skininfo( self.CacheDir )
@@ -1250,8 +1036,6 @@ class Main:
                     return
                 if not self.CachedImagesFound:
                     self.CachedImagesFound = True
-                    if self.ARTISTINFO == "true" and self.ARTISTNUM == 1:
-                        self._get_artistinfo()
                 wait_elapsed = time.time() - self.LASTARTISTREFRESH
                 if( wait_elapsed > self.MINREFRESH ):
                     if( not (self.FirstImage and not self.CachedImagesFound) ):
@@ -1294,8 +1078,6 @@ class Main:
                     if self.NOTIFICATIONTYPE == "1" and not cached_image_info:
                         command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(__language__(30302)), smartUTF8(__language__(30303)), 10000, smartUTF8(__addonicon__))
                         xbmc.executebuiltin(command)
-                    if( self.ARTISTINFO == "true" and not self._playback_stopped_or_changed() ):
-                        self._get_artistinfo()
             elif self.TOTALARTISTS > 1:
                 self._merge_images()
 
