@@ -4,13 +4,20 @@ import os, time, sys, random, xbmc
 import xml.etree.ElementTree as _xmltree
 from ..common.url import URL
 from ..common.fileops import readFile, writeFile, deleteFile, checkPath
+try:
+    import htbackdrops_info as settings
+except ImportError:
+    clowncar = ''
+try:
+    clowncar = settings.clowncar
+except AttributeError:
+    clowncar = ''
 
 
 class objectConfig():
     def __init__( self ):
-        clowncar = '96d681ea0dcb07ad9d27a347e64b652a'
-        self.QUERYURL = 'http://htbackdrops.org/api/%s/searchXML' % clowncar
-        self.DOWNLOADURL = 'http://htbackdrops.org/api/%s/download/' % clowncar
+        self.QUERYURL = 'http://htbackdrops.org/api/%s/searchXML' % clowncar.decode( 'base64' )
+        self.DOWNLOADURL = 'http://htbackdrops.org/api/%s/download/' % clowncar.decode( 'base64' )
         secsinweek = int( 7*24*60*60 )
         self.FILENAME = 'htbackdropsartistimages.nfo'
         self.CACHETIMEFILENAME = 'htbackdropscachetime.nfo'

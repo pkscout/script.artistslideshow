@@ -4,15 +4,22 @@ import os, time, random
 import xml.etree.ElementTree as _xmltree
 from ..common.url import URL
 from ..common.fileops import readFile, writeFile, checkPath
+try:
+    import lastfm_info as settings
+except ImportError:
+    clowncar = ''
+try:
+    clowncar = settings.clowncar
+except AttributeError:
+    clowncar = ''
 
 
 class objectConfig():
     def __init__( self ):
         secsinweek = int( 7*24*60*60 )
-        clowncar = 'afe7e856e4f4089fc90f841980ea1ada'
-        self.ARTISTPARAMS = {'autocorrect':'1', 'api_key':clowncar, 'method':'artist.getInfo'}
-        self.ALBUMPARAMS = {'autocorrect':'1', 'api_key':clowncar, 'method':'artist.getTopAlbums'}
-        self.SIMILARPARAMS = {'autocorrect':'1', 'api_key':clowncar, 'limit':'50', 'method':'artist.getSimilar'}
+        self.ARTISTPARAMS = {'autocorrect':'1', 'api_key':clowncar.decode( 'base64' ), 'method':'artist.getInfo'}
+        self.ALBUMPARAMS = {'autocorrect':'1', 'api_key':clowncar.decode( 'base64' ), 'method':'artist.getTopAlbums'}
+        self.SIMILARPARAMS = {'autocorrect':'1', 'api_key':clowncar.decode( 'base64' ), 'limit':'50', 'method':'artist.getSimilar'}
         self.URL = 'http://ws.audioscrobbler.com/2.0/'
         self.BIOFILENAME = 'lastfmartistbio.nfo'
         self.ALBUMFILENAME = 'lastfmartistalbums.nfo'

@@ -7,12 +7,20 @@ if sys.version_info >= (2, 7):
     import json as _json
 else:
     import simplejson as _json
+try:
+    import theaudiodb_info as settings
+except ImportError:
+    clowncar = ''
+try:
+    clowncar = settings.clowncar
+except AttributeError:
+    clowncar = ''
+
 
 
 class objectConfig():
     def __init__( self ):
-        clowncar = '293621276b2d731671156g'
-        url = 'http://www.theaudiodb.com/api/v1/json/%s/' % clowncar
+        url = 'http://www.theaudiodb.com/api/v1/json/%s/' % clowncar.decode( 'base64' )
         secsinweek = int( 7*24*60*60 )
         self.ARTISTURL = url + 'artist-mb.php'
         self.ALBUMURL = url + 'album.php'
