@@ -98,7 +98,8 @@ class objectConfig():
                 else:
                     num = str( i )
                 try:
-                    images.append( json_data['artists'][0]['strArtistFanart' + num] )
+                    image = json_data['artists'][0]['strArtistFanart' + num] or ''
+                    images.append( image )
                 except (IndexError, KeyError, ValueError):
                     self.loglines.append( 'Index, Key, or Value Error when getting strArtistFanart' + num )
                 except Exception, e:

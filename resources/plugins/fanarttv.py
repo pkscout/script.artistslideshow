@@ -40,7 +40,7 @@ class objectConfig():
         json_data = self._get_data( filepath, cachefilepath, url, url_params )
         if json_data:
             try:
-                image_list = json_data['artistbackground']
+                image_list = json_data['artistbackground'] or []
             except (IndexError, KeyError, ValueError):
                 self.loglines.append( 'Index, Key, or Value Error getting backgrounds from ' + self.FILENAME )
                 image_list = []
@@ -49,7 +49,8 @@ class objectConfig():
                 self.loglines.extend( ['unexpected error getting backgrounds from %s' % self.FILENAME, e] )
             if img_params['getall'] == 'true':
                 try:
-                    image_list.extend( json_data['artistthumb'] )
+                    thumbs = json_data['artistthumb'] or []
+                    image_list.extend( thumbs )
                 except (IndexError, KeyError, ValueError):
                     self.loglines.append( 'Index, Key, or Value Error getting thumbs from ' + self.FILENAME )
                 except Exception, e:
