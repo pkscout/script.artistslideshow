@@ -67,8 +67,11 @@ class objectConfig():
         cachefilepath = os.path.join( bio_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
         url_params['i'] = bio_params.get( 'mbid', '' )
         json_data = self._get_data( filepath, cachefilepath, self.ARTISTURL, url_params )
+        self.loglines.extend( ['the json data is:', json_data] )
         if json_data:
-            bio = json_data.get( 'artists', [{}] )[0].get( 'strBiography' + bio_params.get( 'lang', '' ).upper(), '' )
+            artist = json_data.get( 'artists', [{}] )
+            if artist is not None:
+                bio = artist[0].get( 'strBiography' + bio_params.get( 'lang', '' ).upper(), '' )
         return bio, self.loglines
         
         
