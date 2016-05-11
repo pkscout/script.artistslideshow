@@ -373,20 +373,6 @@ class Main:
                 response = self.LASTJSONRESPONSE
             artist_names = _json.loads(response).get( 'result', {} ).get( 'item', {} ).get( 'artist', [] )
             mbids = _json.loads(response).get( 'result', {} ).get( 'item', {} ).get( 'muiscbrainzartistid', [] )
-#            try:
-#                artist_names = _json.loads(response)['result']['item']['artist']
-#            except (IndexError, KeyError, ValueError):
-#                artist_names = []
-#            except Exception, e:
-#                lw.log( ['unexpected error getting JSON back from XBMC', e] )
-#                artist_names = []
-#            try:
-#                mbids = _json.loads(response)['result']['item']['muiscbrainzartistid']
-#            except (IndexError, KeyError, ValueError):
-#                mbids = []
-#            except Exception, e:
-#                lw.log( ['unexpected error getting JSON back from XBMC', e] )
-#                mbids = []
             try:
                 playing_song = xbmc.Player().getMusicInfoTag().getTitle()
             except RuntimeError:
@@ -581,13 +567,6 @@ class Main:
             if self._playback_stopped_or_changed():
                 return ''
             all_names = artist.get( 'aliases', [] )
-#            try:
-#                all_names = artist['aliases']
-#            except KeyError:
-#                all_names = []
-#            except Exception, e:
-#                lw.log( ['unexpected error getting JSON data from XBMC response', e] )
-#                all_names = []
             aliases = []
             if all_names:
                 for one_name in all_names:
@@ -667,13 +646,6 @@ class Main:
                     break
             offset = offset + 100
             total_items = int( json_data.get( type[:-1] + '-count', '0' ) )
-#            try:
-#                total_items = int(json_data[type[:-1] + '-count'])
-#            except KeyError:
-#                total_items = 0
-#            except Exception, e:
-#                lw.log( ['unexpected error getting JSON data from ' + mbquery, e] )
-#                total_items = 0
             if (not mbsearch) and (total_items - offset > 0):
                 lw.log( ['getting more data from musicbrainz'] )
                 query_elapsed = time.time() - query_start

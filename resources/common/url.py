@@ -82,19 +82,8 @@ class URL():
     
     def _unpack_args( self, kwargs ):
         params = kwargs.get( 'params', {} )
-#        try:
-#            params = kwargs['params']
-#        except:
-#            params = {}
         if self.returntype == 'json':
             data = kwargs.get( 'data', [] )
         else:
             data = kwargs.get( 'data', '' )
-#        try:
-#            data = kwargs['data']
-#        except:
-#            if self.returntype == 'json':
-#                data = []
-#            else:
-#                data = ''
     	return params, data
