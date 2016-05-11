@@ -8,9 +8,9 @@ from ..common.fileops import readFile, writeFile, deleteFile, checkPath
 
 class objectConfig():
     def __init__( self ):
-        apikey = '96d681ea0dcb07ad9d27a347e64b652a'
-        self.QUERYURL = 'http://htbackdrops.org/api/%s/searchXML' % apikey
-        self.DOWNLOADURL = 'http://htbackdrops.org/api/%s/download/' % apikey
+        clowncar = '96d681ea0dcb07ad9d27a347e64b652a'
+        self.QUERYURL = 'http://htbackdrops.org/api/%s/searchXML' % clowncar
+        self.DOWNLOADURL = 'http://htbackdrops.org/api/%s/download/' % clowncar
         secsinweek = int( 7*24*60*60 )
         self.FILENAME = 'htbackdropsartistimages.nfo'
         self.CACHETIMEFILENAME = 'htbackdropscachetime.nfo'

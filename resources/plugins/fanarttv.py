@@ -11,7 +11,7 @@ else:
 
 class objectConfig():
     def __init__( self ):
-        self.APIKEY = '7a93c84fe1c9999e6f0fec206a66b0f5'
+        self.CLOWNCAR = '7a93c84fe1c9999e6f0fec206a66b0f5'
         secsinweek = int( 7*24*60*60 )
         self.URL = 'http://webservice.fanart.tv/v3/music/'
         self.FILENAME = 'fanarttvartistimages.nfo'
@@ -34,7 +34,7 @@ class objectConfig():
         filepath = os.path.join( img_params.get( 'infodir', '' ), self.FILENAME )
         cachefilepath = os.path.join( img_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
         url = self.URL + img_params.get( 'mbid', '' )
-        url_params['api_key'] = self.APIKEY
+        url_params['api_key'] = self.CLOWNCAR
         if img_params.get( 'clientapikey', False ):
             url_params['client_key'] = img_params.get( 'clientapikey', '' )
         json_data = self._get_data( filepath, cachefilepath, url, url_params )

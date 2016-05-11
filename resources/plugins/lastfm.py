@@ -9,10 +9,10 @@ from ..common.fileops import readFile, writeFile, checkPath
 class objectConfig():
     def __init__( self ):
         secsinweek = int( 7*24*60*60 )
-        apikey = 'afe7e856e4f4089fc90f841980ea1ada'
-        self.ARTISTPARAMS = {'autocorrect':'1', 'api_key':apikey, 'method':'artist.getInfo'}
-        self.ALBUMPARAMS = {'autocorrect':'1', 'api_key':apikey, 'method':'artist.getTopAlbums'}
-        self.SIMILARPARAMS = {'autocorrect':'1', 'api_key':apikey, 'limit':'50', 'method':'artist.getSimilar'}
+        clowncar = 'afe7e856e4f4089fc90f841980ea1ada'
+        self.ARTISTPARAMS = {'autocorrect':'1', 'api_key':clowncar, 'method':'artist.getInfo'}
+        self.ALBUMPARAMS = {'autocorrect':'1', 'api_key':clowncar, 'method':'artist.getTopAlbums'}
+        self.SIMILARPARAMS = {'autocorrect':'1', 'api_key':clowncar, 'limit':'50', 'method':'artist.getSimilar'}
         self.URL = 'http://ws.audioscrobbler.com/2.0/'
         self.BIOFILENAME = 'lastfmartistbio.nfo'
         self.ALBUMFILENAME = 'lastfmartistalbums.nfo'

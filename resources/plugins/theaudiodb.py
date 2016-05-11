@@ -11,8 +11,8 @@ else:
 
 class objectConfig():
     def __init__( self ):
-        apikey = '293621276b2d731671156g'
-        url = 'http://www.theaudiodb.com/api/v1/json/%s/' % apikey
+        clowncar = '293621276b2d731671156g'
+        url = 'http://www.theaudiodb.com/api/v1/json/%s/' % clowncar
         secsinweek = int( 7*24*60*60 )
         self.ARTISTURL = url + 'artist-mb.php'
         self.ALBUMURL = url + 'album.php'
