@@ -371,20 +371,22 @@ class Main:
                 self.LASTJSONRESPONSE = response
             else:
                 response = self.LASTJSONRESPONSE
-            try:
-                artist_names = _json.loads(response)['result']['item']['artist']
-            except (IndexError, KeyError, ValueError):
-                artist_names = []
-            except Exception, e:
-                lw.log( ['unexpected error getting JSON back from XBMC', e] )
-                artist_names = []
-            try:
-                mbids = _json.loads(response)['result']['item']['muiscbrainzartistid']
-            except (IndexError, KeyError, ValueError):
-                mbids = []
-            except Exception, e:
-                lw.log( ['unexpected error getting JSON back from XBMC', e] )
-                mbids = []
+            artist_names = _json.loads(response).get( 'result', {} ).get( 'item', {} ).get( 'artist', [] )
+            mbids = _json.loads(response).get( 'result', {} ).get( 'item', {} ).get( 'muiscbrainzartistid', [] )
+#            try:
+#                artist_names = _json.loads(response)['result']['item']['artist']
+#            except (IndexError, KeyError, ValueError):
+#                artist_names = []
+#            except Exception, e:
+#                lw.log( ['unexpected error getting JSON back from XBMC', e] )
+#                artist_names = []
+#            try:
+#                mbids = _json.loads(response)['result']['item']['muiscbrainzartistid']
+#            except (IndexError, KeyError, ValueError):
+#                mbids = []
+#            except Exception, e:
+#                lw.log( ['unexpected error getting JSON back from XBMC', e] )
+#                mbids = []
             try:
                 playing_song = xbmc.Player().getMusicInfoTag().getTitle()
             except RuntimeError:
@@ -515,7 +517,7 @@ class Main:
         self.CacheDir = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8'), self.FANARTFOLDER )
         lw.log( ['cachedir = %s' % self.CacheDir] )
         try:
-            dirs, files = xbmcvfs.listdir(self.CacheDir)
+            dirs, files = xbmcvfs.listdir( self.CacheDir )
         except OSError:
             files = []
         except Exception, e:
@@ -578,13 +580,14 @@ class Main:
             mbid = ''
             if self._playback_stopped_or_changed():
                 return ''
-            try:
-                all_names = artist['aliases']
-            except KeyError:
-                all_names = []
-            except Exception, e:
-                lw.log( ['unexpected error getting JSON data from XBMC response', e] )
-                all_names = []
+            all_names = artist.get( 'aliases', [] )
+#            try:
+#                all_names = artist['aliases']
+#            except KeyError:
+#                all_names = []
+#            except Exception, e:
+#                lw.log( ['unexpected error getting JSON data from XBMC response', e] )
+#                all_names = []
             aliases = []
             if all_names:
                 for one_name in all_names:
@@ -663,13 +666,14 @@ class Main:
                         offset = -100
                     break
             offset = offset + 100
-            try:
-                total_items = int(json_data[type[:-1] + '-count'])
-            except KeyError:
-                total_items = 0
-            except Exception, e:
-                lw.log( ['unexpected error getting JSON data from ' + mbquery, e] )
-                total_items = 0
+            total_items = int( json_data.get( type[:-1] + '-count', '0' ) )
+#            try:
+#                total_items = int(json_data[type[:-1] + '-count'])
+#            except KeyError:
+#                total_items = 0
+#            except Exception, e:
+#                lw.log( ['unexpected error getting JSON data from ' + mbquery, e] )
+#                total_items = 0
             if (not mbsearch) and (total_items - offset > 0):
                 lw.log( ['getting more data from musicbrainz'] )
                 query_elapsed = time.time() - query_start
@@ -728,7 +732,7 @@ class Main:
         self.OVERRIDEPATH = addon.getSetting( "slideshow_path" ).decode('utf-8')
         self.RESTRICTCACHE = addon.getSetting( "restrict_cache" )
         try:
-            self.maxcachesize = int(addon.getSetting( "max_cache_size" )) * 1000000
+            self.maxcachesize = int( addon.getSetting( "max_cache_size" ) ) * 1000000
         except ValueError:
             self.maxcachesize = 1024 * 1000000
         except Exception, e:
@@ -1000,7 +1004,7 @@ class Main:
         #sets a property (or clears it if no value is supplied)
         #does not crash if e.g. the window no longer exists.
         try:
-          self.WINDOW.setProperty(property_name, value)
+          self.WINDOW.setProperty( property_name, value )
           lw.log( ['%s set to %s' % (property_name, value)] )
         except Exception, e:
           lw.log( ["Exception: Couldn't set propery " + property_name + " value " + value , e])

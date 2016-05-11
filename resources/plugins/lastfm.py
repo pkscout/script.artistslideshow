@@ -33,9 +33,9 @@ class objectConfig():
         self.loglines = []
         url_params = {}
         albums = []
-        filepath = os.path.join( album_params['infodir'], self.ALBUMFILENAME )
-        cachefilepath = os.path.join( album_params['infodir'], self.CACHETIMEFILENAME )
-        additionalparams = {'artist': album_params['artist']}  
+        filepath = os.path.join( album_params.get( 'infodir', '' ), self.ALBUMFILENAME )
+        cachefilepath = os.path.join( album_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
+        additionalparams = {'artist': album_params.get( 'artist', '' )}  
         url_params = dict( self.ALBUMPARAMS.items() + additionalparams.items() )
         self.loglines.append( 'trying to get artist albums from ' + self.URL )
         rawxml = self._get_data( filepath, cachefilepath, url_params )
@@ -70,9 +70,9 @@ class objectConfig():
         self.loglines = []
         url_params = {}
         bio = ''
-        filepath = os.path.join( bio_params['infodir'], self.BIOFILENAME )
-        cachefilepath = os.path.join( bio_params['infodir'], self.CACHETIMEFILENAME )
-        additionalparams = {'artist': bio_params['artist'], 'lang':bio_params['lang']}  
+        filepath = os.path.join( bio_params.get( 'infodir', '' ), self.BIOFILENAME )
+        cachefilepath = os.path.join( bio_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
+        additionalparams = {'artist': bio_params.get( 'artist', '' ), 'lang':bio_params.get( 'lang', '' )}  
         url_params = dict( self.ARTISTPARAMS.items() + additionalparams.items() )
         self.loglines.append( 'trying to get artist bio from ' + self.URL )
         rawxml = self._get_data( filepath, cachefilepath, url_params )
@@ -94,9 +94,9 @@ class objectConfig():
         self.loglines = []
         url_params = {}
         similar_artists = []
-        filepath = os.path.join( sim_params['infodir'], self.SIMILARFILENAME )
-        cachefilepath = os.path.join( sim_params['infodir'], self.CACHETIMEFILENAME )
-        additionalparams = {'artist': sim_params['artist']}  
+        filepath = os.path.join( sim_params.get( 'infodir', '' ), self.SIMILARFILENAME )
+        cachefilepath = os.path.join( sim_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
+        additionalparams = {'artist': sim_params.get( 'artist', '' )}  
         url_params = dict( self.SIMILARPARAMS.items() + additionalparams.items() )
         self.loglines.append( 'trying to get similar artists from ' + self.URL )
         rawxml = self._get_data( filepath, cachefilepath, url_params )

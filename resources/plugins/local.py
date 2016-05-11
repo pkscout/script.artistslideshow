@@ -21,8 +21,8 @@ class objectConfig():
     def getAlbumList( self, album_params ):
         self.loglines = []
         albums = []
-        filepath = os.path.join( album_params['localartistdir'], self.ALBUMFILEPATH )
-        local_path = os.path.join( album_params['localartistdir'], smartUTF8(album_params['artist']).decode('utf-8'), 'override' )
+        filepath = os.path.join( album_params.get( 'localartistdir', '' ), self.ALBUMFILEPATH )
+        local_path = os.path.join( album_params.get( 'localartistdir', ''), smartUTF8( album_params.get( 'artist', '' ) ).decode('utf-8'), 'override' )
         self.loglines.append( 'checking ' + filepath )
         rloglines, rawxml = readFile( filepath )
         self.loglines.extend( rloglines )
@@ -51,7 +51,7 @@ class objectConfig():
     def getBio( self, bio_params ):
         self.loglines = []
         bio = ''
-        filepath = os.path.join( bio_params['localartistdir'], self.BIOFILEPATH )
+        filepath = os.path.join( bio_params.get( 'localartistdir', '' ), self.BIOFILEPATH )
         self.loglines.append( 'checking ' + filepath )
         loglines, rawxml = readFile( filepath )
         self.loglines.extend( loglines )
@@ -72,8 +72,8 @@ class objectConfig():
     def getSimilarArtists( self, sim_params ):
         self.loglines = []
         similar_artists = []
-        filepath = os.path.join( sim_params['localartistdir'], self.SIMILARFILEPATH )
-        local_path = os.path.join( sim_params['localartistdir'], smartUTF8(sim_params['artist']).decode('utf-8'), 'override' )
+        filepath = os.path.join( sim_params.get( 'localartistdir', '' ), self.SIMILARFILEPATH )
+        local_path = os.path.join( sim_params.get( 'localartistdir', '' ), smartUTF8( sim_params.get( 'artist', '' ) ).decode( 'utf-8' ), 'override' )
         self.loglines.append( 'checking ' + filepath )
         rloglines, rawxml = readFile( filepath )
         self.loglines.extend( rloglines )

@@ -36,30 +36,18 @@ class objectConfig():
         url_params = {}
         albums = []
         json_data = ''
-        artistfilepath = os.path.join( album_params['infodir'], self.ARTISTFILENAME )
-        idfilepath = os.path.join( album_params['infodir'], self.IDFILENAME )
+        artistfilepath = os.path.join( album_params.get( 'infodir', '' ), self.ARTISTFILENAME )
+        idfilepath = os.path.join( album_params.get( 'infodir', '' ), self.IDFILENAME )
         audiodbid = self._get_audiodbid( idfilepath, artistfilepath )
         if audiodbid:
-            cachefilepath = os.path.join( album_params['infodir'], self.CACHETIMEFILENAME )
-            filepath = os.path.join( album_params['infodir'], self.ALBUMFILENAME )
+            cachefilepath = os.path.join( album_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
+            filepath = os.path.join( album_params.get( 'infodir', '' ), self.ALBUMFILENAME )
             url_params['i'] = audiodbid
             json_data = self._get_data( filepath, cachefilepath, self.ALBUMURL, url_params )
         if json_data:
-            try:
-                rawalbums = json_data['album']
-            except (IndexError, KeyError, ValueError):
-                rawalbums = []
-                self.loglines.append( 'Index, Key, or Value Error when reading albums JSON data from ' + self.ALBUMFILENAME )
-            except Exception, e:
-                rawalbums = []
-                self.loglines.extend( ['unexpected error getting albums JSON back from %s' % self.ALBUMFILENAME, e] )
+            rawalbums = json_data.get( 'album', [] )
             for album in rawalbums:
-                try:
-                    albums.append( ( album['strAlbum'] , album['strAlbumThumb'] ) )
-                except (IndexError, KeyError, ValueError):
-                    self.loglines.append( 'Index, Key, or Value Error when reading album info' )
-                except Exception, e:
-                    self.loglines.extend( ['unexpected error getting album info', e] )
+                albums.append( ( album.get( 'strAlbum', '' ), album.get( 'strAlbumThumb', '' ) ) )
         return albums, self.loglines
 
         
@@ -67,19 +55,12 @@ class objectConfig():
         self.loglines = []
         url_params = {}
         bio = ''
-        filepath = os.path.join( bio_params['infodir'], self.ARTISTFILENAME )
-        cachefilepath = os.path.join( bio_params['infodir'], self.CACHETIMEFILENAME )
-        url_params['i'] = bio_params['mbid']
+        filepath = os.path.join( bio_params.get( 'infodir', '' ), self.ARTISTFILENAME )
+        cachefilepath = os.path.join( bio_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
+        url_params['i'] = bio_params.get( 'mbid', '' )
         json_data = self._get_data( filepath, cachefilepath, self.ARTISTURL, url_params )
         if json_data:
-            try:
-                bio = json_data['artists'][0]['strBiography'+ bio_params['lang'].upper()]
-            except (IndexError, KeyError, ValueError):
-                self.loglines.append( 'Index, Key, or Value Error when reading JSON data from ' + self.ARTISTFILENAME )
-                bio = ''
-            except Exception, e:
-                bio = ''
-                self.loglines.extend( ['unexpected error getting JSON back from %s' % self.ARTISTFILENAME, e] )           
+            bio = json_data.get( 'artists', [] )[0].get( 'strBiography' + bio_params.get( 'lang', '' ).upper(), '' )
         return bio, self.loglines
         
         
@@ -87,9 +68,9 @@ class objectConfig():
         self.loglines = []
         url_params = {}
         images = []
-        filepath = os.path.join( img_params['infodir'], self.ARTISTFILENAME )
-        cachefilepath = os.path.join( img_params['infodir'], self.CACHETIMEFILENAME )
-        url_params['i'] = img_params['mbid']
+        filepath = os.path.join( img_params.get( 'infodir', '' ), self.ARTISTFILENAME )
+        cachefilepath = os.path.join( img_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
+        url_params['i'] = img_params.get( 'mbid', '' )
         json_data = self._get_data( filepath, cachefilepath, self.ARTISTURL, url_params )
         if json_data:
             for i in range( 1, 3 ):
@@ -97,17 +78,13 @@ class objectConfig():
                     num = ''
                 else:
                     num = str( i )
-                try:
-                    image = json_data['artists'][0]['strArtistFanart' + num] or ''
+                image = json_data.get( 'artists', [] )[0].get( 'strArtistFanart' + num, '' )
+                if image:
                     images.append( image )
-                except (IndexError, KeyError, ValueError):
-                    self.loglines.append( 'Index, Key, or Value Error when getting strArtistFanart' + num )
-                except Exception, e:
-                    self.loglines.extend( ['unexpected error when getting strArtistFanart' + num, e] ) 
         if images == []:
             return [], self.loglines
         else: 
-            return self._remove_exclusions( images, img_params['exclusionsfile'] ), self.loglines
+            return self._remove_exclusions( images, img_params.get( 'exclusionsfile', '' ) ), self.loglines
         
         
     def _get_audiodbid( self, idfilepath, filepath ):
@@ -121,14 +98,7 @@ class objectConfig():
                 rloglines, rawdata = readFile( filepath )
                 self.loglines.extend( rloglines )
                 json_data = _json.loads( rawdata )
-                try:
-                    audiodbid = ( json_data['artists'][0]['idArtist'] )
-                except (IndexError, KeyError, ValueError):
-                    self.loglines.append( 'Index, Key, or Value Error when reading JSON data from ' + self.ARTISTFILENAME )
-                    audiodbid = ''
-                except Exception, e:
-                    audiodbid = ''
-                    self.loglines.extend( ['unexpected error getting JSON back from %s' % self.ARTISTFILENAME, e] )
+                audiodbid = json_data.get( 'artists', [] )[0].get( 'idArtist', '' )
                 if audiodbid:
                     success, wloglines = writeFile( audiodbid, idfilepath )
                     self.loglines.extend( wloglines )

@@ -31,44 +31,25 @@ class objectConfig():
         self.loglines = []
         url_params = {}
         images = []
-        filepath = os.path.join( img_params['infodir'], self.FILENAME )
-        cachefilepath = os.path.join( img_params['infodir'], self.CACHETIMEFILENAME )
-        url = self.URL + img_params['mbid']
+        filepath = os.path.join( img_params.get( 'infodir', '' ), self.FILENAME )
+        cachefilepath = os.path.join( img_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
+        url = self.URL + img_params.get( 'mbid', '' )
         url_params['api_key'] = self.APIKEY
-        if img_params['clientapikey']:
-            url_params['client_key'] = img_params['clientapikey']
+        if img_params.get( 'clientapikey', False ):
+            url_params['client_key'] = img_params.get( 'clientapikey', '' )
         json_data = self._get_data( filepath, cachefilepath, url, url_params )
         if json_data:
-            try:
-                image_list = json_data['artistbackground'] or []
-            except (IndexError, KeyError, ValueError):
-                self.loglines.append( 'Index, Key, or Value Error getting backgrounds from ' + self.FILENAME )
-                image_list = []
-            except Exception, e:
-                image_list = []
-                self.loglines.extend( ['unexpected error getting backgrounds from %s' % self.FILENAME, e] )
-            if img_params['getall'] == 'true':
-                try:
-                    thumbs = json_data['artistthumb'] or []
-                    image_list.extend( thumbs )
-                except (IndexError, KeyError, ValueError):
-                    self.loglines.append( 'Index, Key, or Value Error getting thumbs from ' + self.FILENAME )
-                except Exception, e:
-                    image_list = []
-                    self.loglines.extend( ['unexpected error getting thumbs from %s' % self.FILENAME, e] )
+            image_list = json_data.get( 'artistbackground', [] )
+            if img_params.get( 'getall', 'false' ) == 'true':
+                image_list.extend( json_data.get( 'artistthumb', [] ) )
             for image in image_list:
-                try:
-                    images.append( image['url'] )
-                except (IndexError, KeyError, ValueError):
-                    self.loglines.append( 'Index, Key, or Value Error when reading JSON data from list of images' )
-                    image_list = []
-                except Exception, e:
-                    bio = []
-                    self.loglines.extend( ['unexpected error getting JSON back from list of images', e] )
+                url = image.get( 'url', '' )
+                if url:
+                    images.append( url )
         if images == []:
             return [], self.loglines
         else: 
-            return self._remove_exclusions( images, img_params['exclusionsfile'] ), self.loglines
+            return self._remove_exclusions( images, img_params.get( 'exclusionsfile' ) ), self.loglines
 
 
     def _get_cache_time( self, cachefilepath ):
@@ -113,7 +94,7 @@ class objectConfig():
 
 
     def _put_cache_time( self, cachefilepath ):
-        cachetime = random.randint( self.CACHEEXPIRE['low'], self.CACHEEXPIRE['high'] )
+        cachetime = random.randint( self.CACHEEXPIRE.get( 'low' ), self.CACHEEXPIRE.get( 'high' ) )
         success, wloglines = writeFile( str( cachetime ), cachefilepath )
         self.loglines.append( wloglines)
         return success

@@ -29,15 +29,15 @@ class objectConfig():
         self.loglines = []
         url_params = {}
         images = []
-        filepath = os.path.join( img_params['infodir'], self.FILENAME )
-        cachefilepath = os.path.join( img_params['infodir'], self.CACHETIMEFILENAME )
+        filepath = os.path.join( img_params.get( 'infodir', '' ), self.FILENAME )
+        cachefilepath = os.path.join( img_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
         url_params['cid'] = '5'
-        if img_params['mbid']:
-            url_params['mbid'] = img_params['mbid']
-        else:
+        if img_params.get( 'mbid', False ):
+            url_params['mbid'] = img_params.get( 'mbid', '' )
+        elif img_params.get( 'artist', False ):
             url_params['default_operator'] = 'and'
             url_params['fields'] = 'title'
-            url_params['keywords'] = img_params['artist'].replace( '&','%26' ) 
+            url_params['keywords'] = img_params.get( 'artist', '').replace( '&','%26' ) 
         rawxml = self._get_data( filepath, cachefilepath, url_params )
         if rawxml:
             xmldata = _xmltree.fromstring( rawxml )
@@ -52,13 +52,13 @@ class objectConfig():
                     name = element.text
                     match = True
             elif element.tag == "aid" and match:
-                if element.text == '1' or img_params['getall'] == 'true':
+                if element.text == '1' or img_params.get( 'getall', 'false' ) == 'true':
                     images.append(self.DOWNLOADURL + name + '/fullsize')
                 match = False
         if images == []:
             return [], self.loglines
         else: 
-            return self._remove_exclusions( images, img_params['exclusionsfile'] ), self.loglines
+            return self._remove_exclusions( images, img_params.get( 'exclusionsfile', '' ) ), self.loglines
 
 
     def _get_cache_time( self, cachefilepath ):
@@ -96,7 +96,7 @@ class objectConfig():
 
 
     def _put_cache_time( self, cachefilepath ):
-        cachetime = random.randint( self.CACHEEXPIRE['low'], self.CACHEEXPIRE['high'] )
+        cachetime = random.randint( self.CACHEEXPIRE.get( 'low' ), self.CACHEEXPIRE.get( 'high' ) )
         success, wloglines = writeFile( str( cachetime ), cachefilepath )
         self.loglines.append( wloglines)
         return success
