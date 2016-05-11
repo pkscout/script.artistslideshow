@@ -455,46 +455,6 @@ class Main:
         return infolabel
 
 
-    def _get_local_data( self, item ):
-        data = []
-        local_path = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8'), 'override' )
-        if item == "similar":
-            filename = os.path.join( local_path, 'artistsimilar.nfo' )
-        elif item == "albums":
-            filename = os.path.join( local_path, 'artistsalbums.nfo' )
-        elif item == "bio":
-            filename = os.path.join( local_path, 'artistbio.nfo' )
-        lw.log( ['checking filename ' + filename] )
-        loglines, rawxml = readFile( filename )
-        lw.log( loglines )
-        if rawxml:
-            xmldata = _xmltree.fromstring( rawxml )
-        else:
-            return []
-        if item == "bio":
-            for element in xmldata.getiterator():
-                if element.tag == "content":
-                    bio = element.text
-                    if not bio:
-                        bio = ''
-                    data.append(bio)
-        elif( item == "similar" or item == "albums" ):
-            for element in xmldata.getiterator():
-                if element.tag == "name":
-                    name = element.text
-                    name.encode('ascii', 'ignore')
-                elif element.tag == "image":
-                    image_text = element.text
-                    if not image_text:
-                        image = ''
-                    else:
-                        image = os.path.join( local_path, item, image_text )
-                    data.append( ( name , image ) )
-        if data == '':
-            lw.log( ['no %s found in local xml file' % item] )
-        return data
-
-
     def _get_local_images( self ):
         self.LocalImagesFound = False
         if not self.NAME:
