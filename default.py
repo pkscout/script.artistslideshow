@@ -24,7 +24,6 @@ if sys.version_info >= (2, 7):
     import json as _json
 else:
     import simplejson as _json
-from resources.dicttoxml.dicttoxml import dicttoxml
 from resources.common.fix_utf8 import smartUTF8
 from resources.common.fileops import checkPath, writeFile, readFile, deleteFile
 from resources.common.url import URL
