@@ -60,7 +60,7 @@ class objectConfig():
         url_params['i'] = bio_params.get( 'mbid', '' )
         json_data = self._get_data( filepath, cachefilepath, self.ARTISTURL, url_params )
         if json_data:
-            bio = json_data.get( 'artists', [] )[0].get( 'strBiography' + bio_params.get( 'lang', '' ).upper(), '' )
+            bio = json_data.get( 'artists', [{}] )[0].get( 'strBiography' + bio_params.get( 'lang', '' ).upper(), '' )
         return bio, self.loglines
         
         
@@ -78,7 +78,7 @@ class objectConfig():
                     num = ''
                 else:
                     num = str( i )
-                image = json_data.get( 'artists', [] )[0].get( 'strArtistFanart' + num, '' )
+                image = json_data.get( 'artists', [{}] )[0].get( 'strArtistFanart' + num, '' )
                 if image:
                     images.append( image )
         if images == []:
@@ -98,7 +98,7 @@ class objectConfig():
                 rloglines, rawdata = readFile( filepath )
                 self.loglines.extend( rloglines )
                 json_data = _json.loads( rawdata )
-                audiodbid = json_data.get( 'artists', [] )[0].get( 'idArtist', '' )
+                audiodbid = json_data.get( 'artists', [{}] )[0].get( 'idArtist', '' )
                 if audiodbid:
                     success, wloglines = writeFile( audiodbid, idfilepath )
                     self.loglines.extend( wloglines )
