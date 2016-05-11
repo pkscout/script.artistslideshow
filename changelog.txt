@@ -3,6 +3,7 @@ v.2.0.0~beta2
 
 v.2.0.0~beta1
 - separated code for downloads into modules to make it easier to add other services
+- rewrite of cache mechanism to reduce load on external sites
 
 v.1.8.8
 - updated cache logic to reduce API calls to external sites
