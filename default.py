@@ -49,6 +49,8 @@ imgURL  = URL( 'binary' )
 
 # this section imports all the scraper plugins, initializes, and sorts them
 def _get_plugin_settings( preamble, module, description ):
+    if module == 'local':
+        return 'true', 0
     try:
         active = addon.getSetting( preamble + module )
     except ValueError:
@@ -358,7 +360,6 @@ class Main:
         if( xbmc.Player().isPlayingAudio() == True ):
             try:
                 playing_file = xbmc.Player().getPlayingFile() + ' - ' + xbmc.Player().getMusicInfoTag().getArtist() + ' - ' + xbmc.Player().getMusicInfoTag().getTitle()
-                lw.log( ['playing file is ' + playing_file] )
             except RuntimeError:
                 return artists_info
             except Exception, e:
