@@ -32,21 +32,42 @@ from resources.common.transforms import getImageType, itemHash, itemHashwithPath
 from resources.common.xlogger import Logger
 import resources.plugins
 
-__addon__        = xbmcaddon.Addon()
-__addonname__    = __addon__.getAddonInfo('id')
-__addonversion__ = __addon__.getAddonInfo('version')
-__addonpath__    = __addon__.getAddonInfo('path').decode('utf-8')
-__addonicon__    = xbmc.translatePath('%s/icon.png' % __addonpath__ )
-__language__     = __addon__.getLocalizedString
-__preamble__     = '[Artist Slideshow]'
-__logdebug__     = __addon__.getSetting( "logging" ) 
+addon        = xbmcaddon.Addon()
+addonname    = addon.getAddonInfo('id')
+addonversion = addon.getAddonInfo('version')
+addonpath    = addon.getAddonInfo('path').decode('utf-8')
+addonicon    = xbmc.translatePath('%s/icon.png' % addonpath )
+language     = addon.getLocalizedString
+preamble     = '[Artist Slideshow]'
+logdebug     = addon.getSetting( "logging" ) 
 
-lw      = Logger( preamble=__preamble__, logdebug=__logdebug__ )
-mbURL   = URL( 'json',{"User-Agent": __addonname__  + '/' + __addonversion__  + '( https://github.com/pkscout/artistslideshow )', "content-type":"text/html; charset=UTF-8"} )
+lw      = Logger( preamble=preamble, logdebug=logdebug )
+mbURL   = URL( 'json',{"User-Agent": addonname  + '/' + addonversion  + '( https://github.com/pkscout/artistslideshow )', "content-type":"text/html; charset=UTF-8"} )
 JSONURL = URL( 'json' )
 txtURL  = URL( 'text' )
 imgURL  = URL( 'binary' )
+
 # this section imports all the scraper plugins, initializes, and sorts them
+def _get_plugin_settings( preamble, module, description ):
+    try:
+        active = addon.getSetting( preamble + module )
+    except ValueError:
+        active = 'false'
+    except Exception, e:
+        lw.log( ['unexpected error while parsing %s setting for %s' % (description, module), e] )
+        active = 'false'        
+    if active == 'true':
+        try:
+            priority = int( addon.getSetting( preamble + "priority_" + module ) )
+        except ValueError:
+            priority = 10
+        except Exception, e:
+            lw.log( ['unexpected error while parsing %s priority for %s' % (description, module), e] )
+            priority = 10
+    else:
+        priority = 10
+    return active, priority
+
 bio_plugins = {'names':[], 'objs':{}}
 image_plugins = {'names':[], 'objs':{}}
 album_plugins = {'names':[], 'objs':{}}
@@ -59,22 +80,30 @@ for module in resources.plugins.__all__:
     plugin = imp_plugin.objectConfig()
     scrapers = plugin.provides()
     if 'bio' in scrapers:
-        bio_plugins['objs'][module] = plugin
-        bio_plugins['names'].append( module )
-        lw.log( ['added %s to bio plugins' % module] )
+        bio_active, bio_priority = _get_plugin_settings( 'ab_', module, 'artist bio' )
+        if bio_active == 'true':
+            bio_plugins['objs'][module] = plugin
+            bio_plugins['names'].append( [bio_priority, module] )
+            lw.log( ['added %s to bio plugins' % module] )
     if 'images' in scrapers:
-        image_plugins['objs'][module] = plugin
-        image_plugins['names'].append( module )
-        lw.log( ['added %s to image plugins' % module] )
+        img_active, img_priority = _get_plugin_settings( '', module, 'artist images' )
+        if img_active == 'true':
+            image_plugins['objs'][module] = plugin
+            image_plugins['names'].append( [img_priority, module] )
+            lw.log( ['added %s to image plugins' % module] )
     if 'albums' in scrapers:
-        album_plugins['objs'][module] = plugin
-        album_plugins['names'].append( module )
-        lw.log( ['added %s to album info plugins' % module] )
+        ai_active, ai_priority = _get_plugin_settings( 'ai_', module, 'artist albums' )
+        if ai_active == 'true':
+            album_plugins['objs'][module] = plugin
+            album_plugins['names'].append( [ai_priority, module] )
+            lw.log( ['added %s to album info plugins' % module] )
     if 'similar' in scrapers:
-        similar_plugins['objs'][module] = plugin
-        similar_plugins['names'].append( module )
-        lw.log( ['added %s to similar artist plugins' % module] )
-    
+        sa_active, sa_priority = _get_plugin_settings( 'sa_', module, 'similar artists' )
+        if sa_active == 'true':
+            similar_plugins['objs'][module] = plugin
+            similar_plugins['names'].append( [ai_priority, module] )
+            lw.log( ['added %s to similar artist plugins' % module] )
+
 
 LANGUAGES = (
 # Full Language name[0]         ISO 639-1[1]   Script Language[2]
@@ -214,7 +243,7 @@ class Main:
 
     def _download( self, src, dst, dst2 ):
         if (not xbmc.abortRequested):
-            tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( __addonname__ , xbmc.getCacheThumbName(src) ))
+            tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( addonname , xbmc.getCacheThumbName(src) ))
             lw.log( ['the tmpname is ' + tmpname] )
             if xbmcvfs.exists(tmpname):
                 success, loglines = deleteFile( tmpname )
@@ -254,9 +283,13 @@ class Main:
         bio_params['lang'] = self.LANGUAGE
         bio_params['artist'] = self.NAME
         bio = ''
+        try:
+            bio_plugins['names'].sort( key=lambda x: x[0] )
+        except TypeError:
+            pass
         for plugin_name in bio_plugins['names']:
-            lw.log( ['checking %s for bio' % plugin_name] )
-            bio, loglines = bio_plugins['objs'][plugin_name].getBio( bio_params )
+            lw.log( ['checking %s for bio' % plugin_name[1]] )
+            bio, loglines = bio_plugins['objs'][plugin_name[1]].getBio( bio_params )
             lw.log( loglines )
             if bio:
                 lw.log( ['got a bio from %s, so stop looking' % plugin_name] )
@@ -271,9 +304,13 @@ class Main:
         album_params['lang'] = self.LANGUAGE
         album_params['artist'] = self.NAME
         albums = []
+        try:
+            album_plugins['names'].sort( key=lambda x: x[0] )
+        except TypeError:
+            pass
         for plugin_name in album_plugins['names']:
-            lw.log( ['checking %s for album info' % plugin_name] )
-            albums, loglines = album_plugins['objs'][plugin_name].getAlbumList( album_params )
+            lw.log( ['checking %s for album info' % plugin_name[1]] )
+            albums, loglines = album_plugins['objs'][plugin_name[1]].getAlbumList( album_params )
             lw.log( loglines )
             if not albums == []:
                 lw.log( ['got album list from %s, so stop looking' % plugin_name] )
@@ -288,9 +325,13 @@ class Main:
         similar_params['lang'] = self.LANGUAGE
         similar_params['artist'] = self.NAME
         similar_artists = []
+        try:
+            similar_plugins['names'].sort( key=lambda x: x[0] )
+        except TypeError:
+            pass
         for plugin_name in similar_plugins['names']:
-            lw.log( ['checking %s for similar artist info' % plugin_name] )
-            similar_artists, loglines = similar_plugins['objs'][plugin_name].getSimilarArtists( similar_params )
+            lw.log( ['checking %s for similar artist info' % plugin_name[1]] )
+            similar_artists, loglines = similar_plugins['objs'][plugin_name[1]].getSimilarArtists( similar_params )
             lw.log( loglines )
             if not similar_artists == []:
                 lw.log( ['got similar artist list from %s, so stop looking' % plugin_name] )
@@ -408,11 +449,10 @@ class Main:
         image_params['exclusionsfile'] = os.path.join( self.CacheDir, "_exclusions.nfo" )
         for plugin_name in image_plugins['names']:
             image_list = []
-            lw.log( ['checking %s for images' % plugin_name] )
-            image_params['enabled'] = __addon__.getSetting( plugin_name )
-            image_params['getall'] = __addon__.getSetting( plugin_name + "_all" )
-            image_params['clientapikey'] = __addon__.getSetting( plugin_name + "_clientapikey" )
-            image_list, loglines = image_plugins['objs'][plugin_name].getImageList( image_params )
+            lw.log( ['checking %s for images' % plugin_name[1]] )
+            image_params['getall'] = addon.getSetting( plugin_name[1] + "_all" )
+            image_params['clientapikey'] = addon.getSetting( plugin_name[1] + "_clientapikey" )
+            image_list, loglines = image_plugins['objs'][plugin_name[1]].getImageList( image_params )
             lw.log( loglines )
             images.extend( image_list )
         return images
@@ -673,42 +713,42 @@ class Main:
 
 
     def _get_settings( self ):
-        self.ARTISTINFO = __addon__.getSetting( "artistinfo" )
-        self.LANGUAGE = __addon__.getSetting( "language" )
+        self.ARTISTINFO = addon.getSetting( "artistinfo" )
+        self.LANGUAGE = addon.getSetting( "language" )
         for language in LANGUAGES:
             if self.LANGUAGE == language[2]:
                 self.LANGUAGE = language[1]
                 lw.log( ['language = %s' % self.LANGUAGE] )
                 break
-        self.LOCALARTISTPATH = __addon__.getSetting( "local_artist_path" ).decode('utf-8')
-        self.PRIORITY = __addon__.getSetting( "priority" )
-        self.USEFALLBACK = __addon__.getSetting( "fallback" )
-        self.FALLBACKPATH = __addon__.getSetting( "fallback_path" ).decode('utf-8')
-        self.USEOVERRIDE = __addon__.getSetting( "slideshow" )
-        self.OVERRIDEPATH = __addon__.getSetting( "slideshow_path" ).decode('utf-8')
-        self.RESTRICTCACHE = __addon__.getSetting( "restrict_cache" )
+        self.LOCALARTISTPATH = addon.getSetting( "local_artist_path" ).decode('utf-8')
+        self.PRIORITY = addon.getSetting( "priority" )
+        self.USEFALLBACK = addon.getSetting( "fallback" )
+        self.FALLBACKPATH = addon.getSetting( "fallback_path" ).decode('utf-8')
+        self.USEOVERRIDE = addon.getSetting( "slideshow" )
+        self.OVERRIDEPATH = addon.getSetting( "slideshow_path" ).decode('utf-8')
+        self.RESTRICTCACHE = addon.getSetting( "restrict_cache" )
         try:
-            self.maxcachesize = int(__addon__.getSetting( "max_cache_size" )) * 1000000
+            self.maxcachesize = int(addon.getSetting( "max_cache_size" )) * 1000000
         except ValueError:
             self.maxcachesize = 1024 * 1000000
         except Exception, e:
             lw.log( ['unexpected error while parsing maxcachesize setting', e] )
             self.maxcachesize = 1024 * 1000000
-        self.NOTIFICATIONTYPE = __addon__.getSetting( "show_progress" )
+        self.NOTIFICATIONTYPE = addon.getSetting( "show_progress" )
         if self.NOTIFICATIONTYPE == "2":
-            self.PROGRESSPATH = __addon__.getSetting( "progress_path" ).decode('utf-8')
+            self.PROGRESSPATH = addon.getSetting( "progress_path" ).decode('utf-8')
             lw.log( ['set progress path to %s' % self.PROGRESSPATH] )
         else:
             self.PROGRESSPATH = ''
-        if __addon__.getSetting( "fanart_folder" ):
-            self.FANARTFOLDER = __addon__.getSetting( "fanart_folder" ).decode('utf-8')
+        if addon.getSetting( "fanart_folder" ):
+            self.FANARTFOLDER = addon.getSetting( "fanart_folder" ).decode('utf-8')
             lw.log( ['set fanart folder to %s' % self.FANARTFOLDER] )
         else:
             self.FANARTFOLDER = 'extrafanart'
 
 
     def _init_vars( self ):
-        self.DATAROOT = xbmc.translatePath('special://profile/addon_data/%s' % __addonname__ ).decode('utf-8')
+        self.DATAROOT = xbmc.translatePath('special://profile/addon_data/%s' % addonname ).decode('utf-8')
         self.CHECKFILE = os.path.join( self.DATAROOT, 'migrationcheck.nfo' )
         self._set_property( "ArtistSlideshow.CleanupComplete" )
         self._set_property( "ArtistSlideshow.ArtworkReady" )
@@ -720,12 +760,12 @@ class Main:
                 self.SKININFO[item[0:-5]] = ''
         self.EXTERNALCALLSTATUS = self._get_infolabel( self.EXTERNALCALL )
         lw.log( ['external call is set to ' + self._get_infolabel( self.EXTERNALCALL )] )
-        if __addon__.getSetting( "transparent" ) == 'true':
+        if addon.getSetting( "transparent" ) == 'true':
             self._set_property("ArtistSlideshowTransparent", 'true')
-            self.InitDir = xbmc.translatePath('%s/resources/transparent' % __addonpath__ ).decode('utf-8')
+            self.InitDir = xbmc.translatePath('%s/resources/transparent' % addonpath ).decode('utf-8')
         else:
             self._set_property("ArtistSlideshowTransparent", '')
-            self.InitDir = xbmc.translatePath('%s/resources/black' % __addonpath__ ).decode('utf-8')
+            self.InitDir = xbmc.translatePath('%s/resources/black' % addonpath ).decode('utf-8')
         self._set_property("ArtistSlideshow", self.InitDir)
         self.NAME = ''
         self.ALLARTISTS = []
@@ -740,8 +780,8 @@ class Main:
         self.DownloadedAllImages = False
         self.UsingFallback = False
         self.MINREFRESH = 9.9
-        self.TransitionDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % __addonname__ ).decode('utf-8')
-        self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % __addonname__ ).decode('utf-8')
+        self.TransitionDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % addonname ).decode('utf-8')
+        self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % addonname ).decode('utf-8')
         self.params = {}
 
 
@@ -968,7 +1008,7 @@ class Main:
 
     def _set_thedir(self, theartist, dirtype):
         CacheName = itemHash(theartist)
-        thedir = xbmc.translatePath('special://profile/addon_data/%s/%s/%s/' % ( __addonname__ , dirtype, CacheName, )).decode('utf-8')
+        thedir = xbmc.translatePath('special://profile/addon_data/%s/%s/%s/' % ( addonname , dirtype, CacheName, )).decode('utf-8')
         exists, loglines = checkPath( thedir )
         lw.log( loglines )
         return thedir
@@ -1011,7 +1051,7 @@ class Main:
             if self.ARTISTNUM == 1:
                 if self.NOTIFICATIONTYPE == "1":
                     self._set_property("ArtistSlideshow", self.InitDir)
-                    command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(__language__(30300)), smartUTF8(__language__(30301)), 5000, smartUTF8(__addonicon__))
+                    command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(language(30300)), smartUTF8(language(30301)), 5000, smartUTF8(addonicon))
                     xbmc.executebuiltin(command)
                 elif self.NOTIFICATIONTYPE == "2":
                     self._set_property("ArtistSlideshow", self.PROGRESSPATH)
@@ -1062,7 +1102,7 @@ class Main:
                 if self.ARTISTNUM == 1:
                     self._refresh_image_directory()
                     if self.NOTIFICATIONTYPE == "1" and not cached_image_info:
-                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(__language__(30304)), smartUTF8(__language__(30305)), 5000, smartUTF8(__addonicon__))
+                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(language(30304)), smartUTF8(language(30305)), 5000, smartUTF8(addonicon))
                         xbmc.executebuiltin(command)
                 if self.TOTALARTISTS > 1:
                     self._merge_images()
@@ -1079,7 +1119,7 @@ class Main:
                     lw.log( ['setting slideshow directory to blank directory'] )
                     self._set_property("ArtistSlideshow", self.InitDir)
                     if self.NOTIFICATIONTYPE == "1" and not cached_image_info:
-                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(__language__(30302)), smartUTF8(__language__(30303)), 10000, smartUTF8(__addonicon__))
+                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(language(30302)), smartUTF8(language(30303)), 10000, smartUTF8(addonicon))
                         xbmc.executebuiltin(command)
             elif self.TOTALARTISTS > 1:
                 self._merge_images()
@@ -1091,7 +1131,7 @@ class Main:
             cache_trim_delay = 0   #delay time is in seconds
             if( now - self.LastCacheTrim > cache_trim_delay ):
                 lw.log( ['trimming the cache down to %s bytes' % self.maxcachesize]  )
-                cache_root = xbmc.translatePath( 'special://profile/addon_data/%s/ArtistSlideshow/' % __addonname__ ).decode('utf-8')
+                cache_root = xbmc.translatePath( 'special://profile/addon_data/%s/ArtistSlideshow/' % addonname ).decode('utf-8')
                 folders, fls = xbmcvfs.listdir( cache_root )
                 folders.sort( key=lambda x: os.path.getmtime( os.path.join ( cache_root, x ) ), reverse=True )
                 cache_size = 0
@@ -1182,7 +1222,7 @@ class Main:
 
 
 if ( __name__ == "__main__" ):
-    lw.log( ['script version %s started' % __addonversion__], xbmc.LOGNOTICE )
-    lw.log( ['debug logging set to %s' % __logdebug__], xbmc.LOGNOTICE )
+    lw.log( ['script version %s started' % addonversion], xbmc.LOGNOTICE )
+    lw.log( ['debug logging set to %s' % logdebug], xbmc.LOGNOTICE )
     slideshow = Main()
 lw.log( ['script stopped'], xbmc.LOGNOTICE )

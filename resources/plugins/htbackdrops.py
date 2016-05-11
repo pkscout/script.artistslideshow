@@ -27,8 +27,6 @@ class objectConfig():
         
     def getImageList( self, img_params ):
         self.loglines = []
-        if not img_params['enabled'] == 'true':
-            return [], self.loglines
         url_params = {}
         images = []
         filepath = os.path.join( img_params['infodir'], self.FILENAME )
