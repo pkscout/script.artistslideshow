@@ -46,7 +46,7 @@ msgstr ""
 #Settings
 
 msgctxt "#32000"
-msgid "Download"
+msgid "Images"
 msgstr ""
 
 msgctxt "#32001"
@@ -179,7 +179,57 @@ msgctxt "#32209"
 msgid "Enable debug logging"
 msgstr ""
 
-#empty strings from id 32209 to 32900
+#empty strings from id 32210 to 32299
+
+msgctxt "#32300"
+msgid "Album Info"
+msgstr ""
+
+msgctxt "#32301"
+msgid "  Priority"
+msgstr ""
+
+msgctxt "#32302"
+msgid "Download album info from the audiodb.com"
+msgstr ""
+
+msgctxt "#32303"
+msgid "Download album info from the last.fm"
+msgstr ""
+
+#empty strings from id 32304 to 32399
+
+msgctxt "#32400"
+msgid "Artist Bio"
+msgstr ""
+
+msgctxt "#32401"
+msgid "Preferred language for artist bio"
+msgstr ""
+
+msgctxt "#32402"
+msgid "Get artist bio from Kodi"
+msgstr ""
+
+msgctxt "#32403"
+msgid "Download artist bio from theaudiodb.com"
+msgstr ""
+
+msgctxt "#32404"
+msgid "Download artist bio from last.fm"
+msgstr ""
+
+#empty strings from id 32404 to 32499
+
+msgctxt "#32500"
+msgid "Similar Artists"
+msgstr ""
+
+msgctxt "#32501"
+msgid "Download similar artists from last.fm"
+msgstr ""
+
+#empty strings from id 32502 to 32900
 #Languages
 
 msgctxt "#32901"
