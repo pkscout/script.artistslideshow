@@ -53,9 +53,10 @@ class objectConfig():
             url_params['i'] = audiodbid
             json_data = self._get_data( filepath, cachefilepath, self.ALBUMURL, url_params )
         if json_data:
-            rawalbums = json_data.get( 'album', [] )
-            for album in rawalbums:
-                albums.append( ( album.get( 'strAlbum', '' ), album.get( 'strAlbumThumb', '' ) ) )
+            rawalbums = json_data.get( 'album' )
+            if rawalbums is not None:
+                for album in rawalbums:
+                    albums.append( ( album.get( 'strAlbum', '' ), album.get( 'strAlbumThumb', '' ) ) )
         return albums, self.loglines
 
         
@@ -69,7 +70,7 @@ class objectConfig():
         json_data = self._get_data( filepath, cachefilepath, self.ARTISTURL, url_params )
         self.loglines.extend( ['the json data is:', json_data] )
         if json_data:
-            artist = json_data.get( 'artists', [{}] )
+            artist = json_data.get( 'artists' )
             if artist is not None:
                 bio = artist[0].get( 'strBiography' + bio_params.get( 'lang', '' ).upper(), '' )
         return bio, self.loglines
@@ -84,14 +85,16 @@ class objectConfig():
         url_params['i'] = img_params.get( 'mbid', '' )
         json_data = self._get_data( filepath, cachefilepath, self.ARTISTURL, url_params )
         if json_data:
-            for i in range( 1, 3 ):
-                if i == 1:
-                    num = ''
-                else:
-                    num = str( i )
-                image = json_data.get( 'artists', [{}] )[0].get( 'strArtistFanart' + num, '' )
-                if image:
-                    images.append( image )
+            artist = json_data.get( 'artists' )
+            if artist is not None:
+                for i in range( 1, 3 ):
+                    if i == 1:
+                        num = ''
+                    else:
+                        num = str( i )
+                    image = artist[0].get( 'strArtistFanart' + num, '' )
+                    if image:
+                        images.append( image )
         if images == []:
             return [], self.loglines
         else: 
