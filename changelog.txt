@@ -1,3 +1,6 @@
+v.2.0.0~beta4
+- fixed an issue where bio language setting wasn't displaying
+
 v.2.0.0~beta3
 - fixed issue with null artist or album info returned from theaudiodb
 

@@ -24,7 +24,7 @@
         <setting id="ai_priority_lastfm" type="slider" label="32301" visible="eq(-1,true)" default="5" range='1,1,10' option='int' />
     </category>
     <category label="32400">
-        <setting id="language" type="enum" label="32401" visible="eq(-1,true)" default="11" lvalues="32901|32902|32903|32904|32905|32906|32907|32908|32909|32910|32911|32912|32913|32947|32914|32915|32916|32917|32918|32919|32920|32921|32922|32924|32925|32926|32927|32928|32929|32930|32932|32933|32934|32935|32936|32937|32938|32939|32940|32942|32943|32944|32945|32946" />
+        <setting id="language" type="enum" label="32401" default="11" lvalues="32901|32902|32903|32904|32905|32906|32907|32908|32909|32910|32911|32912|32913|32947|32914|32915|32916|32917|32918|32919|32920|32921|32922|32924|32925|32926|32927|32928|32929|32930|32932|32933|32934|32935|32936|32937|32938|32939|32940|32942|32943|32944|32945|32946" />
         <setting id="ab_kodi" type="bool" label="32402" default="false" />
         <setting id="ab_priority_kodi" type="slider" label="32301" visible="eq(-1,true)" default="5" range='1,1,10' option='int' />
         <setting id="ab_theaudiodb" type="bool" label="32403" default="false" />
