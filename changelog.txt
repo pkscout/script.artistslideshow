@@ -1,4 +1,5 @@
 v.2.0.0~beta4
+- fix for crash when Musicbrainz server doesn't respond
 - fixed an issue where bio language setting wasn't displaying
 
 v.2.0.0~beta3

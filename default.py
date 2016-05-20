@@ -605,7 +605,13 @@ class Main:
                         offset = -100
                     break
             offset = offset + 100
-            total_items = int( json_data.get( type[:-1] + '-count', '0' ) )
+            try:
+                total_items = int( json_data.get( type[:-1] + '-count', '0' ) )
+            except AttributeError:
+                total_items = 0
+            except Exception, e:
+                lw.log( ['unexpected error getting JSON data from ' + mbquery, e] )
+                total_items = 0
             if (not mbsearch) and (total_items - offset > 0):
                 lw.log( ['getting more data from musicbrainz'] )
                 query_elapsed = time.time() - query_start
