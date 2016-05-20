@@ -1,6 +1,7 @@
 v.2.0.0~beta4
 - fix for crash when Musicbrainz server doesn't respond
 - fixed an issue where bio language setting wasn't displaying
+- fixed an issue with bio and album info not loading
 
 v.2.0.0~beta3
 - fixed issue with null artist or album info returned from theaudiodb

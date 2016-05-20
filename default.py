@@ -476,8 +476,7 @@ class Main:
             lw.log( ['local images found'] )
             if self.ARTISTNUM == 1:
             	self._set_artwork_skininfo( self.CacheDir )
-                if self.ARTISTINFO == "true":
-                    self._get_artistinfo()
+                self._get_artistinfo()
             if self.TOTALARTISTS > 1:
                self._merge_images()
 
@@ -655,7 +654,6 @@ class Main:
 
 
     def _get_settings( self ):
-        self.ARTISTINFO = addon.getSetting( "artistinfo" )
         self.LANGUAGE = addon.getSetting( "language" )
         for language in LANGUAGES:
             if self.LANGUAGE == language[2]:
@@ -976,7 +974,7 @@ class Main:
         else:
             self._set_cachedir( self.NAME )
         lw.log( ['cachedir = %s' % self.CacheDir] )
-        if self.ARTISTNUM == 1 and self.ARTISTINFO == "true":
+        if self.ARTISTNUM == 1:
             self._get_artistinfo()
         dirs, files = xbmcvfs.listdir(self.CacheDir)
         for file in files:
