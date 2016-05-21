@@ -229,7 +229,39 @@ msgctxt "#32501"
 msgid "Download similar artists from last.fm"
 msgstr ""
 
-#empty strings from id 32502 to 32900
+#empty strings from id 32502 to 32599
+
+msgctxt "#32600"
+msgid "Instructions"
+msgstr ""
+
+msgctxt "#32600"
+msgid "Instructions"
+msgstr ""
+
+msgctxt "#32601"
+msgid "Some services allow you to set a priority for use."
+msgstr ""
+
+msgctxt "#32602"
+msgid "In those cases priority 1 will be used first and 10 last."
+msgstr ""
+
+msgctxt "#32603"
+msgid " "
+msgstr ""
+
+msgctxt "#32604"
+msgid "Certain services require your music to be tagged with the MusicBrainz ID"
+msgstr ""
+
+msgctxt "#32605"
+msgid "see http://kodi.wiki/view/Add-on:Artist_Slideshow for more information"
+msgstr ""
+
+
+#empty strings from id 32606 to 32900
+
 #Languages
 
 msgctxt "#32901"

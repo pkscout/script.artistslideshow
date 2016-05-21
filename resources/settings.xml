@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
+	<category label="32600">
+		<setting label="32601" type="lsep" />
+		<setting label="32602" type="lsep" />
+		<setting label="32603" type="lsep" />
+		<setting label="32604" type="lsep" />
+		<setting label="32605" type="lsep" />
+	</category>
     <category label="32100">
         <setting id="local_artist_path" type="folder" label="32101" default="" />
         <setting id="priority" type="enum" label="32102" lvalues="32110|32111|32112" default="0" />
