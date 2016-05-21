@@ -1,3 +1,8 @@
+v.2.0.0~beta5
+- fix for empty string returned when asking Kodi for MBIDs
+- removed remote MBID lookup, MBID must now be in Kodi
+- changed default to get bio from Kodi and images from htbackdrops
+
 v.2.0.0~beta4
 - fix for crash when Musicbrainz server doesn't respond
 - fixed an issue where bio language setting wasn't displaying

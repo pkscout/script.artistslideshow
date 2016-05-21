@@ -41,7 +41,6 @@ preamble     = '[Artist Slideshow]'
 logdebug     = addon.getSetting( "logging" ) 
 
 lw      = Logger( preamble=preamble, logdebug=logdebug )
-mbURL   = URL( 'json',{"User-Agent": addonname  + '/' + addonversion  + '( https://github.com/pkscout/artistslideshow )', "content-type":"text/html; charset=UTF-8"} )
 JSONURL = URL( 'json' )
 txtURL  = URL( 'text' )
 imgURL  = URL( 'binary' )
@@ -346,12 +345,12 @@ class Main:
 
     def _get_current_artists( self ):
         current_artists = []
-        for artist, mbid in self._get_current_artists_info( 'withoutmbid'):
+        for artist, mbid in self._get_current_artists_info( ):
             current_artists.append( artist )
         return current_artists
 
 
-    def _get_current_artists_info( self, type ):
+    def _get_current_artists_info( self ):
         featured_artists = ''
         artist_names = []
         artists_info = []
@@ -372,7 +371,7 @@ class Main:
             else:
                 response = self.LASTJSONRESPONSE
             artist_names = _json.loads(response).get( 'result', {} ).get( 'item', {} ).get( 'artist', [] )
-            mbids = _json.loads(response).get( 'result', {} ).get( 'item', {} ).get( 'muiscbrainzartistid', [] )
+            mbids = _json.loads(response).get( 'result', {} ).get( 'item', {} ).get( 'musicbrainzartistid', [] )
             try:
                 playing_song = xbmc.Player().getMusicInfoTag().getTitle()
             except RuntimeError:
@@ -402,11 +401,7 @@ class Main:
                 artist_names.append( one_artist.strip(' ()') )            
         for artist_name, mbid in itertools.izip_longest( artist_names, mbids, fillvalue='' ):
             if artist_name:
-                if not mbid and type == 'withmbid':
-                    mbid = self._get_musicbrainz_id( artist_name )
-                else:
-                    mbid = ''
-                artists_info.append( (artist_name, mbid) )
+                artists_info.append( (artist_name, self._get_musicbrainz_id( artist_name, mbid )) )
         return artists_info
 
 
@@ -481,8 +476,9 @@ class Main:
                self._merge_images()
 
 
-    def _get_musicbrainz_id ( self, theartist ):
-        mbid = ''
+    def _get_musicbrainz_id ( self, theartist, mbid ):
+        if mbid:
+            return mbid
         lw.log( ['Looking for a musicbrainz ID for artist ' + theartist, 'Looking for musicbrainz ID in the musicbrainz.nfo file'] )
         self._set_infodir( theartist )
         filename = os.path.join( self.InfoDir, 'musicbrainz.nfo' )
@@ -490,137 +486,14 @@ class Main:
             loglines, mbid = readFile( filename )
             lw.log( loglines )
             if not mbid:
-                if time.time() - os.path.getmtime(filename) < 1209600:
-                    lw.log( ['no musicbrainz ID found in musicbrainz.nfo file'] )
-                    return ''
-                else:
-                    lw.log( ['no musicbrainz ID found in musicbrainz.nfo file, trying lookup again'] )
+                lw.log( ['no musicbrainz ID found in musicbrainz.nfo file'] )
+                return ''
             else:
                 lw.log( ['musicbrainz ID found in musicbrainz.nfo file'] )
                 return mbid
         else:
             lw.log( ['no musicbrainz.nfo file found'] )
-        if self._playback_stopped_or_changed():
-            success, loglines = writeFile( '', filename )
-            lw.log( loglines )
             return ''
-        # this is here to account for songs or albums that have the artist 'Various Artists'
-        # because AS chokes when trying to find this artist on MusicBrainz
-        if theartist.lower() == 'various artists':
-            success, loglines = writeFile( self.VARIOUSARTISTSMBID, filename)
-            lw.log( loglines )
-            return self.VARIOUSARTISTSMBID
-        lw.log( ['querying musicbrainz.com for musicbrainz ID. This is about to get messy.'] )
-        badSubstrings = ["the ", "The ", "THE ", "a ", "A ", "an ", "An ", "AN "]
-        searchartist = theartist
-        for badSubstring in badSubstrings:
-            if theartist.startswith(badSubstring):
-                searchartist = theartist.replace(badSubstring, "")
-        mboptions = {"fmt":"json"} 
-        mbsearch = 'artist:"%s"' % searchartist
-        query_times = {'last':0, 'current':time.time()}
-        lw.log( ['parsing musicbrainz response for muiscbrainz ID'] )
-        cached_mb_info = False
-        for artist in self._get_musicbrainz_info( mboptions, mbsearch, 'artist', 'artists', query_times ):
-            mbid = ''
-            if self._playback_stopped_or_changed():
-                return ''
-            all_names = artist.get( 'aliases', [] )
-            aliases = []
-            if all_names:
-                for one_name in all_names:
-                    aliases.append( one_name['name'].lower() )
-            if artist['name'].lower() == theartist.lower() or theartist.lower() in aliases:
-                mbid = artist['id']
-                lw.log( ['found a potential musicbrainz ID of %s for %s' % (mbid, theartist)] )
-                playing_album = self._get_playing_item( 'album' )
-                if playing_album:
-                    lw.log( ['checking album name against releases in musicbrainz'] )
-                    query_times = {'last':query_times['current'], 'current':time.time()}
-                    cached_mb_info = self._parse_musicbrainz_info( 'release', mbid, playing_album, query_times )
-                if not cached_mb_info:
-                    playing_song = self._get_playing_item( 'title' )
-                    if playing_song:
-                        lw.log( ['checking song name against recordings in musicbrainz'] )
-                        if smartUTF8( theartist ) == playing_song[0:(playing_song.find('-'))-1]:
-                            playing_song = playing_song[(playing_song.find('-'))+2:]
-                        query_times = {'last':query_times['current'], 'current':time.time()}
-                        cached_mb_info = self._parse_musicbrainz_info( 'recording', mbid, playing_song, query_times )
-                        if not cached_mb_info:
-                            lw.log( ['checking song name against works in musicbrainz'] )
-                            query_times = {'last':query_times['current'], 'current':time.time()}
-                            cached_mb_info = self._parse_musicbrainz_info( 'work', mbid, playing_song, query_times )
-                if cached_mb_info:
-                    break
-                else:
-                    lw.log( ['No matching song/album found for %s. Trying the next artist.' % theartist] )
-        if cached_mb_info:
-            lw.log( ['Musicbrainz ID for %s is %s. writing out to cache file.' % (theartist, mbid)] )
-        else:
-            mbid = ''
-            lw.log( ['No musicbrainz ID found for %s. writing empty cache file.' % theartist] )
-        success, loglines = writeFile( mbid, filename )
-        lw.log( loglines )
-        return mbid
-
-                                
-    def _get_musicbrainz_info( self, mboptions, mbsearch, type, response_type, query_times ):
-        mbbase = 'http://www.musicbrainz.org/ws/2/'
-        theartist = self.NAME
-        mb_data = []
-        offset = 0
-        do_loop = True
-        elapsed_time = query_times['current'] - query_times['last']
-        if elapsed_time < 1:
-            self._wait( 1 - elapsed_time )
-        elif self._playback_stopped_or_changed():
-            return []        
-        query_start = time.time()
-        while do_loop:
-            if mbsearch:
-                mbquery = mbbase + type
-                mboptions['query'] = mbsearch
-            else:
-                mbquery = mbbase + type[:-1]
-                mboptions['offset'] = str(offset)
-            lw.log( ['getting results from musicbrainz using: ' + mbquery] )
-            for x in range(1, 5):
-                success, loglines, json_data = mbURL.Get( mbquery, params=mboptions )
-                lw.log( loglines )
-                if self._playback_stopped_or_changed():
-                    return []       
-                if not success:
-                    wait_time = random.randint(2,5)
-                    lw.log( ['site unreachable, waiting %s seconds to try again.' % wait_time] )
-                    self._wait( wait_time )
-                else:
-                    try:
-                        mb_data.extend( json_data[response_type] )
-                    except KeyError:
-                        lw.log( ['no valid value for %s found in JSON data' % type] )
-                        offset = -100
-                    except Exception, e:
-                        lw.log( ['unexpected error while parsing JSON data', e] )
-                        offset = -100
-                    break
-            offset = offset + 100
-            try:
-                total_items = int( json_data.get( type[:-1] + '-count', '0' ) )
-            except AttributeError:
-                total_items = 0
-            except Exception, e:
-                lw.log( ['unexpected error getting JSON data from ' + mbquery, e] )
-                total_items = 0
-            if (not mbsearch) and (total_items - offset > 0):
-                lw.log( ['getting more data from musicbrainz'] )
-                query_elapsed = time.time() - query_start
-                if query_elapsed < 1:
-                    self._wait(1 - query_elapsed)
-                elif self._playback_stopped_or_changed():
-                    return []        
-            else:
-                do_loop = False
-        return mb_data
 
 
     def _get_playing_item( self, item ):
@@ -1093,7 +966,7 @@ class Main:
         self.ARTISTNUM = 0
         self.TOTALARTISTS = len( self.ALLARTISTS )
         self.MergedImagesFound = False
-        for artist, mbid in self._get_current_artists_info( 'withmbid' ):
+        for artist, mbid in self._get_current_artists_info( ):
             lw.log( ['current artist is %s with a mbid of %s' % (artist, mbid)] )
             self.ARTISTNUM += 1
             self.NAME = artist
