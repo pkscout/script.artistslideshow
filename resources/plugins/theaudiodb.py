@@ -112,7 +112,9 @@ class objectConfig():
                 rloglines, rawdata = readFile( filepath )
                 self.loglines.extend( rloglines )
                 json_data = _json.loads( rawdata )
-                audiodbid = json_data.get( 'artists', [{}] )[0].get( 'idArtist', '' )
+                artist = json_data.get( 'artists' )
+                if artist is not None:
+                    audiodbid = artist[0].get( 'idArtist', '' )
                 if audiodbid:
                     success, wloglines = writeFile( audiodbid, idfilepath )
                     self.loglines.extend( wloglines )

@@ -1,3 +1,6 @@
+v.2.0.0~beta6
+- fix for crash when theaudiodb returns null for an artist
+
 v.2.0.0~beta5
 - fix for empty string returned when asking Kodi for MBIDs
 - removed remote MBID lookup, MBID must now be in Kodi
