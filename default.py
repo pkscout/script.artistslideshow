@@ -8,9 +8,6 @@
 # *  sfaxman for smartUnicode
 # *
 # *  code from all scripts/examples are used in script.artistslideshow
-# *
-# *  Musicbrainz python library by Kenneth Reitz
-# *  see resource/musicbrainzngs/copying for copyright and use restrictions
 # *  
 # *  Last.fm:      http://www.last.fm/
 # *  fanart.tv:    http://www.fanart.tv
