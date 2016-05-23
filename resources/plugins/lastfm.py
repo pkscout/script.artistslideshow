@@ -26,8 +26,8 @@ class objectConfig():
         self.SIMILARFILENAME = 'lastfmartistsimilar.nfo'
         self.CACHETIMEFILENAME = 'lastfmcachetime.nfo'
         self.CACHEEXPIRE = {}
-        self.CACHEEXPIRE['low'] = int( 4*secsinweek )
-        self.CACHEEXPIRE['high'] = int( 12*secsinweek )
+        self.CACHEEXPIRE['low'] = int( 12*secsinweek )
+        self.CACHEEXPIRE['high'] = int( 24*secsinweek )
         self.loglines = []
         self.TEXTURL = URL( 'text' )
 

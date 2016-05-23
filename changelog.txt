@@ -1,3 +1,6 @@
+v.2.0.0~beta7
+- changed cache expire range to 12 - 24 weeks
+
 v.2.0.0~beta6
 - fix for crash when theaudiodb returns null for an artist
 

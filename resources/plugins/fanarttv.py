@@ -23,8 +23,8 @@ class objectConfig():
         self.FILENAME = 'fanarttvartistimages.nfo'
         self.CACHETIMEFILENAME = 'fanarttvcachetime.nfo'
         self.CACHEEXPIRE = {}
-        self.CACHEEXPIRE['low'] = int( 4*secsinweek )
-        self.CACHEEXPIRE['high'] = int( 12*secsinweek )
+        self.CACHEEXPIRE['low'] = int( 12*secsinweek )
+        self.CACHEEXPIRE['high'] = int( 24*secsinweek )
         self.loglines = []
         self.JSONURL = URL( 'json' )
 
