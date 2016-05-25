@@ -1,28 +1,12 @@
-v.2.0.0~beta7
-- changed cache expire range to 12 - 24 weeks
-
-v.2.0.0~beta6
-- fix for crash when theaudiodb returns null for an artist
-
-v.2.0.0~beta5
-- fix for empty string returned when asking Kodi for MBIDs
-- removed remote MBID lookup, MBID must now be in Kodi
-- changed default to get bio from Kodi and images from htbackdrops
-
-v.2.0.0~beta4
-- fix for crash when Musicbrainz server doesn't respond
-- fixed an issue where bio language setting wasn't displaying
-- fixed an issue with bio and album info not loading
-
-v.2.0.0~beta3
-- fixed issue with null artist or album info returned from theaudiodb
-
-v.2.0.0~beta2
-- added preferences to allow selection of services and priority for use
-
-v.2.0.0~beta1
+v.2.0.0
 - separated code for downloads into modules to make it easier to add other services
+- added preferences to allow selection of services and priority for use
+- removed remote MusicBrainz lookup, MBID must now be in Kodi
+- changed default to get bio from Kodi and images from htbackdrops
 - rewrite of cache mechanism to reduce load on external sites
+- changed cache expire range to 12 - 24 weeks (set randomly when cache is refreshed)
+- updated preference strings (only French and English included, other languages
+  will be added back later via Kodi Transifex project)
 
 v.1.8.8
 - updated cache logic to reduce API calls to external sites
