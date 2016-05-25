@@ -240,8 +240,8 @@ msgid "Some services allow you to set a priority for use."
 msgstr "Certains services vous permettent de définir une priorité à l'utilisation."
 
 msgctxt "#32602"
-msgid "Dans ces cas, la priorité 1 sera utilisée pour la première et 10 pour la dernière."
-msgstr ""
+msgid "In those cases priority 1 will be used first and 10 last."
+msgstr "Dans ces cas, la priorité 1 sera utilisée pour la première et 10 pour la dernière."
 
 msgctxt "#32603"
 msgid " "
@@ -249,11 +249,11 @@ msgstr " "
 
 msgctxt "#32604"
 msgid "Certain services require your music to be tagged with the MusicBrainz ID"
-msgstr "Certains services nécessitent que vos musiques soient taguées avec l'ID MusicBrainz"
+msgstr "Certains services nécessitent que vos musiques soient taguées avec l'ID MusicBrainz."
 
 msgctxt "#32605"
 msgid "see http://kodi.wiki/view/Add-on:Artist_Slideshow for more information"
-msgstr "voir http://kodi.wiki/view/Add-on:Artist_Slideshow pour plus d'informations"
+msgstr "Voir http://kodi.wiki/view/Add-on:Artist_Slideshow pour plus d'informations."
 
 #empty strings from id 32606 to 32900
 
