@@ -201,7 +201,7 @@ msgstr "Télécharger les informations de l'album depuis last.fm"
 
 msgctxt "#32400"
 msgid "Artist Bio"
-msgstr "Biographie des artistes"
+msgstr "Biographie de l'artiste"
 
 msgctxt "#32401"
 msgid "Preferred language for artist bio"
