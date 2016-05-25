@@ -75,19 +75,19 @@ msgstr "  Langue préférée pour les informations des artistes"
 
 msgctxt "#32007"
 msgid "  Download all images regardless of resolution"
-msgstr "  Télécharger toutes les images indépendamment de la résolution"
+msgstr "  - Télécharger toutes les images indépendamment de la résolution"
 
 msgctxt "#32008"
 msgid "Download images from fanart.tv"
-msgstr "Télécharger des images à partir de fanart.tv"
+msgstr "Télécharger les images à partir de fanart.tv"
 
 msgctxt "#32009"
 msgid "Download images from theaudiodb.com"
-msgstr "Télécharger les images à partir de theaudiodb.com"
+msgstr "Télécharger les images depuis theaudiodb.com"
 
 msgctxt "#32010"
 msgid "  Client API key"
-msgstr "  Clé du client API"
+msgstr "  - Clé du client API"
 
 #empty strings from id 32011 to 32099
 
@@ -101,7 +101,7 @@ msgstr "Dossier local de l’artiste"
 
 msgctxt "#32102"
 msgid "  Image Priority"
-msgstr "  Priorité des images"
+msgstr "  - Priorité des images"
 
 msgctxt "#32103"
 msgid "Fallback folder"
@@ -145,11 +145,11 @@ msgstr "Avancés"
 
 msgctxt "#32201"
 msgid "Limit size of download cache"
-msgstr "Taille limite du cache de téléchargement"
+msgstr "Limiter la taille du cache de téléchargement"
 
 msgctxt "#32202"
 msgid "  Maximum cache size (in megabytes)"
-msgstr "  Taille maximale du cache (en méga octets)"
+msgstr "  - Taille maximale du cache (en méga octets)"
 
 msgctxt "#32203"
 msgid "Download notification type"
@@ -157,11 +157,11 @@ msgstr "Type de notification de téléchargement"
 
 msgctxt "#32204"
 msgid "  Custom notification images folder"
-msgstr "  Dossier des images personnalisées de notification"
+msgstr "  - Dossier des images personnalisées de notification"
 
 msgctxt "#32205"
 msgid "Alternate name for local fanart folder"
-msgstr "Nom alternatif pour le dossier Fanart"
+msgstr "Nom alternatif pour le dossier local des fanarts"
 
 msgctxt "#32206"
 msgid "None"
@@ -187,15 +187,15 @@ msgstr "Informations de l'album"
 
 msgctxt "#32301"
 msgid "  Priority"
-msgstr "  Priorité"
+msgstr "  - Priorité"
 
 msgctxt "#32302"
 msgid "Download album info from the audiodb.com"
-msgstr "Télécharger les informations de l'albums depuis audiodb.com"
+msgstr "Télécharger les informations de l'album depuis theaudiodb.com"
 
 msgctxt "#32303"
 msgid "Download album info from the last.fm"
-msgstr "Télécharger les informations de l'albums depuis last.fm"
+msgstr "Télécharger les informations de l'album depuis last.fm"
 
 #empty strings from id 32304 to 32399
 
@@ -212,8 +212,8 @@ msgid "Get artist bio from Kodi"
 msgstr "Obtenir la biographie de l'artiste depuis Kodi"
 
 msgctxt "#32403"
-msgid "Télécharger la biographie de l'artiste depuis theaudiodb.com"
-msgstr ""
+msgid "Download artist bio from theaudiodb.com"
+msgstr "Télécharger la biographie de l'artiste depuis theaudiodb.com"
 
 msgctxt "#32404"
 msgid "Download artist bio from last.fm"
