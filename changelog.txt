@@ -1,3 +1,7 @@
+v.2.0.1
+- added option to turn off multiple artist images
+- fixed crash if htbackdrops or last.fm are unresponsive
+
 v.2.0.0
 - separated code for downloads into modules to make it easier to add other services
 - added preferences to allow selection of services and priority for use
