@@ -395,7 +395,12 @@ class Main:
             featured_artists = self._get_featured_artists( self._get_infolabel(self.SKININFO['title']) )
         if featured_artists:
             for one_artist in featured_artists:
-                artist_names.append( one_artist.strip(' ()') )            
+                artist_names.append( one_artist.strip(' ()') )
+        if self.DISABLEMULTIARTIST == 'true':
+            if len( artist_names ) > 1:
+                del artist_names[1:-1]
+            if len( mbids ) > 1:
+                del mbids[1:-1]
         for artist_name, mbid in itertools.izip_longest( artist_names, mbids, fillvalue='' ):
             if artist_name:
                 artists_info.append( (artist_name, self._get_musicbrainz_id( artist_name, mbid )) )
@@ -537,6 +542,7 @@ class Main:
         self.USEOVERRIDE = addon.getSetting( "slideshow" )
         self.OVERRIDEPATH = addon.getSetting( "slideshow_path" ).decode('utf-8')
         self.RESTRICTCACHE = addon.getSetting( "restrict_cache" )
+        self.DISABLEMULTIARTIST = addon.getSetting( "disable_multiartist" )
         try:
             self.maxcachesize = int( addon.getSetting( "max_cache_size" ) ) * 1000000
         except ValueError:
@@ -961,6 +967,7 @@ class Main:
     def _use_correct_artwork( self ):
         self.ALLARTISTS = self._get_current_artists()
         self.ARTISTNUM = 0
+        # if multiartist off then set totalartists to 1
         self.TOTALARTISTS = len( self.ALLARTISTS )
         self.MergedImagesFound = False
         for artist, mbid in self._get_current_artists_info( ):

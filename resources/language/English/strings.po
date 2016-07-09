@@ -179,6 +179,10 @@ msgctxt "#32209"
 msgid "Enable debug logging"
 msgstr ""
 
+msgctxt "#32210"
+msgid "Disable secondary and featured artist images"
+msgstr ""
+
 #empty strings from id 32210 to 32299
 
 msgctxt "#32300"
