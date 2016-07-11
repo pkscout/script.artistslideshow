@@ -396,11 +396,16 @@ class Main:
         if featured_artists:
             for one_artist in featured_artists:
                 artist_names.append( one_artist.strip(' ()') )
+        lw.log( ['starting with the following artists', artist_names] )
+        lw.log( ['disable multi artist is set to ' + self.DISABLEMULTIARTIST] )
         if self.DISABLEMULTIARTIST == 'true':
             if len( artist_names ) > 1:
-                del artist_names[1:-1]
+                lw.log( ['deleting extra artists'] )
+                del artist_names[1:]
             if len( mbids ) > 1:
-                del mbids[1:-1]
+                lw.log( ['deleting extra MBIDs'] )
+                del mbids[1:]
+        lw.log( ['left with', artist_names] )
         for artist_name, mbid in itertools.izip_longest( artist_names, mbids, fillvalue='' ):
             if artist_name:
                 artists_info.append( (artist_name, self._get_musicbrainz_id( artist_name, mbid )) )

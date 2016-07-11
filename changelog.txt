@@ -1,5 +1,8 @@
-v.2.0.1
-- added option to turn off multiple artist images
+v.2.0.1~beta2
+- fixed code to turn off featured or multi-artist image merge
+
+v.2.0.1~beta1
+- added option to turn off featured or multi-artist image merge
 - fixed crash if htbackdrops or last.fm are unresponsive
 
 v.2.0.0
