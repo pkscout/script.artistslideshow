@@ -1,3 +1,6 @@
+v.2.0.1~beta3
+- fixed issue when merging separate artist images with same file name
+
 v.2.0.1~beta2
 - fixed code to turn off featured or multi-artist image merge
 
