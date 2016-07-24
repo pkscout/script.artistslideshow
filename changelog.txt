@@ -1,3 +1,6 @@
+v.2.0.1~beta4
+- added option to search theaudiodb.com using artist name if mbid unavailable
+
 v.2.0.1~beta3
 - fixed issue when merging separate artist images with same file name
 
