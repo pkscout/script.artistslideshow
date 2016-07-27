@@ -183,6 +183,18 @@ msgctxt "#32210"
 msgid "Disable secondary and featured artist images"
 msgstr ""
 
+msgctxt "#32211"
+msgid "Enable fuzzy local artist image paths"
+msgstr ""
+
+msgctxt "#32212"
+msgid "  Replace illegal path characters in artist name with"
+msgstr ""
+
+msgctxt "#32213"
+msgid "  Replace trailing period in artist name with"
+msgstr ""
+
 #empty strings from id 32210 to 32299
 
 msgctxt "#32300"

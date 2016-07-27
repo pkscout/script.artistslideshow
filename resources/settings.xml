@@ -50,6 +50,10 @@
         <setting id="show_progress" type="enum" label="32203" lvalues="32206|32207|32208" default="0" />
         <setting id="progress_path" type="folder" label="32204" default="" enable="eq(-1,2)"/>
 		<setting id="fanart_folder" type="text" label="32205" default="" />
+        <setting id="enable_fuzzysearch" type="bool" label="32211" default="false" />
+        <setting id="illegal_replace" type="text" label=" 32212" default="_" visible="eq(-1,true)"/>
+        <setting id="end_replace" type="text" label="32213" default="_" visible="eq(-2,true) + eq(System.Platform.Windows,true)"/>
+		
         <setting id="logging" type="bool" label="32209" default="false" />
     </category>
 </settings>

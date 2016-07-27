@@ -15,7 +15,7 @@
 # *  htbackdrops:  http://www.htbackdrops.org
 
 import xbmc, xbmcaddon, xbmcgui, xbmcvfs
-import itertools, os, random, re, sys, time
+import itertools, os, platform, random, re, sys, time
 import xml.etree.ElementTree as _xmltree
 if sys.version_info >= (2, 7):
     import json as _json
@@ -412,6 +412,33 @@ class Main:
         return artists_info
 
 
+    def _get_directory_list( self, trynum='first' ):
+        lw.log( ['checking %s for artist images' % self.CacheDir] )
+        try:
+            dirs, files = xbmcvfs.listdir( self.CacheDir )
+        except OSError:
+            files = []
+        except Exception, e:
+            lw.log( ['unexpected error getting directory list', e] )
+            files = []
+        if not files and trynum == 'first':
+            if self.NAME[-1] == '.':
+                trunc_name = self.NAME[:-1] + self.ENDREPLACE
+            else:
+                trunc_name = self.NAME
+                s_name = ''
+            lw.log( ['the illegal characters are ', self.ILLEGALCHARS, 'the replacement is ' + self.ILLEGALREPLACE] )
+            for c in list( trunc_name ):
+                if c in self.ILLEGALCHARS:
+                    s_name = s_name + self.ILLEGALREPLACE
+                else:
+                    s_name = s_name + c  
+            lw.log( ['did not work with %s, trying %s' % (self.NAME, s_name)] )           
+            self.CacheDir = os.path.join( self.LOCALARTISTPATH, smartUTF8(s_name).decode('utf-8'), self.FANARTFOLDER )
+            files = self._get_directory_list( 'second' )
+        return files
+        
+
     def _get_featured_artists( self, data ):
         the_split = data.replace('ft.','feat.').split('feat.')
         if len( the_split ) > 1:
@@ -464,13 +491,7 @@ class Main:
             return
         self.CacheDir = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8'), self.FANARTFOLDER )
         lw.log( ['cachedir = %s' % self.CacheDir] )
-        try:
-            dirs, files = xbmcvfs.listdir( self.CacheDir )
-        except OSError:
-            files = []
-        except Exception, e:
-            lw.log( ['unexpected error getting directory list', e] )
-            files = []
+        files = self._get_directory_list()
         for file in files:
             if file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png'):
                 self.LocalImagesFound = True
@@ -566,6 +587,19 @@ class Main:
             lw.log( ['set fanart folder to %s' % self.FANARTFOLDER] )
         else:
             self.FANARTFOLDER = 'extrafanart'
+        pl = platform.system()
+        ps = os.path.sep
+        lw.log( ['the platform is %s and the path separator is %s' % (pl, ps)] )
+        if pl == "Windows":
+            self.ENDREPLACE = addon.getSetting( "end_replace" )
+            self.ILLEGALCHARS = list( '<>:"/\|?*' )
+        elif pl == "Darwin":
+            self.ENDREPLACE = '.'
+            self.ILLEGALCHARS = [':']
+        else:
+            self.ENDREPLACE = '.'
+            self.ILLEGALCHARS = [ps]
+        self.ILLEGALREPLACE = addon.getSetting( "illegal_replace" )
 
 
     def _init_vars( self ):
