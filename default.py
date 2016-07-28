@@ -15,7 +15,7 @@
 # *  htbackdrops:  http://www.htbackdrops.org
 
 import xbmc, xbmcaddon, xbmcgui, xbmcvfs
-import itertools, os, platform, random, re, sys, time
+import itertools, os, random, re, sys, time
 import xml.etree.ElementTree as _xmltree
 if sys.version_info >= (2, 7):
     import json as _json
@@ -421,12 +421,12 @@ class Main:
         except Exception, e:
             lw.log( ['unexpected error getting directory list', e] )
             files = []
-        if not files and trynum == 'first':
+        if not files and trynum == 'first' and self.ENABLEFUZZYSEARCH == 'true':
             if self.NAME[-1] == '.':
                 trunc_name = self.NAME[:-1] + self.ENDREPLACE
             else:
                 trunc_name = self.NAME
-                s_name = ''
+            s_name = ''
             lw.log( ['the illegal characters are ', self.ILLEGALCHARS, 'the replacement is ' + self.ILLEGALREPLACE] )
             for c in list( trunc_name ):
                 if c in self.ILLEGALCHARS:
@@ -587,19 +587,21 @@ class Main:
             lw.log( ['set fanart folder to %s' % self.FANARTFOLDER] )
         else:
             self.FANARTFOLDER = 'extrafanart'
-        pl = platform.system()
-        ps = os.path.sep
-        lw.log( ['the platform is %s and the path separator is %s' % (pl, ps)] )
-        if pl == "Windows":
-            self.ENDREPLACE = addon.getSetting( "end_replace" )
-            self.ILLEGALCHARS = list( '<>:"/\|?*' )
-        elif pl == "Darwin":
-            self.ENDREPLACE = '.'
-            self.ILLEGALCHARS = [':']
-        else:
-            self.ENDREPLACE = '.'
-            self.ILLEGALCHARS = [ps]
-        self.ILLEGALREPLACE = addon.getSetting( "illegal_replace" )
+        self.ENABLEFUZZYSEARCH = addon.getSetting( "enable_fuzzysearch" )
+        lw.log( ['fuzzy search is ' + self.ENABLEFUZZYSEARCH] )
+        if self.ENABLEFUZZYSEARCH == 'true':
+            pl = addon.getSetting( "storage_target" )
+            lw.log( ['the target is ' + pl] )
+            if pl == "0":
+                self.ENDREPLACE = addon.getSetting( "end_replace" )
+                self.ILLEGALCHARS = list( '<>:"/\|?*' )
+            elif pl == "2":
+                self.ENDREPLACE = '.'
+                self.ILLEGALCHARS = [':']
+            else:
+                self.ENDREPLACE = '.'
+                self.ILLEGALCHARS = [os.path.sep]
+            self.ILLEGALREPLACE = addon.getSetting( "illegal_replace" )
 
 
     def _init_vars( self ):
