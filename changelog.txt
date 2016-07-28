@@ -1,3 +1,6 @@
+v.2.0.1~beta6
+- fixed settings file to enable trailing period replacement only on Windows
+
 v.2.0.1~beta5
 - added option for fuzzy local path search replacing illegal path characters
 
