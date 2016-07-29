@@ -422,13 +422,9 @@ class Main:
             lw.log( ['unexpected error getting directory list', e] )
             files = []
         if not files and trynum == 'first' and self.ENABLEFUZZYSEARCH == 'true':
-            if self.NAME[-1] == '.':
-                trunc_name = self.NAME[:-1] + self.ENDREPLACE
-            else:
-                trunc_name = self.NAME
             s_name = ''
             lw.log( ['the illegal characters are ', self.ILLEGALCHARS, 'the replacement is ' + self.ILLEGALREPLACE] )
-            for c in list( trunc_name ):
+            for c in list( self._remove_trailing_dot( self.NAME ) ):
                 if c in self.ILLEGALCHARS:
                     s_name = s_name + self.ILLEGALREPLACE
                 else:
@@ -799,6 +795,13 @@ class Main:
             lw.log( ['switching slideshow to ' + self.TransitionDir] )
         self.LASTARTISTREFRESH = time.time()
         lw.log( ['Last slideshow refresh time is ' + str(self.LASTARTISTREFRESH)] )
+
+
+    def _remove_trailing_dot( self, thename ):
+        if thename[-1] == '.' and len( thename ) > 1:
+            return self._remove_trailing_dot( thename[:-1] + self.ENDREPLACE )
+        else:
+            return thename
 
 
     def _rename_tbn_files( self, loc, type ):
