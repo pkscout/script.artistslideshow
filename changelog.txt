@@ -1,27 +1,7 @@
-v.2.0.1~beta8
-- fuzzy local artist path now removes all trailing periods
-
-v.2.0.1~beta7
-- fix so AS respects the "enable fuzzy local artist path setting"
-- changed fuzzy options to allow for storage host different from local host
-- fixed crash when artist has period at end of name
-
-v.2.0.1~beta6
-- fixed settings file to enable trailing period replacement only on Windows
-
-v.2.0.1~beta5
+v.2.0.1
 - added option for fuzzy local path search replacing illegal path characters
-
-v.2.0.1~beta4
 - added option to search theaudiodb.com using artist name if mbid unavailable
-
-v.2.0.1~beta3
 - fixed issue when merging separate artist images with same file name
-
-v.2.0.1~beta2
-- fixed code to turn off featured or multi-artist image merge
-
-v.2.0.1~beta1
 - added option to turn off featured or multi-artist image merge
 - fixed crash if htbackdrops or last.fm are unresponsive
 
