@@ -726,8 +726,8 @@ class Main:
                     new_file = old_file.strip('_')
                     if new_file == 'artistimagesfanarttv.nfo':
                         new_file = 'fanarttvartistimages.nfo'
-                    elif new_file == 'artistimageshtbackdrops.nfo':
-                        new_file = 'htbackdropsartistimages.nfo'
+#                    elif new_file == 'artistimageshtbackdrops.nfo':
+#                        new_file = 'htbackdropsartistimages.nfo'
                     elif new_file == 'artistimageslastfm.nfo':
                         new_file = 'lastfmartistimages.nfo'
                     elif new_file == 'artistbio.nfo':
