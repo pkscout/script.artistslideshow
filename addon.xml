@@ -10,7 +10,7 @@
 		<provides>executable</provides>
 	</extension>
 	<extension point="xbmc.addon.metadata">
-		<news>2.0.3~beta2
+		<news>2.0.3
 		- removed support for htbackdrops.org (API access no longer avaialble)</news>
 		<summary lang="ar">حمل المزيد من الصور والمعلومات عن الفنان الذى يُغنِى حالياً</summary>
 		<summary lang="be">Download images and additional info of the currently playing artist</summary>
