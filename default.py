@@ -850,14 +850,20 @@ class Main:
 
 
     def _set_properties( self ):
-      self._set_property("ArtistSlideshow.ArtistBiography", self.biography)
-      for count, item in enumerate( self.similar ):
-          self._set_property("ArtistSlideshow.%d.SimilarName" % ( count + 1 ), item[0])
-          self._set_property("ArtistSlideshow.%d.SimilarThumb" % ( count + 1 ), item[1])
-      for count, item in enumerate( self.albums ):
-          self._set_property("ArtistSlideshow.%d.AlbumName" % ( count + 1 ), item[0])
-          self._set_property("ArtistSlideshow.%d.AlbumThumb" % ( count + 1 ), item[1])
-
+        similar_total = '0'
+        album_total = '0'
+        self._set_property( "ArtistSlideshow.ArtistBiography", self.biography )
+        for count, item in enumerate( self.similar ):
+            self._set_property( "ArtistSlideshow.%d.SimilarName" % ( count + 1 ), item[0] )
+            self._set_property( "ArtistSlideshow.%d.SimilarThumb" % ( count + 1 ), item[1] )
+            similar_total = str( count )
+        for count, item in enumerate( self.albums ):
+            self._set_property( "ArtistSlideshow.%d.AlbumName" % ( count + 1 ), item[0] )
+            self._set_property( "ArtistSlideshow.%d.AlbumThumb" % ( count + 1 ), item[1] )
+            album_total = str( count )
+        self._set_property( "ArtistSlideshow.SimilarCount", similar_total )
+        self._set_property( "ArtistSlideshow.AlbumCount", album_total )
+        
 
     def _set_property( self, property_name, value=""):
         #sets a property (or clears it if no value is supplied)
