@@ -850,8 +850,8 @@ class Main:
 
 
     def _set_properties( self ):
-        similar_total = '0'
-        album_total = '0'
+        similar_total = ''
+        album_total = ''
         self._set_property( "ArtistSlideshow.ArtistBiography", self.biography )
         for count, item in enumerate( self.similar ):
             self._set_property( "ArtistSlideshow.%d.SimilarName" % ( count + 1 ), item[0] )
