@@ -1,3 +1,6 @@
+v.2.0.4~beta2
+- added MusicBrainz ID extraction from theaudiodb.com information
+
 v.2.0.4~beta1
 - added ArtistSlideshow.SimilarCount and ArtistSlideshow.AlbumCount to skin properties
 

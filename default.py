@@ -469,6 +469,7 @@ class Main:
             image_list, loglines = image_plugins['objs'][plugin_name[1]].getImageList( image_params )
             lw.log( loglines )
             images.extend( image_list )
+            image_params['mbid'] = self._get_musicbrainz_id( self.NAME, self.MBID ) 
         return images
 
 
@@ -501,23 +502,40 @@ class Main:
                self._merge_images()
 
 
-    def _get_musicbrainz_id ( self, theartist, mbid ):
+    def _get_musicbrainz_id( self, theartist, mbid ):
+        self._set_infodir( theartist )
+        lw.log( ['Looking for a musicbrainz ID for artist ' + theartist] )
+        if mbid:
+            lw.log( 'returning ' + mbid )
+            return mbid
+        mbid = self._get_musicbrainz_from_file( 'theaudiodbartistbio.nfo' )
         if mbid:
             return mbid
-        lw.log( ['Looking for a musicbrainz ID for artist ' + theartist, 'Looking for musicbrainz ID in the musicbrainz.nfo file'] )
-        self._set_infodir( theartist )
-        filename = os.path.join( self.InfoDir, 'musicbrainz.nfo' )
+        return self._get_musicbrainz_from_file( 'musicbrainz.nfo' )
+
+
+    def _get_musicbrainz_from_file( self, mbid_file ):
+        lw.log( ['Looking for musicbrainz ID in the %s file' % mbid_file] )
+        filename = os.path.join( self.InfoDir, mbid_file )
         if xbmcvfs.exists( filename ):
-            loglines, mbid = readFile( filename )
+            loglines, rawdata = readFile( filename )
             lw.log( loglines )
-            if not mbid:
-                lw.log( ['no musicbrainz ID found in musicbrainz.nfo file'] )
+            if mbid_file == 'musicbrainz.nfo':
+                if not rawdata:
+                    lw.log( ['no musicbrainz ID found in %s file' % mbid_file] )
+                    return ''
+                else:
+                    lw.log( ['musicbrainz ID found in %s file' % mbid_file] )
+                    return rawdata
+            try:
+                json_data = _json.loads( rawdata )
+            except ValueError:
+                self.loglines.append( 'no valid JSON data returned from ' + mbid_file )
                 return ''
-            else:
-                lw.log( ['musicbrainz ID found in musicbrainz.nfo file'] )
-                return mbid
+            lw.log( ['musicbrainz ID found in %s file' % mbid_file] )
+            return json_data.get( 'artists' )[0].get( 'strMusicBrainzID', '' )
         else:
-            lw.log( ['no musicbrainz.nfo file found'] )
+            lw.log( ['no %s file found' % mbid_file] )
             return ''
 
 
@@ -759,24 +777,6 @@ class Main:
         self.DAEMON = params.get( "daemon", "False" )
         if self.DAEMON == "True":
             lw.log( ['daemonizing'] )
-
-
-    def _parse_musicbrainz_info( self, type, mbid, playing_thing, query_times ):
-        if self._playback_stopped_or_changed():
-            return False
-        lw.log( ["checking this artist's " + type + "s against currently playing " + type] )
-        mboptions = {"artist":mbid, "limit":"100", "fmt":"json"}
-        for thing in self._get_musicbrainz_info( mboptions, '', type + 's', type + 's', query_times ):
-            title = smartUTF8( thing['title'] )
-            if playing_thing.rfind('(') > 0:
-                playing_title = smartUTF8( playing_thing[:playing_thing.rfind('(')-2] )
-            else:
-                playing_title = smartUTF8( playing_thing )
-            lw.log( ['comparing musicbrainz %s: %s with local %s: %s' % (type, title, type, playing_title)] )
-            if title.lower().startswith( playing_title.lower() ) or playing_title.lower().startswith( title.lower() ):
-                lw.log( ['found matching %s, this should be the right artist' % type] )
-                return True
-        return False
 
 
     def _playback_stopped_or_changed( self ):
