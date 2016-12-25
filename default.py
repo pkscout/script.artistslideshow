@@ -533,7 +533,10 @@ class Main:
                 self.loglines.append( 'no valid JSON data returned from ' + mbid_file )
                 return ''
             lw.log( ['musicbrainz ID found in %s file' % mbid_file] )
-            return json_data.get( 'artists' )[0].get( 'strMusicBrainzID', '' )
+            try:
+                return json_data.get( 'artists' )[0].get( 'strMusicBrainzID', '' )
+            except TypeError:
+                return ''
         else:
             lw.log( ['no %s file found' % mbid_file] )
             return ''

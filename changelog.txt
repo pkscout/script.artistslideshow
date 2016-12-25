@@ -1,3 +1,6 @@
+v.2.0.4~beta3
+- fix for crash with malformed json
+
 v.2.0.4~beta2
 - added MusicBrainz ID extraction from theaudiodb.com information
 
