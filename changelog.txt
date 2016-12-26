@@ -1,3 +1,7 @@
+v.2.0.4~beta4
+- fix for artist name separation leaving extra spaces
+- added option to use local fanart and folder image outside extrafanart folder
+
 v.2.0.4~beta3
 - fix for crash with malformed json
 
