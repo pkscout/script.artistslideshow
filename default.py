@@ -486,8 +486,20 @@ class Main:
         if not self.NAME:
             lw.log( ['no artist name provided'] )
             return
-        self.CacheDir = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8'), self.FANARTFOLDER )
+        artist_path = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8') )
+        self.CacheDir = os.path.join( artist_path, self.FANARTFOLDER )
         lw.log( ['cachedir = %s' % self.CacheDir] )
+        copy_files = []
+        if self.INCLUDEFANARTJPG == 'true':
+           copy_files.append( 'fanart.jpg' )
+           copy_files.append( 'fanart.png' )
+        if self.INCLUDEFOLDERJPG == 'true':
+            copy_files.append( 'folder.jpg' )
+            copy_files.append( 'folder.png' )
+        for one_file in copy_files:
+            result, loglines = checkPath( self.CacheDir )
+            lw.log( loglines )
+            xbmcvfs.copy( os.path.join( artist_path, one_file ), os.path.join( self.CacheDir, one_file ) )
         files = self._get_directory_list()
         for file in files:
             if file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png'):
@@ -586,6 +598,8 @@ class Main:
         self.OVERRIDEPATH = addon.getSetting( "slideshow_path" ).decode('utf-8')
         self.RESTRICTCACHE = addon.getSetting( "restrict_cache" )
         self.DISABLEMULTIARTIST = addon.getSetting( "disable_multiartist" )
+        self.INCLUDEFANARTJPG = addon.getSetting( "include_fanartjpg" )
+        self.INCLUDEFOLDERJPG = addon.getSetting( "include_folderjpg" )
         try:
             self.maxcachesize = int( addon.getSetting( "max_cache_size" ) ) * 1000000
         except ValueError:
