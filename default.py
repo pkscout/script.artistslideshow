@@ -886,7 +886,7 @@ class Main:
 
 
     def _split_artists( self, response):
-        return response.replace('ft.',' / ').replace('feat.',' / ').split(' / ')
+        return response.replace(' ft. ',' / ').replace(' feat. ',' / ').split(' / ')
 
 
     def _start_download( self ):
