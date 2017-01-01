@@ -489,11 +489,12 @@ class Main:
         artist_path = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8') )
         self.CacheDir = os.path.join( artist_path, self.FANARTFOLDER )
         lw.log( ['cachedir = %s' % self.CacheDir] )
+        artist_path_exists, loglines = checkPath( os.path.join( artist_path, '' ), False )
         copy_files = []
-        if self.INCLUDEFANARTJPG == 'true':
+        if self.INCLUDEFANARTJPG == 'true' and artist_path_exists:
            copy_files.append( 'fanart.jpg' )
            copy_files.append( 'fanart.png' )
-        if self.INCLUDEFOLDERJPG == 'true':
+        if self.INCLUDEFOLDERJPG == 'true' and artist_path_exists:
             copy_files.append( 'folder.jpg' )
             copy_files.append( 'folder.png' )
         for one_file in copy_files:
