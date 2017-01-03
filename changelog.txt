@@ -1,7 +1,5 @@
-v.2.0.5~beta2
+v.2.0.5
 - reverted to old logic for checking for start of new artist (more reliable)
-
-v.2.0.5~beta1
 - fix for creation of empty artist folders when using fanart.jpg option
 
 v.2.0.4
