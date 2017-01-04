@@ -543,7 +543,7 @@ class Main:
             try:
                 json_data = _json.loads( rawdata )
             except ValueError:
-                self.loglines.append( 'no valid JSON data returned from ' + mbid_file )
+                lw.log( 'no valid JSON data returned from ' + mbid_file )
                 return ''
             lw.log( ['musicbrainz ID found in %s file' % mbid_file] )
             try:

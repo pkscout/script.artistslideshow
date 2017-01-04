@@ -1,3 +1,6 @@
+v.2.0.6~beta1
+- fix for crash when no valid JSON returned from theaudiodb.com
+
 v.2.0.5
 - reverted to old logic for checking for start of new artist (more reliable)
 - fix for creation of empty artist folders when using fanart.jpg option
