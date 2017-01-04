@@ -1,3 +1,6 @@
+v.2.0.6~beta2
+- removed some logging causing a unicode problem
+
 v.2.0.6~beta1
 - fix for crash when no valid JSON returned from theaudiodb.com
 

@@ -1038,11 +1038,9 @@ class Main:
     def _use_correct_artwork( self ):
         self.ALLARTISTS = self._get_current_artists()
         self.ARTISTNUM = 0
-        # if multiartist off then set totalartists to 1
         self.TOTALARTISTS = len( self.ALLARTISTS )
         self.MergedImagesFound = False
         for artist, mbid in self._get_current_artists_info( ):
-            lw.log( ['current artist is %s with a mbid of %s' % (artist, mbid)] )
             self.ARTISTNUM += 1
             self.NAME = artist
             self.MBID = mbid
