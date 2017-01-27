@@ -533,6 +533,7 @@ class Main:
         if xbmcvfs.exists( filename ):
             loglines, rawdata = readFile( filename )
             lw.log( loglines )
+            rawdata = rawdata.rstrip( '\n' )
             if mbid_file == 'musicbrainz.nfo':
                 if not rawdata:
                     lw.log( ['no musicbrainz ID found in %s file' % mbid_file] )
