@@ -69,6 +69,7 @@ bio_plugins = {'names':[], 'objs':{}}
 image_plugins = {'names':[], 'objs':{}}
 album_plugins = {'names':[], 'objs':{}}
 similar_plugins = {'names':[], 'objs':{}}
+mbid_plugins = {'names':[], 'objs':{}} 
 for module in resources.plugins.__all__:
     full_plugin = 'resources.plugins.' + module
     __import__( full_plugin )
@@ -100,6 +101,10 @@ for module in resources.plugins.__all__:
             similar_plugins['objs'][module] = plugin
             similar_plugins['names'].append( [ai_priority, module] )
             lw.log( ['added %s to similar artist plugins' % module] )
+    if 'mbid' in scrapers:
+        mbid_plugins['objs'][module] = plugin
+        mbid_plugins['names'].append( [1, module] )
+        lw.log( ['added %s to mbid plugins' % module] )
 
 
 LANGUAGES = (
@@ -365,9 +370,9 @@ class Main:
                 # if the same file is playing, use cached JSON response instead of doing a new query
                 response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "musicbrainzartistid"]},"id":1}' )
                 self.LASTPLAYINGFILE = playing_file
-                self.LASTJSONRESPONSE = response
             else:
-                response = self.LASTJSONRESPONSE
+                lw.log( ['same file playing, returning cached artists_info'] )
+                return self.ARTISTS_INFO
             artist_names = _json.loads(response).get( 'result', {} ).get( 'item', {} ).get( 'artist', [] )
             mbids = _json.loads(response).get( 'result', {} ).get( 'item', {} ).get( 'musicbrainzartistid', [] )
             try:
@@ -385,7 +390,7 @@ class Main:
                     playingartist = ''
                     playing_song = ''
                 except Exception, e:
-                    lw.log( ['unexpected error gettting playing song back from XBMC', e] )
+                    lw.log( ['unexpected error gettting playing song back from Kodi', e] )
                     playingartist = ''
                     playing_song = ''
                 artist_names = self._split_artists( playingartist )
@@ -410,6 +415,7 @@ class Main:
         for artist_name, mbid in itertools.izip_longest( artist_names, mbids, fillvalue='' ):
             if artist_name:
                 artists_info.append( (artist_name, self._get_musicbrainz_id( artist_name, mbid )) )
+        self.ARTISTS_INFO = artists_info
         return artists_info
 
 
@@ -456,7 +462,7 @@ class Main:
     def _get_image_list( self ):
         images = []
         image_params = {}
-        image_params['mbid'] = self.MBID
+        image_params['mbid'] = self._get_musicbrainz_id( self.NAME, self.MBID )
         image_params['lang'] = self.LANGUAGE
         image_params['artist'] = self.NAME
         image_params['infodir'] = self.InfoDir
@@ -521,39 +527,17 @@ class Main:
         if mbid:
             lw.log( ['returning ' + mbid] )
             return mbid
-        mbid = self._get_musicbrainz_from_file( 'theaudiodbartistbio.nfo' )
-        if mbid:
-            return mbid
-        return self._get_musicbrainz_from_file( 'musicbrainz.nfo' )
-
-
-    def _get_musicbrainz_from_file( self, mbid_file ):
-        lw.log( ['Looking for musicbrainz ID in the %s file' % mbid_file] )
-        filename = os.path.join( self.InfoDir, mbid_file )
-        if xbmcvfs.exists( filename ):
-            loglines, rawdata = readFile( filename )
+        mbid_params = {}
+        mbid_params['infodir'] = self.InfoDir
+        for plugin_name in mbid_plugins['names']:
+            lw.log( ['checking %s for mbid' % plugin_name[1]] )
+            mbid, loglines = mbid_plugins['objs'][plugin_name[1]].getMBID( mbid_params )
             lw.log( loglines )
-            rawdata = rawdata.rstrip( '\n' )
-            if mbid_file == 'musicbrainz.nfo':
-                if not rawdata:
-                    lw.log( ['no musicbrainz ID found in %s file' % mbid_file] )
-                    return ''
-                else:
-                    lw.log( ['musicbrainz ID found in %s file' % mbid_file] )
-                    return rawdata
-            try:
-                json_data = _json.loads( rawdata )
-            except ValueError:
-                lw.log( 'no valid JSON data returned from ' + mbid_file )
-                return ''
-            lw.log( ['musicbrainz ID found in %s file' % mbid_file] )
-            try:
-                return json_data.get( 'artists' )[0].get( 'strMusicBrainzID', '' )
-            except TypeError:
-                return ''
-        else:
-            lw.log( ['no %s file found' % mbid_file] )
-            return ''
+            if mbid:
+                lw.log( ['returning ' + mbid] )
+                return mbid
+        lw.log( ['no musicbrainz ID found for artist ' + theartist] )
+        return ''
 
 
     def _get_playing_item( self, item ):
