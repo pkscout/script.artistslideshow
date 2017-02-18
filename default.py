@@ -443,7 +443,9 @@ class Main:
         
 
     def _get_featured_artists( self, data ):
-        the_split = data.replace('ft.','feat.').split('feat.')
+        replace_regex = re.compile( r"ft\.", re.IGNORECASE )
+        split_regex = re.compile( r"feat\.", re.IGNORECASE )
+        the_split = split_regex.split( replace_regex.sub( 'feat.', data ) )
         if len( the_split ) > 1:
             return self._split_artists( the_split[-1] )
         else:

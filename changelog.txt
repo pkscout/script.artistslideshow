@@ -1,3 +1,6 @@
+v.2.0.7~beta2
+- fix so featured artist parsing from song name is case insensitive
+
 v.2.0.7~beta1
 - strip errant linefeed from readfile on musicbrainz.nfo (where manually created)
 - added last.fm bio file as option for finding Musicbrainz ID
