@@ -625,7 +625,7 @@ class Main:
 
 
     def _init_vars( self ):
-        self.DATAROOT = xbmc.translatePath('special://profile/addon_data/%s' % addonname ).decode('utf-8')
+        self.DATAROOT = xbmc.translatePath(addon.getAddonInfo('profile')).decode('utf-8')
         self.CHECKFILE = os.path.join( self.DATAROOT, 'migrationcheck.nfo' )
         self._set_property( "ArtistSlideshow.CleanupComplete" )
         self._set_property( "ArtistSlideshow.ArtworkReady" )
