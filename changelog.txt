@@ -1,3 +1,6 @@
+v.2.0.8~beta2
+- fix for crash if Kodi plugin tries to load bio with oddly encoded characters
+
 v.2.0.8~beta1
 - fix for crash if a services cache file contains a string that doesn't evaluate to int
 
