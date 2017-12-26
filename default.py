@@ -246,7 +246,7 @@ class Main:
 
     def _download( self, src, dst, dst2 ):
         if (not xbmc.abortRequested):
-            tmpname = xbmc.translatePath('special://profile/addon_data/%s/temp/%s' % ( addonname , xbmc.getCacheThumbName(src) ))
+            tmpname = os.path.join( self.DATAROOT, 'temp', src.rsplit('/', 1)[-1] )
             lw.log( ['the tmpname is ' + tmpname] )
             if xbmcvfs.exists(tmpname):
                 success, loglines = deleteFile( tmpname )
@@ -259,12 +259,11 @@ class Main:
             if not success:
                 return False
             if xbmcvfs.Stat( tmpname ).st_size() > 999:
-                image_ext = getImageType( tmpname )
-                if not xbmcvfs.exists ( dst + image_ext ):
-                    lw.log( ['copying %s to %s' % (tmpname, dst2 + image_ext)] )
-                    xbmcvfs.copy( tmpname, dst2 + image_ext )
-                    lw.log( ['moving %s to %s' % (tmpname, dst + image_ext)] )
-                    xbmcvfs.rename( tmpname, dst + image_ext )
+                if not xbmcvfs.exists ( dst ):
+                    lw.log( ['copying %s to %s' % (tmpname, dst2)] )
+                    xbmcvfs.copy( tmpname, dst2 )
+                    lw.log( ['moving %s to %s' % (tmpname, dst)] )
+                    xbmcvfs.rename( tmpname, dst )
                     return True
                 else:
                     lw.log( ['image already exists, deleting temporary file'] )
@@ -639,10 +638,10 @@ class Main:
         lw.log( ['external call is set to ' + self._get_infolabel( self.EXTERNALCALL )] )
         if addon.getSetting( "transparent" ) == 'true':
             self._set_property("ArtistSlideshowTransparent", 'true')
-            self.InitDir = xbmc.translatePath('%s/resources/transparent' % addonpath ).decode('utf-8')
+            self.InitDir = os.path.join( self.DATAROOT, 'resources', 'transparent' )
         else:
             self._set_property("ArtistSlideshowTransparent", '')
-            self.InitDir = xbmc.translatePath('%s/resources/black' % addonpath ).decode('utf-8')
+            self.InitDir = os.path.join( self.DATAROOT, 'resources', 'black' )
         self._set_property("ArtistSlideshow", self.InitDir)
         self.NAME = ''
         self.ALLARTISTS = []
@@ -657,8 +656,8 @@ class Main:
         self.DownloadedAllImages = False
         self.UsingFallback = False
         self.MINREFRESH = 9.9
-        self.TransitionDir = xbmc.translatePath('special://profile/addon_data/%s/transition' % addonname ).decode('utf-8')
-        self.MergeDir = xbmc.translatePath('special://profile/addon_data/%s/merge' % addonname ).decode('utf-8')
+        self.TransitionDir = os.path.join( self.DATAROOT, 'transtion' )
+        self.MergeDir = os.path.join( self.DATAROOT, 'merge' )
         self.params = {}
 
 
@@ -786,9 +785,9 @@ class Main:
 
 
     def _set_thedir(self, theartist, dirtype):
-        CacheName = itemHash(theartist)
-        thedir = xbmc.translatePath('special://profile/addon_data/%s/%s/%s/' % ( addonname , dirtype, CacheName, )).decode('utf-8')
-        exists, loglines = checkPath( thedir )
+        CacheName = theartist
+        thedir = os.path.join( self.DATAROOT, dirtype, CacheName )
+        exists, loglines = checkPath( os.path.join( thedir, '' ) )
         lw.log( loglines )
         return thedir
 
@@ -837,18 +836,25 @@ class Main:
                 else:
                     self._set_property("ArtistSlideshow", self.InitDir)
         lw.log( ['downloading images'] )
-        folders, cachelist = xbmcvfs.listdir( self.CacheDir )
-        cachelist_str = ''.join(str(e) for e in cachelist)
+        imgdb = os.path.join( self.CacheDir, '_imgdb.nfo' )
+        lw.log( ['checking download cache file ' + imgdb] )
+        loglines, cachelist_str = readFile( imgdb )
+        lw.log( loglines )
         for url in self._get_image_list():
             lw.log( ['the url to check is ' + url] )
             if( self._playback_stopped_or_changed() ):
                 return
-            path = itemHashwithPath( url, self.CacheDir )
-            path2 = itemHashwithPath( url, self.TransitionDir )
-            checkpath, checkfilename = os.path.split( path )
-            if not (checkfilename in cachelist_str):
+            url_image_name = url.rsplit('/', 1)[-1]
+            path = os.path.join( self.CacheDir, url_image_name )
+            path2 = os.path.join( self.TransitionDir, url_image_name )
+            lw.log( ['checking %s against %s' % (url_image_name, cachelist_str)] )
+            if not (url_image_name in cachelist_str):
                 if self._download(url, path, path2):
                     lw.log( ['downloaded %s to %s' % (url, path)]  )
+                    lw.log( ['updating download database at ' + imgdb] )
+                    cachelist_str = cachelist_str + url_image_name + '\r'
+                    success, loglines = writeFile( cachelist_str, imgdb )
+                    lw.log( loglines )
                     self.ImageDownloaded = True
             if self.ImageDownloaded:
                 if( self._playback_stopped_or_changed() and self.ARTISTNUM == 1 ):
@@ -910,7 +916,7 @@ class Main:
             cache_trim_delay = 0   #delay time is in seconds
             if( now - self.LastCacheTrim > cache_trim_delay ):
                 lw.log( ['trimming the cache down to %s bytes' % self.maxcachesize]  )
-                cache_root = xbmc.translatePath( 'special://profile/addon_data/%s/ArtistSlideshow/' % addonname ).decode('utf-8')
+                cache_root = os.path.join( self.DATAROOT, 'ArtistSlideshow', '')
                 folders, fls = xbmcvfs.listdir( cache_root )
                 folders.sort( key=lambda x: os.path.getmtime( os.path.join ( cache_root, x ) ), reverse=True )
                 cache_size = 0
@@ -984,7 +990,7 @@ class Main:
         elif data == '1.6.0':
             self._upgrade_artist_folders()
             self._upgrade_artist_images()
-#            self._update_check_file( '2.1.0', 'name change of artist folders and image files complete' )
+            self._update_check_file( '2.1.0', 'name change of artist folders and image files complete' )
 
 
     def _upgrade_artist_folders( self ):
