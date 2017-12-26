@@ -143,6 +143,10 @@ msgctxt "#32112"
 msgid "Use both local and remote images"
 msgstr ""
 
+msgctxt "#32113"
+msgid "  Always use local artist path for storage"
+msgstr ""
+
 #empty strings from id 32113 to 32199
 
 msgctxt "#32200"

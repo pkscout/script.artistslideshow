@@ -580,6 +580,7 @@ class Main:
                 break
         self.LOCALARTISTPATH = addon.getSetting( "local_artist_path" ).decode('utf-8')
         self.PRIORITY = addon.getSetting( "priority" )
+        self.LOCALSTORAGEONLY = addon.getSetting( "localstorageonly" ) 
         self.USEFALLBACK = addon.getSetting( "fallback" )
         self.FALLBACKPATH = addon.getSetting( "fallback_path" ).decode('utf-8')
         self.USEOVERRIDE = addon.getSetting( "slideshow" )
@@ -626,6 +627,10 @@ class Main:
     def _init_vars( self ):
         self.DATAROOT = xbmc.translatePath(addon.getAddonInfo('profile')).decode('utf-8')
         self.CHECKFILE = os.path.join( self.DATAROOT, 'migrationcheck.nfo' )
+        self.IMAGECHECKFILE = os.path.join( self.DATAROOT, 'imagecheck.nfo' )
+        if self.LOCALSTORAGEONLY == 'false':
+            deleteFile( self.IMAGECHECKFILE )
+        self.IMGDB = '_imgdb.nfo'
         self._set_property( "ArtistSlideshow.CleanupComplete" )
         self._set_property( "ArtistSlideshow.ArtworkReady" )
         self.SKININFO = {}
@@ -656,7 +661,7 @@ class Main:
         self.DownloadedAllImages = False
         self.UsingFallback = False
         self.MINREFRESH = 9.9
-        self.TransitionDir = os.path.join( self.DATAROOT, 'transtion' )
+        self.TransitionDir = os.path.join( self.DATAROOT, 'transition' )
         self.MergeDir = os.path.join( self.DATAROOT, 'merge' )
         self.params = {}
 
@@ -836,7 +841,7 @@ class Main:
                 else:
                     self._set_property("ArtistSlideshow", self.InitDir)
         lw.log( ['downloading images'] )
-        imgdb = os.path.join( self.CacheDir, '_imgdb.nfo' )
+        imgdb = os.path.join( self.CacheDir, self.IMGDB )
         lw.log( ['checking download cache file ' + imgdb] )
         loglines, cachelist_str = readFile( imgdb )
         lw.log( loglines )
@@ -975,8 +980,8 @@ class Main:
                 self._set_artwork_skininfo( self.FALLBACKPATH )
 
 
-    def _update_check_file( self, version, message ):
-        success, loglines = writeFile( version, self.CHECKFILE )
+    def _update_check_file( self, path, text, message ):
+        success, loglines = writeFile( text, path )
         lw.log( loglines )
         if success:
             lw.log( [message] )
@@ -985,12 +990,60 @@ class Main:
     def _upgrade( self ):
         #this is where any code goes for one time upgrade routines
         loglines, data = readFile( self.CHECKFILE )
-        if not data:
-            self._update_check_file( '2.1.0', 'initial install, no upgrade done' )
-        elif data == '1.6.0':
+        lw.log( loglines )
+        if '2.1.0' not in data:
             self._upgrade_artist_folders()
             self._upgrade_artist_images()
-            self._update_check_file( '2.1.0', 'name change of artist folders and image files complete' )
+            self._update_check_file( self.CHECKFILE, '2.1.0', 'name change of artist folders and image files complete' )
+        loglines, upgradecheck = readFile( self.CHECKFILE )
+        lw.log( loglines )
+        loglines, imagecheck = readFile( self.IMAGECHECKFILE )
+        lw.log( loglines )
+        if not 'true' in imagecheck:
+            lw.log( ['upgradecheck is %s and localstorageonly is %s' % (upgradecheck, self.LOCALSTORAGEONLY)] )
+            if '2.1.0' in upgradecheck and self.LOCALSTORAGEONLY == 'true':
+                lw.log( ['migrating images'] )
+                self._upgrade_migratetolocal()
+                self._update_check_file( self.IMAGECHECKFILE, 'true', 'images migrated to local storage location' )
+
+        
+    def _upgrade_migratetolocal( self ):
+        imgroot = os.path.join( self.DATAROOT, 'ArtistSlideshow' )
+        try:
+            img_dirs, old_files = xbmcvfs.listdir( imgroot )
+        except Exception, e:
+            lw.log( ['unexpected error while getting directory list', e] )
+            img_dirs = []
+        for img_dir_name in img_dirs:
+            local_dir = os.path.join( self.LOCALARTISTPATH, img_dir_name, self.FANARTFOLDER )
+            default_dir = os.path.join( self.DATAROOT, 'ArtistSlideshow', img_dir_name )
+            imgdb = os.path.join( local_dir, self.IMGDB )
+            exists, loglines = checkPath( os.path.join( local_dir, '' ) )
+            try:
+                throwaway, images = xbmcvfs.listdir( default_dir )
+            except Exception, e:
+                lw.log( ['unexpected error while getting directory list', e] )
+                images = []
+            for image in images:
+                if image == self.IMGDB:
+                    lw.log( ['skipping image database file'] )
+                else:
+                    src = os.path.join( default_dir, image )
+                    dst = os.path.join( local_dir, image )
+                    exists, loglines = checkPath( dst, False )
+                    if not exists:
+                        success, loglines = renameFile( src, dst )
+                        lw.log( loglines )
+                        if success:
+                            loglines, all_images = readFile( imgdb )
+                            lw.log( loglines )
+                            success, loglines = writeFile( all_images + image + '\r', imgdb )
+                            lw.log( loglines )
+                    else:
+                        success, loglines = deleteFile( src )
+                        lw.log( loglines )
+                        success, loglines = writeFile( all_images + image + '\r', imgdb )
+                        lw.log( loglines )
 
 
     def _upgrade_artist_folders( self ):
@@ -1066,10 +1119,6 @@ class Main:
                         image_url = artist[0].get( 'strArtistFanart' + num, '' )
                         if image_url:
                             image_list.append( image_url )
-            exists, loglines = checkPath( lastfm, False )
-            lw.log( loglines )
-            if exists:
-                pass # for now, have to do XML for this one
             for image in image_list:
                 self._upgrade_rename_image( image, os.path.join( imgroot, info_dir ) )
                 if self.LOCALARTISTPATH:
@@ -1079,7 +1128,7 @@ class Main:
     def _upgrade_rename_image( self, image, dirpath):
             new_img_name = image.rsplit('/', 1)[-1]
             img_hashed = itemHash( image ) + '.jpg'
-            imgdb = os.path.join( dirpath, '_imgdb.nfo')
+            imgdb = os.path.join( dirpath, self.IMGDB)
             old_img = os.path.join( dirpath, img_hashed )
             new_img = os.path.join( dirpath, new_img_name )
             exists, loglines = checkPath( old_img, False )
