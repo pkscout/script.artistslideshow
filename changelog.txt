@@ -3,6 +3,7 @@ v.2.1.0~alpha1
 - included new option to ONLY use local artist path for storage
 - updated AS to save and use unhashed artist and image names
 - cleaned up folder path creation routines
+- removed old download exclusion logic in favor of new _imgdb.nfo history
 
 v.2.0.8
 - fix for crash if Kodi plugin tries to load bio with oddly encoded characters

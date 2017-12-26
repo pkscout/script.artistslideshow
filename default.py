@@ -467,7 +467,6 @@ class Main:
         image_params['lang'] = self.LANGUAGE
         image_params['artist'] = self.NAME
         image_params['infodir'] = self.InfoDir
-        image_params['exclusionsfile'] = os.path.join( self.CacheDir, "_exclusions.nfo" )
         for plugin_name in image_plugins['names']:
             image_list = []
             lw.log( ['checking %s for images' % plugin_name[1]] )
