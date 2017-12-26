@@ -2,6 +2,8 @@
 
 import socket
 import requests as _requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+_requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     
 
 class URL():
