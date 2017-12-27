@@ -1,5 +1,6 @@
 v.2.1.0~alpha2
 - archive any directory that can't be renamed
+- added XML parsing of lastfm info to find artist name
 
 v.2.1.0~alpha1
 - Fuzzy artist search is now required and cannot be disabled
