@@ -22,7 +22,7 @@ if sys.version_info >= (2, 7):
 else:
     import simplejson as _json
 from resources.common.fix_utf8 import smartUTF8
-from resources.common.fileops import checkPath, writeFile, readFile, deleteFile, renameFile
+from resources.common.fileops import checkPath, writeFile, readFile, deleteFile, renameFile, deleteFolder
 from resources.common.url import URL
 from resources.common.transforms import getImageType, itemHash, itemHashwithPath
 from resources.common.xlogger import Logger
@@ -791,7 +791,7 @@ class Main:
 
     def _set_thedir( self, theartist, dirtype ):
         CacheName = self._set_safe_artist_name( theartist )
-        if dirtype == 'ArtistSlideshow' and self.LOCALSTORAGEONLY == 'true':
+        if dirtype == 'ArtistSlideshow' and self.LOCALSTORAGEONLY == 'true' and self.LOCALARTISTPATH:
             thedir = os.path.join( self.LOCALARTISTPATH, CacheName, self.FANARTFOLDER )
         else:
             thedir = os.path.join( self.DATAROOT, dirtype, CacheName )
@@ -997,7 +997,7 @@ class Main:
         if '2.1.0' not in data:
             self._upgrade_artist_folders()
             self._upgrade_artist_images()
-#            self._update_check_file( self.CHECKFILE, '2.1.0', 'name change of artist folders and image files complete' )
+            self._update_check_file( self.CHECKFILE, '2.1.0', 'name change of artist folders and image files complete' )
         loglines, upgradecheck = readFile( self.CHECKFILE )
         lw.log( loglines )
         loglines, imagecheck = readFile( self.IMAGECHECKFILE )
@@ -1007,48 +1007,9 @@ class Main:
             if '2.1.0' in upgradecheck and self.LOCALSTORAGEONLY == 'true':
                 lw.log( ['migrating images'] )
                 self._upgrade_migratetolocal()
-#                self._update_check_file( self.IMAGECHECKFILE, 'true', 'images migrated to local storage location' )
+                self._update_check_file( self.IMAGECHECKFILE, 'true', 'images migrated to local storage location' )
 
         
-    def _upgrade_migratetolocal( self ):
-        imgroot = os.path.join( self.DATAROOT, 'ArtistSlideshow' )
-        try:
-            img_dirs, old_files = xbmcvfs.listdir( imgroot )
-        except Exception, e:
-            lw.log( ['unexpected error while getting directory list', e] )
-            img_dirs = []
-        for img_dir_name in img_dirs:
-            local_dir = os.path.join( self.LOCALARTISTPATH, img_dir_name, self.FANARTFOLDER )
-            default_dir = os.path.join( self.DATAROOT, 'ArtistSlideshow', img_dir_name )
-            imgdb = os.path.join( local_dir, self.IMGDB )
-            exists, loglines = checkPath( os.path.join( local_dir, '' ) )
-            try:
-                throwaway, images = xbmcvfs.listdir( default_dir )
-            except Exception, e:
-                lw.log( ['unexpected error while getting directory list', e] )
-                images = []
-            for image in images:
-                if image == self.IMGDB:
-                    lw.log( ['skipping image database file'] )
-                else:
-                    src = os.path.join( default_dir, image )
-                    dst = os.path.join( local_dir, image )
-                    exists, loglines = checkPath( dst, False )
-                    loglines, all_images = readFile( imgdb )
-                    lw.log( loglines )
-                    if not exists:
-                        success, loglines = renameFile( src, dst )
-                        lw.log( loglines )
-                        if success:
-                            success, loglines = writeFile( all_images + image + '\r', imgdb )
-                            lw.log( loglines )
-                    else:
-                        success, loglines = deleteFile( src )
-                        lw.log( loglines )
-                        success, loglines = writeFile( all_images + image + '\r', imgdb )
-                        lw.log( loglines )
-
-
     def _upgrade_artist_folders( self ):
         inforoot = os.path.join( self.DATAROOT, 'ArtistInformation' )
         imgroot = os.path.join( self.DATAROOT, 'ArtistSlideshow' )
@@ -1063,7 +1024,11 @@ class Main:
             lw.log( ['looking for artist name for folder ' + info_dir] )
             old_info = os.path.join( inforoot, info_dir )
             newname = self._upgrade_get_artistname( old_info )
-            lw.log( ['got back %s from artist search' % str( newname )])
+            if newname:
+                lw.log( ['got back %s from artist search' % smartUTF8(newname).decode('utf-8')] )
+            else:
+                lw.log( ['got back %s from artist search' % newname] )
+            
             if newname:
                 s_newname = self._set_safe_artist_name( newname )
                 new_info = os.path.join( inforoot, s_newname, '' )
@@ -1078,27 +1043,12 @@ class Main:
                     lw.log( loglines )
             else:
                 infoarchive = os.path.join( infoarchiveroot, info_dir )
-                success, loglines = checkPath( os.path.join( infoarchive, '' ) )
                 orginfo = os.path.join( inforoot, info_dir )
                 self._upgrade_archive_folder( orginfo, infoarchive )
                 imgarchive =  os.path.join( imgarchiveroot, info_dir )
-                success, loglines = checkPath( os.path.join( imgarchive, '' ) )
                 orgimg = os.path.join( imgroot, info_dir )
                 self._upgrade_archive_folder( orgimg, imgarchive )
                 
-
-    def _upgrade_archive_folder( self, src, dst ):
-        lw.log( ['moving from %s to %s' % (src, dst)] )               
-        try:
-            folders, files = xbmcvfs.listdir( os.path.join( src, '' ) )
-        except Exception, e:
-            lw.log( ['unexpected error while getting directory list', e] )
-            files = []
-        for file in files:
-            success, loglines = renameFile( os.path.join( src, file ), os.path.join( dst, file ) )
-            lw.log( loglines )
-        xbmcvfs.rmdir( src )
-
 
     def _upgrade_artist_images( self ):
         inforoot = os.path.join( self.DATAROOT, 'ArtistInformation' )
@@ -1151,6 +1101,26 @@ class Main:
                     self._upgrade_rename_image( image, os.path.join( self.LOCALARTISTPATH, info_dir, self.FANARTFOLDER ) )
 
 
+    def _upgrade_archive_folder( self, src, dst ):
+        lw.log( ['moving from %s to %s' % (src, dst)] )               
+        try:
+            folders, files = xbmcvfs.listdir( os.path.join( src, '' ) )
+        except Exception, e:
+            lw.log( ['unexpected error while getting directory list', e] )
+            files = []
+        if files:
+           success, loglines = checkPath( dst )
+           lw.log( loglines )
+        else:
+           success, loglines = deleteFolder( src )
+           lw.log( loglines )
+        for file in files:
+            success, loglines = renameFile( os.path.join( src, file ), os.path.join( dst, file ) )
+            lw.log( loglines )
+        success, loglines = deleteFolder( os.path.join( src, '' ) )
+        lw.log( loglines )
+
+
     def _upgrade_rename_image( self, image, dirpath):
             new_img_name = image.rsplit('/', 1)[-1]
             img_hashed = itemHash( image ) + '.jpg'
@@ -1197,14 +1167,71 @@ class Main:
                json_data = {}
             artist = json_data.get( 'artists', None)
             if artist:
-                thename = artist[0].get( 'name', None )
+                thename = artist[0].get( 'strArtist', None )
                 if thename:
                     return thename
         exists, loglines = checkPath( lastfm, False )
         lw.log( loglines )
         if exists:
-            pass # for now, have to do XML for this one
+            loglines, rawxml = readFile( lastfm )
+            try:
+                xmldata = _xmltree.fromstring( rawxml )
+            except _xmltree.ParseError:
+                lw.log( ['error reading XML data from ' + lastfm] )
+                return None
+            for element in xmldata.getiterator():
+                if element.tag == "name":
+                    return element.text
         return None
+
+
+    def _upgrade_migratetolocal( self ):
+        imgroot = os.path.join( self.DATAROOT, 'ArtistSlideshow' )
+        try:
+            img_dirs, old_files = xbmcvfs.listdir( imgroot )
+        except Exception, e:
+            lw.log( ['unexpected error while getting directory list', e] )
+            img_dirs = []
+        for img_dir_name in img_dirs:
+            default_dir = os.path.join( self.DATAROOT, 'ArtistSlideshow', img_dir_name )
+            info_dir = os.path.join( self.DATAROOT, 'ArtistInformation', img_dir_name )
+            exists, loglines = checkPath( os.path.join( info_dir, '' ), False )
+            lw.log( loglines )
+            if not exists:
+                imgarchive = os.path.join( self.DATAROOT, 'archive', 'ArtistSlideshow', img_dir_name )
+                self._upgrade_archive_folder( default_dir, imgarchive )
+                continue
+            local_dir = os.path.join( self.LOCALARTISTPATH, img_dir_name, self.FANARTFOLDER )
+            imgdb = os.path.join( local_dir, self.IMGDB )
+            exists, loglines = checkPath( os.path.join( local_dir, '' ) )
+            try:
+                throwaway, images = xbmcvfs.listdir( default_dir )
+            except Exception, e:
+                lw.log( ['unexpected error while getting directory list', e] )
+                images = []
+            for image in images:
+                if image == self.IMGDB or image == '_exclusions.nfo':
+                    success, loglines = deleteFile( os.path.join( default_dir, image ) )
+                    lw.log( loglines )
+                else:
+                    src = os.path.join( default_dir, image )
+                    dst = os.path.join( local_dir, image )
+                    exists, loglines = checkPath( dst, False )
+                    loglines, all_images = readFile( imgdb )
+                    lw.log( loglines )
+                    if not exists:
+                        success, loglines = renameFile( src, dst )
+                        lw.log( loglines )
+                        if success:
+                            success, loglines = writeFile( all_images + image + '\r', imgdb )
+                            lw.log( loglines )
+                    else:
+                        success, loglines = deleteFile( src )
+                        lw.log( loglines )
+                        success, loglines = writeFile( all_images + image + '\r', imgdb )
+                        lw.log( loglines )
+            success, loglines = deleteFolder( os.path.join( default_dir, '' ) )
+            lw.log( loglines )
 
 
     def _wait( self, wait_time ):
