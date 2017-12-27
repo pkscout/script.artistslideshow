@@ -997,7 +997,7 @@ class Main:
         if '2.1.0' not in data:
             self._upgrade_artist_folders()
             self._upgrade_artist_images()
-            self._update_check_file( self.CHECKFILE, '2.1.0', 'name change of artist folders and image files complete' )
+#            self._update_check_file( self.CHECKFILE, '2.1.0', 'name change of artist folders and image files complete' )
         loglines, upgradecheck = readFile( self.CHECKFILE )
         lw.log( loglines )
         loglines, imagecheck = readFile( self.IMAGECHECKFILE )
@@ -1007,7 +1007,7 @@ class Main:
             if '2.1.0' in upgradecheck and self.LOCALSTORAGEONLY == 'true':
                 lw.log( ['migrating images'] )
                 self._upgrade_migratetolocal()
-                self._update_check_file( self.IMAGECHECKFILE, 'true', 'images migrated to local storage location' )
+#                self._update_check_file( self.IMAGECHECKFILE, 'true', 'images migrated to local storage location' )
 
         
     def _upgrade_migratetolocal( self ):
@@ -1052,6 +1052,8 @@ class Main:
     def _upgrade_artist_folders( self ):
         inforoot = os.path.join( self.DATAROOT, 'ArtistInformation' )
         imgroot = os.path.join( self.DATAROOT, 'ArtistSlideshow' )
+        infoarchiveroot = os.path.join( self.DATAROOT, 'archive', 'ArtistInformation' )
+        imgarchiveroot = os.path.join( self.DATAROOT, 'archive', 'ArtistSlideshow' )
         try:
             info_dirs, old_files = xbmcvfs.listdir( inforoot )
         except Exception, e:
@@ -1074,6 +1076,28 @@ class Main:
                     new_img = os.path.join( imgroot, s_newname, '' )
                     success, loglines = renameFile( old_img, new_img )
                     lw.log( loglines )
+            else:
+                infoarchive = os.path.join( infoarchiveroot, info_dir )
+                success, loglines = checkPath( os.path.join( infoarchive, '' ) )
+                orginfo = os.path.join( inforoot, info_dir )
+                self._upgrade_archive_folder( orginfo, infoarchive )
+                imgarchive =  os.path.join( imgarchiveroot, info_dir )
+                success, loglines = checkPath( os.path.join( imgarchive, '' ) )
+                orgimg = os.path.join( imgroot, info_dir )
+                self._upgrade_archive_folder( orgimg, imgarchive )
+                
+
+    def _upgrade_archive_folder( self, src, dst ):
+        lw.log( ['moving from %s to %s' % (src, dst)] )               
+        try:
+            folders, files = xbmcvfs.listdir( os.path.join( src, '' ) )
+        except Exception, e:
+            lw.log( ['unexpected error while getting directory list', e] )
+            files = []
+        for file in files:
+            success, loglines = renameFile( os.path.join( src, file ), os.path.join( dst, file ) )
+            lw.log( loglines )
+        xbmcvfs.rmdir( src )
 
 
     def _upgrade_artist_images( self ):
@@ -1090,13 +1114,15 @@ class Main:
             lw.log( ['renaming images in ' + info_dir])
             fanart = os.path.join( inforoot, info_dir, 'fanarttvartistimages.nfo' )
             audiodb = os.path.join( inforoot, info_dir, 'theaudiodbartistbio.nfo' )
-            lastfm = os.path.join( inforoot, info_dir, 'lastfmartistbio.nfo' )
             exists, loglines = checkPath( fanart, False )
             lw.log( loglines )
             if exists:
                 loglines, rawdata = readFile( fanart )
                 lw.log( loglines )
-                json_data = _json.loads( rawdata )
+                try:
+                    json_data = _json.loads( rawdata )
+                except ValueError:
+                    json_data = {}
                 abs = json_data.get( 'artistbackground', [] )
                 for ab in abs:
                     image_list.append( ab.get( 'url', '' ) )
@@ -1105,7 +1131,10 @@ class Main:
             if exists:
                 loglines, rawdata = readFile( audiodb )
                 lw.log( loglines )
-                json_data = _json.loads( rawdata )
+                try:
+                    json_data = _json.loads( rawdata )
+                except ValueError:
+                    json_data = {}
                 artist = json_data.get( 'artists', None )
                 if artist:
                     for i in range( 1, 3 ):
@@ -1150,17 +1179,27 @@ class Main:
         if exists:
             loglines, rawdata = readFile( fanart )
             lw.log( loglines )
-            json_data = _json.loads( rawdata )
-            return json_data.get( 'name', None )
+            try:
+                json_data = _json.loads( rawdata )
+            except ValueError:
+               json_data = {}
+            thename = json_data.get( 'name', None )
+            if thename:
+                return thename
         exists, loglines = checkPath( audiodb, False )
         lw.log( loglines )
         if exists:
             loglines, rawdata = readFile( audiodb )
             lw.log( loglines )
-            json_data = _json.loads( rawdata )
+            try:
+                json_data = _json.loads( rawdata )
+            except ValueError:
+               json_data = {}
             artist = json_data.get( 'artists', None)
             if artist:
-                return artist[0].get( 'name', None )
+                thename = artist[0].get( 'name', None )
+                if thename:
+                    return thename
         exists, loglines = checkPath( lastfm, False )
         lw.log( loglines )
         if exists:
