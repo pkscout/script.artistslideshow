@@ -790,7 +790,10 @@ class Main:
 
     def _set_thedir(self, theartist, dirtype):
         CacheName = theartist
-        thedir = os.path.join( self.DATAROOT, dirtype, CacheName )
+        if dirtype == 'ArtistSlideshow' and self.LOCALSTORAGEONLY == 'true':
+            thedir = os.path.join( self.LOCALARTISTPATH, CacheName, self.FANARTFOLDER )
+        else:
+            thedir = os.path.join( self.DATAROOT, dirtype, CacheName )
         exists, loglines = checkPath( os.path.join( thedir, '' ) )
         lw.log( loglines )
         return thedir
@@ -814,11 +817,11 @@ class Main:
             pass
             #self.CacheDir was successfully set in _get_local_images
         else:
-            self._set_cachedir( self.NAME )
+            self._set_cachedir( smartUTF8( self.NAME ).decode('utf-8') )
         lw.log( ['cachedir = %s' % self.CacheDir] )
         if self.ARTISTNUM == 1:
             self._get_artistinfo()
-        dirs, files = xbmcvfs.listdir(self.CacheDir)
+        dirs, files = xbmcvfs.listdir( self.CacheDir )
         for file in files:
             if (file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')) or (self.PRIORITY == '2' and self.LocalImagesFound):
                 self.CachedImagesFound = True
