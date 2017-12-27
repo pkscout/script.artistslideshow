@@ -427,14 +427,8 @@ class Main:
         except Exception, e:
             lw.log( ['unexpected error getting directory list', e] )
             files = []
-        if not files and trynum == 'first' and self.ENABLEFUZZYSEARCH == 'true':
-            s_name = ''
-            lw.log( ['the illegal characters are ', self.ILLEGALCHARS, 'the replacement is ' + self.ILLEGALREPLACE] )
-            for c in list( self._remove_trailing_dot( self.NAME ) ):
-                if c in self.ILLEGALCHARS:
-                    s_name = s_name + self.ILLEGALREPLACE
-                else:
-                    s_name = s_name + c  
+        if not files and trynum == 'first':
+            s_name = self._set_safe_artist_name( self.NAME )
             lw.log( ['did not work with %s, trying %s' % (self.NAME, s_name)] )           
             self.CacheDir = os.path.join( self.LOCALARTISTPATH, smartUTF8(s_name).decode('utf-8'), self.FANARTFOLDER )
             files = self._get_directory_list( 'second' )
@@ -606,21 +600,17 @@ class Main:
             lw.log( ['set fanart folder to %s' % self.FANARTFOLDER] )
         else:
             self.FANARTFOLDER = 'extrafanart'
-        self.ENABLEFUZZYSEARCH = addon.getSetting( "enable_fuzzysearch" )
-        lw.log( ['fuzzy search is ' + self.ENABLEFUZZYSEARCH] )
-        if self.ENABLEFUZZYSEARCH == 'true':
-            pl = addon.getSetting( "storage_target" )
-            lw.log( ['the target is ' + pl] )
-            if pl == "0":
-                self.ENDREPLACE = addon.getSetting( "end_replace" )
-                self.ILLEGALCHARS = list( '<>:"/\|?*' )
-            elif pl == "2":
-                self.ENDREPLACE = '.'
-                self.ILLEGALCHARS = [':']
-            else:
-                self.ENDREPLACE = '.'
-                self.ILLEGALCHARS = [os.path.sep]
-            self.ILLEGALREPLACE = addon.getSetting( "illegal_replace" )
+        pl = addon.getSetting( "storage_target" )
+        if pl == "0":
+            self.ENDREPLACE = addon.getSetting( "end_replace" )
+            self.ILLEGALCHARS = list( '<>:"/\|?*' )
+        elif pl == "2":
+            self.ENDREPLACE = '.'
+            self.ILLEGALCHARS = [':']
+        else:
+            self.ENDREPLACE = '.'
+            self.ILLEGALCHARS = [os.path.sep]
+        self.ILLEGALREPLACE = addon.getSetting( "illegal_replace" )
 
 
     def _init_vars( self ):
@@ -788,8 +778,19 @@ class Main:
           lw.log( ["Exception: Couldn't set propery " + property_name + " value " + value , e])
 
 
-    def _set_thedir(self, theartist, dirtype):
-        CacheName = theartist
+    def _set_safe_artist_name( self, theartist ):
+        s_name = ''
+        lw.log( ['the illegal characters are ', self.ILLEGALCHARS, 'the replacement is ' + self.ILLEGALREPLACE] )
+        for c in list( self._remove_trailing_dot( theartist ) ):
+            if c in self.ILLEGALCHARS:
+                s_name = s_name + self.ILLEGALREPLACE
+            else:
+                s_name = s_name + c  
+        return s_name
+
+
+    def _set_thedir( self, theartist, dirtype ):
+        CacheName = self._set_safe_artist_name( theartist )
         if dirtype == 'ArtistSlideshow' and self.LOCALSTORAGEONLY == 'true':
             thedir = os.path.join( self.LOCALARTISTPATH, CacheName, self.FANARTFOLDER )
         else:
@@ -1033,12 +1034,12 @@ class Main:
                     src = os.path.join( default_dir, image )
                     dst = os.path.join( local_dir, image )
                     exists, loglines = checkPath( dst, False )
+                    loglines, all_images = readFile( imgdb )
+                    lw.log( loglines )
                     if not exists:
                         success, loglines = renameFile( src, dst )
                         lw.log( loglines )
                         if success:
-                            loglines, all_images = readFile( imgdb )
-                            lw.log( loglines )
                             success, loglines = writeFile( all_images + image + '\r', imgdb )
                             lw.log( loglines )
                     else:
@@ -1051,7 +1052,6 @@ class Main:
     def _upgrade_artist_folders( self ):
         inforoot = os.path.join( self.DATAROOT, 'ArtistInformation' )
         imgroot = os.path.join( self.DATAROOT, 'ArtistSlideshow' )
-        lw.log( ['the illegal characters are ', self.ILLEGALCHARS, 'the replacement is ' + self.ILLEGALREPLACE] )
         try:
             info_dirs, old_files = xbmcvfs.listdir( inforoot )
         except Exception, e:
@@ -1063,12 +1063,7 @@ class Main:
             newname = self._upgrade_get_artistname( old_info )
             lw.log( ['got back %s from artist search' % str( newname )])
             if newname:
-                s_newname = ''
-                for c in list( self._remove_trailing_dot( newname ) ):
-                    if c in self.ILLEGALCHARS:
-                        s_newname = s_newname + self.ILLEGALREPLACE
-                    else:
-                        s_newname = s_newname + c
+                s_newname = self._set_safe_artist_name( newname )
                 new_info = os.path.join( inforoot, s_newname, '' )
                 success, loglines = renameFile( os.path.join( old_info, '' ), new_info )
                 lw.log( loglines )

@@ -198,15 +198,15 @@ msgid "Enable fuzzy local artist image paths"
 msgstr ""
 
 msgctxt "#32212"
-msgid "  Platform for image storage"
+msgid "Platform for image storage"
 msgstr ""
 
 msgctxt "#32213"
-msgid "  Replace illegal path characters in artist name with"
+msgid "Replace illegal path characters in artist name with"
 msgstr ""
 
 msgctxt "#32214"
-msgid "  Replace trailing period in artist name with"
+msgid "Replace trailing period in artist name with"
 msgstr ""
 
 msgctxt "#32215"

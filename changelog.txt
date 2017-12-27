@@ -1,4 +1,5 @@
 v.2.1.0~alpha1
+- Fuzzy artist search is now required and cannot be disabled
 - created upgrade routine to rename hashed artist and image names
 - included new option to ONLY use local artist path for storage
 - updated AS to save and use unhashed artist and image names
