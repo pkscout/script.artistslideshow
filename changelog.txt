@@ -1,3 +1,6 @@
+v.2.1.0~alpha5
+- another damn UTF8 problem. I hate UTF8.
+
 v.2.1.0~alpha4
 - fix for mishandled UTF8 characters in artist name during playback
 

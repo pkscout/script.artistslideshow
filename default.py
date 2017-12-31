@@ -430,7 +430,7 @@ class Main:
         if not files and trynum == 'first':
             s_name = self._set_safe_artist_name( self.NAME )
             lw.log( ['did not work with %s, trying %s' % (self.NAME, s_name)] )           
-            self.CacheDir = os.path.join( self.LOCALARTISTPATH, smartUTF8(s_name).decode('utf-8'), self.FANARTFOLDER )
+            self.CacheDir = os.path.join( self.LOCALARTISTPATH, s_name, self.FANARTFOLDER )
             files = self._get_directory_list( 'second' )
         return files
         
@@ -1193,6 +1193,7 @@ class Main:
             lw.log( ['unexpected error while getting directory list', e] )
             img_dirs = []
         for img_dir_name in img_dirs:
+            img_dir_name = smartUTF8(img_dir_name).decode('utf-8')
             default_dir = os.path.join( self.DATAROOT, 'ArtistSlideshow', img_dir_name )
             info_dir = os.path.join( self.DATAROOT, 'ArtistInformation', img_dir_name )
             exists, loglines = checkPath( os.path.join( info_dir, '' ), False )
