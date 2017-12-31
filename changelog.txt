@@ -1,5 +1,8 @@
+v.2.1.0~alpha4
+- fix for mishandled UTF8 characters in artist name during playback
+
 v.2.1.0~alpha3
-- fix for mishandled UTF8 characters in artist name
+- fix for mishandled UTF8 characters in artist name during upgrade migration
 
 v.2.1.0~alpha2
 - archive any directory that can't be renamed

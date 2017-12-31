@@ -786,7 +786,7 @@ class Main:
                 s_name = s_name + self.ILLEGALREPLACE
             else:
                 s_name = s_name + c  
-        return s_name
+        return smartUTF8(s_name).decode('utf-8')
 
 
     def _set_thedir( self, theartist, dirtype ):
@@ -818,7 +818,7 @@ class Main:
             pass
             #self.CacheDir was successfully set in _get_local_images
         else:
-            self._set_cachedir( smartUTF8( self.NAME ).decode('utf-8') )
+            self._set_cachedir( self.NAME )
         lw.log( ['cachedir = %s' % self.CacheDir] )
         if self.ARTISTNUM == 1:
             self._get_artistinfo()
