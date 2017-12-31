@@ -1021,14 +1021,14 @@ class Main:
             lw.log( ['unexpected error while getting directory list', e] )
             info_dirs = []
         for info_dir in info_dirs:
+            info_dir = smartUTF8(info_dir).decode('utf-8')
             lw.log( ['looking for artist name for folder ' + info_dir] )
             old_info = os.path.join( inforoot, info_dir )
             newname = self._upgrade_get_artistname( old_info )
             if newname:
                 lw.log( ['got back %s from artist search' % smartUTF8(newname).decode('utf-8')] )
             else:
-                lw.log( ['got back %s from artist search' % newname] )
-            
+                lw.log( ['got back %s from artist search' % newname] )          
             if newname:
                 s_newname = self._set_safe_artist_name( newname )
                 new_info = os.path.join( inforoot, s_newname, '' )

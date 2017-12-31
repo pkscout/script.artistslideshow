@@ -1,3 +1,6 @@
+v.2.1.0~alpha3
+- fix for mishandled UTF8 characters in artist name
+
 v.2.1.0~alpha2
 - archive any directory that can't be renamed
 - added XML parsing of lastfm info to find artist name
