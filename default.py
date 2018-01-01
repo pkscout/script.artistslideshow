@@ -499,7 +499,7 @@ class Main:
             copy_files.append( 'folder.jpg' )
             copy_files.append( 'folder.png' )
         for one_file in copy_files:
-            result, loglines = checkPath( self.CacheDir )
+            result, loglines = checkPath( os.path.join( self.CacheDir, '' ) )
             lw.log( loglines )
             xbmcvfs.copy( os.path.join( artist_path, one_file ), os.path.join( self.CacheDir, one_file ) )
         files = self._get_directory_list()
@@ -1109,7 +1109,7 @@ class Main:
             lw.log( ['unexpected error while getting directory list', e] )
             files = []
         if files:
-           success, loglines = checkPath( dst )
+           success, loglines = checkPath( os.path.join( dst, '' ) )
            lw.log( loglines )
         else:
            success, loglines = deleteFolder( src )

@@ -1,3 +1,6 @@
+v.2.1.0~alpha6
+- fix for AS reporting a directory doesn't exist when it does
+
 v.2.1.0~alpha5
 - another damn UTF8 problem. I hate UTF8.
 
