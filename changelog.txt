@@ -1,5 +1,8 @@
 v.2.1.0~alpha6
+- added background dialog box for upgrade progress
+- now creates hash of all artists in Kodi database to use if possible
 - fix for AS reporting a directory doesn't exist when it does
+- more freaking UTF8 fixes.  Have I mentioned that I hate UTF8.
 
 v.2.1.0~alpha5
 - another damn UTF8 problem. I hate UTF8.

@@ -19,8 +19,10 @@ import itertools, os, random, re, sys, time
 import xml.etree.ElementTree as _xmltree
 if sys.version_info >= (2, 7):
     import json as _json
+    from collections import OrderedDict as _ordereddict
 else:
     import simplejson as _json
+    from resources.common.ordereddict import OrderedDict as _ordereddict
 from resources.common.fix_utf8 import smartUTF8
 from resources.common.fileops import checkPath, writeFile, readFile, deleteFile, renameFile, deleteFolder
 from resources.common.url import URL
@@ -429,7 +431,7 @@ class Main:
             files = []
         if not files and trynum == 'first':
             s_name = self._set_safe_artist_name( self.NAME )
-            lw.log( ['did not work with %s, trying %s' % (self.NAME, s_name)] )           
+            lw.log( ['did not work with %s, trying %s' % (smartUTF8( self.NAME ).decode( 'utf-8' ), s_name)] )           
             self.CacheDir = os.path.join( self.LOCALARTISTPATH, s_name, self.FANARTFOLDER )
             files = self._get_directory_list( 'second' )
         return files
@@ -1015,17 +1017,23 @@ class Main:
         imgroot = os.path.join( self.DATAROOT, 'ArtistSlideshow' )
         infoarchiveroot = os.path.join( self.DATAROOT, 'archive', 'ArtistInformation' )
         imgarchiveroot = os.path.join( self.DATAROOT, 'archive', 'ArtistSlideshow' )
+        artist_hashes = self._upgrade_get_artists_hashmap()
+        aDialog = xbmcgui.DialogProgressBG()
+        aDialog.create( smartUTF8(language(32013)), smartUTF8(language(32012)) )
         try:
             info_dirs, old_files = xbmcvfs.listdir( inforoot )
         except Exception, e:
             lw.log( ['unexpected error while getting directory list', e] )
             info_dirs = []
+        total = float( len( info_dirs ) )
+        count = 1
         for info_dir in info_dirs:
             info_dir = smartUTF8(info_dir).decode('utf-8')
             lw.log( ['looking for artist name for folder ' + info_dir] )
             old_info = os.path.join( inforoot, info_dir )
-            newname = self._upgrade_get_artistname( old_info )
+            newname = self._upgrade_get_artistname( old_info, info_dir, artist_hashes )
             if newname:
+                aDialog.update( int(100*(count/total)), smartUTF8( language(32013) ), newname )
                 lw.log( ['got back %s from artist search' % smartUTF8(newname).decode('utf-8')] )
             else:
                 lw.log( ['got back %s from artist search' % newname] )          
@@ -1048,19 +1056,26 @@ class Main:
                 imgarchive =  os.path.join( imgarchiveroot, info_dir )
                 orgimg = os.path.join( imgroot, info_dir )
                 self._upgrade_archive_folder( orgimg, imgarchive )
+            count = count + 1
+        aDialog.close()
                 
 
     def _upgrade_artist_images( self ):
         inforoot = os.path.join( self.DATAROOT, 'ArtistInformation' )
         imgroot = os.path.join( self.DATAROOT, 'ArtistSlideshow' )
+        iDialog = xbmcgui.DialogProgressBG()
+        iDialog.create( smartUTF8(language(32013)), smartUTF8(language(32012)) )
         try:
             info_dirs, old_files = xbmcvfs.listdir( inforoot )
         except Exception, e:
             lw.log( ['unexpected error while getting directory list', e] )
             info_dirs = []
         image_list = []
+        total = float( len( info_dirs ) )
+        count = 1
         for info_dir in info_dirs:
             info_dir = smartUTF8(info_dir).decode('utf-8')
+            iDialog.update( int(100*(count/total)), smartUTF8( language(32014) ), info_dir )
             lw.log( ['renaming images in ' + info_dir])
             fanart = os.path.join( inforoot, info_dir, 'fanarttvartistimages.nfo' )
             audiodb = os.path.join( inforoot, info_dir, 'theaudiodbartistbio.nfo' )
@@ -1099,6 +1114,9 @@ class Main:
                 self._upgrade_rename_image( image, os.path.join( imgroot, info_dir ) )
                 if self.LOCALARTISTPATH:
                     self._upgrade_rename_image( image, os.path.join( self.LOCALARTISTPATH, info_dir, self.FANARTFOLDER ) )
+            count = count + 1
+        iDialog.close()
+
 
 
     def _upgrade_archive_folder( self, src, dst ):
@@ -1139,7 +1157,14 @@ class Main:
                     lw.log( loglines )
 
 
-    def _upgrade_get_artistname( self, infopath ):
+    def _upgrade_get_artistname( self, infopath, hashed_name, artist_hashes ):
+        try:
+            thename = artist_hashes[hashed_name]
+        except KeyError:
+            thename = None
+        if thename:
+            lw.log( ['found artist in hash map'])
+            return thename
         lw.log( ['looking for artist information in ' + infopath] )
         fanart = os.path.join( infopath, 'fanarttvartistimages.nfo' )
         audiodb = os.path.join( infopath, 'theaudiodbartistbio.nfo' )
@@ -1183,6 +1208,33 @@ class Main:
                 if element.tag == "name":
                     return element.text
         return None
+
+
+    def _upgrade_get_artists_hashmap( self ):
+        hDialog = xbmcgui.DialogProgressBG()
+        hDialog.create( smartUTF8(language(32011)), smartUTF8(language(32012)) )
+        hashmap = _ordereddict()
+        response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"AudioLibrary.GetArtists", "params":{"albumartistsonly":false, "sort":{"order":"ascending", "ignorearticle":true, "method":"artist"}},"id": 1}}' )
+        try:
+            artists_info = _json.loads(response)['result']['artists']
+        except (IndexError, KeyError, ValueError):
+            artists_info = []
+        except Exception, e:
+            lw.log( ['unexpected error getting JSON back from Kodi', e] )
+            artists_info = []
+        if artists_info:
+            total = float( len( artists_info ) )
+            count = 1
+            for artist_info in artists_info:
+                artist = smartUTF8( artist_info['artist'] ).decode('utf-8')
+            	artist_hash = itemHash( artist_info['artist'] )
+                hashmap[artist_hash] = artist_info['artist']
+                lw.log( ["%s has a hash of %s" % (artist, artist_hash)] )
+                hDialog.update( int(100*(count/total)), smartUTF8( language(32011) ), artist )
+                count += 1
+            hashmap[itemHash( "Various Artists" )] = "Various Artists" 
+        hDialog.close()
+        return hashmap
 
 
     def _upgrade_migratetolocal( self ):

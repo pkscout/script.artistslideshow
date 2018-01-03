@@ -12,7 +12,10 @@
 	<extension point="xbmc.addon.metadata">
 		<news>
 v.2.1.0~alpha6
-- fix for AS reporting a directory as not existing when it does
+- added background dialog box for upgrade progress
+- now creates hash of all artists in Kodi database to use if possible
+- fix for AS reporting a directory doesn't exist when it does
+- more freaking UTF8 fixes.  Have I mentioned that I hate UTF8.
 
 v.2.1.0~alphas 3 - 5
 - fixes for mishandled UTF8 characters

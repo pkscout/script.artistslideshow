@@ -89,6 +89,23 @@ msgctxt "#32010"
 msgid "  Client API key"
 msgstr ""
 
+msgctxt "#32011"
+msgid "Create artist hash mapping file"
+msgstr ""
+
+msgctxt "#32012"
+msgid "beginning work"
+msgstr ""
+
+msgctxt "#32013"
+msgid "Migrating artist information"
+msgstr ""
+
+msgctxt "#32014"
+msgid "Migrating artist images"
+msgstr ""
+
+
 #empty strings from id 32011 to 32099
 
 msgctxt "#32100"
