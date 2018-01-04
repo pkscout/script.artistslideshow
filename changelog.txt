@@ -1,3 +1,6 @@
+v.2.1.0~alpha7
+- added dialog box for image migration to local storage
+
 v.2.1.0~alpha6
 - added background dialog box for upgrade progress
 - now creates hash of all artists in Kodi database to use if possible

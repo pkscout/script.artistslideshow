@@ -105,8 +105,11 @@ msgctxt "#32014"
 msgid "Migrating artist images"
 msgstr ""
 
+msgctxt "#32015"
+msgid "Moving artist images to local artist location"
+msgstr ""
 
-#empty strings from id 32011 to 32099
+#empty strings from id 32016 to 32099
 
 msgctxt "#32100"
 msgid "Slideshow"

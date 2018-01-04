@@ -1238,14 +1238,19 @@ class Main:
 
 
     def _upgrade_migratetolocal( self ):
+        mDialog = xbmcgui.DialogProgressBG()
+        mDialog.create( smartUTF8(language(32015)), smartUTF8(language(32012)) )
         imgroot = os.path.join( self.DATAROOT, 'ArtistSlideshow' )
         try:
             img_dirs, old_files = xbmcvfs.listdir( imgroot )
         except Exception, e:
             lw.log( ['unexpected error while getting directory list', e] )
             img_dirs = []
+        total = float( len( img_dirs ) )
+        count = 1
         for img_dir_name in img_dirs:
             img_dir_name = smartUTF8(img_dir_name).decode('utf-8')
+            mDialog.update( int(100*(count/total)), smartUTF8( language(32011) ), img_dir_name )
             default_dir = os.path.join( self.DATAROOT, 'ArtistSlideshow', img_dir_name )
             info_dir = os.path.join( self.DATAROOT, 'ArtistInformation', img_dir_name )
             exists, loglines = checkPath( os.path.join( info_dir, '' ), False )
@@ -1285,6 +1290,8 @@ class Main:
                         lw.log( loglines )
             success, loglines = deleteFolder( os.path.join( default_dir, '' ) )
             lw.log( loglines )
+            count += 1
+        mDialog.close()
 
 
     def _wait( self, wait_time ):
