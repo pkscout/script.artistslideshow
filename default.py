@@ -264,8 +264,9 @@ class Main:
                 if not xbmcvfs.exists ( dst ):
                     lw.log( ['copying %s to %s' % (tmpname, dst2)] )
                     xbmcvfs.copy( tmpname, dst2 )
-                    lw.log( ['moving %s to %s' % (tmpname, dst)] )
-                    xbmcvfs.rename( tmpname, dst )
+                    lw.log( ['copying %s to %s' % (tmpname, dst)] )
+                    xbmcvfs.copy( tmpname, dst )
+                    deleteFile( tmpname )
                     return True
                 else:
                     lw.log( ['image already exists, deleting temporary file'] )
