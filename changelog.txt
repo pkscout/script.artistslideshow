@@ -1,31 +1,7 @@
-v.2.1.0~alpha7
-- added dialog box for image migration to local storage
-- fix for mergedir not being set if last artist has no images
-
-v.2.1.0~alpha6
-- added background dialog box for upgrade progress
-- now creates hash of all artists in Kodi database to use if possible
-- fix for AS reporting a directory doesn't exist when it does
-- more freaking UTF8 fixes.  Have I mentioned that I hate UTF8.
-
-v.2.1.0~alpha5
-- another damn UTF8 problem. I hate UTF8.
-
-v.2.1.0~alpha4
-- fix for mishandled UTF8 characters in artist name during playback
-
-v.2.1.0~alpha3
-- fix for mishandled UTF8 characters in artist name during upgrade migration
-
-v.2.1.0~alpha2
-- archive any directory that can't be renamed
-- added XML parsing of lastfm info to find artist name
-
-v.2.1.0~alpha1
-- Fuzzy artist search is now required and cannot be disabled
+v.2.1.0~beta1
+- updated AS to save and use unhashed artist and image names
 - created upgrade routine to rename hashed artist and image names
 - included new option to ONLY use local artist path for storage
-- updated AS to save and use unhashed artist and image names
 - cleaned up folder path creation routines
 - removed old download exclusion logic in favor of new _imgdb.nfo history
 
