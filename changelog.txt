@@ -1,5 +1,6 @@
 v.2.1.0~alpha7
 - added dialog box for image migration to local storage
+- fix for mergedir not being set if last artist has no images
 
 v.2.1.0~alpha6
 - added background dialog box for upgrade progress

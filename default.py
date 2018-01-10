@@ -513,8 +513,8 @@ class Main:
             if self.ARTISTNUM == 1:
             	self._set_artwork_skininfo( self.CacheDir )
                 self._get_artistinfo()
-            if self.TOTALARTISTS > 1:
-               self._merge_images()
+        if self.TOTALARTISTS > 1:
+            self._merge_images()
 
 
     def _get_musicbrainz_id( self, theartist, mbid ):
