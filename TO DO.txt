@@ -1,0 +1,18 @@
+UPGRADE:
+- get list of directories in ArtistInformation
+- get the artist name from one of the files
+- rename the folder in ArtistInformation and ArtistSlideshow
+- delete exclusions file
+**do the rest only if the folder was renamed
+- if a local image dir is set, move content and delete the empty folder in ArtistSlideshow
+- get list of images (ask getImageList to not download new file if cache expired)
+- check local image dir (or ArtistSlideshow dir if local image dir not set)
+- if the hashed image exists, rename it to original and add to list of files that have been downloaded
+
+CODE CHANGES:
+- eliminate all hashing
+- remove all exclusion code
+- remove all old migration code
+- add code to plugin getImageList to allow option to not download new file even if cache has expired
+- if local image dir is set, create new dirs there instead of ArtistSlideshow (if not too hard)
+- as images are downloaded add them to the file of downloaded images
