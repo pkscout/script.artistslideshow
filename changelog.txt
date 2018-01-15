@@ -1,7 +1,4 @@
-v.2.1.0~beta2
-- fix for newly downloaded images not being stored properly
-
-v.2.1.0~beta1
+v.2.1.0
 - updated AS to save and use unhashed artist and image names
 - created upgrade routine to rename hashed artist and image names
 - included new option to ONLY use local artist path for storage
