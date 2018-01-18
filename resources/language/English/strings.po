@@ -109,7 +109,11 @@ msgctxt "#32015"
 msgid "Moving artist images to local artist location"
 msgstr ""
 
-#empty strings from id 32016 to 32099
+msgctxt "#32016"
+msgid "  I donate to this service"
+msgstr ""
+
+#empty strings from id 32017 to 32099
 
 msgctxt "#32100"
 msgid "Slideshow"
