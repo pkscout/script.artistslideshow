@@ -1,3 +1,6 @@
+v.2.1.1~beta1
+- change to cache timing including decreased cache time if donating to image services
+
 v.2.1.0
 - updated AS to save and use unhashed artist and image names
 - created upgrade routine to rename hashed artist and image names

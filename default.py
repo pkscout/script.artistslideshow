@@ -294,6 +294,7 @@ class Main:
             pass
         for plugin_name in bio_plugins['names']:
             lw.log( ['checking %s for bio' % plugin_name[1]] )
+            bio_params['donated'] = addon.getSetting( plugin_name[1] + "_donated" )
             bio, loglines = bio_plugins['objs'][plugin_name[1]].getBio( bio_params )
             lw.log( loglines )
             if bio:
@@ -315,6 +316,7 @@ class Main:
             pass
         for plugin_name in album_plugins['names']:
             lw.log( ['checking %s for album info' % plugin_name[1]] )
+            album_params['donated'] = addon.getSetting( plugin_name[1] + "_donated" )
             albums, loglines = album_plugins['objs'][plugin_name[1]].getAlbumList( album_params )
             lw.log( loglines )
             if not albums == []:
@@ -469,6 +471,7 @@ class Main:
             lw.log( ['checking %s for images' % plugin_name[1]] )
             image_params['getall'] = addon.getSetting( plugin_name[1] + "_all" )
             image_params['clientapikey'] = addon.getSetting( plugin_name[1] + "_clientapikey" )
+            image_params['donated'] = addon.getSetting( plugin_name[1] + "_donated" )
             image_list, loglines = image_plugins['objs'][plugin_name[1]].getImageList( image_params )
             lw.log( loglines )
             images.extend( image_list )

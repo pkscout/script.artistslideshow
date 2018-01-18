@@ -32,9 +32,11 @@ class objectConfig():
         self.IDFILENAME = 'theaudiodbid.nfo'
         self.CACHETIMEFILENAME = 'theaudiodbcachetime.nfo'
         self.ALBUMCACHETIMEFILENAME = 'theaudiodbalbumcachetime.nfo'
+        self.HASDONATION = False
         self.CACHEEXPIRE = {}
-        self.CACHEEXPIRE['low'] = int( 12*secsinweek )
-        self.CACHEEXPIRE['high'] = int( 24*secsinweek )
+        self.CACHEEXPIRE['low'] = int( 3*secsinweek )
+        self.CACHEEXPIRE['high'] = int( 4*secsinweek )
+        self.CACHEEXPIREWITHDONATION = int( 1*secsinweek )
         self.loglines = []
         self.JSONURL = URL( 'json' )
 
@@ -49,6 +51,7 @@ class objectConfig():
         url_params = {}
         albums = []
         json_data = ''
+        self._check_donation( album_params.get( 'donate' ) )
         url, url_params = self._determine_url( album_params, '', self.ALBUMURL, self.ALBUMSEARCHURL )
         if url:
             json_data = self._get_data( self.ALBUMFILEPATH, self.ALBUMCACHEFILEPATH, url, url_params )
@@ -66,6 +69,7 @@ class objectConfig():
         url_params = {}
         bio = ''
         json_data = ''
+        self._check_donation( bio_params.get( 'donate' ) )
         url, url_params = self._determine_url( bio_params, self.ARTISTMBIDURL, self.ARTISTTADBIDURL, self.ARTISTSEARCHURL )
         if url:
             json_data = self._get_data( self.ARTISTFILEPATH, self.CACHEFILEPATH, url, url_params )
@@ -83,6 +87,7 @@ class objectConfig():
         url_params = {}
         images = []
         json_data = ''
+        self._check_donation( img_params.get( 'donate' ) )
         url, url_params = self._determine_url( img_params, self.ARTISTMBIDURL, self.ARTISTTADBIDURL, self.ARTISTSEARCHURL )
         if url:
             json_data = self._get_data( self.ARTISTFILEPATH, self.CACHEFILEPATH, url, url_params )
@@ -122,6 +127,13 @@ class objectConfig():
         else:
             return '', self.loglines
         
+
+    def _check_donation( self, donation ):
+        if donation == 'true':
+            self.HASDONATION = True
+            self.CACHEEXPIRE['low'] = self.CACHEEXPIREWITHDONATION
+            self.CACHEEXPIRE['high'] = self.CACHEEXPIREWITHDONATION
+
 
     def _determine_url( self, params, mbidurl, tadbidurl, nameurl ):
         url_params = {}
