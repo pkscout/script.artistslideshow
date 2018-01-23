@@ -113,7 +113,12 @@ msgctxt "#32016"
 msgid "  I donate to this service"
 msgstr ""
 
-#empty strings from id 32017 to 32099
+msgctxt "#32017"
+msgid "Moving artist service information files to local artist location"
+msgstr ""
+
+
+#empty strings from id 32018 to 32099
 
 msgctxt "#32100"
 msgid "Slideshow"
@@ -245,7 +250,11 @@ msgctxt "#32217"
 msgid "Other"
 msgstr ""
 
-#empty strings from id 32210 to 32299
+msgctxt "#32218"
+msgid "Always use local artist path for service information storage"
+msgstr ""
+
+#empty strings from id 32219 to 32299
 
 msgctxt "#32300"
 msgid "Album Info"

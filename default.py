@@ -579,7 +579,8 @@ class Main:
                 break
         self.LOCALARTISTPATH = addon.getSetting( "local_artist_path" ).decode('utf-8')
         self.PRIORITY = addon.getSetting( "priority" )
-        self.LOCALSTORAGEONLY = addon.getSetting( "localstorageonly" ) 
+        self.LOCALSTORAGEONLY = addon.getSetting( "localstorageonly" )
+        self.LOCALINFOSTORAGE = addon.getSetting( "localinfostorage" ) 
         self.USEFALLBACK = addon.getSetting( "fallback" )
         self.FALLBACKPATH = addon.getSetting( "fallback_path" ).decode('utf-8')
         self.USEOVERRIDE = addon.getSetting( "slideshow" )
@@ -623,6 +624,7 @@ class Main:
         self.DATAROOT = xbmc.translatePath(addon.getAddonInfo('profile')).decode('utf-8')
         self.CHECKFILE = os.path.join( self.DATAROOT, 'migrationcheck.nfo' )
         self.IMAGECHECKFILE = os.path.join( self.DATAROOT, 'imagecheck.nfo' )
+        self.INFOCHECKFILE = os.path.join( self.DATAROOT, 'infocheck.nfo' )
         if self.LOCALSTORAGEONLY == 'false':
             deleteFile( self.IMAGECHECKFILE )
         self.IMGDB = '_imgdb.nfo'
@@ -799,6 +801,8 @@ class Main:
         CacheName = self._set_safe_artist_name( theartist )
         if dirtype == 'ArtistSlideshow' and self.LOCALSTORAGEONLY == 'true' and self.LOCALARTISTPATH:
             thedir = os.path.join( self.LOCALARTISTPATH, CacheName, self.FANARTFOLDER )
+        elif dirtype == 'ArtistInformation' and self.LOCALINFOSTORAGE == 'true' and self.LOCALARTISTPATH:
+            thedir = os.path.join( self.LOCALARTISTPATH, CacheName, 'information' )
         else:
             thedir = os.path.join( self.DATAROOT, dirtype, CacheName )
         exists, loglines = checkPath( os.path.join( thedir, '' ) )
@@ -1014,6 +1018,14 @@ class Main:
                 lw.log( ['migrating images'] )
                 self._upgrade_migratetolocal()
                 self._update_check_file( self.IMAGECHECKFILE, 'true', 'images migrated to local storage location' )
+        loglines, infocheck = readFile( self.INFOCHECKFILE )
+        lw.log( loglines )
+        if not 'true' in infocheck:
+            lw.log( ['upgradecheck is %s and localinfostorage is %s' % (upgradecheck, self.LOCALINFOSTORAGE)] )
+            if '2.1.0' in upgradecheck and self.LOCALINFOSTORAGE == 'true':
+                lw.log( ['migrating service information files'] )
+                self._upgrade_migratetolocalinfo()
+                self._update_check_file( self.INFOCHECKFILE, 'true', 'service information files migrated to local storage location' )
 
         
     def _upgrade_artist_folders( self ):
@@ -1254,7 +1266,7 @@ class Main:
         count = 1
         for img_dir_name in img_dirs:
             img_dir_name = smartUTF8(img_dir_name).decode('utf-8')
-            mDialog.update( int(100*(count/total)), smartUTF8( language(32011) ), img_dir_name )
+            mDialog.update( int(100*(count/total)), smartUTF8( language(32015) ), img_dir_name )
             default_dir = os.path.join( self.DATAROOT, 'ArtistSlideshow', img_dir_name )
             info_dir = os.path.join( self.DATAROOT, 'ArtistInformation', img_dir_name )
             exists, loglines = checkPath( os.path.join( info_dir, '' ), False )
@@ -1292,6 +1304,44 @@ class Main:
                         lw.log( loglines )
                         success, loglines = writeFile( all_images + image + '\r', imgdb )
                         lw.log( loglines )
+            success, loglines = deleteFolder( os.path.join( default_dir, '' ) )
+            lw.log( loglines )
+            count += 1
+        mDialog.close()
+
+
+    def _upgrade_migratetolocalinfo( self ):
+        mDialog = xbmcgui.DialogProgressBG()
+        mDialog.create( smartUTF8(language(32017)), smartUTF8(language(32012)) )
+        inforoot = os.path.join( self.DATAROOT, 'ArtistInformation' )
+        try:
+            info_dirs, old_files = xbmcvfs.listdir( inforoot )
+        except Exception as e:
+            lw.log( ['unexpected error while getting directory list', e] )
+            info_dirs = []
+        total = float( len( info_dirs ) )
+        count = 1
+        for info_dir_name in info_dirs:
+            info_dir_name = smartUTF8(info_dir_name).decode('utf-8')
+            mDialog.update( int(100*(count/total)), smartUTF8( language(32017) ), info_dir_name )
+            default_dir = os.path.join( self.DATAROOT, 'ArtistInformation', info_dir_name )
+            local_dir = os.path.join( self.LOCALARTISTPATH, info_dir_name, 'information' )
+            exists, loglines = checkPath( os.path.join( local_dir, '' ) )
+            try:
+                throwaway, infofiles = xbmcvfs.listdir( default_dir )
+            except Exception as e:
+                lw.log( ['unexpected error while getting directory list', e] )
+                infofiles = []
+            for infofile in infofiles:
+                src = os.path.join( default_dir, infofile )
+                dst = os.path.join( local_dir, infofile )
+                exists, loglines = checkPath( dst, False )
+                if not exists:
+                    success, loglines = renameFile( src, dst )
+                    lw.log( loglines )
+                else:
+                    success, loglines = deleteFile( src )
+                    lw.log( loglines )
             success, loglines = deleteFolder( os.path.join( default_dir, '' ) )
             lw.log( loglines )
             count += 1
