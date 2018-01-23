@@ -1294,7 +1294,9 @@ class Main:
                     loglines, all_images = readFile( imgdb )
                     lw.log( loglines )
                     if not exists:
-                        success, loglines = renameFile( src, dst )
+                        xbmcvfs.copy( src, dst )
+                        lw.log ('copying %s to %s' % (src, dst))
+                        success, loglines = deleteFile( src )
                         lw.log( loglines )
                         if success:
                             success, loglines = writeFile( all_images + image + '\r', imgdb )
@@ -1337,7 +1339,9 @@ class Main:
                 dst = os.path.join( local_dir, infofile )
                 exists, loglines = checkPath( dst, False )
                 if not exists:
-                    success, loglines = renameFile( src, dst )
+                    xbmcvfs.copy( src, dst )
+                    lw.log ('copying %s to %s' % (src, dst))
+                    success, loglines = deleteFile( src )
                     lw.log( loglines )
                 else:
                     success, loglines = deleteFile( src )
