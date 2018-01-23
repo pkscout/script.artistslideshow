@@ -25,7 +25,7 @@ def itemHashwithPath(item, thepath):
 def getImageType( filename ):
     try:
         new_ext = '.' + imghdr.what( filename ).replace( 'jpeg', 'jpg' )
-    except Exception, e:
+    except Exception as e:
         new_ext = '.tbn'
     return new_ext
 

@@ -52,7 +52,7 @@ def _get_plugin_settings( preamble, module, description ):
         active = addon.getSetting( preamble + module )
     except ValueError:
         active = 'false'
-    except Exception, e:
+    except Exception as e:
         lw.log( ['unexpected error while parsing %s setting for %s' % (description, module), e] )
         active = 'false'        
     if active == 'true':
@@ -60,7 +60,7 @@ def _get_plugin_settings( preamble, module, description ):
             priority = int( addon.getSetting( preamble + "priority_" + module ) )
         except ValueError:
             priority = 10
-        except Exception, e:
+        except Exception as e:
             lw.log( ['unexpected error while parsing %s priority for %s' % (description, module), e] )
             priority = 10
     else:
@@ -207,14 +207,14 @@ class Main:
                     break
             try:
                 self._set_property("ArtistSlideshow.CleanupComplete", "True")
-            except Exception, e:
+            except Exception as e:
                 lw.log( ['unexpected error while setting property.', e] )
 
 
     def _clean_dir( self, dir_path ):
         try:
             dirs, old_files = xbmcvfs.listdir( dir_path )
-        except Exception, e:
+        except Exception as e:
             lw.log( ['unexpected error while getting directory list', e] )
             old_files = []
         for old_file in old_files:
@@ -367,7 +367,7 @@ class Main:
                 playing_file = xbmc.Player().getPlayingFile() + ' - ' + xbmc.Player().getMusicInfoTag().getArtist() + ' - ' + xbmc.Player().getMusicInfoTag().getTitle()
             except RuntimeError:
                 return artists_info
-            except Exception, e:
+            except Exception as e:
                 lw.log( ['unexpected error getting playing file back from XBMC', e] )
                 return artists_info
             if playing_file != self.LASTPLAYINGFILE:
@@ -383,7 +383,7 @@ class Main:
                 playing_song = xbmc.Player().getMusicInfoTag().getTitle()
             except RuntimeError:
                 playing_song = ''
-            except Exception, e:
+            except Exception as e:
                 lw.log( ['unexpected error gettting playing song back from XBMC', e] )
                 playing_song = ''
             if not artist_names:
@@ -393,7 +393,7 @@ class Main:
                 except RuntimeError:
                     playingartist = ''
                     playing_song = ''
-                except Exception, e:
+                except Exception as e:
                     lw.log( ['unexpected error gettting playing song back from Kodi', e] )
                     playingartist = ''
                     playing_song = ''
@@ -429,7 +429,7 @@ class Main:
             dirs, files = xbmcvfs.listdir( self.CacheDir )
         except OSError:
             files = []
-        except Exception, e:
+        except Exception as e:
             lw.log( ['unexpected error getting directory list', e] )
             files = []
         if not files and trynum == 'first':
@@ -554,7 +554,7 @@ class Main:
                 got_item = True
             except RuntimeError:
                 got_title = False
-            except Exception, e:
+            except Exception as e:
                 got_title = False
                 lw.log( ['unexpected error getting %s from XBMC' % item, e] )
             if num_trys > max_trys:
@@ -592,7 +592,7 @@ class Main:
             self.maxcachesize = int( addon.getSetting( "max_cache_size" ) ) * 1000000
         except ValueError:
             self.maxcachesize = 1024 * 1000000
-        except Exception, e:
+        except Exception as e:
             lw.log( ['unexpected error while parsing maxcachesize setting', e] )
             self.maxcachesize = 1024 * 1000000
         self.NOTIFICATIONTYPE = addon.getSetting( "show_progress" )
@@ -704,7 +704,7 @@ class Main:
             params = dict( arg.split( "=" ) for arg in sys.argv[ 1 ].split( "&" ) )
         except IndexError:
             params = {}        
-        except Exception, e:
+        except Exception as e:
             lw.log( ['unexpected error while parsing arguments', e] )
             params = {}
         self.WINDOWID = params.get( "windowid", "12006")
@@ -780,7 +780,7 @@ class Main:
         try:
           self.WINDOW.setProperty( property_name, value )
           lw.log( ['%s set to %s' % (property_name, value)] )
-        except Exception, e:
+        except Exception as e:
           lw.log( ["Exception: Couldn't set propery " + property_name + " value " + value , e])
 
 
@@ -1026,7 +1026,7 @@ class Main:
         aDialog.create( smartUTF8(language(32013)), smartUTF8(language(32012)) )
         try:
             info_dirs, old_files = xbmcvfs.listdir( inforoot )
-        except Exception, e:
+        except Exception as e:
             lw.log( ['unexpected error while getting directory list', e] )
             info_dirs = []
         total = float( len( info_dirs ) )
@@ -1071,7 +1071,7 @@ class Main:
         iDialog.create( smartUTF8(language(32013)), smartUTF8(language(32012)) )
         try:
             info_dirs, old_files = xbmcvfs.listdir( inforoot )
-        except Exception, e:
+        except Exception as e:
             lw.log( ['unexpected error while getting directory list', e] )
             info_dirs = []
         image_list = []
@@ -1127,7 +1127,7 @@ class Main:
         lw.log( ['moving from %s to %s' % (src, dst)] )               
         try:
             folders, files = xbmcvfs.listdir( os.path.join( src, '' ) )
-        except Exception, e:
+        except Exception as e:
             lw.log( ['unexpected error while getting directory list', e] )
             files = []
         if files:
@@ -1223,7 +1223,7 @@ class Main:
             artists_info = _json.loads(response)['result']['artists']
         except (IndexError, KeyError, ValueError):
             artists_info = []
-        except Exception, e:
+        except Exception as e:
             lw.log( ['unexpected error getting JSON back from Kodi', e] )
             artists_info = []
         if artists_info:
@@ -1247,7 +1247,7 @@ class Main:
         imgroot = os.path.join( self.DATAROOT, 'ArtistSlideshow' )
         try:
             img_dirs, old_files = xbmcvfs.listdir( imgroot )
-        except Exception, e:
+        except Exception as e:
             lw.log( ['unexpected error while getting directory list', e] )
             img_dirs = []
         total = float( len( img_dirs ) )
@@ -1268,7 +1268,7 @@ class Main:
             exists, loglines = checkPath( os.path.join( local_dir, '' ) )
             try:
                 throwaway, images = xbmcvfs.listdir( default_dir )
-            except Exception, e:
+            except Exception as e:
                 lw.log( ['unexpected error while getting directory list', e] )
                 images = []
             for image in images:

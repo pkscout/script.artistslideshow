@@ -47,7 +47,7 @@ def deleteFile( filename ):
         except IOError:
             log_lines.append( 'unable to delete %s' % filename )
             return False, log_lines
-        except Exception, e:
+        except Exception as e:
             log_lines.append( 'unknown error while attempting to delete %s' % filename )
             log_lines.append( e )
             return False, log_lines
@@ -66,7 +66,7 @@ def deleteFolder( foldername ):
         except IOError:
             log_lines.append( 'unable to delete %s' % foldername )
             return False, log_lines
-        except Exception, e:
+        except Exception as e:
             log_lines.append( 'unknown error while attempting to delete %s' % foldername )
             log_lines.append( e )
             return False, log_lines
@@ -89,7 +89,7 @@ def readFile( filename ):
         except IOError:
             log_lines.append( 'unable to read data from ' + filename )
             return log_lines, ''
-        except Exception, e:
+        except Exception as e:
             log_lines.append( 'unknown error while reading data from ' + filename )
             log_lines.append( e )
             return log_lines, ''
@@ -108,7 +108,7 @@ def renameFile ( filename, newfilename ):
         except IOError:
             log_lines.append( 'unable to rename %s' % filename )
             return False, log_lines
-        except Exception, e:
+        except Exception as e:
             log_lines.append( 'unknown error while attempting to rename %s' % filename )
             log_lines.append( e )
             return False, log_lines
@@ -125,7 +125,7 @@ def popenWithTimeout( command, timeout ):
     except OSError:
         log_lines.append( 'error finding external script, terminating' )
         return False, log_lines
-    except Exception, e:
+    except Exception as e:
         log_lines.append( 'unknown error while attempting to run %s' % command )
         log_lines.append( e )
         return False, log_lines
@@ -153,7 +153,7 @@ def writeFile( data, filename ):
         log_lines.append( 'unable to write data to ' + filename )
         log_lines.append( e )
         return False, log_lines
-    except Exception, e:
+    except Exception as e:
         log_lines.append( 'unknown error while writing data to ' + filename )
         log_lines.append( e )
         return False, log_lines

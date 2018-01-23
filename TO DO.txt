@@ -1,3 +1,1 @@
 - add option to download square artist images from theaudiodb.com
-- fix Exception syntax in various places
-- changes to caching time (match fanart.tv to VIP, add donated option for theaudiodb.com)
