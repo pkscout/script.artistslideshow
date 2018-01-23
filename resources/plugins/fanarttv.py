@@ -1,6 +1,6 @@
 #v.0.1.0
 
-import os, time, sys, random, xbmc
+import os, time, sys, random, xbmc, xbmcvfs
 from ..common.url import URL
 from ..common.fileops import readFile, writeFile, deleteFile, checkPath
 if sys.version_info >= (2, 7):
@@ -126,7 +126,8 @@ class objectConfig():
         exists, cloglines = checkPath( filepath, False )
         self.loglines.extend( cloglines )
         if exists:
-            if time.time() - os.path.getmtime( filepath ) < self._get_cache_time( cachefilepath ):
+            st = xbmcvfs.Stat( filepath )
+            if time.time() - st.st_mtime() < self._get_cache_time( cachefilepath ):
                 self.loglines.append( 'cached artist info found for fanarttv' )
                 return False
             else:
