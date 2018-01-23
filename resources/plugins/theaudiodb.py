@@ -102,6 +102,10 @@ class objectConfig():
                     image = artist[0].get( 'strArtistFanart' + num, '' )
                     if image:
                         images.append( image )
+                if img_params.get( 'getall', 'false' ) == 'true':
+                    image = artist[0].get( 'strArtistThumb' )
+                    if image:
+                        images.append( image )
         return images, self.loglines
 
 
