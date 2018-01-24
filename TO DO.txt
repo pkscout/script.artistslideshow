@@ -1,1 +1,0 @@
-- add option to download square artist images from theaudiodb.com

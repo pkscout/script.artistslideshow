@@ -24,7 +24,7 @@ else:
     import simplejson as _json
     from resources.common.ordereddict import OrderedDict as _ordereddict
 from resources.common.fix_utf8 import smartUTF8
-from resources.common.fileops import checkPath, writeFile, readFile, deleteFile, renameFile, deleteFolder
+from resources.common.fileops import checkPath, writeFile, readFile, deleteFile, deleteFolder, copyFile, moveFile
 from resources.common.url import URL
 from resources.common.transforms import getImageType, itemHash, itemHashwithPath
 from resources.common.xlogger import Logger
@@ -262,11 +262,10 @@ class Main:
                 return False
             if xbmcvfs.Stat( tmpname ).st_size() > 999:
                 if not xbmcvfs.exists ( dst ):
-                    lw.log( ['copying %s to %s' % (tmpname, dst2)] )
-                    xbmcvfs.copy( tmpname, dst2 )
-                    lw.log( ['copying %s to %s' % (tmpname, dst)] )
-                    xbmcvfs.copy( tmpname, dst )
-                    deleteFile( tmpname )
+                    success, loglines = copyFile( tmpname, dst2 )
+                    lw.log( loglines )
+                    success, loglines = moveFile( tmpname, dst )
+                    lw.log( loglines )
                     return True
                 else:
                     lw.log( ['image already exists, deleting temporary file'] )
@@ -507,7 +506,8 @@ class Main:
         for one_file in copy_files:
             result, loglines = checkPath( os.path.join( self.CacheDir, '' ) )
             lw.log( loglines )
-            xbmcvfs.copy( os.path.join( artist_path, one_file ), os.path.join( self.CacheDir, one_file ) )
+            success, loglines = copyFile( os.path.join( artist_path, one_file ), os.path.join( self.CacheDir, one_file ) )
+            lw.log( loglines )
         files = self._get_directory_list()
         for file in files:
             if file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png'):
@@ -689,7 +689,8 @@ class Main:
             if(file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')):
                 img_source = os.path.join( self.CacheDir, smartUTF8( file ).decode( 'utf-8' ) )
                 img_dest = os.path.join( self.MergeDir, itemHash( img_source ) + getImageType( img_source ) )               
-                xbmcvfs.copy( img_source, img_dest )                
+                success, loglines = copyFile( img_source, img_dest )
+                lw.log( loglines )
         if self.ARTISTNUM == self.TOTALARTISTS:
             wait_elapsed = time.time() - self.LASTARTISTREFRESH
             if( wait_elapsed > self.MINREFRESH ):
@@ -1056,14 +1057,14 @@ class Main:
             if newname:
                 s_newname = self._set_safe_artist_name( newname )
                 new_info = os.path.join( inforoot, s_newname, '' )
-                success, loglines = renameFile( os.path.join( old_info, '' ), new_info )
+                success, loglines = moveFile( os.path.join( old_info, '' ), new_info )
                 lw.log( loglines )
                 old_img = os.path.join( imgroot, info_dir, '' )
                 exists, loglines = checkPath( old_img, False )
                 lw.log( loglines )
                 if exists:
                     new_img = os.path.join( imgroot, s_newname, '' )
-                    success, loglines = renameFile( old_img, new_img )
+                    success, loglines = moveFile( old_img, new_img )
                     lw.log( loglines )
             else:
                 infoarchive = os.path.join( infoarchiveroot, info_dir )
@@ -1149,7 +1150,7 @@ class Main:
            success, loglines = deleteFolder( src )
            lw.log( loglines )
         for file in files:
-            success, loglines = renameFile( os.path.join( src, file ), os.path.join( dst, file ) )
+            success, loglines = moveFile( os.path.join( src, file ), os.path.join( dst, file ) )
             lw.log( loglines )
         success, loglines = deleteFolder( os.path.join( src, '' ) )
         lw.log( loglines )
@@ -1164,7 +1165,7 @@ class Main:
             exists, loglines = checkPath( old_img, False )
             lw.log( loglines )
             if exists:
-                success, loglines = renameFile( old_img, new_img )
+                success, loglines = moveFile( old_img, new_img )
                 lw.log( loglines )
                 if success:
                     loglines, all_images = readFile( imgdb )
@@ -1294,9 +1295,7 @@ class Main:
                     loglines, all_images = readFile( imgdb )
                     lw.log( loglines )
                     if not exists:
-                        xbmcvfs.copy( src, dst )
-                        lw.log ('copying %s to %s' % (src, dst))
-                        success, loglines = deleteFile( src )
+                        success, loglines = moveFile( src, dst )
                         lw.log( loglines )
                         if success:
                             success, loglines = writeFile( all_images + image + '\r', imgdb )
@@ -1339,9 +1338,7 @@ class Main:
                 dst = os.path.join( local_dir, infofile )
                 exists, loglines = checkPath( dst, False )
                 if not exists:
-                    xbmcvfs.copy( src, dst )
-                    lw.log ('copying %s to %s' % (src, dst))
-                    success, loglines = deleteFile( src )
+                    success, loglines = moveFile( src, dst )
                     lw.log( loglines )
                 else:
                     success, loglines = deleteFile( src )

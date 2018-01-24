@@ -3,6 +3,7 @@ v.2.1.1~beta1
 - added option to download artist thumb from theaudiodb.com
 - added option to store service information files in local artist path
 - fixes to exception handling syntax to be consistent with Python3
+- refactored some common functions
 
 v.2.1.0
 - updated AS to save and use unhashed artist and image names
