@@ -117,7 +117,6 @@ msgctxt "#32017"
 msgid "Moving artist service information files to local artist location"
 msgstr ""
 
-
 #empty strings from id 32018 to 32099
 
 msgctxt "#32100"
@@ -174,6 +173,10 @@ msgstr ""
 
 msgctxt "#32113"
 msgid "  Always use local artist path for storage"
+msgstr ""
+
+msgctxt "#32114"
+msgid "Alternate Slideshow"
 msgstr ""
 
 #empty strings from id 32113 to 32199
