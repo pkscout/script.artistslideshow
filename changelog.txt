@@ -1,3 +1,6 @@
+v.2.1.1~beta3
+- rearranged settings again
+
 v.2.1.1~beta2
 - change to cache timing including decreased cache time if donating to image services
 - added option to download artist thumb from theaudiodb.com

@@ -172,7 +172,7 @@ msgid "Use both local and remote images"
 msgstr ""
 
 msgctxt "#32113"
-msgid "  Always use local artist path for storage"
+msgid "  Always use local artist path for image storage"
 msgstr ""
 
 msgctxt "#32114"
@@ -254,7 +254,7 @@ msgid "Other"
 msgstr ""
 
 msgctxt "#32218"
-msgid "Always use local artist path for service information storage"
+msgid "  Always use local artist path for service information storage"
 msgstr ""
 
 #empty strings from id 32219 to 32299
