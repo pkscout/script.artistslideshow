@@ -1,9 +1,7 @@
-#v.0.2.0
+#v.0.3.0
 
 import socket
 import requests as _requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-_requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     
 
 class URL():
@@ -44,16 +42,16 @@ class URL():
             loglines.append( params )
             loglines.append( 'the data are: ')
             loglines.append( data )
-        except _requests.exceptions.ConnectionError, e:
+        except _requests.exceptions.ConnectionError as e:
             loglines.append( 'site unreachable at ' + url )
             loglines.append( e )
-        except _requests.exceptions.Timeout, e:
+        except _requests.exceptions.Timeout as e:
             loglines.append( 'timeout error while downloading from ' + url )
             loglines.append( e )
-        except socket.timeout, e:
+        except socket.timeout as e:
             loglines.append( 'timeout error while downloading from ' + url )
             loglines.append( e )
-        except _requests.exceptions.HTTPError, e:
+        except _requests.exceptions.HTTPError as e:
             loglines.append( 'HTTP Error while downloading from ' + url )
             loglines.append( e )
         except _requests.exceptions.RequestException as e:
@@ -94,4 +92,4 @@ class URL():
                 data = []
             else:
                 data = ''
-    	return params, data
+        return params, data
