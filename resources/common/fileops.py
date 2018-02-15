@@ -1,6 +1,12 @@
 # v.0.4.0
 
-import subprocess, shutil, time
+import shutil, time
+try:
+    import subprocess
+    hasSubprocess = True
+except:
+    import os
+    hasSubprocess = False
 try:
     import xbmcvfs
     isXBMC = True
@@ -115,22 +121,26 @@ def moveFile( src, dst ):
 
 def popenWithTimeout( command, timeout ):
     log_lines = []
-    try:
-        p = subprocess.Popen( command, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-    except OSError:
-        log_lines.append( 'error finding external script, terminating' )
+    if hasSubProcess:
+        try:
+            p = subprocess.Popen( command, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+        except OSError:
+            log_lines.append( 'error finding external script, terminating' )
+            return False, log_lines
+        except Exception as e:
+            log_lines.append( 'unknown error while attempting to run %s' % command )
+            log_lines.append( e )
+            return False, log_lines
+        for t in xrange( timeout * 4 ):
+            time.sleep( 0.25 )
+            if p.poll() is not None:
+                return p.communicate(), log_lines
+        p.kill()
+        log_lines.append( 'script took too long to run, terminating' )
         return False, log_lines
-    except Exception as e:
-        log_lines.append( 'unknown error while attempting to run %s' % command )
-        log_lines.append( e )
-        return False, log_lines
-    for t in xrange( timeout * 4 ):
-        time.sleep( 0.25 )
-        if p.poll() is not None:
-            return p.communicate(), ''
-    p.kill()
-    log_lines.append( 'script took too long to run, terminating' )
-    return False, log_lines
+    else:
+        os.system( command )
+        return True, log_lines
 
 
 def readFile( filename ):

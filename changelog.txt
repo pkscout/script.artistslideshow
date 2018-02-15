@@ -1,3 +1,6 @@
+v.2.1.1~beta4
+- change to fileops common module to not use subprocess (unavailable in Windows Store version of Kodi)
+
 v.2.1.1~beta3
 - rearranged settings again
 
