@@ -1,4 +1,4 @@
-# v.0.4.0
+# v.0.4.1
 
 import shutil, time
 try:
@@ -121,7 +121,7 @@ def moveFile( src, dst ):
 
 def popenWithTimeout( command, timeout ):
     log_lines = []
-    if hasSubProcess:
+    if hasSubprocess:
         try:
             p = subprocess.Popen( command, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
         except OSError:
