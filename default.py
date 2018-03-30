@@ -939,7 +939,9 @@ class Main:
                 folders, fls = xbmcvfs.listdir( cache_root )
                 try:
                     folders.sort( key=lambda x: os.path.getmtime( os.path.join( cache_root, x ) ), reverse=True )
-                except:  # if there are any problems, don't try and delete the older cache files
+                except Exception as e:
+                    # if there are any problems, don't try and delete the older cache files
+                    lw.log( ['unexpected error sorting cache directory', e] )
                     return
                 cache_size = 0
                 first_folder = True
