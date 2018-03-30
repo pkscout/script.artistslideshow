@@ -937,7 +937,10 @@ class Main:
                 lw.log( ['trimming the cache down to %s bytes' % self.maxcachesize]  )
                 cache_root = os.path.join( self.DATAROOT, 'ArtistSlideshow', '')
                 folders, fls = xbmcvfs.listdir( cache_root )
-                folders.sort( key=lambda x: os.path.getmtime( os.path.join ( cache_root, x ) ), reverse=True )
+                try:
+                    folders.sort( key=lambda x: os.path.getmtime( os.path.join( cache_root, x ) ), reverse=True )
+                except:  # if there are any problems, don't try and delete the older cache files
+                    return
                 cache_size = 0
                 first_folder = True
                 for folder in folders:
