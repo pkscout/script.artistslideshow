@@ -1,4 +1,4 @@
-# v.0.4.2
+# v.0.4.3
 
 import shutil, time
 try:
@@ -99,7 +99,7 @@ def moveFile( src, dst ):
     if _exists( src ):
         try:
             log_lines.append( 'moving %s to %s' % (src, dst) )
-            _rename( filename, newfilename )
+            _rename( src, dst )
         except IOError:
             log_lines.append( 'unable to move %s' % src )
             success = False
