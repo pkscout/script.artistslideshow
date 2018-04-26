@@ -1,7 +1,5 @@
-v.2.1.2~beta2
+v.2.1.2
 - fix for common library issue with moving a file
-
-v.2.1.2~beta1
 - fix for crash when trying to trim cache folder
 
 v.2.1.1
