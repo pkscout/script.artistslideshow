@@ -28,6 +28,7 @@ from resources.common.fileops import checkPath, writeFile, readFile, deleteFile,
 from resources.common.url import URL
 from resources.common.transforms import getImageType, itemHash, itemHashwithPath
 from resources.common.xlogger import Logger
+from resources.common.kodisettings import getSettingBool, getSettingInt, getSettingNumber, getSettingString
 import resources.plugins
 
 addon        = xbmcaddon.Addon()
@@ -181,7 +182,7 @@ class Main:
                     self._set_property("ArtistSlideshowRunning")
             else:
                 lw.log( ['first song started'] )
-                time.sleep(1) # it may take some time for xbmc to read tag info after playback started
+                time.sleep(1) # it may take some time for Kodi to read the tag info after playback started
                 self._use_correct_artwork()
                 self._trim_cache()
             while (not xbmc.abortRequested):
@@ -194,7 +195,7 @@ class Main:
                             self._use_correct_artwork()
                             self._trim_cache()
                         elif(not (self.DownloadedAllImages or self.UsingFallback)):
-                            if(not (self.LocalImagesFound and self.PRIORITY == '1')):
+                            if(not (self.LocalImagesFound and self.PRIORITY == 1)):
                                 lw.log( ['same artist playing, continue download'] )
                                 self._use_correct_artwork()
                     else:
@@ -406,8 +407,8 @@ class Main:
             for one_artist in featured_artists:
                 artist_names.append( one_artist.strip(' ()') )
         lw.log( ['starting with the following artists', artist_names] )
-        lw.log( ['disable multi artist is set to ' + self.DISABLEMULTIARTIST] )
-        if self.DISABLEMULTIARTIST == 'true':
+        lw.log( ['disable multi artist is set to ' + str( self.DISABLEMULTIARTIST )] )
+        if self.DISABLEMULTIARTIST:
             if len( artist_names ) > 1:
                 lw.log( ['deleting extra artists'] )
                 del artist_names[1:]
@@ -497,10 +498,10 @@ class Main:
         lw.log( ['cachedir = %s' % self.CacheDir] )
         artist_path_exists, loglines = checkPath( os.path.join( artist_path, '' ), False )
         copy_files = []
-        if self.INCLUDEFANARTJPG == 'true' and artist_path_exists:
+        if self.INCLUDEFANARTJPG and artist_path_exists:
            copy_files.append( 'fanart.jpg' )
            copy_files.append( 'fanart.png' )
-        if self.INCLUDEFOLDERJPG == 'true' and artist_path_exists:
+        if self.INCLUDEFOLDERJPG and artist_path_exists:
             copy_files.append( 'folder.jpg' )
             copy_files.append( 'folder.png' )
         for one_file in copy_files:
@@ -571,49 +572,38 @@ class Main:
 
 
     def _get_settings( self ):
-        self.LANGUAGE = addon.getSetting( "language" )
+        self.LANGUAGE = getSettingString( addon, 'language' )
         for language in LANGUAGES:
             if self.LANGUAGE == language[2]:
                 self.LANGUAGE = language[1]
                 lw.log( ['language = %s' % self.LANGUAGE] )
                 break
-        self.LOCALARTISTPATH = addon.getSetting( "local_artist_path" ).decode('utf-8')
-        self.PRIORITY = addon.getSetting( "priority" )
-        self.LOCALSTORAGEONLY = addon.getSetting( "localstorageonly" )
-        self.LOCALINFOSTORAGE = addon.getSetting( "localinfostorage" ) 
-        self.USEFALLBACK = addon.getSetting( "fallback" )
-        self.FALLBACKPATH = addon.getSetting( "fallback_path" ).decode('utf-8')
-        self.USEOVERRIDE = addon.getSetting( "slideshow" )
-        self.OVERRIDEPATH = addon.getSetting( "slideshow_path" ).decode('utf-8')
-        self.RESTRICTCACHE = addon.getSetting( "restrict_cache" )
-        self.DISABLEMULTIARTIST = addon.getSetting( "disable_multiartist" )
-        self.INCLUDEFANARTJPG = addon.getSetting( "include_fanartjpg" )
-        self.INCLUDEFOLDERJPG = addon.getSetting( "include_folderjpg" )
-#        self.USENEWIMAGESCHEMA = addon.getSettingBool( "newimageschema" )
-        self.USENEWIMAGESCHEMA = False
-        try:
-            self.maxcachesize = int( addon.getSetting( "max_cache_size" ) ) * 1000000
-        except ValueError:
-            self.maxcachesize = 1024 * 1000000
-        except Exception as e:
-            lw.log( ['unexpected error while parsing maxcachesize setting', e] )
-            self.maxcachesize = 1024 * 1000000
-        self.NOTIFICATIONTYPE = addon.getSetting( "show_progress" )
-        if self.NOTIFICATIONTYPE == "2":
-            self.PROGRESSPATH = addon.getSetting( "progress_path" ).decode('utf-8')
+        self.LOCALARTISTPATH = getSettingString( addon, 'local_artist_path' ).decode('utf-8')
+        self.PRIORITY = getSettingInt( addon, 'priority' )
+        self.LOCALSTORAGEONLY = getSettingBool( addon, 'localstorageonly' )
+        self.LOCALINFOSTORAGE = getSettingBool( addon, 'localinfostorage' ) 
+        self.USEFALLBACK = getSettingBool( addon, 'fallback' )
+        self.FALLBACKPATH = getSettingString( addon, 'fallback_path' ).decode('utf-8')
+        self.USEOVERRIDE = getSettingBool( addon, 'slideshow' )
+        self.OVERRIDEPATH = getSettingString( addon, 'slideshow_path' ).decode('utf-8')
+        self.RESTRICTCACHE = getSettingBool( addon, 'restrict_cache' )
+        self.DISABLEMULTIARTIST = getSettingBool( addon, 'disable_multiartist' )
+        self.INCLUDEFANARTJPG = getSettingBool( addon, 'include_fanartjpg' )
+        self.INCLUDEFOLDERJPG = getSettingBool( addon, 'include_folderjpg' )
+        self.USENEWIMAGESCHEMA = getSettingBool( addon, 'newimageschema' )
+        self.MAXCACHESIZE = getSettingInt( addon, 'max_cache_size', default=1024 ) * 1000000
+        self.NOTIFICATIONTYPE = getSettingInt( addon, 'show_progress' )
+        if self.NOTIFICATIONTYPE == 2:
+            self.PROGRESSPATH = getSettingString( addon, 'progress_path' ).decode('utf-8')
             lw.log( ['set progress path to %s' % self.PROGRESSPATH] )
         else:
             self.PROGRESSPATH = ''
-        if addon.getSetting( "fanart_folder" ):
-            self.FANARTFOLDER = addon.getSetting( "fanart_folder" ).decode('utf-8')
-            lw.log( ['set fanart folder to %s' % self.FANARTFOLDER] )
-        else:
-            self.FANARTFOLDER = 'extrafanart'
-        pl = addon.getSetting( "storage_target" )
-        if pl == "0":
+        self.FANARTFOLDER = getSettingString( addon, 'fanart_folder', default='extrafanart' ).decode('utf-8')
+        pl = getSettingInt( addon, "storage_target" )
+        if pl == 0:
             self.ENDREPLACE = addon.getSetting( "end_replace" )
             self.ILLEGALCHARS = list( '<>:"/\|?*' )
-        elif pl == "2":
+        elif pl == 2:
             self.ENDREPLACE = '.'
             self.ILLEGALCHARS = [':']
         else:
@@ -627,7 +617,7 @@ class Main:
         self.CHECKFILE = os.path.join( self.DATAROOT, 'migrationcheck.nfo' )
         self.IMAGECHECKFILE = os.path.join( self.DATAROOT, 'imagecheck.nfo' )
         self.INFOCHECKFILE = os.path.join( self.DATAROOT, 'infocheck.nfo' )
-        if self.LOCALSTORAGEONLY == 'false':
+        if not self.LOCALSTORAGEONLY:
             deleteFile( self.IMAGECHECKFILE )
         self.IMGDB = '_imgdb.nfo'
         self._set_property( "ArtistSlideshow.CleanupComplete" )
@@ -640,25 +630,28 @@ class Main:
                 self.SKININFO[item[0:-5]] = ''
         self.EXTERNALCALLSTATUS = self._get_infolabel( self.EXTERNALCALL )
         lw.log( ['external call is set to ' + self._get_infolabel( self.EXTERNALCALL )] )
-        if addon.getSetting( "transparent" ) == 'true':
+        if getSettingBool( addon, "transparent" ):
             self._set_property("ArtistSlideshowTransparent", 'true')
             self.InitDir = os.path.join( self.DATAROOT, 'resources', 'transparent' )
         else:
             self._set_property("ArtistSlideshowTransparent", '')
             self.InitDir = os.path.join( self.DATAROOT, 'resources', 'black' )
         self._set_property("ArtistSlideshow", self.InitDir)
-        response = xbmc.executeJSONRPC('{"jsonrpc":"2.0", "method":"Settings.GetSettingValue", "params":{"setting":"musiclibrary.artistsfolder"}, "id":1}')
         if self.USENEWIMAGESCHEMA:
+            response = xbmc.executeJSONRPC('{"jsonrpc":"2.0", "method":"Settings.GetSettingValue", "params":{"setting":"musiclibrary.artistsfolder"}, "id":1}')
             try:
                 newimageschemapath = _json.loads(response)['result']['value']
             except (IndexError, KeyError, ValueError):
                 newimageschemapath = ''
             lw.log( ['the new image schema path is ' + newimageschemapath] )
             if newimageschemapath:
-                self.LOCALSTORAGEONLY = 'true'
-                self.LOCALINFOSTORAGE = 'true'
+                self.LOCALSTORAGEONLY = True
+                self.LOCALINFOSTORAGE = True
+                self.RESTRICTCACHE = False
+                self.INCLUDEFANARTJPG = False
+                self.INCLUDEFOLDERJPG = False
                 self.FANARTFOLDER = ''
-                self.LOCALARTISTFOLDER = newimageschemapath
+                self.LOCALARTISTPATH = newimageschemapath
             else:
                 self.USENEWIMAGESCHEMA = False                
         self.NAME = ''
@@ -766,16 +759,16 @@ class Main:
     
 
     def _set_artwork_skininfo( self, dir ):
-        self._set_property("ArtistSlideshow", dir)
-        self._set_property("ArtistSlideshow.ArtworkReady", "true")
+        self._set_property( 'ArtistSlideshow', dir )
+        self._set_property( 'ArtistSlideshow.ArtworkReady', 'true')
     
 
     def _set_cachedir( self, theartist ):
-        self.CacheDir = self._set_thedir( theartist, "ArtistSlideshow" )
+        self.CacheDir = self._set_thedir( theartist, 'ArtistSlideshow' )
 
 
     def _set_infodir( self, theartist ):
-        self.InfoDir = self._set_thedir( theartist, "ArtistInformation" )
+        self.InfoDir = self._set_thedir( theartist, 'ArtistInformation' )
 
 
     def _set_properties( self ):
@@ -794,7 +787,7 @@ class Main:
         self._set_property( "ArtistSlideshow.AlbumCount", album_total )
         
 
-    def _set_property( self, property_name, value=""):
+    def _set_property( self, property_name, value="" ):
         #sets a property (or clears it if no value is supplied)
         #does not crash if e.g. the window no longer exists.
         try:
@@ -817,9 +810,9 @@ class Main:
 
     def _set_thedir( self, theartist, dirtype ):
         CacheName = self._set_safe_artist_name( theartist )
-        if dirtype == 'ArtistSlideshow' and self.LOCALSTORAGEONLY == 'true' and self.LOCALARTISTPATH:
+        if dirtype == 'ArtistSlideshow' and self.LOCALSTORAGEONLY and self.LOCALARTISTPATH:
             thedir = os.path.join( self.LOCALARTISTPATH, CacheName, self.FANARTFOLDER )
-        elif dirtype == 'ArtistInformation' and self.LOCALINFOSTORAGE == 'true' and self.LOCALARTISTPATH:
+        elif dirtype == 'ArtistInformation' and self.LOCALINFOSTORAGE and self.LOCALARTISTPATH:
             thedir = os.path.join( self.LOCALARTISTPATH, CacheName, 'information' )
         else:
             thedir = os.path.join( self.DATAROOT, dirtype, CacheName )
@@ -842,7 +835,7 @@ class Main:
         if not self.NAME:
             lw.log( ['no artist name provided'] )
             return
-        if self.PRIORITY == '2' and self.LocalImagesFound:
+        if self.PRIORITY == 2 and self.LocalImagesFound:
             pass
             #self.CacheDir was successfully set in _get_local_images
         else:
@@ -852,7 +845,7 @@ class Main:
             self._get_artistinfo()
         dirs, files = xbmcvfs.listdir( self.CacheDir )
         for file in files:
-            if (file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')) or (self.PRIORITY == '2' and self.LocalImagesFound):
+            if (file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')) or (self.PRIORITY == 2 and self.LocalImagesFound):
                 self.CachedImagesFound = True
         if self.CachedImagesFound:
             lw.log( ['cached images found'] )
@@ -863,11 +856,11 @@ class Main:
         else:
             self.LASTARTISTREFRESH = 0
             if self.ARTISTNUM == 1:
-                if self.NOTIFICATIONTYPE == "1":
+                if self.NOTIFICATIONTYPE == 1:
                     self._set_property("ArtistSlideshow", self.InitDir)
                     command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(language(30300)), smartUTF8(language(30301)), 5000, smartUTF8(addonicon))
                     xbmc.executebuiltin(command)
-                elif self.NOTIFICATIONTYPE == "2":
+                elif self.NOTIFICATIONTYPE == 2:
                     self._set_property("ArtistSlideshow", self.PROGRESSPATH)
                 else:
                     self._set_property("ArtistSlideshow", self.InitDir)
@@ -922,7 +915,7 @@ class Main:
             if( not self._playback_stopped_or_changed() ):
                 if self.ARTISTNUM == 1:
                     self._refresh_image_directory()
-                    if self.NOTIFICATIONTYPE == "1" and not cached_image_info:
+                    if self.NOTIFICATIONTYPE == 1 and not cached_image_info:
                         command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(language(30304)), smartUTF8(language(30305)), 5000, smartUTF8(addonicon))
                         xbmc.executebuiltin(command)
                 if self.TOTALARTISTS > 1:
@@ -939,7 +932,7 @@ class Main:
                 if self.ARTISTNUM == 1:
                     lw.log( ['setting slideshow directory to blank directory'] )
                     self._set_property("ArtistSlideshow", self.InitDir)
-                    if self.NOTIFICATIONTYPE == "1" and not cached_image_info:
+                    if self.NOTIFICATIONTYPE == 1 and not cached_image_info:
                         command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(language(30302)), smartUTF8(language(30303)), 10000, smartUTF8(addonicon))
                         xbmc.executebuiltin(command)
             elif self.TOTALARTISTS > 1:
@@ -947,11 +940,11 @@ class Main:
 
 
     def _trim_cache( self ):
-        if( self.RESTRICTCACHE == 'true' and not self.PRIORITY == '2' ):
+        if (self.RESTRICTCACHE and not self.PRIORITY == 2):
             now = time.time()
             cache_trim_delay = 0   #delay time is in seconds
-            if( now - self.LastCacheTrim > cache_trim_delay ):
-                lw.log( ['trimming the cache down to %s bytes' % self.maxcachesize]  )
+            if (now - self.LastCacheTrim > cache_trim_delay):
+                lw.log( ['trimming the cache down to %s bytes' % self.MAXCACHESIZE]  )
                 cache_root = os.path.join( self.DATAROOT, 'ArtistSlideshow', '')
                 folders, fls = xbmcvfs.listdir( cache_root )
                 try:
@@ -967,7 +960,7 @@ class Main:
                         break
                     cache_size = cache_size + self._get_folder_size( os.path.join (cache_root, folder ) )
                     lw.log( ['looking at folder %s cache size is now %s' % (folder, cache_size)] )
-                    if( cache_size > self.maxcachesize and not first_folder ):
+                    if( cache_size > self.MAXCACHESIZE and not first_folder ):
                         self._clean_dir( os.path.join(cache_root, folder) )
                         lw.log( ['deleted files in folder %s' % folder] )
                     first_folder = False
@@ -984,19 +977,19 @@ class Main:
             self.NAME = artist
             self.MBID = mbid
             self._set_infodir( self.NAME )
-            if self.USEOVERRIDE == 'true':
+            if self.USEOVERRIDE:
                 lw.log( ['using override directory for images'] )
                 self._set_property("ArtistSlideshow", self.OVERRIDEPATH)
                 self._set_artwork_skininfo( self.OVERRIDEPATH )
                 if(self.ARTISTNUM == 1):
                     self._get_artistinfo()
-            elif self.PRIORITY == '1' and self.LOCALARTISTPATH:
+            elif self.PRIORITY == 1 and self.LOCALARTISTPATH:
                 lw.log( ['looking for local artwork'] )
                 self._get_local_images()
                 if not self.LocalImagesFound:
                     lw.log( ['no local artist artwork found, start download'] )
                     self._start_download()
-            elif self.PRIORITY == '2' and self.LOCALARTISTPATH:
+            elif self.PRIORITY == 2 and self.LOCALARTISTPATH:
                 lw.log( ['looking for local artwork'] )
                 self._get_local_images()
                 lw.log( ['start download'] )
@@ -1008,7 +1001,7 @@ class Main:
                     lw.log( ['no remote artist artwork found, looking for local artwork'] )
                     self._get_local_images()
         if not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded or self.MergedImagesFound):
-            if (self.USEFALLBACK == 'true'):
+            if self.USEFALLBACK:
                 lw.log( ['no images found for artist, using fallback slideshow'] )
                 lw.log( ['fallbackdir = ' + self.FALLBACKPATH] )
                 self.UsingFallback = True
@@ -1036,16 +1029,16 @@ class Main:
         loglines, imagecheck = readFile( self.IMAGECHECKFILE )
         lw.log( loglines )
         if not 'true' in imagecheck:
-            lw.log( ['upgradecheck is %s and localstorageonly is %s' % (upgradecheck, self.LOCALSTORAGEONLY)] )
-            if '2.1.0' in upgradecheck and self.LOCALSTORAGEONLY == 'true':
+            lw.log( ['upgradecheck is %s and localstorageonly is %s' % (upgradecheck, str( self.LOCALSTORAGEONLY ))] )
+            if '2.1.0' in upgradecheck and self.LOCALSTORAGEONLY:
                 lw.log( ['migrating images'] )
                 self._upgrade_migratetolocal()
                 self._update_check_file( self.IMAGECHECKFILE, 'true', 'images migrated to local storage location' )
         loglines, infocheck = readFile( self.INFOCHECKFILE )
         lw.log( loglines )
         if not 'true' in infocheck:
-            lw.log( ['upgradecheck is %s and localinfostorage is %s' % (upgradecheck, self.LOCALINFOSTORAGE)] )
-            if '2.1.0' in upgradecheck and self.LOCALINFOSTORAGE == 'true':
+            lw.log( ['upgradecheck is %s and localinfostorage is %s' % (upgradecheck, str( self.LOCALINFOSTORAGE ))] )
+            if '2.1.0' in upgradecheck and self.LOCALINFOSTORAGE:
                 lw.log( ['migrating service information files'] )
                 self._upgrade_migratetolocalinfo()
                 self._update_check_file( self.INFOCHECKFILE, 'true', 'service information files migrated to local storage location' )
