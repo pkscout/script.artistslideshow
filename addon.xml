@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="2.1.4~beta1">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="2.1.4~beta2">
 	<requires>
 		<import addon="xbmc.python" version="2.19.0" />
 		<import addon="xbmc.addon" version="15.0.0" />
@@ -10,8 +10,8 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
-v.2.1.4~beta1
-- converted language files to current format for forward compatability
+v.2.1.4~beta2
+- fix for fallback images not showing if all artists on a multi-artist song have no images
 		</news>
 		<summary lang="ar_SA">حمل المزيد من الصور والمعلومات عن الفنان الذى يُغنِى حالياً</summary>
 		<summary lang="be_BY">Download images and additional info of the currently playing artist</summary>
