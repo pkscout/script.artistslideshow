@@ -46,6 +46,7 @@
         <setting id="sa_priority_lastfm" type="slider" label="32301" visible="eq(-1,true)" default="5" range='1,1,10' option='int' />
     </category>
     <category label="32200">
+        <setting id="newimageschema" type="bool" label="32219" default="false" />
         <setting id="show_progress" type="enum" label="32203" lvalues="32206|32207|32208" default="0" />
         <setting id="progress_path" type="folder" label="32204" default="" visible="eq(-1,2)"/>
         <setting id="storage_target" type="enum" label="32212" default="0" lvalues="32215|32217|32216" />

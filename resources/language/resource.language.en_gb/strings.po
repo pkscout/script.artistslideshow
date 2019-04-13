@@ -257,6 +257,10 @@ msgctxt "#32218"
 msgid "  Always use local artist path for service information storage"
 msgstr ""
 
+msgctxt "#32219"
+msgid "Use Kodi music image storage schema"
+msgstr ""
+
 #empty strings from id 32219 to 32299
 
 msgctxt "#32300"
