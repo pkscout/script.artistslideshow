@@ -589,6 +589,8 @@ class Main:
         self.DISABLEMULTIARTIST = addon.getSetting( "disable_multiartist" )
         self.INCLUDEFANARTJPG = addon.getSetting( "include_fanartjpg" )
         self.INCLUDEFOLDERJPG = addon.getSetting( "include_folderjpg" )
+#        self.USENEWIMAGESCHEMA = addon.getSettingBool( "newimageschema" )
+        self.USENEWIMAGESCHEMA = False
         try:
             self.maxcachesize = int( addon.getSetting( "max_cache_size" ) ) * 1000000
         except ValueError:
@@ -645,6 +647,20 @@ class Main:
             self._set_property("ArtistSlideshowTransparent", '')
             self.InitDir = os.path.join( self.DATAROOT, 'resources', 'black' )
         self._set_property("ArtistSlideshow", self.InitDir)
+        response = xbmc.executeJSONRPC('{"jsonrpc":"2.0", "method":"Settings.GetSettingValue", "params":{"setting":"musiclibrary.artistsfolder"}, "id":1}')
+        if self.USENEWIMAGESCHEMA:
+            try:
+                newimageschemapath = _json.loads(response)['result']['value']
+            except (IndexError, KeyError, ValueError):
+                newimageschemapath = ''
+            lw.log( ['the new image schema path is ' + newimageschemapath] )
+            if newimageschemapath:
+                self.LOCALSTORAGEONLY = 'true'
+                self.LOCALINFOSTORAGE = 'true'
+                self.FANARTFOLDER = ''
+                self.LOCALARTISTFOLDER = newimageschemapath
+            else:
+                self.USENEWIMAGESCHEMA = False                
         self.NAME = ''
         self.ALLARTISTS = []
         self.MBID = ''

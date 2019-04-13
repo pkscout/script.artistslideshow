@@ -1,7 +1,9 @@
-v.2.1.4~beta2
-- fix for fallback images not showing if all artists on a multi-artist song have no images
+v.3.0.0~beta1
+- first Leia only version
+- added experimental support for Kodi's new music management schema
 
-v.2.1.4~beta1
+v.2.1.4
+- fix for fallback images not showing if all artists on a multi-artist song have no images
 - converted language files to current format for forward compatibility
 
 v.2.1.3
