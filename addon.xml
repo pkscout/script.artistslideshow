@@ -1,7 +1,7 @@
 <addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="2.1.4">
 	<requires>
-		<import addon="xbmc.python" version="2.19.0" />
-		<import addon="xbmc.addon" version="15.0.0" />
+		<import addon="xbmc.python" version="2.25.0" />
+		<import addon="xbmc.addon" version="17.0.0" />
 		<import addon="script.module.requests" version="2.3.0" />
 		<import addon="script.module.simplejson" version="3.3.0" />
 	</requires>
@@ -73,8 +73,8 @@ v.2.1.4
 		<language />
 		<platform>all</platform>
 		<license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
-		<forum>http://forum.xbmc.org/showthread.php?t=124880</forum>
-		<website>http://wiki.xbmc.org/index.php?title=Add-on:Artist_Slideshow</website>
+		<forum>https://forum.xbmc.org/showthread.php?t=124880</forum>
+		<website>https://wiki.xbmc.org/index.php?title=Add-on:Artist_Slideshow</website>
 		<email>artistslideshow.xbmc@gmail.com</email>
 		<source>https://github.com/pkscout/script.artistslideshow</source>
 	</extension>
