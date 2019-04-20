@@ -1,10 +1,7 @@
 #v.0.1.0
 
 import sys, xbmc
-if sys.version_info >= (2, 7):
-    import json as _json
-else:
-    import simplejson as _json
+import json as _json
 
 
 class objectConfig():

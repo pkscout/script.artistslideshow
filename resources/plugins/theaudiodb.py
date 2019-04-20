@@ -3,10 +3,7 @@
 import os, time, sys, random, xbmc, xbmcvfs
 from ..common.url import URL
 from ..common.fileops import readFile, writeFile, deleteFile, checkPath
-if sys.version_info >= (2, 7):
-    import json as _json
-else:
-    import simplejson as _json
+import json as _json
 try:
     import theaudiodb_info as settings
 except ImportError:

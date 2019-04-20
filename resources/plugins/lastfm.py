@@ -5,7 +5,7 @@ import xml.etree.ElementTree as _xmltree
 from ..common.url import URL
 from ..common.fileops import readFile, writeFile, checkPath
 try:
-    import lastfm_info as settings
+    from . import lastfm_info as settings
 except ImportError:
     clowncar = ''
 try:
@@ -43,7 +43,7 @@ class objectConfig():
         filepath = os.path.join( album_params.get( 'infodir', '' ), self.ALBUMFILENAME )
         cachefilepath = os.path.join( album_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
         additionalparams = {'artist': album_params.get( 'artist', '' )}  
-        url_params = dict( self.ALBUMPARAMS.items() + additionalparams.items() )
+        url_params = dict( list(self.ALBUMPARAMS.items()) + list(additionalparams.items()) )
         self.loglines.append( 'trying to get artist albums from ' + self.URL )
         try:
            xmldata = _xmltree.fromstring( self._get_data( filepath, cachefilepath, url_params ) )
@@ -79,7 +79,7 @@ class objectConfig():
         filepath = os.path.join( bio_params.get( 'infodir', '' ), self.BIOFILENAME )
         cachefilepath = os.path.join( bio_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
         additionalparams = {'artist': bio_params.get( 'artist', '' ), 'lang':bio_params.get( 'lang', '' )}  
-        url_params = dict( self.ARTISTPARAMS.items() + additionalparams.items() )
+        url_params = dict( list(self.ARTISTPARAMS.items()) + list(additionalparams.items()) )
         self.loglines.append( 'trying to get artist bio from ' + self.URL )
         try:
            xmldata = _xmltree.fromstring( self._get_data( filepath, cachefilepath, url_params ) )
@@ -102,7 +102,7 @@ class objectConfig():
         filepath = os.path.join( sim_params.get( 'infodir', '' ), self.SIMILARFILENAME )
         cachefilepath = os.path.join( sim_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
         additionalparams = {'artist': sim_params.get( 'artist', '' )}  
-        url_params = dict( self.SIMILARPARAMS.items() + additionalparams.items() )
+        url_params = dict( list(self.SIMILARPARAMS.items()) + list(additionalparams.items()) )
         self.loglines.append( 'trying to get similar artists from ' + self.URL )
         try:
            xmldata = _xmltree.fromstring( self._get_data( filepath, cachefilepath, url_params ) )

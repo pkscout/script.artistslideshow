@@ -5,7 +5,7 @@ import xml.etree.ElementTree as _xmltree
 from ..common.url import URL
 from ..common.fileops import readFile, writeFile, deleteFile, checkPath
 try:
-    import htbackdrops_info as settings
+    from . import htbackdrops_info as settings
 except ImportError:
     clowncar = ''
 try:

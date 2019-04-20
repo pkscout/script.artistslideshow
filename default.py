@@ -17,12 +17,8 @@
 import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 import itertools, os, random, re, sys, time
 import xml.etree.ElementTree as _xmltree
-if sys.version_info >= (2, 7):
-    import json as _json
-    from collections import OrderedDict as _ordereddict
-else:
-    import simplejson as _json
-    from resources.common.ordereddict import OrderedDict as _ordereddict
+import json as _json
+from collections import OrderedDict as _ordereddict
 from resources.common.fix_utf8 import smartUTF8
 from resources.common.fileops import checkPath, writeFile, readFile, deleteFile, deleteFolder, copyFile, moveFile
 from resources.common.url import URL
@@ -189,7 +185,7 @@ class Main:
                 time.sleep(1)
                 if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
                     if( xbmc.Player().isPlayingAudio() == True or self._get_infolabel( self.EXTERNALCALL ) != '' ):
-                        if set( self.ALLARTISTS ) <> set( self._get_current_artists() ):
+                        if set( self.ALLARTISTS ) != set( self._get_current_artists() ):
                             self._clear_properties()
                             self.UsingFallback = False
                             self._use_correct_artwork()
@@ -733,7 +729,7 @@ class Main:
 
 
     def _playback_stopped_or_changed( self ):
-        if set( self.ALLARTISTS ) <> set( self._get_current_artists() ) or self.EXTERNALCALLSTATUS != self._get_infolabel( self.EXTERNALCALL ):
+        if set( self.ALLARTISTS ) != set( self._get_current_artists() ) or self.EXTERNALCALLSTATUS != self._get_infolabel( self.EXTERNALCALL ):
             self._clear_properties()
             return True
         else:
@@ -752,7 +748,7 @@ class Main:
 
 
     def _remove_trailing_dot( self, thename ):
-        if thename[-1] == '.' and len( thename ) > 1 and self.ENDREPLACE <> '.':
+        if thename[-1] == '.' and len( thename ) > 1 and self.ENDREPLACE != '.':
             return self._remove_trailing_dot( thename[:-1] + self.ENDREPLACE )
         else:
             return thename
