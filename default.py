@@ -188,7 +188,7 @@ class Main:
                 time.sleep(1)
                 if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
                     if( xbmc.Player().isPlayingAudio() == True or self._get_infolabel( self.EXTERNALCALL ) != '' ):
-                        if set( self.ALLARTISTS ) <> set( self._get_current_artists() ):
+                        if set( self.ALLARTISTS ) != set( self._get_current_artists() ):
                             self._clear_properties()
                             self.UsingFallback = False
                             self._use_correct_artwork()
@@ -515,7 +515,7 @@ class Main:
         if self.LocalImagesFound:
             lw.log( ['local images found'] )
             if self.ARTISTNUM == 1:
-            	self._set_artwork_skininfo( self.CacheDir )
+                self._set_artwork_skininfo( self.CacheDir )
                 self._get_artistinfo()
         if self.TOTALARTISTS > 1:
             self._merge_images()
@@ -724,7 +724,7 @@ class Main:
 
 
     def _playback_stopped_or_changed( self ):
-        if set( self.ALLARTISTS ) <> set( self._get_current_artists() ) or self.EXTERNALCALLSTATUS != self._get_infolabel( self.EXTERNALCALL ):
+        if set( self.ALLARTISTS ) != set( self._get_current_artists() ) or self.EXTERNALCALLSTATUS != self._get_infolabel( self.EXTERNALCALL ):
             self._clear_properties()
             return True
         else:
@@ -743,7 +743,7 @@ class Main:
 
 
     def _remove_trailing_dot( self, thename ):
-        if thename[-1] == '.' and len( thename ) > 1 and self.ENDREPLACE <> '.':
+        if thename[-1] == '.' and len( thename ) > 1 and self.ENDREPLACE != '.':
             return self._remove_trailing_dot( thename[:-1] + self.ENDREPLACE )
         else:
             return thename
@@ -1250,7 +1250,7 @@ class Main:
             count = 1
             for artist_info in artists_info:
                 artist = smartUTF8( artist_info['artist'] ).decode('utf-8')
-            	artist_hash = itemHash( artist_info['artist'] )
+                artist_hash = itemHash( artist_info['artist'] )
                 hashmap[artist_hash] = artist_info['artist']
                 lw.log( ["%s has a hash of %s" % (artist, artist_hash)] )
                 hDialog.update( int(100*(count/total)), smartUTF8( language(32011) ), artist )
