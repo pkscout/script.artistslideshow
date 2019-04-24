@@ -34,7 +34,7 @@ addonpath    = addon.getAddonInfo('path')
 addonicon    = xbmc.translatePath('%s/icon.png' % addonpath )
 language     = addon.getLocalizedString
 preamble     = '[Artist Slideshow]'
-logdebug     = addon.getSetting( "logging" ) 
+logdebug     = getSettingBool( addon, "logging" ) 
 
 lw      = Logger( preamble=preamble, logdebug=logdebug )
 JSONURL = URL( 'json' )
@@ -1373,8 +1373,7 @@ class Main:
                 return
 
 
-if ( __name__ == "__main__" ):
-    lw.log( ['script version %s started' % addonversion], xbmc.LOGNOTICE )
-    lw.log( ['debug logging set to %s' % logdebug], xbmc.LOGNOTICE )
-    slideshow = Main()
+lw.log( ['script version %s started' % addonversion], xbmc.LOGNOTICE )
+lw.log( ['debug logging set to %s' % str( logdebug )], xbmc.LOGNOTICE )
+slideshow = Main()
 lw.log( ['script stopped'], xbmc.LOGNOTICE )
