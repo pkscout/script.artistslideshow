@@ -1,0 +1,2 @@
+change over to kodisix for unicode string handling <https://github.com/romanvm/kodi.six>
+add option to use experimental Kodi 18 music image location
