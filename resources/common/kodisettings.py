@@ -5,34 +5,39 @@ def _getsetting( addon, name, default, type="string" ):
         try:
             return addon.getSettingBool( name )
         except TypeError:
-            return False
+            return default
         except AttributeError:
             if addon.getSetting( name ).lower() == 'true':
                 return True
-            else:
+            if addon.getSetting( name ).lower() == 'false':
                 return False
+            return default
     if type.lower() == "int":
         try:
             return addon.getSettingInt( name )
         except TypeError:
-            return 0
+            return default
         except AttributeError:
             try:
                 return int( addon.getSetting( name ) )
             except:
-                return 0
+                return default
     if type.lower() == "number":
         try:
             return addon.getSettingNumber( name )
         except TypeError:
-            return 0.0
+            return default
         except AttributeError:
             try:
                 return float( addon.getSetting( name ) )
             except:
-                return 0.0
+                return default
     else:
-        return addon.getSetting( name )
+        setting = addon.getSetting( name )
+        if setting:
+            return setting
+        else:
+            return default
 
 
 def getSettingBool( addon, name, default=False ):
