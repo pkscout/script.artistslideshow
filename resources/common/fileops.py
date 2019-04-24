@@ -8,7 +8,7 @@ except:
     import os
     hasSubprocess = False
 try:
-    import xbmcvfs
+    from kodi_six import xbmcvfs
     isXBMC = True
 except:
     import os

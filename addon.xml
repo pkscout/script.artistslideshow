@@ -3,7 +3,7 @@
 		<import addon="xbmc.python" version="2.26.0" />
 		<import addon="xbmc.addon" version="17.9.910" />
 		<import addon="script.module.requests" version="2.3.0" />
-		<import addon="script.module.simplejson" version="3.3.0" />
+		<import addon="script.module.kodi-six" />
 	</requires>
 	<extension library="default.py" point="xbmc.python.script">
 		<provides>executable</provides>
@@ -12,6 +12,7 @@
 		<news>
 v.3.0~beta1
 - first Leia only version
+- first work to make ready for Python3
 - added experimental support for Kodi's new music management schema
 		</news>
 		<summary lang="ar_SA">حمل المزيد من الصور والمعلومات عن الفنان الذى يُغنِى حالياً</summary>

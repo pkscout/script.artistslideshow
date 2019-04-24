@@ -192,7 +192,7 @@ class objectConfig():
         self.loglines.append( 'writing out the cache timeout information for last.fm' )
         cachetime = random.randint( self.CACHEEXPIRE['low'], self.CACHEEXPIRE['high'] )
         success, wloglines = writeFile( str( cachetime ), cachefilepath )
-        self.loglines.append( wloglines)
+        self.loglines.append( wloglines )
         return success
 
 

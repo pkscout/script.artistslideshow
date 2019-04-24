@@ -1,7 +1,7 @@
 #v.0.3.0
 
 try:
-    import xbmc
+    from kodi_six import xbmc
     LOGTYPE = 'xbmc'
 except:
     import logging, logging.handlers

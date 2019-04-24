@@ -14,12 +14,12 @@
 # *  theaudiodb:   http://www.theaudiodb.com
 # *  htbackdrops:  http://www.htbackdrops.org
 
-import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 import itertools, os, random, re, sys, time
 import xml.etree.ElementTree as _xmltree
 import json as _json
+from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcvfs
+from kodi_six.utils import py2_encode, py2_decode
 from collections import OrderedDict as _ordereddict
-from resources.common.fix_utf8 import smartUTF8
 from resources.common.fileops import checkPath, writeFile, readFile, deleteFile, deleteFolder, copyFile, moveFile
 from resources.common.url import URL
 from resources.common.transforms import getImageType, itemHash, itemHashwithPath
@@ -30,7 +30,7 @@ import resources.plugins
 addon        = xbmcaddon.Addon()
 addonname    = addon.getAddonInfo('id')
 addonversion = addon.getAddonInfo('version')
-addonpath    = addon.getAddonInfo('path').decode('utf-8')
+addonpath    = addon.getAddonInfo('path')
 addonicon    = xbmc.translatePath('%s/icon.png' % addonpath )
 language     = addon.getLocalizedString
 preamble     = '[Artist Slideshow]'
@@ -216,7 +216,7 @@ class Main:
             old_files = []
         for old_file in old_files:
             if not old_file.endswith( '.nfo' ):
-                success, loglines = deleteFile( os.path.join(dir_path, old_file.decode('utf-8')) )
+                success, loglines = deleteFile( os.path.join(dir_path, old_file) )
 
 
     def _clean_text( self, text ):
@@ -280,7 +280,7 @@ class Main:
         bio_params = {}
         bio_params['mbid'] = self.MBID
         bio_params['infodir'] = self.InfoDir
-        bio_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8') )
+        bio_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, py2_decode( self.NAME ) )
         bio_params['lang'] = self.LANGUAGE
         bio_params['artist'] = self.NAME
         bio = ''
@@ -302,7 +302,7 @@ class Main:
             self.biography = ''
         album_params = {}
         album_params['infodir'] = self.InfoDir
-        album_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8') )
+        album_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, py2_decode( self.NAME ) )
         album_params['lang'] = self.LANGUAGE
         album_params['artist'] = self.NAME
         albums = []
@@ -324,7 +324,7 @@ class Main:
             self.albums = albums
         similar_params = {}
         similar_params['infodir'] = self.InfoDir
-        similar_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8') )
+        similar_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, py2_decode( self.NAME ) )
         similar_params['lang'] = self.LANGUAGE
         similar_params['artist'] = self.NAME
         similar_artists = []
@@ -360,11 +360,12 @@ class Main:
         mbids = []
         if( xbmc.Player().isPlayingAudio() == True ):
             try:
-                playing_file = xbmc.Player().getPlayingFile() + ' - ' + xbmc.Player().getMusicInfoTag().getArtist() + ' - ' + xbmc.Player().getMusicInfoTag().getTitle()
+                playing_file = xbmc.Player().getPlayingFile()
+                # playing_file = xbmc.Player().getPlayingFile() + ' - ' + xbmc.Player().getMusicInfoTag().getArtist() + ' - ' + xbmc.Player().getMusicInfoTag().getTitle()
             except RuntimeError:
                 return artists_info
             except Exception as e:
-                lw.log( ['unexpected error getting playing file back from XBMC', e] )
+                lw.log( ['unexpected error getting playing file back from Kodi', e] )
                 return artists_info
             if playing_file != self.LASTPLAYINGFILE:
                 # if the same file is playing, use cached JSON response instead of doing a new query
@@ -414,7 +415,7 @@ class Main:
         lw.log( ['left with', artist_names] )
         for artist_name, mbid in itertools.izip_longest( artist_names, mbids, fillvalue='' ):
             if artist_name:
-                artists_info.append( (artist_name, self._get_musicbrainz_id( artist_name, mbid )) )
+                artists_info.append( (py2_encode( artist_name ), self._get_musicbrainz_id( py2_encode( artist_name ), mbid )) )
         self.ARTISTS_INFO = artists_info
         return artists_info
 
@@ -430,7 +431,7 @@ class Main:
             files = []
         if not files and trynum == 'first':
             s_name = self._set_safe_artist_name( self.NAME )
-            lw.log( ['did not work with %s, trying %s' % (smartUTF8( self.NAME ).decode( 'utf-8' ), s_name)] )           
+            lw.log( ['did not work with %s, trying %s' % (py2_decode( self.NAME ), s_name)] )           
             self.CacheDir = os.path.join( self.LOCALARTISTPATH, s_name, self.FANARTFOLDER )
             files = self._get_directory_list( 'second' )
         return files
@@ -489,7 +490,7 @@ class Main:
         if not self.NAME:
             lw.log( ['no artist name provided'] )
             return
-        artist_path = os.path.join( self.LOCALARTISTPATH, smartUTF8(self.NAME).decode('utf-8') )
+        artist_path = os.path.join( self.LOCALARTISTPATH, py2_decode( self.NAME ) )
         self.CacheDir = os.path.join( artist_path, self.FANARTFOLDER )
         lw.log( ['cachedir = %s' % self.CacheDir] )
         artist_path_exists, loglines = checkPath( os.path.join( artist_path, '' ), False )
@@ -553,7 +554,7 @@ class Main:
                 got_title = False
             except Exception as e:
                 got_title = False
-                lw.log( ['unexpected error getting %s from XBMC' % item, e] )
+                lw.log( ['unexpected error getting %s from Kodi' % item, e] )
             if num_trys > max_trys:
                 break
             else:
@@ -574,14 +575,14 @@ class Main:
                 self.LANGUAGE = language[1]
                 lw.log( ['language = %s' % self.LANGUAGE] )
                 break
-        self.LOCALARTISTPATH = getSettingString( addon, 'local_artist_path' ).decode('utf-8')
+        self.LOCALARTISTPATH = getSettingString( addon, 'local_artist_path' )
         self.PRIORITY = getSettingInt( addon, 'priority' )
         self.LOCALSTORAGEONLY = getSettingBool( addon, 'localstorageonly' )
         self.LOCALINFOSTORAGE = getSettingBool( addon, 'localinfostorage' ) 
         self.USEFALLBACK = getSettingBool( addon, 'fallback' )
-        self.FALLBACKPATH = getSettingString( addon, 'fallback_path' ).decode('utf-8')
+        self.FALLBACKPATH = getSettingString( addon, 'fallback_path' )
         self.USEOVERRIDE = getSettingBool( addon, 'slideshow' )
-        self.OVERRIDEPATH = getSettingString( addon, 'slideshow_path' ).decode('utf-8')
+        self.OVERRIDEPATH = getSettingString( addon, 'slideshow_path' )
         self.RESTRICTCACHE = getSettingBool( addon, 'restrict_cache' )
         self.DISABLEMULTIARTIST = getSettingBool( addon, 'disable_multiartist' )
         self.INCLUDEFANARTJPG = getSettingBool( addon, 'include_fanartjpg' )
@@ -590,11 +591,11 @@ class Main:
         self.MAXCACHESIZE = getSettingInt( addon, 'max_cache_size', default=1024 ) * 1000000
         self.NOTIFICATIONTYPE = getSettingInt( addon, 'show_progress' )
         if self.NOTIFICATIONTYPE == 2:
-            self.PROGRESSPATH = getSettingString( addon, 'progress_path' ).decode('utf-8')
+            self.PROGRESSPATH = getSettingString( addon, 'progress_path' )
             lw.log( ['set progress path to %s' % self.PROGRESSPATH] )
         else:
             self.PROGRESSPATH = ''
-        self.FANARTFOLDER = getSettingString( addon, 'fanart_folder', default='extrafanart' ).decode('utf-8')
+        self.FANARTFOLDER = getSettingString( addon, 'fanart_folder', default='extrafanart' )
         pl = getSettingInt( addon, "storage_target" )
         if pl == 0:
             self.ENDREPLACE = addon.getSetting( "end_replace" )
@@ -609,7 +610,7 @@ class Main:
 
 
     def _init_vars( self ):
-        self.DATAROOT = xbmc.translatePath(addon.getAddonInfo('profile')).decode('utf-8')
+        self.DATAROOT = xbmc.translatePath(addon.getAddonInfo('profile'))
         self.CHECKFILE = os.path.join( self.DATAROOT, 'migrationcheck.nfo' )
         self.IMAGECHECKFILE = os.path.join( self.DATAROOT, 'imagecheck.nfo' )
         self.INFOCHECKFILE = os.path.join( self.DATAROOT, 'infocheck.nfo' )
@@ -693,7 +694,7 @@ class Main:
         for file in files:
             if(file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')):
                 self.MergedImagesFound = True
-                img_source = os.path.join( self.CacheDir, smartUTF8( file ).decode( 'utf-8' ) )
+                img_source = os.path.join( self.CacheDir, py2_decode( file ) )
                 img_dest = os.path.join( self.MergeDir, itemHash( img_source ) + getImageType( img_source ) )               
                 success, loglines = copyFile( img_source, img_dest )
                 lw.log( loglines )
@@ -737,7 +738,7 @@ class Main:
 
 
     def _refresh_image_directory( self ):
-        if( self._get_infolabel( self.ARTISTSLIDESHOW ).decode('utf-8') == self.TransitionDir):
+        if( self._get_infolabel( self.ARTISTSLIDESHOW ) == self.TransitionDir):
             self._set_artwork_skininfo( self.CacheDir )
             lw.log( ['switching slideshow to ' + self.CacheDir] )
         else:
@@ -801,7 +802,7 @@ class Main:
                 s_name = s_name + self.ILLEGALREPLACE
             else:
                 s_name = s_name + c  
-        return smartUTF8(s_name).decode('utf-8')
+        return py2_decode( s_name )
 
 
     def _set_thedir( self, theartist, dirtype ):
@@ -854,7 +855,7 @@ class Main:
             if self.ARTISTNUM == 1:
                 if self.NOTIFICATIONTYPE == 1:
                     self._set_property("ArtistSlideshow", self.InitDir)
-                    command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(language(30300)), smartUTF8(language(30301)), 5000, smartUTF8(addonicon))
+                    command = 'XBMC.Notification(%s, %s, %s, %s)' % (py2_encode( language(30300 )), py2_encode( language(30301) ), 5000, py2_encode( addonicon ))
                     xbmc.executebuiltin(command)
                 elif self.NOTIFICATIONTYPE == 2:
                     self._set_property("ArtistSlideshow", self.PROGRESSPATH)
@@ -912,11 +913,11 @@ class Main:
                 if self.ARTISTNUM == 1:
                     self._refresh_image_directory()
                     if self.NOTIFICATIONTYPE == 1 and not cached_image_info:
-                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(language(30304)), smartUTF8(language(30305)), 5000, smartUTF8(addonicon))
+                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (py2_encode( language(30304) ), py2_encode( language(30305) ), 5000, py2_encode( addonicon ))
                         xbmc.executebuiltin(command)
                 if self.TOTALARTISTS > 1:
                     self._merge_images()
-            if( self._get_infolabel( self.ARTISTSLIDESHOW ).decode('utf-8') == self.TransitionDir and self.ARTISTNUM == 1):
+            if( self._get_infolabel( self.ARTISTSLIDESHOW ) == self.TransitionDir and self.ARTISTNUM == 1):
                 self._wait( self.MINREFRESH )
                 if( not self._playback_stopped_or_changed() ):
                     self._refresh_image_directory()
@@ -929,7 +930,7 @@ class Main:
                     lw.log( ['setting slideshow directory to blank directory'] )
                     self._set_property("ArtistSlideshow", self.InitDir)
                     if self.NOTIFICATIONTYPE == 1 and not cached_image_info:
-                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (smartUTF8(language(30302)), smartUTF8(language(30303)), 10000, smartUTF8(addonicon))
+                        command = 'XBMC.Notification(%s, %s, %s, %s)' % (py2_encode( language(30302) ), py2_encode( language(30303) ), 10000, py2_encode( addonicon ))
                         xbmc.executebuiltin(command)
             elif self.TOTALARTISTS > 1:
                 self._merge_images()
@@ -1047,7 +1048,7 @@ class Main:
         imgarchiveroot = os.path.join( self.DATAROOT, 'archive', 'ArtistSlideshow' )
         artist_hashes = self._upgrade_get_artists_hashmap()
         aDialog = xbmcgui.DialogProgressBG()
-        aDialog.create( smartUTF8(language(32013)), smartUTF8(language(32012)) )
+        aDialog.create( py2_encode( language(32013) ), py2_encode( language(32012) ) )
         try:
             info_dirs, old_files = xbmcvfs.listdir( inforoot )
         except Exception as e:
@@ -1056,13 +1057,13 @@ class Main:
         total = float( len( info_dirs ) )
         count = 1
         for info_dir in info_dirs:
-            info_dir = smartUTF8(info_dir).decode('utf-8')
+            info_dir = py2_decode( info_dir )
             lw.log( ['looking for artist name for folder ' + info_dir] )
             old_info = os.path.join( inforoot, info_dir )
             newname = self._upgrade_get_artistname( old_info, info_dir, artist_hashes )
             if newname:
-                aDialog.update( int(100*(count/total)), smartUTF8( language(32013) ), newname )
-                lw.log( ['got back %s from artist search' % smartUTF8(newname).decode('utf-8')] )
+                aDialog.update( int(100*(count/total)), py2_encode( language(32013) ), newname )
+                lw.log( ['got back %s from artist search' % py2_decode( newname )] )
             else:
                 lw.log( ['got back %s from artist search' % newname] )          
             if newname:
@@ -1092,7 +1093,7 @@ class Main:
         inforoot = os.path.join( self.DATAROOT, 'ArtistInformation' )
         imgroot = os.path.join( self.DATAROOT, 'ArtistSlideshow' )
         iDialog = xbmcgui.DialogProgressBG()
-        iDialog.create( smartUTF8(language(32013)), smartUTF8(language(32012)) )
+        iDialog.create( py2_encode( language(32013) ), py2_encode( language(32012) ) )
         try:
             info_dirs, old_files = xbmcvfs.listdir( inforoot )
         except Exception as e:
@@ -1102,8 +1103,8 @@ class Main:
         total = float( len( info_dirs ) )
         count = 1
         for info_dir in info_dirs:
-            info_dir = smartUTF8(info_dir).decode('utf-8')
-            iDialog.update( int(100*(count/total)), smartUTF8( language(32014) ), info_dir )
+            info_dir = py2_decode( info_dir )
+            iDialog.update( int(100*(count/total)), py2_encode( language(32014) ), info_dir )
             lw.log( ['renaming images in ' + info_dir])
             fanart = os.path.join( inforoot, info_dir, 'fanarttvartistimages.nfo' )
             audiodb = os.path.join( inforoot, info_dir, 'theaudiodbartistbio.nfo' )
@@ -1240,7 +1241,7 @@ class Main:
 
     def _upgrade_get_artists_hashmap( self ):
         hDialog = xbmcgui.DialogProgressBG()
-        hDialog.create( smartUTF8(language(32011)), smartUTF8(language(32012)) )
+        hDialog.create( py2_encode( language(32011)) , py2_encode( language(32012) ) )
         hashmap = _ordereddict()
         response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"AudioLibrary.GetArtists", "params":{"albumartistsonly":false, "sort":{"order":"ascending", "ignorearticle":true, "method":"artist"}},"id": 1}}' )
         try:
@@ -1254,11 +1255,11 @@ class Main:
             total = float( len( artists_info ) )
             count = 1
             for artist_info in artists_info:
-                artist = smartUTF8( artist_info['artist'] ).decode('utf-8')
-            	artist_hash = itemHash( artist_info['artist'] )
+                artist = py2_decode( artist_info['artist'] )
+                artist_hash = itemHash( artist_info['artist'] )
                 hashmap[artist_hash] = artist_info['artist']
                 lw.log( ["%s has a hash of %s" % (artist, artist_hash)] )
-                hDialog.update( int(100*(count/total)), smartUTF8( language(32011) ), artist )
+                hDialog.update( int(100*(count/total)), py2_encode( language(32011) ), artist )
                 count += 1
             hashmap[itemHash( "Various Artists" )] = "Various Artists" 
         hDialog.close()
@@ -1267,7 +1268,7 @@ class Main:
 
     def _upgrade_migratetolocal( self ):
         mDialog = xbmcgui.DialogProgressBG()
-        mDialog.create( smartUTF8(language(32015)), smartUTF8(language(32012)) )
+        mDialog.create( py2_encode( language(32015) ), py2_encode( language(32012) ) )
         imgroot = os.path.join( self.DATAROOT, 'ArtistSlideshow' )
         try:
             img_dirs, old_files = xbmcvfs.listdir( imgroot )
@@ -1277,8 +1278,8 @@ class Main:
         total = float( len( img_dirs ) )
         count = 1
         for img_dir_name in img_dirs:
-            img_dir_name = smartUTF8(img_dir_name).decode('utf-8')
-            mDialog.update( int(100*(count/total)), smartUTF8( language(32015) ), img_dir_name )
+            img_dir_name = py2_decode( img_dir_name )
+            mDialog.update( int(100*(count/total)), py2_encode( language(32015) ), img_dir_name )
             default_dir = os.path.join( self.DATAROOT, 'ArtistSlideshow', img_dir_name )
             info_dir = os.path.join( self.DATAROOT, 'ArtistInformation', img_dir_name )
             exists, loglines = checkPath( os.path.join( info_dir, '' ), False )
@@ -1324,7 +1325,7 @@ class Main:
 
     def _upgrade_migratetolocalinfo( self ):
         mDialog = xbmcgui.DialogProgressBG()
-        mDialog.create( smartUTF8(language(32017)), smartUTF8(language(32012)) )
+        mDialog.create( py2_decode(language(32017)), py2_decode( language(32012) ) )
         inforoot = os.path.join( self.DATAROOT, 'ArtistInformation' )
         try:
             info_dirs, old_files = xbmcvfs.listdir( inforoot )
@@ -1334,8 +1335,8 @@ class Main:
         total = float( len( info_dirs ) )
         count = 1
         for info_dir_name in info_dirs:
-            info_dir_name = smartUTF8(info_dir_name).decode('utf-8')
-            mDialog.update( int(100*(count/total)), smartUTF8( language(32017) ), info_dir_name )
+            info_dir_name = py2_decode( info_dir_name )
+            mDialog.update( int(100*(count/total)), py2_encode( language(32017) ), info_dir_name )
             default_dir = os.path.join( self.DATAROOT, 'ArtistInformation', info_dir_name )
             local_dir = os.path.join( self.LOCALARTISTPATH, info_dir_name, 'information' )
             exists, loglines = checkPath( os.path.join( local_dir, '' ) )
