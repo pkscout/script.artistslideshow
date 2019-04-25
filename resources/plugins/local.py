@@ -3,7 +3,7 @@
 import os
 import xml.etree.ElementTree as _xmltree
 from ..common.fileops import readFile, checkPath
-from ..common.fix_utf8 import smartUTF8
+from kodi_six.utils import py2_encode, py2_decode
 
 
 class objectConfig( object ):
@@ -22,7 +22,7 @@ class objectConfig( object ):
         self.loglines = []
         albums = []
         filepath = os.path.join( album_params.get( 'localartistdir', '' ), self.ALBUMFILEPATH )
-        local_path = os.path.join( album_params.get( 'localartistdir', ''), smartUTF8( album_params.get( 'artist', '' ) ).decode('utf-8'), 'override' )
+        local_path = os.path.join( album_params.get( 'localartistdir', ''), py2_decode( album_params.get( 'artist', '' ) ), 'override' )
         self.loglines.append( 'checking ' + filepath )
         rloglines, rawxml = readFile( filepath )
         self.loglines.extend( rloglines )
@@ -86,7 +86,7 @@ class objectConfig( object ):
         self.loglines = []
         similar_artists = []
         filepath = os.path.join( sim_params.get( 'localartistdir', '' ), self.SIMILARFILEPATH )
-        local_path = os.path.join( sim_params.get( 'localartistdir', '' ), smartUTF8( sim_params.get( 'artist', '' ) ).decode( 'utf-8' ), 'override' )
+        local_path = os.path.join( sim_params.get( 'localartistdir', '' ), py2_decode( sim_params.get( 'artist', '' ) ), 'override' )
         self.loglines.append( 'checking ' + filepath )
         rloglines, rawxml = readFile( filepath )
         self.loglines.extend( rloglines )
