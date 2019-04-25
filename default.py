@@ -14,7 +14,11 @@
 # *  theaudiodb:   http://www.theaudiodb.com
 # *  htbackdrops:  http://www.htbackdrops.org
 
-import itertools, os, random, re, sys, time
+try:
+    from itertools import izip_longest as _zip_longest
+except ImportError:
+    from itertools import zip_longest as _zip_longest
+import os, random, re, sys, time
 import xml.etree.ElementTree as _xmltree
 import json as _json
 from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcvfs
@@ -413,7 +417,7 @@ class Main:
                 lw.log( ['deleting extra MBIDs'] )
                 del mbids[1:]
         lw.log( ['left with', artist_names] )
-        for artist_name, mbid in itertools.izip_longest( artist_names, mbids, fillvalue='' ):
+        for artist_name, mbid in _zip_longest( artist_names, mbids, fillvalue='' ):
             if artist_name:
                 artists_info.append( (py2_encode( artist_name ), self._get_musicbrainz_id( py2_encode( artist_name ), mbid )) )
         self.ARTISTS_INFO = artists_info
