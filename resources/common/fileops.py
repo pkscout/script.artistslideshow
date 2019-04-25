@@ -2,6 +2,10 @@
 
 import shutil, time
 try:
+    range
+except NameError:
+    range = xrange
+try:
     import subprocess
     hasSubprocess = True
 except:
@@ -119,7 +123,7 @@ def popenWithTimeout( command, timeout ):
             log_lines.append( 'unknown error while attempting to run %s' % command )
             log_lines.append( e )
             return False, log_lines
-        for t in xrange( timeout * 4 ):
+        for t in range( timeout * 4 ):
             time.sleep( 0.25 )
             if p.poll() is not None:
                 return p.communicate(), log_lines

@@ -13,7 +13,7 @@ try:
 except AttributeError:
     clowncar = ''
 
-class objectConfig():
+class objectConfig( object ):
     def __init__( self ):
         secsinweek = int( 7*24*60*60 )
         self.URL = 'http://webservice.fanart.tv/v3/music/'

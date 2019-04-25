@@ -14,7 +14,7 @@ except AttributeError:
     clowncar = ''
 
 
-class objectConfig():
+class objectConfig( object ):
     def __init__( self ):
         secsinweek = int( 7*24*60*60 )
         self.ARTISTPARAMS = {'autocorrect':'1', 'api_key':clowncar.decode( 'base64' ), 'method':'artist.getInfo'}

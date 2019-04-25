@@ -162,7 +162,7 @@ LANGUAGES = (
     ("Brazilian"                  , "pb",            "32" ) )
 
 
-class Main:
+class Main( object ):
 
     def __init__( self ):
         self._parse_argv()
@@ -602,7 +602,7 @@ class Main:
         self.FANARTFOLDER = getSettingString( addon, 'fanart_folder', default='extrafanart' )
         pl = getSettingInt( addon, "storage_target" )
         if pl == 0:
-            self.ENDREPLACE = addon.getSetting( "end_replace" )
+            self.ENDREPLACE = getSettingString( addon, "end_replace" )
             self.ILLEGALCHARS = list( '<>:"/\|?*' )
         elif pl == 2:
             self.ENDREPLACE = '.'
@@ -614,7 +614,7 @@ class Main:
 
 
     def _init_vars( self ):
-        self.DATAROOT = xbmc.translatePath(addon.getAddonInfo('profile'))
+        self.DATAROOT = xbmc.translatePath( addon.getAddonInfo('profile') )
         self.CHECKFILE = os.path.join( self.DATAROOT, 'migrationcheck.nfo' )
         self.IMAGECHECKFILE = os.path.join( self.DATAROOT, 'imagecheck.nfo' )
         self.INFOCHECKFILE = os.path.join( self.DATAROOT, 'infocheck.nfo' )

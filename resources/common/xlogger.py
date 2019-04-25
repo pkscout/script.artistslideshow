@@ -8,7 +8,7 @@ except:
     LOGTYPE = 'file'
 
 #this class creates an object used to log stuff to the xbmc log file
-class Logger():
+class Logger( object ):
     def __init__( self, logconfig="file", format='%(asctime)-15s %(levelname)-8s %(message)s', logfile='logfile.log',
                   logname='_logger', numbackups=5, logdebug=False, maxsize=100000, when='midnight', interval=1, preamble='' ):
         self.LOGPREAMBLE = preamble

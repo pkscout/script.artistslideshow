@@ -5,7 +5,7 @@ from ..common.url import URL
 from ..common.fileops import readFile, writeFile, deleteFile, checkPath
 import json as _json
 try:
-    import theaudiodb_info as settings
+    from . import theaudiodb_info as settings
 except ImportError:
     clowncar = ''
 try:
@@ -15,7 +15,7 @@ except AttributeError:
 
 
 
-class objectConfig():
+class objectConfig( object ):
     def __init__( self ):
         url = 'http://www.theaudiodb.com/api/v1/json/%s/' % clowncar.decode( 'base64' )
         secsinweek = int( 7*24*60*60 )

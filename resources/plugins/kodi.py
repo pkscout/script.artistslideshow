@@ -4,7 +4,7 @@ import sys, xbmc
 import json as _json
 
 
-class objectConfig():
+class objectConfig( object ):
     def __init__( self ):
         self.loglines = []
 

@@ -4,7 +4,7 @@ import socket
 import requests as _requests
     
 
-class URL():
+class URL( object ):
 
     def __init__( self, returntype='text', headers='', timeout=10 ):
         self.timeout = timeout

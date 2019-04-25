@@ -14,7 +14,7 @@ except AttributeError:
     clowncar = ''
 
 
-class objectConfig():
+class objectConfig( object ):
     def __init__( self ):
         self.QUERYURL = 'http://htbackdrops.org/api/%s/searchXML' % clowncar.decode( 'base64' )
         self.DOWNLOADURL = 'http://htbackdrops.org/api/%s/download/' % clowncar.decode( 'base64' )

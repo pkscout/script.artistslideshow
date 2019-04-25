@@ -6,7 +6,7 @@ from ..common.fileops import readFile, checkPath
 from ..common.fix_utf8 import smartUTF8
 
 
-class objectConfig():
+class objectConfig( object ):
     def __init__( self ):
         self.loglines = []
         self.BIOFILEPATH = os.path.join( 'override', 'artistbio.nfo' )
