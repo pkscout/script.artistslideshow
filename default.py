@@ -517,7 +517,7 @@ class Main( object ):
         if self.LocalImagesFound:
             lw.log( ['local images found'] )
             if self.ARTISTNUM == 1:
-            	self._set_artwork_skininfo( self.CacheDir )
+                self._set_artwork_skininfo( self.CacheDir )
                 self._get_artistinfo()
         if self.TOTALARTISTS > 1:
             self._merge_images()
