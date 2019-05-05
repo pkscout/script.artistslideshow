@@ -52,19 +52,9 @@ class objectConfig( object ):
         match = False
         for element in xmldata.getiterator():
             if element.tag == "name":
-                if match:
-                    match = False
-                else:
-                    name = element.text
-                    name.encode('ascii', 'ignore')
-                    match = True
-            elif element.tag == "image":
-                if element.attrib.get('size') == "extralarge":
-                    image = element.text
-                    if not image:
-                        image = ''
-                    albums.append( ( name , image ) )
-                    match = False
+                name = element.text
+                name.encode('ascii', 'ignore')
+                albums.append( ( name , '' ) ) # last.fm no longer provides images via API
         if albums == []:
             self.loglines.append( 'no album info found in lastfm xml file' )
             return [], self.loglines
@@ -111,19 +101,9 @@ class objectConfig( object ):
         match = False
         for element in xmldata.getiterator():
             if element.tag == "name":
-                if match:
-                    match = False
-                else:
-                    name = element.text
-                    name.encode('ascii', 'ignore')
-                    match = True
-            elif element.tag == "image":
-                if element.attrib.get('size') == "extralarge":
-                    image = element.text
-                    if not image:
-                        image = ''
-                    similar_artists.append( ( name , image ) )
-                    match = False
+                name = element.text
+                name.encode('ascii', 'ignore')
+                similar_artists.append( ( name , '' ) ) # last.fm no longer provides images via API
         if similar_artists == []:
             self.loglines.append( 'no similar artists info found in lastfm xml file' )
             return [], self.loglines
