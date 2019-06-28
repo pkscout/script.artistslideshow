@@ -42,7 +42,7 @@ msgctxt "#30305"
 msgid "All artist images downloaded"
 msgstr ""
 
-#empty strings from id 30306 to 31999
+# empty strings from id 30306 to 31999
 #Settings
 
 msgctxt "#32000"
@@ -117,7 +117,7 @@ msgctxt "#32017"
 msgid "Moving artist service information files to local artist location"
 msgstr ""
 
-#empty strings from id 32018 to 32099
+# empty strings from id 32018 to 32099
 
 msgctxt "#32100"
 msgid "Slideshow"
@@ -179,7 +179,7 @@ msgctxt "#32114"
 msgid "Alternate Slideshow"
 msgstr ""
 
-#empty strings from id 32113 to 32199
+# empty strings from id 32113 to 32199
 
 msgctxt "#32200"
 msgid "Advanced"
@@ -261,7 +261,7 @@ msgctxt "#32219"
 msgid "Use Kodi music image storage schema"
 msgstr ""
 
-#empty strings from id 32219 to 32299
+# empty strings from id 32219 to 32299
 
 msgctxt "#32300"
 msgid "Album Info"
@@ -279,7 +279,7 @@ msgctxt "#32303"
 msgid "Download album info from the last.fm"
 msgstr ""
 
-#empty strings from id 32304 to 32399
+# empty strings from id 32304 to 32399
 
 msgctxt "#32400"
 msgid "Artist Bio"
@@ -301,7 +301,7 @@ msgctxt "#32404"
 msgid "Download artist bio from last.fm"
 msgstr ""
 
-#empty strings from id 32404 to 32499
+# empty strings from id 32404 to 32499
 
 msgctxt "#32500"
 msgid "Similar Artists"
@@ -311,7 +311,7 @@ msgctxt "#32501"
 msgid "Download similar artists from last.fm"
 msgstr ""
 
-#empty strings from id 32502 to 32599
+# empty strings from id 32502 to 32599
 
 msgctxt "#32600"
 msgid "Instructions"
@@ -338,9 +338,9 @@ msgid "see http://kodi.wiki/view/Add-on:Artist_Slideshow for more information"
 msgstr ""
 
 
-#empty strings from id 32606 to 32900
+# empty strings from id 32606 to 32900
 
-#Languages
+# Languages
 
 msgctxt "#32901"
 msgid "Albanian"
@@ -430,7 +430,7 @@ msgctxt "#32922"
 msgid "Indonesian"
 msgstr ""
 
-#empty string with id 32923
+# empty string with id 32923
 
 msgctxt "#32924"
 msgid "Italian"
@@ -460,7 +460,7 @@ msgctxt "#32930"
 msgid "Norwegian"
 msgstr ""
 
-#empty string with id 32931
+# empty string with id 32931
 
 msgctxt "#32932"
 msgid "Polish"
@@ -498,7 +498,7 @@ msgctxt "#32940"
 msgid "Spanish"
 msgstr ""
 
-#empty string with id 32941
+# empty string with id 32941
 
 msgctxt "#32942"
 msgid "Swedish"
