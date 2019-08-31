@@ -1,6 +1,6 @@
 #v.0.1.1
 
-import os, time, sys, random, xbmc, xbmcvfs
+import base64, os, time, sys, random, xbmc, xbmcvfs
 from ..common.url import URL
 from ..common.fileops import readFile, writeFile, deleteFile, checkPath
 import json as _json
@@ -17,7 +17,7 @@ except AttributeError:
 
 class objectConfig( object ):
     def __init__( self ):
-        url = 'http://www.theaudiodb.com/api/v1/json/%s/' % clowncar.decode( 'base64' )
+        url = 'http://www.theaudiodb.com/api/v1/json/%s/' % base64.b64decode(clowncar.encode('ascii')).decode('ascii')
         secsinweek = int( 7*24*60*60 )
         self.ARTISTMBIDURL = url + 'artist-mb.php'
         self.ARTISTSEARCHURL = url + 'search.php'

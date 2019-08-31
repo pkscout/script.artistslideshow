@@ -1,6 +1,6 @@
 #v.0.1.0
 
-import os, time, random
+import base64, os, time, random
 import xml.etree.ElementTree as _xmltree
 from ..common.url import URL
 from ..common.fileops import readFile, writeFile, checkPath
@@ -17,9 +17,9 @@ except AttributeError:
 class objectConfig( object ):
     def __init__( self ):
         secsinweek = int( 7*24*60*60 )
-        self.ARTISTPARAMS = {'autocorrect':'1', 'api_key':clowncar.decode( 'base64' ), 'method':'artist.getInfo'}
-        self.ALBUMPARAMS = {'autocorrect':'1', 'api_key':clowncar.decode( 'base64' ), 'method':'artist.getTopAlbums'}
-        self.SIMILARPARAMS = {'autocorrect':'1', 'api_key':clowncar.decode( 'base64' ), 'limit':'50', 'method':'artist.getSimilar'}
+        self.ARTISTPARAMS = {'autocorrect':'1', 'api_key':base64.b64decode(clowncar.encode('ascii')).decode('ascii'), 'method':'artist.getInfo'}
+        self.ALBUMPARAMS = {'autocorrect':'1', 'api_key':base64.b64decode(clowncar.encode('ascii')).decode('ascii'), 'method':'artist.getTopAlbums'}
+        self.SIMILARPARAMS = {'autocorrect':'1', 'api_key':base64.b64decode(clowncar.encode('ascii')).decode('ascii'), 'limit':'50', 'method':'artist.getSimilar'}
         self.URL = 'http://ws.audioscrobbler.com/2.0/'
         self.BIOFILENAME = 'lastfmartistbio.nfo'
         self.ALBUMFILENAME = 'lastfmartistalbums.nfo'
@@ -52,9 +52,19 @@ class objectConfig( object ):
         match = False
         for element in xmldata.getiterator():
             if element.tag == "name":
-                name = element.text
-                name.encode('ascii', 'ignore')
-                albums.append( ( name , '' ) ) # last.fm no longer provides images via API
+                if match:
+                    match = False
+                else:
+                    name = element.text
+                    name.encode('ascii', 'ignore')
+                    match = True
+            elif element.tag == "image":
+                if element.attrib.get('size') == "extralarge":
+                    image = element.text
+                    if not image:
+                        image = ''
+                    albums.append( ( name , image ) )
+                    match = False
         if albums == []:
             self.loglines.append( 'no album info found in lastfm xml file' )
             return [], self.loglines
@@ -101,9 +111,19 @@ class objectConfig( object ):
         match = False
         for element in xmldata.getiterator():
             if element.tag == "name":
-                name = element.text
-                name.encode('ascii', 'ignore')
-                similar_artists.append( ( name , '' ) ) # last.fm no longer provides images via API
+                if match:
+                    match = False
+                else:
+                    name = element.text
+                    name.encode('ascii', 'ignore')
+                    match = True
+            elif element.tag == "image":
+                if element.attrib.get('size') == "extralarge":
+                    image = element.text
+                    if not image:
+                        image = ''
+                    similar_artists.append( ( name , image ) )
+                    match = False
         if similar_artists == []:
             self.loglines.append( 'no similar artists info found in lastfm xml file' )
             return [], self.loglines
