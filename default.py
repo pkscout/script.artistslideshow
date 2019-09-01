@@ -963,6 +963,7 @@ class Main:
         self.ARTISTNUM = 0
         self.TOTALARTISTS = len( self.ALLARTISTS )
         self.MergedImagesFound = False
+        got_images = False
         for artist, mbid in self._get_current_artists_info( ):
             self.ARTISTNUM += 1
             self.NAME = artist
@@ -991,9 +992,11 @@ class Main:
                 if not (self.CachedImagesFound or self.ImageDownloaded):
                     lw.log( ['no remote artist artwork found, looking for local artwork'] )
                     self._get_local_images()
-        if not (self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded or self.MergedImagesFound):
-            if (self.USEFALLBACK == 'true'):
-                lw.log( ['no images found for artist, using fallback slideshow'] )
+            if not got_images:
+                got_images = self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded or self.MergedImagesFound
+        if not got_images:
+            if self.USEFALLBACK == 'true':
+                lw.log( ['no images found for any currently playing artists, using fallback slideshow'] )
                 lw.log( ['fallbackdir = ' + self.FALLBACKPATH] )
                 self.UsingFallback = True
                 self._set_property("ArtistSlideshow", self.FALLBACKPATH)
