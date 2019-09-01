@@ -1,3 +1,6 @@
+v.2.1.5
+- fix for fallback images showing if last artist on a multi-artist song has no images
+
 v.2.1.4
 - fix for fallback images not showing if all artists on a multi-artist song have no images
 

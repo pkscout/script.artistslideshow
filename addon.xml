@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="script.artistslideshow" name="Artist Slideshow" version="2.1.4" provider-name="pkscout,ronie">
+<addon id="script.artistslideshow" name="Artist Slideshow" version="2.1.5" provider-name="pkscout,ronie">
 	<requires>
 		<import addon="xbmc.python" version="2.19.0"/>
 		<import addon="xbmc.addon" version="14.0.0"/>
@@ -11,8 +11,8 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
-v.2.1.4
-- fix for fallback images not showing if all artists on a multi-artist song have no images
+v.2.1.5
+- fix for fallback images showing if last artist on a multi-artist song has no images
 		</news>
 		<summary lang="ar">حمل المزيد من الصور والمعلومات عن الفنان الذى يُغنِى حالياً</summary>
 		<summary lang="be">Download images and additional info of the currently playing artist</summary>
