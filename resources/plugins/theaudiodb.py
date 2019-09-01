@@ -3,6 +3,7 @@
 import base64, os, time, sys, random, xbmc, xbmcvfs
 from ..common.url import URL
 from ..common.fileops import readFile, writeFile, deleteFile, checkPath
+from kodi_six.utils import py2_encode
 import json as _json
 try:
     from . import theaudiodb_info as settings
@@ -212,7 +213,7 @@ class objectConfig( object ):
             success, uloglines, json_data = self.JSONURL.Get( url, params=url_params )
             self.loglines.extend( uloglines )
             if success:
-                success, wloglines = writeFile( _json.dumps( json_data ).encode( 'utf-8' ), filepath )
+                success, wloglines = writeFile( py2_encode( _json.dumps( json_data ) ), filepath )
                 self.loglines.extend( wloglines )
         exists, cloglines = checkPath( filepath, False )
         self.loglines.extend( cloglines )

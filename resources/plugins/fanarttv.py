@@ -1,8 +1,9 @@
 #v.0.1.0
 
-import os, time, sys, random, xbmc, xbmcvfs
+import base64, os, time, sys, random, xbmc, xbmcvfs
 from ..common.url import URL
 from ..common.fileops import readFile, writeFile, deleteFile, checkPath
+from kodi_six.utils import py2_encode
 import json as _json
 try:
     from . import fanarttv_info as settings
@@ -41,7 +42,7 @@ class objectConfig( object ):
         filepath = os.path.join( img_params.get( 'infodir', '' ), self.FILENAME )
         cachefilepath = os.path.join( img_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
         url = self.URL + img_params.get( 'mbid', '' )
-        url_params['api_key'] = clowncar.decode( 'base64' )
+        url_params['api_key'] = base64.b64decode(clowncar.encode('ascii')).decode('ascii')
         if img_params.get( 'clientapikey', False ):
             self.HASCLIENTKEY = True
             url_params['client_key'] = img_params.get( 'clientapikey', '' )
@@ -95,7 +96,7 @@ class objectConfig( object ):
             success, uloglines, json_data = self.JSONURL.Get( url, params=url_params )
             self.loglines.extend( uloglines )
             if success:
-                success, wloglines = writeFile( _json.dumps( json_data ).encode( 'utf-8' ), filepath )
+                success, wloglines = writeFile( py2_encode( _json.dumps( json_data ) ), filepath )
                 self.loglines.extend( wloglines )
         exists, cloglines = checkPath( filepath, False )
         self.loglines.extend( cloglines )

@@ -12,7 +12,6 @@
 # *  Last.fm:      http://www.last.fm/
 # *  fanart.tv:    http://www.fanart.tv
 # *  theaudiodb:   http://www.theaudiodb.com
-# *  htbackdrops:  http://www.htbackdrops.org
 
 try:
     from itertools import izip_longest as _zip_longest
@@ -257,7 +256,7 @@ class Main( object ):
             success, loglines, urldata = imgURL.Get( src, params=self.params )
             lw.log( loglines )
             if success:
-                success, loglines = writeFile( urldata, tmpname )
+                success, loglines = writeFile( bytearray( urldata ), tmpname )
                 lw.log( loglines )
             if not success:
                 return False

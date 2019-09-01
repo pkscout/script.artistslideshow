@@ -4,6 +4,7 @@ import base64, os, time, random
 import xml.etree.ElementTree as _xmltree
 from ..common.url import URL
 from ..common.fileops import readFile, writeFile, checkPath
+from kodi_six.utils import py2_encode
 try:
     from . import lastfm_info as settings
 except ImportError:
@@ -55,8 +56,7 @@ class objectConfig( object ):
                 if match:
                     match = False
                 else:
-                    name = element.text
-                    name.encode('ascii', 'ignore')
+                    name = py2_encode( element.text )
                     match = True
             elif element.tag == "image":
                 if element.attrib.get('size') == "extralarge":
@@ -114,8 +114,7 @@ class objectConfig( object ):
                 if match:
                     match = False
                 else:
-                    name = element.text
-                    name.encode('ascii', 'ignore')
+                    name = py2_encode( element.text )
                     match = True
             elif element.tag == "image":
                 if element.attrib.get('size') == "extralarge":
@@ -178,7 +177,7 @@ class objectConfig( object ):
             success, uloglines, data = self.TEXTURL.Get( self.URL, params=url_params )
             self.loglines.extend( uloglines )
             if success:
-                success, wloglines = writeFile( data.encode( 'utf-8' ), filepath )
+                success, wloglines = writeFile( py2_encode( data ), filepath )
                 self.loglines.extend( wloglines )
         exists, cloglines = checkPath( filepath, False )
         self.loglines.extend( cloglines )

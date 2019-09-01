@@ -32,8 +32,7 @@ class objectConfig( object ):
             return [], self.loglines
         for element in xmldata.getiterator():
             if element.tag == "name":
-                name = element.text
-                name.encode('ascii', 'ignore')
+                name = py2_encode( element.text )
             elif element.tag == "image":
                 image_text = element.text
                 if not image_text:
@@ -96,8 +95,7 @@ class objectConfig( object ):
             return [], self.loglines
         for element in xmldata.getiterator():
             if element.tag == "name":
-                name = element.text
-                name.encode('ascii', 'ignore')
+                name = py2_encode( element.text )
             elif element.tag == "image":
                 image_text = element.text
                 if not image_text:
