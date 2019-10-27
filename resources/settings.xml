@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
     <category label="32100">
-        <setting id="local_artist_path" type="folder" label="32101" default="" />
         <setting id="priority" type="enum" label="32102" lvalues="32110|32111|32112" default="0" />
-        <setting id="localstorageonly" type="bool" label="32113" default="false" />
-        <setting id="localinfostorage" type="bool" label="32218" default="false" />
-		<setting id="include_fanartjpg" type="bool" label="32108" default="false" />
-		<setting id="include_folderjpg" type="bool" label="32109" default="false" />
         <setting id="disable_multiartist" type="bool" label="32210" default="false" />
         <setting id="transparent" type="bool" label="32107" default="false" />
-    </category>
-	<category label="32114">
-		<setting id="fanart_folder" type="text" label="32205" default="" />
         <setting id="fallback" type="bool" label="32105" default="false" />
-        <setting id="fallback_path" type="folder" label="32103" default="" visible="eq(-1,true)" />
+        <setting id="fallback_path" type="folder" label="32121" default="" visible="eq(-1,true)" />
         <setting id="slideshow" type="bool" label="32106" default="false" />
-        <setting id="slideshow_path" type="folder" label="32104" default="" visible="eq(-1,true)" />
+        <setting id="slideshow_path" type="folder" label="32121" default="" visible="eq(-1,true)" />
+    </category>
+	<category label="32115">
+	    <setting id="artist_image_storage" type="enum" label="32116" lvalues="32117|32118|32119" default="0" />
+        <setting id="local_artist_path" type="folder" label="32121" default="" visible="eq(-1,2)" />
+		<setting id="include_fanartjpg" type="bool" label="32108" default="false" visible="eq(-2,2)" />
+		<setting id="include_folderjpg" type="bool" label="32109" default="false" visible="eq(-3,2)" />
+		<setting id="fanart_folder" type="text" label="32205" default="" visible="eq(-4,2)"/>
+	    <setting id="artist_info_storage" type="enum" label="32120" lvalues="32117|32119" default="0" />
+        <setting id="local_info_path" type="folder" label="32121" default="" visible="eq(-1,1)" />
+        <setting id="localstorageonly" type="bool" label="32113" default="false" visible="false" />
+        <setting id="localinfostorage" type="bool" label="32218" default="false" visible="false" />
 	</category>
     <category label="32000">
         <setting id="fanarttv" type="bool" label="32008" default="false" />
@@ -46,7 +49,6 @@
         <setting id="sa_priority_lastfm" type="slider" label="32301" visible="eq(-1,true)" default="5" range='1,1,10' option='int' />
     </category>
     <category label="32200">
-        <setting id="newimageschema" type="bool" label="32219" default="false" />
         <setting id="show_progress" type="enum" label="32203" lvalues="32206|32207|32208" default="0" />
         <setting id="progress_path" type="folder" label="32204" default="" visible="eq(-1,2)"/>
         <setting id="storage_target" type="enum" label="32212" default="0" lvalues="32215|32217|32216" />

@@ -3,7 +3,13 @@
 def _getsetting( addon, name, default, type="string" ):
     if type.lower() == "bool":
         try:
-            return addon.getSettingBool( name )
+            thebool = addon.getSettingBool( name )
+            if thebool == 0:
+                return False
+            elif thebool == 1:
+                return True
+            else:
+                return thebool
         except TypeError:
             return default
         except AttributeError:

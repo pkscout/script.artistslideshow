@@ -58,11 +58,11 @@ msgid "Download images from htbackdrops.org"
 msgstr ""
 
 msgctxt "#32003"
-msgid "  Minimal image width"
+msgid "- Minimum image width"
 msgstr ""
 
 msgctxt "#32004"
-msgid "  Minimal image height"
+msgid "Minimum image height"
 msgstr ""
 
 msgctxt "#32005"
@@ -70,11 +70,11 @@ msgid "Download additional artist information"
 msgstr ""
 
 msgctxt "#32006"
-msgid "  Preferred language for artist information"
+msgid "- Preferred language for artist information"
 msgstr ""
 
 msgctxt "#32007"
-msgid "  Download all images regardless of resolution"
+msgid "- Download all images regardless of resolution"
 msgstr ""
 
 msgctxt "#32008"
@@ -86,7 +86,7 @@ msgid "Download images from theaudiodb.com"
 msgstr ""
 
 msgctxt "#32010"
-msgid "  Client API key"
+msgid "- Client API key"
 msgstr ""
 
 msgctxt "#32011"
@@ -110,7 +110,7 @@ msgid "Moving artist images to local artist location"
 msgstr ""
 
 msgctxt "#32016"
-msgid "  I donate to this service"
+msgid "- I donate to this service"
 msgstr ""
 
 msgctxt "#32017"
@@ -124,11 +124,11 @@ msgid "Slideshow"
 msgstr ""
 
 msgctxt "#32101"
-msgid "Local artist folder"
+msgid "- Local artist folder"
 msgstr ""
 
 msgctxt "#32102"
-msgid "  Image Priority"
+msgid "Image priority"
 msgstr ""
 
 msgctxt "#32103"
@@ -152,11 +152,11 @@ msgid "Use transparent background when no artist images found"
 msgstr ""
 
 msgctxt "#32108"
-msgid "Include root level fanart.jpg"
+msgid "- Include root level fanart.jpg"
 msgstr ""
 
 msgctxt "#32109"
-msgid "Include root level folder.jpg"
+msgid "- Include root level folder.jpg"
 msgstr ""
 
 msgctxt "#32110"
@@ -172,14 +172,43 @@ msgid "Use both local and remote images"
 msgstr ""
 
 msgctxt "#32113"
-msgid "  Always use local artist path for image storage"
+msgid "- Always use local artist path for image storage"
 msgstr ""
 
 msgctxt "#32114"
 msgid "Alternate Slideshow"
 msgstr ""
 
-# empty strings from id 32113 to 32199
+msgctxt "#32115"
+msgid "Storage"
+msgstr ""
+
+msgctxt "#32116"
+msgid "Store artist images in"
+msgstr ""
+
+msgctxt "#32117"
+msgid "addon_data folder"
+msgstr ""
+
+msgctxt "#32118"
+msgid "Kodi 18+ central storage location"
+msgstr ""
+
+msgctxt "#32119"
+msgid "Custom location"
+msgstr ""
+
+msgctxt "#32120"
+msgid "Store artist information in"
+msgstr ""
+
+msgctxt "#32121"
+msgid "- Custom location"
+msgstr ""
+
+
+# empty strings from id 32122 to 32199
 
 msgctxt "#32200"
 msgid "Advanced"
@@ -190,7 +219,7 @@ msgid "Limit size of download cache"
 msgstr ""
 
 msgctxt "#32202"
-msgid "  Maximum cache size (in megabytes)"
+msgid "- Maximum cache size (in megabytes)"
 msgstr ""
 
 msgctxt "#32203"
@@ -198,11 +227,11 @@ msgid "Download notification type"
 msgstr ""
 
 msgctxt "#32204"
-msgid "  Custom notification images folder"
+msgid "- Custom notification images folder"
 msgstr ""
 
 msgctxt "#32205"
-msgid "Alternate name for local fanart folder"
+msgid "- Alternate name for local fanart folder"
 msgstr ""
 
 msgctxt "#32206"
@@ -254,7 +283,7 @@ msgid "Other"
 msgstr ""
 
 msgctxt "#32218"
-msgid "  Always use local artist path for service information storage"
+msgid "- Always use local artist path for service information storage"
 msgstr ""
 
 msgctxt "#32219"
@@ -268,7 +297,7 @@ msgid "Album Info"
 msgstr ""
 
 msgctxt "#32301"
-msgid "  Priority"
+msgid "- Priority"
 msgstr ""
 
 msgctxt "#32302"
