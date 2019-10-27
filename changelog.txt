@@ -1,6 +1,8 @@
+v.3.0.0~beta2
+- updated settings to allow for storing music in Kodi music folder
+
 v.3.0.0~beta1
-- first Leia only version
-- added experimental support for Kodi's new music management schema
+- Python2/3 compatible
 - converted language files to current format for forward compatibility
 
 v.2.1.4

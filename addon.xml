@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.0~beta1">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.0~beta2">
 	<requires>
 		<import addon="xbmc.python" version="2.26.0" />
 		<import addon="xbmc.addon" version="17.9.910" />
@@ -11,10 +11,12 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
-v.3.0~beta1
-- first Leia only version
-- first work to make ready for Python3
-- added experimental support for Kodi's new music management schema
+v.3.0.0~beta2
+- updated settings to allow for storing music in Kodi music folder
+
+v.3.0.0~beta1
+- Python2/3 compatible
+- converted language files to current format for forward compatibility
 		</news>
 		<summary lang="ar_SA">حمل المزيد من الصور والمعلومات عن الفنان الذى يُغنِى حالياً</summary>
 		<summary lang="be_BY">Download images and additional info of the currently playing artist</summary>
