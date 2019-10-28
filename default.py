@@ -166,13 +166,16 @@ class Main( object ):
     def __init__( self ):
         self._parse_argv()
         self._init_window()
-        if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
+        if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == "True" and not self.RUNFROMSETTINGS:
             lw.log( ['script already running'] )
         else:
-            self._upgrade()
+            self._upgrade_settings()
             self._get_settings()
             self._init_vars()
             self._make_dirs()
+            self._upgrade()
+            if self._run_from_settings():
+                return
             self.LastCacheTrim = 0
             self._set_property("ArtistSlideshowRunning", "True")
             if( xbmc.Player().isPlayingAudio() == False and self._get_infolabel( self.EXTERNALCALL ) == '' ):
@@ -236,9 +239,9 @@ class Main( object ):
     def _clear_properties( self ):
         self.MBID = ''
         self.FANARTNUMBER = False
-        self._set_property( "ArtistSlideshow", self.InitDir )
+        self._set_property( "ArtistSlideshow", self.INITDIR )
         self._clean_dir( self.MergeDir )
-        self._clean_dir( self.TransitionDir )
+        self._clean_dir( self.TRANSITIONDIR )
         self._set_property( "ArtistSlideshow.ArtistBiography" )
         for count in range( 50 ):
             self._set_property( "ArtistSlideshow.%d.SimilarName" % ( count + 1 ) )
@@ -425,9 +428,9 @@ class Main( object ):
 
 
     def _get_directory_list( self, trynum='first' ):
-        lw.log( ['checking %s for artist images' % self.CacheDir] )
+        lw.log( ['checking %s for artist images' % self.CACHEDIR] )
         try:
-            dirs, files = xbmcvfs.listdir( self.CacheDir )
+            dirs, files = xbmcvfs.listdir( self.CACHEDIR )
         except OSError:
             files = []
         except Exception as e:
@@ -436,7 +439,7 @@ class Main( object ):
         if not files and trynum == 'first':
             s_name = self._set_safe_artist_name( self.NAME )
             lw.log( ['did not work with %s, trying %s' % (py2_decode( self.NAME ), s_name)] )           
-            self.CacheDir = os.path.join( self.LOCALARTISTPATH, s_name, self.FANARTFOLDER )
+            self.CACHEDIR = os.path.join( self.LOCALARTISTPATH, s_name, self.FANARTFOLDER )
             files = self._get_directory_list( 'second' )
         return files
         
@@ -495,8 +498,8 @@ class Main( object ):
             lw.log( ['no artist name provided'] )
             return
         artist_path = os.path.join( self.LOCALARTISTPATH, py2_decode( self.NAME ) )
-        self.CacheDir = os.path.join( artist_path, self.FANARTFOLDER )
-        lw.log( ['cachedir = %s' % self.CacheDir] )
+        self.CACHEDIR = os.path.join( artist_path, self.FANARTFOLDER )
+        lw.log( ['cachedir = %s' % self.CACHEDIR] )
         artist_path_exists, loglines = checkPath( os.path.join( artist_path, '' ), False )
         copy_files = []
         if self.INCLUDEFANARTJPG and artist_path_exists:
@@ -506,9 +509,9 @@ class Main( object ):
             copy_files.append( 'folder.jpg' )
             copy_files.append( 'folder.png' )
         for one_file in copy_files:
-            result, loglines = checkPath( os.path.join( self.CacheDir, '' ) )
+            result, loglines = checkPath( os.path.join( self.CACHEDIR, '' ) )
             lw.log( loglines )
-            success, loglines = copyFile( os.path.join( artist_path, one_file ), os.path.join( self.CacheDir, one_file ) )
+            success, loglines = copyFile( os.path.join( artist_path, one_file ), os.path.join( self.CACHEDIR, one_file ) )
             lw.log( loglines )
         files = self._get_directory_list()
         for file in files:
@@ -517,7 +520,7 @@ class Main( object ):
         if self.LocalImagesFound:
             lw.log( ['local images found'] )
             if self.ARTISTNUM == 1:
-                self._set_artwork_skininfo( self.CacheDir )
+                self._set_artwork_skininfo( self.CACHEDIR )
                 self._get_artistinfo()
         if self.TOTALARTISTS > 1:
             self._merge_images()
@@ -664,11 +667,11 @@ class Main( object ):
         lw.log( ['external call is set to ' + self._get_infolabel( self.EXTERNALCALL )] )
         if getSettingBool( addon, "transparent" ):
             self._set_property("ArtistSlideshowTransparent", 'true')
-            self.InitDir = os.path.join( self.DATAROOT, 'resources', 'transparent' )
+            self.INITDIR = os.path.join( self.DATAROOT, 'resources', 'transparent' )
         else:
             self._set_property("ArtistSlideshowTransparent", '')
-            self.InitDir = os.path.join( self.DATAROOT, 'resources', 'black' )
-        self._set_property("ArtistSlideshow", self.InitDir)
+            self.INITDIR = os.path.join( self.DATAROOT, 'resources', 'black' )
+        self._set_property("ArtistSlideshow", self.INITDIR)
         self.NAME = ''
         self.ALLARTISTS = []
         self.MBID = ''
@@ -682,7 +685,7 @@ class Main( object ):
         self.DownloadedAllImages = False
         self.UsingFallback = False
         self.MINREFRESH = 9.9
-        self.TransitionDir = os.path.join( self.DATAROOT, 'transition' )
+        self.TRANSITIONDIR = os.path.join( self.DATAROOT, 'transition' )
         self.MergeDir = os.path.join( self.DATAROOT, 'merge' )
         self.params = {}
 
@@ -695,7 +698,7 @@ class Main( object ):
 
 
     def _make_dirs( self ):
-        exists, loglines = checkPath( os.path.join( self.InitDir, '' ) )
+        exists, loglines = checkPath( os.path.join( self.INITDIR, '' ) )
         lw.log( loglines )
         exists, loglines = checkPath( os.path.join( self.DATAROOT, '' ) )
         lw.log( loglines )
@@ -706,13 +709,13 @@ class Main( object ):
 
 
     def _merge_images( self ):
-        lw.log( ['merging files from primary directory %s into merge directory %s' % (self.CacheDir, self.MergeDir)] )
+        lw.log( ['merging files from primary directory %s into merge directory %s' % (self.CACHEDIR, self.MergeDir)] )
         self.MergedImagesFound = False
-        dirs, files = xbmcvfs.listdir(self.CacheDir)
+        dirs, files = xbmcvfs.listdir(self.CACHEDIR)
         for file in files:
             if(file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')):
                 self.MergedImagesFound = True
-                img_source = os.path.join( self.CacheDir, py2_decode( file ) )
+                img_source = os.path.join( self.CACHEDIR, py2_decode( file ) )
                 img_dest = os.path.join( self.MergeDir, itemHash( img_source ) + getImageType( img_source ) )               
                 success, loglines = copyFile( img_source, img_dest )
                 lw.log( loglines )
@@ -725,6 +728,10 @@ class Main( object ):
             if not self._playback_stopped_or_changed():
                 lw.log( ['switching slideshow to merge directory'] )
                 self._set_artwork_skininfo( self.MergeDir )
+
+
+    def _move_to_kodi_storage( self ):
+        lw.log( ['moving images from one place to another'] )
 
 
     def _parse_argv( self ):
@@ -745,6 +752,12 @@ class Main( object ):
         self.DAEMON = params.get( "daemon", "False" )
         if self.DAEMON == "True":
             lw.log( ['daemonizing'] )
+        self.RUNFROMSETTINGS = False
+        self.MOVETOKODISTORAGE = False
+        checkmove = params.get( "movetokodistorage", "False" )
+        if checkmove.lower() == 'true': 
+            self.MOVETOKODISTORAGE = True
+            self.RUNFROMSETTINGS = True
 
 
     def _playback_stopped_or_changed( self ):
@@ -756,12 +769,12 @@ class Main( object ):
 
 
     def _refresh_image_directory( self ):
-        if( self._get_infolabel( self.ARTISTSLIDESHOW ) == self.TransitionDir):
-            self._set_artwork_skininfo( self.CacheDir )
-            lw.log( ['switching slideshow to ' + self.CacheDir] )
+        if( self._get_infolabel( self.ARTISTSLIDESHOW ) == self.TRANSITIONDIR):
+            self._set_artwork_skininfo( self.CACHEDIR )
+            lw.log( ['switching slideshow to ' + self.CACHEDIR] )
         else:
-            self._set_artwork_skininfo( self.TransitionDir )
-            lw.log( ['switching slideshow to ' + self.TransitionDir] )
+            self._set_artwork_skininfo( self.TRANSITIONDIR )
+            lw.log( ['switching slideshow to ' + self.TRANSITIONDIR] )
         self.LASTARTISTREFRESH = time.time()
         lw.log( ['Last slideshow refresh time is ' + str(self.LASTARTISTREFRESH)] )
 
@@ -773,13 +786,20 @@ class Main( object ):
             return thename
     
 
+    def _run_from_settings( self ):
+        if self.MOVETOKODISTORAGE:
+            self._move_to_kodi_storage()
+            return True
+        return False
+
+
     def _set_artwork_skininfo( self, dir ):
         self._set_property( 'ArtistSlideshow', dir )
         self._set_property( 'ArtistSlideshow.ArtworkReady', 'true')
     
 
     def _set_cachedir( self, theartist ):
-        self.CacheDir = self._set_thedir( theartist, 'ArtistSlideshow' )
+        self.CACHEDIR = self._set_thedir( theartist, 'ArtistSlideshow' )
 
 
     def _set_image_name( self, url ):
@@ -878,13 +898,13 @@ class Main( object ):
             return
         if self.PRIORITY == 2 and self.LocalImagesFound:
             pass
-            #self.CacheDir was successfully set in _get_local_images
+            #self.CACHEDIR was successfully set in _get_local_images
         else:
             self._set_cachedir( self.NAME )
-        lw.log( ['cachedir = %s' % self.CacheDir] )
+        lw.log( ['cachedir = %s' % self.CACHEDIR] )
         if self.ARTISTNUM == 1:
             self._get_artistinfo()
-        dirs, files = xbmcvfs.listdir( self.CacheDir )
+        dirs, files = xbmcvfs.listdir( self.CACHEDIR )
         for file in files:
             if (file.lower().endswith('tbn') or file.lower().endswith('jpg') or file.lower().endswith('jpeg') or file.lower().endswith('gif') or file.lower().endswith('png')) or (self.PRIORITY == 2 and self.LocalImagesFound):
                 self.CachedImagesFound = True
@@ -893,18 +913,18 @@ class Main( object ):
             cached_image_info = True
             self.LASTARTISTREFRESH = time.time()
             if self.ARTISTNUM == 1:
-                self._set_artwork_skininfo( self.CacheDir )
+                self._set_artwork_skininfo( self.CACHEDIR )
         else:
             self.LASTARTISTREFRESH = 0
             if self.ARTISTNUM == 1:
                 if self.NOTIFICATIONTYPE == 1:
-                    self._set_property("ArtistSlideshow", self.InitDir)
+                    self._set_property("ArtistSlideshow", self.INITDIR)
                     command = 'XBMC.Notification(%s, %s, %s, %s)' % (py2_encode( language(30300 )), py2_encode( language(30301) ), 5000, py2_encode( addonicon ))
-                    xbmc.executebuiltin(command)
+                    xbmc.executebuiltin( command )
                 elif self.NOTIFICATIONTYPE == 2:
                     self._set_property("ArtistSlideshow", self.PROGRESSPATH)
                 else:
-                    self._set_property("ArtistSlideshow", self.InitDir)
+                    self._set_property("ArtistSlideshow", self.INITDIR)
         lw.log( ['downloading images'] )
         imgdb = os.path.join( self.INFODIR, self.IMGDB )
         lw.log( ['checking download cache file ' + imgdb] )
@@ -915,8 +935,8 @@ class Main( object ):
             if( self._playback_stopped_or_changed() ):
                 return
             url_image_name = url.rsplit('/', 1)[-1]
-            path = os.path.join( self.CacheDir, self._set_image_name( url ) )
-            path2 = os.path.join( self.TransitionDir, url_image_name )
+            path = os.path.join( self.CACHEDIR, self._set_image_name( url ) )
+            path2 = os.path.join( self.TRANSITIONDIR, url_image_name )
             lw.log( ['checking %s against %s' % (url_image_name, cachelist_str)] )
             if not (url_image_name in cachelist_str):
                 if self._download(url, path, path2):
@@ -928,9 +948,9 @@ class Main( object ):
                     self.ImageDownloaded = True
             if self.ImageDownloaded:
                 if( self._playback_stopped_or_changed() and self.ARTISTNUM == 1 ):
-                    self._set_artwork_skininfo( self.CacheDir )
+                    self._set_artwork_skininfo( self.CACHEDIR )
                     self.LASTARTISTREFRESH = time.time()
-                    self._clean_dir( self.TransitionDir )
+                    self._clean_dir( self.TRANSITIONDIR )
                     return
                 if not self.CachedImagesFound:
                     self.CachedImagesFound = True
@@ -945,9 +965,9 @@ class Main( object ):
             lw.log( ['finished downloading images'] )
             self.DownloadedAllImages = True
             if( self._playback_stopped_or_changed() ):
-                self._set_artwork_skininfo( self.CacheDir )
+                self._set_artwork_skininfo( self.CACHEDIR )
                 self.LASTARTISTREFRESH = time.time()
-                self._clean_dir( self.TransitionDir )
+                self._clean_dir( self.TRANSITIONDIR )
                 return
             lw.log( ['cleaning up from refreshing slideshow'] )
             wait_elapsed = time.time() - self.LASTARTISTREFRESH
@@ -961,18 +981,18 @@ class Main( object ):
                         xbmc.executebuiltin(command)
                 if self.TOTALARTISTS > 1:
                     self._merge_images()
-            if( self._get_infolabel( self.ARTISTSLIDESHOW ) == self.TransitionDir and self.ARTISTNUM == 1):
+            if( self._get_infolabel( self.ARTISTSLIDESHOW ) == self.TRANSITIONDIR and self.ARTISTNUM == 1):
                 self._wait( self.MINREFRESH )
                 if( not self._playback_stopped_or_changed() ):
                     self._refresh_image_directory()
-            self._clean_dir( self.TransitionDir )
+            self._clean_dir( self.TRANSITIONDIR )
         if not self.ImageDownloaded:
             lw.log( ['no images downloaded'] )
             self.DownloadedAllImages = True
             if not self.CachedImagesFound:
                 if self.ARTISTNUM == 1:
                     lw.log( ['setting slideshow directory to blank directory'] )
-                    self._set_property("ArtistSlideshow", self.InitDir)
+                    self._set_property("ArtistSlideshow", self.INITDIR)
                     if self.NOTIFICATIONTYPE == 1 and not cached_image_info:
                         command = 'XBMC.Notification(%s, %s, %s, %s)' % (py2_encode( language(30302) ), py2_encode( language(30303) ), 10000, py2_encode( addonicon ))
                         xbmc.executebuiltin(command)
@@ -1060,8 +1080,8 @@ class Main( object ):
             lw.log( [message] )
 
 
-    def _upgrade( self ):
-        #this is where any code goes for one time upgrade routines
+    def _upgrade_settings( self ):
+        #this is where any code goes for one time upgrade routines related to settings
         checkfile = os.path.join( xbmc.translatePath( addon.getAddonInfo('profile') ), 'migrationcheck.nfo' )
         loglines, data = readFile( checkfile )
         lw.log( loglines )
@@ -1071,8 +1091,50 @@ class Main( object ):
             if getSettingBool( addon, 'localinfostorage' ):
                 addon.setSetting( 'artist_info_storage', '1')
                 addon.setSetting( 'local_info_path', addon.getSetting( 'local_artist_path' ))
-            self._update_check_file( checkfile, '3.0.0', 'preference conversion complete' )
 
+
+    def _upgrade( self ):
+        #this is where any code goes for one time upgrade routines
+        checkfile = os.path.join( xbmc.translatePath( addon.getAddonInfo('profile') ), 'migrationcheck.nfo' )
+        loglines, data = readFile( checkfile )
+        lw.log( loglines )
+        if '3.0.0' not in data:
+            src_root = os.path.join( self.DATAROOT, 'ArtistSlideshow' )
+            dst_root = os.path.join( self.DATAROOT, 'ArtistInformation')
+            exists, loglines = checkPath( os.path.join( src_root, '' ) )
+            if exists:
+                try:
+                    dirs, files = xbmcvfs.listdir( src_root )
+                except OSError:
+                    dirs = []
+                except Exception as e:
+                    lw.log( ['unexpected error getting directory list', e] )
+                    dirs = []
+                if dirs:
+                    for dir in dirs:
+                        src = os.path.join( src_root, dir, self.IMGDB )
+                        dst = os.path.join( dst_root, dir, self.IMGDB )
+                        success, loglines = moveFile( src, dst )
+                        lw.log( loglines )
+            src_root = getSettingString( addon, 'local_artist_path' )
+            dst_root = src_root
+            exists, loglines = checkPath( os.path.join( src_root, '' ) )
+            if exists:
+                try:
+                    dirs, files = xbmcvfs.listdir( src_root )
+                except OSError:
+                    dirs = []
+                except Exception as e:
+                    lw.log( ['unexpected error getting directory list', e] )
+                    dirs = []
+                if dirs:
+                    for dir in dirs:
+                        src = os.path.join( src_root, dir, self.FANARTFOLDER, self.IMGDB )
+                        dst = os.path.join( dst_root, dir, 'information', self.IMGDB )
+                        success, loglines = moveFile( src, dst )
+                        lw.log( loglines )
+            self._update_check_file( checkfile, '3.0.0', 'preference conversion complete' )
+        
 
     def _wait( self, wait_time ):
         waited = 0
@@ -1080,7 +1142,7 @@ class Main( object ):
             time.sleep(0.1)
             waited = waited + 0.1
             if self._playback_stopped_or_changed():
-                self._set_property( "ArtistSlideshow", self.InitDir )
+                self._set_property( "ArtistSlideshow", self.INITDIR )
                 self._set_property( "ArtistSlideshow.ArtworkReady" )
                 self.Abort = True
                 return

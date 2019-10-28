@@ -192,7 +192,7 @@ msgid "addon_data folder"
 msgstr ""
 
 msgctxt "#32118"
-msgid "Kodi 18+ central storage location"
+msgid "Kodi music artist folder"
 msgstr ""
 
 msgctxt "#32119"
@@ -290,7 +290,11 @@ msgctxt "#32219"
 msgid "Use Kodi music image storage schema"
 msgstr ""
 
-# empty strings from id 32219 to 32299
+msgctxt "#32220"
+msgid "Move images to Kodi music artist folder"
+msgstr ""
+
+# empty strings from id 32221 to 32299
 
 msgctxt "#32300"
 msgid "Album Info"
