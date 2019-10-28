@@ -235,6 +235,7 @@ class Main( object ):
     
     def _clear_properties( self ):
         self.MBID = ''
+        self.FANARTNUMBER = False
         self._set_property( "ArtistSlideshow", self.InitDir )
         self._clean_dir( self.MergeDir )
         self._clean_dir( self.TransitionDir )
@@ -250,7 +251,7 @@ class Main( object ):
         if (not xbmc.abortRequested):
             tmpname = os.path.join( self.DATAROOT, 'temp', src.rsplit('/', 1)[-1] )
             lw.log( ['the tmpname is ' + tmpname] )
-            if xbmcvfs.exists(tmpname):
+            if xbmcvfs.exists( tmpname ):
                 success, loglines = deleteFile( tmpname )
                 lw.log( loglines )
             success, loglines, urldata = imgURL.Get( src, params=self.params )
@@ -282,7 +283,7 @@ class Main( object ):
         bio = ''
         bio_params = {}
         bio_params['mbid'] = self.MBID
-        bio_params['infodir'] = self.InfoDir
+        bio_params['infodir'] = self.INFODIR
         bio_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, py2_decode( self.NAME ) )
         bio_params['lang'] = self.LANGUAGE
         bio_params['artist'] = self.NAME
@@ -304,7 +305,7 @@ class Main( object ):
         else:
             self.biography = ''
         album_params = {}
-        album_params['infodir'] = self.InfoDir
+        album_params['infodir'] = self.INFODIR
         album_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, py2_decode( self.NAME ) )
         album_params['lang'] = self.LANGUAGE
         album_params['artist'] = self.NAME
@@ -326,7 +327,7 @@ class Main( object ):
         else:
             self.albums = albums
         similar_params = {}
-        similar_params['infodir'] = self.InfoDir
+        similar_params['infodir'] = self.INFODIR
         similar_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, py2_decode( self.NAME ) )
         similar_params['lang'] = self.LANGUAGE
         similar_params['artist'] = self.NAME
@@ -465,7 +466,7 @@ class Main( object ):
         image_params['mbid'] = self._get_musicbrainz_id( self.NAME, self.MBID )
         image_params['lang'] = self.LANGUAGE
         image_params['artist'] = self.NAME
-        image_params['infodir'] = self.InfoDir
+        image_params['infodir'] = self.INFODIR
         for plugin_name in image_plugins['names']:
             image_list = []
             lw.log( ['checking %s for images' % plugin_name[1]] )
@@ -529,7 +530,7 @@ class Main( object ):
             lw.log( ['returning ' + mbid] )
             return mbid
         mbid_params = {}
-        mbid_params['infodir'] = self.InfoDir
+        mbid_params['infodir'] = self.INFODIR
         for plugin_name in mbid_plugins['names']:
             lw.log( ['checking %s for mbid' % plugin_name[1]] )
             mbid, loglines = mbid_plugins['objs'][plugin_name[1]].getMBID( mbid_params )
@@ -587,6 +588,7 @@ class Main( object ):
         self.MAXCACHESIZE = getSettingInt( addon, 'max_cache_size', default=1024 ) * 1000000
         artist_image_storage = getSettingInt( addon, 'artist_image_storage' )
         if artist_image_storage == 1:
+            self.KODILOCALSTORAGE = True
             self.LOCALARTISTSTORAGE = True
             self.RESTRICTCACHE = False
             self.INCLUDEFANARTJPG = False
@@ -598,11 +600,13 @@ class Main( object ):
             try:
                 self.LOCALARTISTPATH = _json.loads(response)['result']['value']
             except (IndexError, KeyError, ValueError):
+                self.KODILOCALSTORAGE = False
                 self.LOCALARTISTSTORAGE = False
                 self.LOCALARTISTPATH = ''
                 self.RESTRICTCACHE = getSettingBool( addon, 'restrict_cache' )
                 self.FANARTFOLDER = 'extrafanart'
         elif artist_image_storage == 2:
+            self.KODILOCALSTORAGE = False
             self.LOCALARTISTSTORAGE = True
             self.LOCALARTISTPATH = getSettingString( addon, 'local_artist_path' )        
             self.RESTRICTCACHE = getSettingBool( addon, 'restrict_cache' )
@@ -610,13 +614,14 @@ class Main( object ):
             self.INCLUDEFOLDERJPG = getSettingBool( addon, 'include_folderjpg' )
             self.FANARTFOLDER = getSettingString( addon, 'fanart_folder', default='extrafanart' )
         else:
+            self.KODILOCALSTORAGE = False
             self.LOCALARTISTSTORAGE = False
             self.LOCALARTISTPATH = ''
             self.INCLUDEFANARTJPG = False
             self.INCLUDEFOLDERJPG = False
             self.RESTRICTCACHE = getSettingBool( addon, 'restrict_cache' )
             self.FANARTFOLDER = 'extrafanart'
-        lw.log( ['LOCALARTISTSTORAGE is ' + str( self.LOCALARTISTSTORAGE ), 'LOCALARTISTPATH is ' + self.LOCALARTISTPATH, 'RESTRICTCACHE is ' + str( self.RESTRICTCACHE ), 'INCLUDEFANARTJPG is ' + str( self.INCLUDEFANARTJPG ), 'INCLUDEFOLDERJPG is ' + str( self.INCLUDEFOLDERJPG ), 'FANARTFOLDER is ' + self.FANARTFOLDER] )
+        lw.log( ['LOCALARTISTSTORAGE is ' + str( self.LOCALARTISTSTORAGE ), 'KODILOCALSTORAGE is ' + str( self.KODILOCALSTORAGE ), 'LOCALARTISTPATH is ' + self.LOCALARTISTPATH, 'RESTRICTCACHE is ' + str( self.RESTRICTCACHE ), 'INCLUDEFANARTJPG is ' + str( self.INCLUDEFANARTJPG ), 'INCLUDEFOLDERJPG is ' + str( self.INCLUDEFOLDERJPG ), 'FANARTFOLDER is ' + self.FANARTFOLDER] )
         if getSettingInt( addon, 'artist_info_storage' ) == 1:
             self.LOCALINFOSTORAGE = True
             self.LOCALINFOPATH = getSettingString( addon, 'local_info_path' )
@@ -644,6 +649,7 @@ class Main( object ):
 
 
     def _init_vars( self ):
+        self.FANARTNUMBER = False
         self.DATAROOT = xbmc.translatePath( addon.getAddonInfo('profile') )
         self.IMGDB = '_imgdb.nfo'
         self._set_property( "ArtistSlideshow.CleanupComplete" )
@@ -776,8 +782,33 @@ class Main( object ):
         self.CacheDir = self._set_thedir( theartist, 'ArtistSlideshow' )
 
 
+    def _set_image_name( self, url ):
+        if not self.KODILOCALSTORAGE:
+            return url.rsplit('/', 1)[-1]
+        ext = os.path.splitext( url )[1]
+        if self.FANARTNUMBER:
+            self.FANARTNUMBER += 1
+        else:
+            files = self._get_directory_list()
+            files.sort()
+            lw.log( files )
+            if files:
+                lastfile = files[-1]
+                try:
+                    tmpname = os.path.splitext( lastfile )[0]
+                except IndexError:
+                    return url.rsplit('/', 1)[-1]
+                try:
+                    self.FANARTNUMBER = int( re.search('(\d+)$', tmpname).group(0) ) + 1
+                except:
+                    self.FANARTNUMBER = 1
+            else:
+                self.FANARTNUMBER = 1
+        return "fanart" + str( self.FANARTNUMBER ) + ext
+            
+
     def _set_infodir( self, theartist ):
-        self.InfoDir = self._set_thedir( theartist, 'ArtistInformation' )
+        self.INFODIR = self._set_thedir( theartist, 'ArtistInformation' )
 
 
     def _set_properties( self ):
@@ -822,7 +853,7 @@ class Main( object ):
         if dirtype == 'ArtistSlideshow' and self.LOCALARTISTSTORAGE and self.LOCALARTISTPATH:
             thedir = os.path.join( self.LOCALARTISTPATH, CacheName, self.FANARTFOLDER )
         elif dirtype == 'ArtistInformation' and self.LOCALINFOSTORAGE and self.LOCALINFOPATH:
-            thedir = os.path.join( self.LOCALARTISTPATH, CacheName, 'information' )
+            thedir = os.path.join( self.LOCALINFOPATH, CacheName, 'information' )
         else:
             thedir = os.path.join( self.DATAROOT, dirtype, CacheName )
         exists, loglines = checkPath( os.path.join( thedir, '' ) )
@@ -835,6 +866,7 @@ class Main( object ):
 
 
     def _start_download( self ):
+        self.FANARTNUMBER = False
         self.CachedImagesFound = False
         self.DownloadedFirstImage = False
         self.DownloadedAllImages = False
@@ -874,7 +906,7 @@ class Main( object ):
                 else:
                     self._set_property("ArtistSlideshow", self.InitDir)
         lw.log( ['downloading images'] )
-        imgdb = os.path.join( self.CacheDir, self.IMGDB )
+        imgdb = os.path.join( self.INFODIR, self.IMGDB )
         lw.log( ['checking download cache file ' + imgdb] )
         loglines, cachelist_str = readFile( imgdb )
         lw.log( loglines )
@@ -883,7 +915,7 @@ class Main( object ):
             if( self._playback_stopped_or_changed() ):
                 return
             url_image_name = url.rsplit('/', 1)[-1]
-            path = os.path.join( self.CacheDir, url_image_name )
+            path = os.path.join( self.CacheDir, self._set_image_name( url ) )
             path2 = os.path.join( self.TransitionDir, url_image_name )
             lw.log( ['checking %s against %s' % (url_image_name, cachelist_str)] )
             if not (url_image_name in cachelist_str):
