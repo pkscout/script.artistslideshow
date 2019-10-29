@@ -1,5 +1,6 @@
 v.3.0.0~beta2
 - updated settings to allow for storing music in Kodi music folder
+- AS now deletes empty artist information and artwork folders
 
 v.3.0.0~beta1
 - Python2/3 compatible

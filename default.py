@@ -250,6 +250,14 @@ class Main( object ):
             self._set_property( "ArtistSlideshow.%d.AlbumThumb" % ( count + 1 ) )
 
 
+    def _delete_folder( self, folder ):
+        success, loglines = deleteFolder( folder )
+        if success:
+            lw.log( ['deleted folder ' + folder] )
+        else:
+            lw.log( loglines )
+
+
     def _download( self, src, dst, dst2 ):
         if (not xbmc.abortRequested):
             tmpname = os.path.join( self.DATAROOT, 'temp', src.rsplit('/', 1)[-1] )
@@ -1065,6 +1073,10 @@ class Main( object ):
             if not got_images:
                 got_images = self.LocalImagesFound or self.CachedImagesFound or self.ImageDownloaded or self.MergedImagesFound
         if not got_images:
+            self._delete_folder( os.path.join( self.INFODIR, '' ) )
+            self._delete_folder( os.path.join( self.CACHEDIR, '' ) )
+            self._delete_folder( os.path.join( os.path.abspath( os.path.join( self.INFODIR, '..') ), '' ) )
+            self._delete_folder( os.path.join( os.path.abspath( os.path.join( self.CACHEDIR, '..') ), '' ) )
             if self.USEFALLBACK:
                 lw.log( ['no images found for any currently playing artists, using fallback slideshow'] )
                 lw.log( ['fallbackdir = ' + self.FALLBACKPATH] )
