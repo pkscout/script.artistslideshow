@@ -70,7 +70,7 @@ class Logger( object ):
 
 
     def _output_xbmc( self, line, loglevel ):
-        if self.LOGDEBUG or (loglevel != xmbc.DEBUG and loglevel != xbmc.INFO):
+        if self.LOGDEBUG or (loglevel != xbmc.LOGDEBUG and loglevel != xbmc.LOGINFO):
             try:
                 xbmc.log( "%s %s" % (self.LOGPREAMBLE, line.__str__()), loglevel)
             except Exception as e:
