@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.0~beta3">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.0~beta4">
 	<requires>
 		<import addon="xbmc.python" version="2.26.0" />
 		<import addon="xbmc.addon" version="17.9.910" />
@@ -11,6 +11,9 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
+v.3.0.0~beta4
+- fix for crash when moving image database
+
 v.3.0.0~beta3
 - rewrite to use a single image control instead of multi-image control in skin
 - reworked settings

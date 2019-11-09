@@ -1,3 +1,6 @@
+v.3.0.0~beta4
+- fix for crash when moving image database
+
 v.3.0.0~beta3
 - rewrite to use a single image control instead of multi-image control in skin
 - reworked settings
