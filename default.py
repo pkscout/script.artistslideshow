@@ -1054,8 +1054,8 @@ class Main( object ):
                     dirs = []
                 if dirs:
                     for dir in dirs:
-                        src = os.path.join( src_root, dir, self.FANARTFOLDER, self.IMGDB )
-                        dst = os.path.join( dst_root, dir, 'information', self.IMGDB )
+                        src = os.path.join( src_root, py2_decode( dir ), self.FANARTFOLDER, self.IMGDB )
+                        dst = os.path.join( dst_root, py2_decode( dir ), 'information', self.IMGDB )
                         success, loglines = moveFile( src, dst )
                         lw.log( loglines )
             self._update_check_file( checkfile, '3.0.0', 'preference conversion complete' )
