@@ -1,7 +1,7 @@
-# XBMC Media Center language file
+# Kodi Media Center language file
 # Addon Name: Artist Slideshow
 # Addon id: script.artistslideshow
-# Addon Provider: ronie|pkscuot
+# Addon Provider: pkscout|ronie
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC Addons\n"
@@ -16,362 +16,190 @@ msgstr ""
 "Language: en\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#Dialog Text
-
-msgctxt "#30300"
-msgid "Downloading"
-msgstr ""
-
-msgctxt "#30301"
-msgid "Downloading artist images"
-msgstr ""
-
-msgctxt "#30302"
-msgid "Nothing Downloaded"
-msgstr ""
-
-msgctxt "#30303"
-msgid "No images found for artist"
-msgstr ""
-
-msgctxt "#30304"
-msgid "Download Complete"
-msgstr ""
-
-msgctxt "#30305"
-msgid "All artist images downloaded"
-msgstr ""
-
-# empty strings from id 30306 to 31999
-#Settings
+# Section Headings
 
 msgctxt "#32000"
-msgid "Images"
-msgstr ""
-
-msgctxt "#32001"
-msgid "Download images from last.fm"
-msgstr ""
-
-msgctxt "#32002"
-msgid "Download images from htbackdrops.org"
-msgstr ""
-
-msgctxt "#32003"
-msgid "- Minimum image width"
-msgstr ""
-
-msgctxt "#32004"
-msgid "Minimum image height"
-msgstr ""
-
-msgctxt "#32005"
-msgid "Download additional artist information"
-msgstr ""
-
-msgctxt "#32006"
-msgid "- Preferred language for artist information"
-msgstr ""
-
-msgctxt "#32007"
-msgid "- Download all images regardless of resolution"
-msgstr ""
-
-msgctxt "#32008"
-msgid "Download images from fanart.tv"
-msgstr ""
-
-msgctxt "#32009"
-msgid "Download images from theaudiodb.com"
-msgstr ""
-
-msgctxt "#32010"
-msgid "- Client API key"
-msgstr ""
-
-msgctxt "#32011"
-msgid "Create artist hash mapping file"
-msgstr ""
-
-msgctxt "#32012"
-msgid "beginning work"
-msgstr ""
-
-msgctxt "#32013"
-msgid "Migrating artist information"
-msgstr ""
-
-msgctxt "#32014"
-msgid "Migrating artist images"
-msgstr ""
-
-msgctxt "#32015"
-msgid "Moving artist images to local artist location"
-msgstr ""
-
-msgctxt "#32016"
-msgid "- I donate to this service"
-msgstr ""
-
-msgctxt "#32017"
-msgid "Moving artist service information files to local artist location"
-msgstr ""
-
-# empty strings from id 32018 to 32099
-
-msgctxt "#32100"
 msgid "Slideshow"
 msgstr ""
 
-msgctxt "#32101"
-msgid "- Local artist folder"
-msgstr ""
-
-msgctxt "#32102"
-msgid "Image priority"
-msgstr ""
-
-msgctxt "#32103"
-msgid "Fallback folder"
-msgstr ""
-
-msgctxt "#32104"
-msgid "Override folder"
-msgstr ""
-
-msgctxt "#32105"
-msgid "Use fallback slideshow"
-msgstr ""
-
-msgctxt "#32106"
-msgid "Use override slideshow"
-msgstr ""
-
-msgctxt "#32107"
-msgid "Use transparent background when no artist images found"
-msgstr ""
-
-msgctxt "#32108"
-msgid "- Include root level fanart.jpg"
-msgstr ""
-
-msgctxt "#32109"
-msgid "- Include root level folder.jpg"
-msgstr ""
-
-msgctxt "#32110"
-msgid "Use remote images first"
-msgstr ""
-
-msgctxt "#32111"
-msgid "Use local images first"
-msgstr ""
-
-msgctxt "#32112"
-msgid "Use both local and remote images"
-msgstr ""
-
-msgctxt "#32113"
-msgid "- Always use local artist path for image storage"
-msgstr ""
-
-msgctxt "#32114"
-msgid "Alternate Slideshow"
-msgstr ""
-
-msgctxt "#32115"
+msgctxt "#32001"
 msgid "Storage"
 msgstr ""
 
-msgctxt "#32116"
-msgid "Store artist images in"
+msgctxt "#32002"
+msgid "Images"
 msgstr ""
 
-msgctxt "#32117"
-msgid "addon_data folder"
-msgstr ""
-
-msgctxt "#32118"
-msgid "Kodi music artist folder"
-msgstr ""
-
-msgctxt "#32119"
-msgid "Custom location"
-msgstr ""
-
-msgctxt "#32120"
-msgid "Store artist information in"
-msgstr ""
-
-msgctxt "#32121"
-msgid "- Custom location"
-msgstr ""
-
-
-# empty strings from id 32122 to 32199
-
-msgctxt "#32200"
-msgid "Advanced"
-msgstr ""
-
-msgctxt "#32201"
-msgid "Limit size of download cache"
-msgstr ""
-
-msgctxt "#32202"
-msgid "- Maximum cache size (in megabytes)"
-msgstr ""
-
-msgctxt "#32203"
-msgid "Download notification type"
-msgstr ""
-
-msgctxt "#32204"
-msgid "- Custom notification images folder"
-msgstr ""
-
-msgctxt "#32205"
-msgid "- Alternate name for local fanart folder"
-msgstr ""
-
-msgctxt "#32206"
-msgid "None"
-msgstr ""
-
-msgctxt "#32207"
-msgid "Text notifications"
-msgstr ""
-
-msgctxt "#32208"
-msgid "Custom images"
-msgstr ""
-
-msgctxt "#32209"
-msgid "Enable debug logging"
-msgstr ""
-
-msgctxt "#32210"
-msgid "Disable secondary and featured artist images"
-msgstr ""
-
-msgctxt "#32211"
-msgid "Enable fuzzy local artist image paths"
-msgstr ""
-
-msgctxt "#32212"
-msgid "Platform for image storage"
-msgstr ""
-
-msgctxt "#32213"
-msgid "Replace illegal path characters in artist name with"
-msgstr ""
-
-msgctxt "#32214"
-msgid "Replace trailing period in artist name with"
-msgstr ""
-
-msgctxt "#32215"
-msgid "Windows"
-msgstr ""
-
-msgctxt "#32216"
-msgid "MacOS"
-msgstr ""
-
-msgctxt "#32217"
-msgid "Other"
-msgstr ""
-
-msgctxt "#32218"
-msgid "- Always use local artist path for service information storage"
-msgstr ""
-
-msgctxt "#32219"
-msgid "Use Kodi music image storage schema"
-msgstr ""
-
-msgctxt "#32220"
-msgid "Move images to Kodi music artist folder"
-msgstr ""
-
-# empty strings from id 32221 to 32299
-
-msgctxt "#32300"
+msgctxt "#32003"
 msgid "Album Info"
 msgstr ""
 
-msgctxt "#32301"
-msgid "- Priority"
-msgstr ""
-
-msgctxt "#32302"
-msgid "Download album info from the audiodb.com"
-msgstr ""
-
-msgctxt "#32303"
-msgid "Download album info from the last.fm"
-msgstr ""
-
-# empty strings from id 32304 to 32399
-
-msgctxt "#32400"
+msgctxt "#32004"
 msgid "Artist Bio"
 msgstr ""
 
-msgctxt "#32401"
-msgid "Preferred language for artist bio"
-msgstr ""
-
-msgctxt "#32402"
-msgid "Get artist bio from Kodi"
-msgstr ""
-
-msgctxt "#32403"
-msgid "Download artist bio from theaudiodb.com"
-msgstr ""
-
-msgctxt "#32404"
-msgid "Download artist bio from last.fm"
-msgstr ""
-
-# empty strings from id 32404 to 32499
-
-msgctxt "#32500"
+msgctxt "#32005"
 msgid "Similar Artists"
 msgstr ""
 
-msgctxt "#32501"
+msgctxt "#32006"
+msgid "Advanced"
+msgstr ""
+
+# empty strings from id 32007 to 32099
+
+# Settings
+
+msgctxt "#32101"
+msgid "Download images from fanart.tv"
+msgstr ""
+
+msgctxt "#32102"
+msgid "Download images from theaudiodb.com"
+msgstr ""
+
+msgctxt "#32103"
+msgid "Download album info from the audiodb.com"
+msgstr ""
+
+msgctxt "#32104"
+msgid "Download album info from the last.fm"
+msgstr ""
+
+msgctxt "#32105"
+msgid "Download artist bio from theaudiodb.com"
+msgstr ""
+
+msgctxt "#32106"
+msgid "Download artist bio from last.fm"
+msgstr ""
+
+msgctxt "#32107"
 msgid "Download similar artists from last.fm"
 msgstr ""
 
-# empty strings from id 32502 to 32599
-
-msgctxt "#32600"
-msgid "Instructions"
+msgctxt "#32108"
+msgid "- Download all images regardless of resolution"
 msgstr ""
 
-msgctxt "#32601"
-msgid "Some services allow you to set a priority for use."
+msgctxt "#32109"
+msgid "- Client API key"
 msgstr ""
 
-msgctxt "#32602"
-msgid "In those cases priority 1 will be used first and 10 last."
+msgctxt "#32110"
+msgid "- I donate to this service"
 msgstr ""
 
-msgctxt "#32603"
-msgid " "
+msgctxt "#32111"
+msgid "Use fallback slideshow"
 msgstr ""
 
-msgctxt "#32604"
-msgid "Certain services require your music to be tagged with the MusicBrainz ID"
+msgctxt "#32112"
+msgid "Use override slideshow"
 msgstr ""
 
-msgctxt "#32605"
-msgid "see http://kodi.wiki/view/Add-on:Artist_Slideshow for more information"
+msgctxt "#32113"
+msgid "- Custom location"
+msgstr ""
+
+msgctxt "#32114"
+msgid "-- Include root level fanart.jpg"
+msgstr ""
+
+msgctxt "#32115"
+msgid "-- Include root level folder.jpg"
+msgstr ""
+
+msgctxt "#32116"
+msgid "- Limit size of download cache"
+msgstr ""
+
+msgctxt "#32117"
+msgid "-- Maximum cache size (in megabytes)"
+msgstr ""
+
+msgctxt "#32118"
+msgid "-- Alternate name for local fanart folder"
+msgstr ""
+
+msgctxt "#32119"
+msgid "Enable debug logging"
+msgstr ""
+
+msgctxt "#32120"
+msgid "Disable secondary and featured artist images"
+msgstr ""
+
+msgctxt "#32121"
+msgid "Store artist images in"
+msgstr ""
+
+msgctxt "#32122"
+msgid "addon_data folder"
+msgstr ""
+
+msgctxt "#32123"
+msgid "Kodi music artist folder"
+msgstr ""
+
+msgctxt "#32124"
+msgid "- Priority"
+msgstr ""
+
+msgctxt "#32125"
+msgid "Store artist information in"
+msgstr ""
+
+msgctxt "#32126"
+msgid "Preferred language for artist bio"
+msgstr ""
+
+msgctxt "#32127"
+msgid "- Use extrafanart folder"
+msgstr ""
+
+msgctxt "#32128"
+msgid "Platform for image storage"
+msgstr ""
+
+msgctxt "#32129"
+msgid "Replace illegal path characters in artist name with"
+msgstr ""
+
+msgctxt "#32130"
+msgid "Replace trailing period in artist name with"
+msgstr ""
+
+msgctxt "#32131"
+msgid "Windows"
+msgstr ""
+
+msgctxt "#32132"
+msgid "Other"
+msgstr ""
+
+msgctxt "#32133"
+msgid "MacOS"
+msgstr ""
+
+msgctxt "#32134"
+msgid "Move images to Kodi music artist folder"
+msgstr ""
+
+msgctxt "#32135"
+msgid "Get artist bio from Kodi"
+msgstr ""
+
+msgctxt "#32136"
+msgid "Custom location"
+msgstr ""
+
+msgctxt "#32137"
+msgid "Delay between slide transitions (in seconds)"
 msgstr ""
 
 
-# empty strings from id 32606 to 32900
+# empty strings from id 32138 to 32900
 
 # Languages
 
