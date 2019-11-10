@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.0~beta4">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.0~beta5">
 	<requires>
 		<import addon="xbmc.python" version="2.26.0" />
 		<import addon="xbmc.addon" version="17.9.910" />
@@ -11,6 +11,12 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
+v.3.0.0~beta5
+- added routine in settings to move images to Kodi artist information folder
+- added alert image that skins will show if they have not been updated for new display method
+- fixed cache trim so it also deletes the image download cache list
+- added code so AS will delete empty artist folders more often
+
 v.3.0.0~beta4
 - fix for crash when moving image database
 
