@@ -139,7 +139,7 @@ msgid "addon_data folder"
 msgstr ""
 
 msgctxt "#32123"
-msgid "Kodi music artist folder"
+msgid "Kodi artist information folder"
 msgstr ""
 
 msgctxt "#32124"
@@ -198,8 +198,59 @@ msgctxt "#32137"
 msgid "Delay between slide transitions (in seconds)"
 msgstr ""
 
+# empty strings from id 32137 to 32199
 
-# empty strings from id 32138 to 32900
+# Dialog headings
+
+msgctxt "#32200"
+msgid "Artist Slideshow"
+msgstr ""
+
+msgctxt "#32201"
+msgid "Warning"
+msgstr ""
+
+msgctxt "#32202"
+msgid "Error"
+msgstr ""
+
+msgctxt "#32203"
+msgid "Progress"
+msgstr ""
+
+# empty strings from id 32204 to 32299
+
+msgctxt "#32300"
+msgid "This will move and rename your image files and cannot be undone. Are you sure you want to do this?"
+msgstr ""
+
+
+msgctxt "#32301"
+msgid "Unable to retrieve path to Kodi music artist image storage. Please check Settings > Media > Music and ensure the Artist Information Folder is set."
+msgstr ""
+
+msgctxt "#32302"
+msgid "Artist Slideshow is already set to use the Kodi artist information folder. Please set to use either addon_data folder or a custom location and try again."
+msgstr ""
+
+msgctxt "#32303"
+msgid "Moving and renaming images from custom location..."
+msgstr ""
+
+msgctxt "#32304"
+msgid "Moving and renaming images from addon_data folder..."
+msgstr ""
+
+msgctxt "#32305"
+msgid "No artist directories found."
+msgstr ""
+
+msgctxt "#32306"
+msgid "Image move complete. You may now change the Artist Slideshow storage location to Kodi artist information folder."
+msgstr ""
+
+
+# empty strings from id 32307 to 32900
 
 # Languages
 
