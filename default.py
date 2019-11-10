@@ -821,7 +821,7 @@ class Main( object ):
             dirs = []
         if not dirs:
             pdialog.close()
-            ok = dialog.ok( language(32200) + ': ' + language(32202), language(32306) )
+            ok = dialog.ok( language(32200) + ': ' + language(32203), language(32306) )
             return
         increment = 100//len( dirs )
         progress = 0
