@@ -13,6 +13,7 @@
 # *  fanart.tv:    http://www.fanart.tv
 # *  theaudiodb:   http://www.theaudiodb.com
 
+from __future__ import division
 try:
     from itertools import izip_longest as _zip_longest
 except ImportError:
@@ -27,7 +28,7 @@ import json as _json
 from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 from kodi_six.utils import py2_encode, py2_decode
 from collections import OrderedDict as _ordereddict
-from resources.common.fileops import checkPath, writeFile, readFile, deleteFile, deleteFolder, copyFile, moveFile
+from resources.common.fileops import checkPath, writeFile, readFile, deleteFile, deleteFolder, copyFile, moveFile, naturalKeys
 from resources.common.url import URL
 from resources.common.transforms import getImageType, itemHash, itemHashwithPath
 from resources.common.xlogger import Logger
@@ -303,10 +304,10 @@ class Main( object ):
             dirs, old_files = xbmcvfs.listdir( dir_path )
         except Exception as e:
             lw.log( ['unexpected error while getting directory list', e] )
-            old_files = []
+            return
         for old_file in old_files:
-            if not old_file.endswith( '.nfo' ):
-                success, loglines = deleteFile( os.path.join(dir_path, old_file) )
+            success, loglines = deleteFile( os.path.join (dir_path, py2_decode( old_file ) ) )
+            lw.log( loglines )
 
 
     def _clean_text( self, text ):
@@ -334,7 +335,7 @@ class Main( object ):
 
 
     def _delete_folder( self, folder ):
-        success, loglines = deleteFolder( folder )
+        success, loglines = deleteFolder( os.path.join( folder, '' ) )
         if success:
             lw.log( ['deleted folder ' + folder] )
         else:
@@ -357,7 +358,7 @@ class Main( object ):
             if( self._playback_stopped_or_changed() ):
                 return
             url_image_name = url.rsplit('/', 1)[-1]
-            path = os.path.join( self.CACHEDIR, self._set_image_name( url ) )
+            path = os.path.join( self.CACHEDIR, self._set_image_name( url, self.CACHEDIR, self.KODILOCALSTORAGE ) )
             lw.log( ['checking %s against %s' % (url_image_name, cachelist_str)] )
             if not (url_image_name in cachelist_str):
                 if (not xbmc.abortRequested):
@@ -483,7 +484,6 @@ class Main( object ):
         if( xbmc.Player().isPlayingAudio() == True ):
             try:
                 playing_file = xbmc.Player().getPlayingFile()
-                # playing_file = xbmc.Player().getPlayingFile() + ' - ' + xbmc.Player().getMusicInfoTag().getArtist() + ' - ' + xbmc.Player().getMusicInfoTag().getTitle()
             except RuntimeError:
                 return artists_info
             except Exception as e:
@@ -664,7 +664,6 @@ class Main( object ):
                 self.LANGUAGE = language[1]
                 lw.log( ['language = %s' % self.LANGUAGE] )
                 break
-        self.PRIORITY = getSettingInt( addon, 'priority' )
         self.USEFALLBACK = getSettingBool( addon, 'fallback' )
         self.FALLBACKPATH = getSettingString( addon, 'fallback_path' )
         self.USEOVERRIDE = getSettingBool( addon, 'slideshow' )
@@ -742,11 +741,12 @@ class Main( object ):
         self.FANARTNUMBER = False
         self.DATAROOT = xbmc.translatePath( addon.getAddonInfo('profile') )
         self.IMGDB = '_imgdb.nfo'
-        self._set_property( "ArtistSlideshow.CleanupComplete" )
+        self._set_property( 'ArtistSlideshow.CleanupComplete' )
+        self._set_property( 'ArtistSlideshow', os.path.join( addonpath, 'resources', 'update-slide', '' ) )
         self.SKININFO = {}
         for item in self.FIELDLIST:
             if self.PASSEDFIELDS[item]:
-                self.SKININFO[item[0:-5]] = "Window(%s).Property(%s)" % ( self.WINDOWID, self.PASSEDFIELDS[item] )
+                self.SKININFO[item[0:-5]] = 'Window(%s).Property(%s)' % ( self.WINDOWID, self.PASSEDFIELDS[item] )
             else:
                 self.SKININFO[item[0:-5]] = ''
         self.EXTERNALCALLSTATUS = self._get_infolabel( self.EXTERNALCALL )
@@ -785,8 +785,70 @@ class Main( object ):
 
 
     def _move_to_kodi_storage( self ):
-        lw.log( ['moving images from one place to another'] )
-        # nothing else done here yet
+        dialog = xbmcgui.Dialog()
+        ret = dialog.yesno( language(32200) + ': ' + language(32201), language(32300) )
+        if not ret:
+            lw.log( ['Image move aborted by user'] )
+            return
+        if self.KODILOCALSTORAGE:
+            lw.log( ['Kodi artist information storage already selected. Aborting.'] )
+            ok = dialog.ok( language(32200) + ': ' + language(32202), language(32302) )
+            return
+        response = xbmc.executeJSONRPC('{"jsonrpc":"2.0", "method":"Settings.GetSettingValue", "params":{"setting":"musiclibrary.artistsfolder"}, "id":1}')
+        lw.log( ['Got the following response back from Kodi for artist information folder', response] )
+        try:
+            kodi_music_artist_path = _json.loads( response )['result']['value']
+        except (IndexError, KeyError, ValueError):
+            kodi_music_artist_path = ''
+        if not kodi_music_artist_path:
+            lw.log( ['No artist information folder setting found. Aborting.'] )
+            ok = dialog.ok( language(32200) + ': ' + language(32202), language(32301) )
+            return
+        lw.log( ['Artist information folder set to %s' % kodi_music_artist_path] )
+        pdialog = xbmcgui.DialogProgress()
+        if self.LOCALARTISTSTORAGE and self.LOCALARTISTPATH:
+            pdialog.create( language(32200) + ': ' + language(32203), language(32303) )
+            src = self.LOCALARTISTPATH
+        else:
+            pdialog.create( language(32200) + ': ' + language(32203), language(32304) )
+            src = os.path.join( self.DATAROOT, 'ArtistSlideshow' )
+        try:
+            dirs, files = xbmcvfs.listdir( src )
+        except OSError:
+            dirs = []
+        except Exception as e:
+            lw.log( ['unexpected error getting directory list', e] )
+            dirs = []
+        if not dirs:
+            pdialog.close()
+            ok = dialog.ok( language(32200) + ': ' + language(32202), language(32306) )
+            return
+        increment = 100//len( dirs )
+        progress = 0
+        for dir in dirs:
+            if (src == self.LOCALARTISTPATH) and self.USEFANARTFOLDER:
+                image_src = os.path.join( self.LOCALARTISTPATH, py2_decode( dir ), self.FANARTFOLDER )
+            else:
+                image_src = os.path.join( src, py2_decode( dir ) )
+            image_dest = os.path.join( kodi_music_artist_path, py2_decode( dir ) )
+            lw.log( ['moving images from %s to %s' % (image_src, image_dest)] )
+            files = self._get_file_list( image_src )
+            self.FANARTNUMBER = False
+            for file in files:
+                file_src = os.path.join( image_src, file )
+                file_dst = os.path.join( image_dest, self._set_image_name( file, image_dest, True ) )
+                success, loglines = moveFile( file_src, file_dst  )
+                lw.log( loglines )
+            self._delete_folder( image_src )
+            if (src == self.LOCALARTISTPATH) and self.USEFANARTFOLDER:
+                self._delete_folder( os.path.abspath( os.path.join( image_src, os.pardir ) ) )
+            if pdialog.iscanceled():
+                pdialog.close()
+                return
+            progress = progress + increment
+            pdialog.update( progress )
+        pdialog.close()
+        ok = dialog.ok( language(32200) + ': ' + language(32203), language(32306) )       
 
 
     def _parse_argv( self ):
@@ -852,28 +914,33 @@ class Main( object ):
         self.CACHEDIR = self._set_thedir( theartist, 'ArtistSlideshow' )
 
 
-    def _set_image_name( self, url ):
-        if not self.KODILOCALSTORAGE:
+    def _set_fanart_number( self, dir ):
+        files = self._get_file_list( dir, do_filter=True )
+        files.sort( key=naturalKeys )
+        lw.log( files )
+        if files:
+            lastfile = files[-1]
+            try:
+                tmpname = os.path.splitext( lastfile )[0]
+            except IndexError:
+                return url.rsplit('/', 1)[-1]
+            try:
+                fanart_number = int( re.search('(\d+)$', tmpname).group(0) ) + 1
+            except:
+                fanart_number = 1
+        else:
+            fanart_number = 1
+        return fanart_number
+
+
+    def _set_image_name( self, url, dir, kodi_storage ):
+        if not kodi_storage:
             return url.rsplit('/', 1)[-1]
         ext = os.path.splitext( url )[1]
         if self.FANARTNUMBER:
             self.FANARTNUMBER += 1
         else:
-            files = self._get_file_list( self.CACHEDIR, do_filter=True )
-            files.sort()
-            lw.log( files )
-            if files:
-                lastfile = files[-1]
-                try:
-                    tmpname = os.path.splitext( lastfile )[0]
-                except IndexError:
-                    return url.rsplit('/', 1)[-1]
-                try:
-                    self.FANARTNUMBER = int( re.search('(\d+)$', tmpname).group(0) ) + 1
-                except:
-                    self.FANARTNUMBER = 1
-            else:
-                self.FANARTNUMBER = 1
+            self.FANARTNUMBER = self._set_fanart_number( dir )
         return "fanart" + str( self.FANARTNUMBER ) + ext
             
 
@@ -897,12 +964,12 @@ class Main( object ):
         self._set_property( "ArtistSlideshow.AlbumCount", album_total )
         
 
-    def _set_property( self, property_name, value="" ):
+    def _set_property( self, property_name, value='' ):
         try:
           self.WINDOW.setProperty( property_name, value )
           lw.log( ['%s set to %s' % (property_name, value)] )
         except Exception as e:
-          lw.log( ["Exception: Couldn't set propery " + property_name + " value " + value , e])
+          lw.log( ['Exception: Could not set property %s to value %s' % (property_name, value), e])
 
 
     def _set_safe_artist_name( self, theartist ):
@@ -957,8 +1024,13 @@ class Main( object ):
                     cache_size = cache_size + self._get_folder_size( os.path.join (cache_root, folder ) )
                     lw.log( ['looking at folder %s cache size is now %s' % (folder, cache_size)] )
                     if( cache_size > self.MAXCACHESIZE and not first_folder ):
-                        self._clean_dir( os.path.join(cache_root, folder) )
+                        self._clean_dir( os.path.join( cache_root, folder ) )
                         lw.log( ['deleted files in folder %s' % folder] )
+                        self._delete_folder( os.path.join( cache_root, folder ) )
+                        if self.LOCALINFOSTORAGE and self.LOCALINFOPATH:
+                            deleteFile( os.path.join( self.LOCALINFOPATH, py2_decode( folder ), 'information', self.IMGDB ) )
+                        else:
+                            deleteFile( os.path.join( self.DATAROOT, 'ArtistInformation', py2_decode( folder ), self.IMGDB ) )
                     first_folder = False
                 self.LASTCACHETRIM = now
 
@@ -987,10 +1059,10 @@ class Main( object ):
                 self.IMAGESFOUND = True
                 got_one_artist_images = True
             if not self._download() and not got_one_artist_images:
-                self._delete_folder( os.path.join( self.INFODIR, '' ) )
-                self._delete_folder( os.path.join( self.CACHEDIR, '' ) )
-                self._delete_folder( os.path.join( os.path.abspath( os.path.join( self.INFODIR, '..') ), '' ) )
-                self._delete_folder( os.path.join( os.path.abspath( os.path.join( self.CACHEDIR, '..') ), '' ) )
+                self._delete_folder( os.path.join( self.INFODIR ) )
+                self._delete_folder( os.path.join( self.CACHEDIR ) )
+                self._delete_folder( os.path.abspath( os.path.join( self.INFODIR, os.pardir ) ) )
+                self._delete_folder( os.path.abspath( os.path.join( self.CACHEDIR, os.pardir ) ) )
         if self.USEFALLBACK and not self.IMAGESFOUND:
             lw.log( ['no images found for any currently playing artists, using fallback slideshow'] )
             lw.log( ['fallbackdir = ' + self.FALLBACKPATH] )
@@ -1037,8 +1109,8 @@ class Main( object ):
                     dirs = []
                 if dirs:
                     for dir in dirs:
-                        src = os.path.join( src_root, dir, self.IMGDB )
-                        dst = os.path.join( dst_root, dir, self.IMGDB )
+                        src = os.path.join( src_root, py2_decode( dir ), self.IMGDB )
+                        dst = os.path.join( dst_root, py2_decode( dir ), self.IMGDB )
                         success, loglines = moveFile( src, dst )
                         lw.log( loglines )
             src_root = getSettingString( addon, 'local_artist_path' )
