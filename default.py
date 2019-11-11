@@ -739,6 +739,7 @@ class Main( object ):
 
     def _init_vars( self ):
         self.FANARTNUMBER = False
+        self.CACHEDIR = ''
         self.DATAROOT = xbmc.translatePath( addon.getAddonInfo('profile') )
         self.IMGDB = '_imgdb.nfo'
         self._set_property( 'ArtistSlideshow.CleanupComplete' )
@@ -902,7 +903,7 @@ class Main( object ):
     def _set_artwork_from_dir( self, dir, files ):
         for file in files:
             self.SLIDESHOW.AddImage( os.path.join( dir, file ) )
-        if (dir == self.CACHEDIR) and (self.INCLUDEFANARTJPG or self.INCLUDEFOLDERJPG):
+        if self.INCLUDEFANARTJPG or self.INCLUDEFOLDERJPG:
             root_folder = os.path.join( dir, os.pardir )
             files = self._get_file_list( root_folder )
             for file in files:
