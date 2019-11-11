@@ -1,3 +1,6 @@
+v.3.0.0~beta6
+- fix for crash if no artist artwork found
+
 v.3.0.0~beta5
 - added routine in settings to move images to Kodi artist information folder
 - added alert image that skins will show if they have not been updated for new display method
