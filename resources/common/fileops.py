@@ -1,4 +1,4 @@
-# v.0.5
+# v.0.6.1
 
 import os, re, shutil, time
 try:
@@ -9,7 +9,6 @@ try:
     import subprocess
     hasSubprocess = True
 except:
-    import os
     hasSubprocess = False
 try:
     from kodi_six import xbmcvfs
