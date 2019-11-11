@@ -1,0 +1,2 @@
+add option to use experimental Kodi 18 music image location
+either supplement last.fm with local Kodi images or drop last.fm support and add album and similar artists lists from Kodi data
