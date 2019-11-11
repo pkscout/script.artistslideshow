@@ -848,6 +848,7 @@ class Main( object ):
                 return
             progress = progress + increment
             pdialog.update( progress )
+            lw.log( ['using increment of %s updating progress to %s' % (str( increment ), str( progress ))] )
         pdialog.close()
         ok = dialog.ok( language(32200) + ': ' + language(32203), language(32306) )       
 
