@@ -198,16 +198,18 @@ class Slideshow( threading.Thread ):
         cmd = ''
         last_image = ''
         while self.SHOW:
+            outofimages = True
             with self.QUEUELOCK:
                 if not self.WORKQUEUE.empty():
                     cmd = self.WORKQUEUE.get()
             if cmd == 'quit':
                 break
-            if self.IMAGEADDED or self.IMAGESCLEARED:
+            if self.IMAGEADDED or self.IMAGESCLEARED or outofimages:
                 random.shuffle( self.IMAGES )
                 lw.log( ['the images available are', self.IMAGES] )
                 self.IMAGEADDED = False
                 self.IMAGESCLEARED = False
+                outofimages = False
             for image in self.IMAGES:
                 if self.IMAGEADDED or self.IMAGESCLEARED:
                     lw.log( ['image list changed, resetting loop'] )
