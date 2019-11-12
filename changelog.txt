@@ -1,3 +1,6 @@
+v.3.0.0~beta8
+- fix for progress bar not updating with more than 100 artists
+
 v.3.0.0~beta7
 - new logic for randomizing images
 
