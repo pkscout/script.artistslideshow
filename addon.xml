@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.0~beta6">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.0~beta7">
 	<requires>
 		<import addon="xbmc.python" version="2.25.0" />
 		<import addon="xbmc.addon" version="17.0.0" />
@@ -11,6 +11,9 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
+v.3.0.0~beta7
+- new logic for randomizing images
+
 v.3.0.0~beta6
 - fix for crash if no artist artwork found
 

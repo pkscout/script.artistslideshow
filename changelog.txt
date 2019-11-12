@@ -1,3 +1,6 @@
+v.3.0.0~beta7
+- new logic for randomizing images
+
 v.3.0.0~beta6
 - fix for crash if no artist artwork found
 
