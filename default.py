@@ -826,8 +826,8 @@ class Main( object ):
             pdialog.close()
             ok = dialog.ok( language(32200) + ': ' + language(32203), language(32306) )
             return
-        increment = 100//len( dirs )
-        progress = 0
+        increment = 100/len( dirs )
+        progress = 0.0
         for dir in dirs:
             if (src == self.LOCALARTISTPATH) and self.USEFANARTFOLDER:
                 image_src = os.path.join( self.LOCALARTISTPATH, py2_decode( dir ), self.FANARTFOLDER )
@@ -849,7 +849,7 @@ class Main( object ):
                 pdialog.close()
                 return
             progress = progress + increment
-            pdialog.update( progress )
+            pdialog.update( int( progress ) )
             lw.log( ['using increment of %s updating progress to %s' % (str( increment ), str( progress ))] )
         pdialog.close()
         ok = dialog.ok( language(32200) + ': ' + language(32203), language(32306) )       
