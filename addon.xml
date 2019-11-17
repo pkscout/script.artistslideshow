@@ -42,6 +42,9 @@ v.3.0.0~beta2
 - updated settings to allow for storing music in Kodi music folder
 - AS now deletes empty artist information and artwork folders
 		</news>
+		<assets>
+        	<icon>icon.png</icon>
+        </assets>
 		<summary lang="ar_SA">حمل المزيد من الصور والمعلومات عن الفنان الذى يُغنِى حالياً</summary>
 		<summary lang="be_BY">Download images and additional info of the currently playing artist</summary>
 		<summary lang="bg_BG">Сваля изображения и допълнителна инф. за изпълнителя на текущата песен</summary>
