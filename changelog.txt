@@ -1,3 +1,6 @@
+v.3.0.0~beta10
+- fix for first artist startup if using fade through black
+
 v.3.0.0~beta9
 - artist transitions now fade through black
 - added option to turn off artist transition fade though black

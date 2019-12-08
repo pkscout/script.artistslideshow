@@ -269,13 +269,16 @@ class Main( object ):
             self._upgrade()
             if self._run_from_settings():
                 return
-            self._set_property("ArtistSlideshowRunning", "True")
+            self._set_property( 'ArtistSlideshowRunning', 'True' )
+            if self.FADETOBLACK:
+                self._set_property( 'ArtistSlideshow.Image', os.path.join( addonpath, 'resources', 'images', 'black-hd.png' ) )
             self.SLIDESHOW.setDaemon(True)
             self.SLIDESHOW.start()
             if( xbmc.Player().isPlayingAudio() == False and self._get_infolabel( self.EXTERNALCALL ) == '' ):
                 lw.log( ['no music playing'] )
-                if( self.DAEMON == "False" ):
-                    self._set_property("ArtistSlideshowRunning")
+                if( self.DAEMON == 'False' ):
+                    self._set_property( 'ArtistSlideshowRunning' )
+                    self._set_property( 'ArtistSlideshow.Image' )
             else:
                 lw.log( ['first song started'] )
                 time.sleep(1) # it may take some time for Kodi to read the tag info after playback started
