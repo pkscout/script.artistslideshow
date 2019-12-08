@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.0~beta8">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.0~beta9">
 	<requires>
 		<import addon="xbmc.python" version="2.25.0" />
 		<import addon="xbmc.addon" version="17.0.0" />
@@ -11,36 +11,9 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
-v.3.0.0~beta8
-- fix for progress bar not updating with more than 100 artists
-
-v.3.0.0~beta7
-- new logic for randomizing images
-
-v.3.0.0~beta6
-- fix for crash if no artist artwork found
-
-v.3.0.0~beta5
-- added routine in settings to move images to Kodi artist information folder
-- added alert image that skins will show if they have not been updated for new display method
-- fixed cache trim so it also deletes the image download cache list
-- added code so AS will delete empty artist folders more often
-
-v.3.0.0~beta4
-- fix for crash when moving image database
-
-v.3.0.0~beta3
-- rewrite to use a single image control instead of multi-image control in skin
-- reworked settings
-- added option to disable extranfanart folder
-- added option to control time between slide transitions
-- outdated language files removed, so AS is English only for now (sorry)
-- removed option to have a pop up displayed when downloading artwork
-- AS can now store images and information files in separate directory structure
-
-v.3.0.0~beta2
-- updated settings to allow for storing music in Kodi music folder
-- AS now deletes empty artist information and artwork folders
+v.3.0.0~beta9
+- artist transitions now fade through black
+- added option to turn off artist transition fade though black
 		</news>
 		<assets>
         	<icon>icon.png</icon>

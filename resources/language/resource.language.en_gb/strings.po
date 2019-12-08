@@ -198,7 +198,12 @@ msgctxt "#32137"
 msgid "Delay between slide transitions (in seconds)"
 msgstr ""
 
-# empty strings from id 32137 to 32199
+msgctxt "#32138"
+msgid "Fade to black during change in artists"
+msgstr ""
+
+
+# empty strings from id 32139 to 32199
 
 # Dialog headings
 
@@ -219,6 +224,8 @@ msgid "Progress"
 msgstr ""
 
 # empty strings from id 32204 to 32299
+
+# Dialog texts
 
 msgctxt "#32300"
 msgid "This will move and rename your image files and cannot be undone. Are you sure you want to do this?"

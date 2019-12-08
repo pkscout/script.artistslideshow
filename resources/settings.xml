@@ -2,6 +2,7 @@
 <settings>
     <category label="32000">
         <setting id="slide_delay" type="number" label="32137" default="10" />
+        <setting id="fadetoblack" type="bool" label="32138" default="true" />
         <setting id="slideshow" type="bool" label="32112" default="false" />
         <setting id="slideshow_path" type="folder" label="32113" default="" visible="eq(-1,true)" />
         <setting id="disable_multiartist" type="bool" label="32120" default="false" visible="eq(-2,false)" />

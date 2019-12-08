@@ -1,3 +1,7 @@
+v.3.0.0~beta9
+- artist transitions now fade through black
+- added option to turn off artist transition fade though black
+
 v.3.0.0~beta8
 - fix for progress bar not updating with more than 100 artists
 

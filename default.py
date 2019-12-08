@@ -168,7 +168,7 @@ LANGUAGES = (
 
 class Slideshow( threading.Thread ):
 
-    def __init__( self, workqueue, queuelock, window, delay ):
+    def __init__( self, workqueue, queuelock, window, delay, fadetoblack ):
         super( Slideshow , self).__init__()
         self.WORKQUEUE = workqueue
         self.QUEUELOCK= queuelock
@@ -178,6 +178,7 @@ class Slideshow( threading.Thread ):
         self.IMAGEADDED = False
         self.IMAGESCLEARED = False
         self.SHOW = True
+        self.FADETOBLACK = fadetoblack
         lw.log( ['Slideshow thread started'] )
     
     
@@ -189,7 +190,10 @@ class Slideshow( threading.Thread ):
 
     def ClearImages( self ):
         self.IMAGES = []
-        self._set_property( 'ArtistSlideshow.Image' )
+        if self.FADETOBLACK:
+            self._set_property( 'ArtistSlideshow.Image', os.path.join( addonpath, 'resources', 'images', 'black-hd.png' ) )  
+        else:
+            self._set_property( 'ArtistSlideshow.Image' )  
         lw.log( ['images cleared'] )
         self.IMAGESCLEARED = True
 
@@ -197,6 +201,8 @@ class Slideshow( threading.Thread ):
     def run( self ):
         cmd = ''
         last_image = ''
+        if self.FADETOBLACK:
+            self._set_property( 'ArtistSlideshow.Image', os.path.join( addonpath, 'resources', 'images', 'black-hd.png' ) )        
         while self.SHOW:
             outofimages = True
             with self.QUEUELOCK:
@@ -281,7 +287,6 @@ class Main( object ):
                     if( xbmc.Player().isPlayingAudio() == True or self._get_infolabel( self.EXTERNALCALL ) != '' ):
                         if set( self.ALLARTISTS ) != set( self._get_current_artists() ):
                             self._clear_properties()
-                            self.USINGFALLBACK = False
                             self._use_correct_artwork()
                             self._trim_cache()
                     else:
@@ -369,7 +374,7 @@ class Main( object ):
                     if xbmcvfs.exists( tmpname ):
                         success, loglines = deleteFile( tmpname )
                         lw.log( loglines )
-                    success, loglines, urldata = imgURL.Get( url, params=self.params )
+                    success, loglines, urldata = imgURL.Get( url, params=self.PARAMS )
                     lw.log( loglines )
                     if success:
                         success, loglines = writeFile( bytearray( urldata ), tmpname )
@@ -673,6 +678,7 @@ class Main( object ):
         self.DISABLEMULTIARTIST = getSettingBool( addon, 'disable_multiartist' )
         self.MAXCACHESIZE = getSettingInt( addon, 'max_cache_size', default=1024 ) * 1000000
         self.SLIDEDELAY = getSettingInt( addon, 'slide_delay', default=10 )
+        self.FADETOBLACK = getSettingBool( addon, 'fadetoblack', default=True )
         artist_image_storage = getSettingInt( addon, 'artist_image_storage', default=0 )
         if artist_image_storage == 1:
             self.KODILOCALSTORAGE = True
@@ -762,14 +768,10 @@ class Main( object ):
         self.LASTJSONRESPONSE = ''
         self.LASTARTISTREFRESH = 0
         self.LASTCACHETRIM = 0
-        self.IMAGEDOWNLOADED = False
-        self.USINGFALLBACK = False
-        self.MINREFRESH = 9.9
-        self.TRANSITIONDIR = os.path.join( self.DATAROOT, 'transition' )
-        self.params = {}
+        self.PARAMS = {}
         self.SLIDESHOWLOCK = threading.Lock()
         self.SLIDESHOWCMD = Queue()
-        self.SLIDESHOW = Slideshow( self.SLIDESHOWCMD, self.SLIDESHOWLOCK, self.WINDOW, self.SLIDEDELAY )
+        self.SLIDESHOW = Slideshow( self.SLIDESHOWCMD, self.SLIDESHOWLOCK, self.WINDOW, self.SLIDEDELAY, self.FADETOBLACK )
 
 
     def _init_window( self ):
@@ -1067,12 +1069,14 @@ class Main( object ):
                 self._delete_folder( os.path.join( self.CACHEDIR ) )
                 self._delete_folder( os.path.abspath( os.path.join( self.INFODIR, os.pardir ) ) )
                 self._delete_folder( os.path.abspath( os.path.join( self.CACHEDIR, os.pardir ) ) )
-        if self.USEFALLBACK and not self.IMAGESFOUND:
-            lw.log( ['no images found for any currently playing artists, using fallback slideshow'] )
-            lw.log( ['fallbackdir = ' + self.FALLBACKPATH] )
-            self.USINGFALLBACK = True
-            self._set_artwork_from_dir( self.FALLBACKPATH, self._get_file_list( self.FALLBACKPATH ) )
-
+        if not self.IMAGESFOUND:
+            lw.log( ['no images found for any currently playing artists'] )
+            if self.USEFALLBACK:
+                lw.log( ['using fallback slideshow'] )
+                lw.log( ['fallbackdir = ' + self.FALLBACKPATH] )
+                self._set_artwork_from_dir( self.FALLBACKPATH, self._get_file_list( self.FALLBACKPATH ) )
+            else:
+                self._set_property( 'ArtistSlideshow.Image' )
 
     def _update_check_file( self, path, text, message ):
         success, loglines = writeFile( text, path )
