@@ -1,3 +1,8 @@
+v.3.0.0~beta11
+- Artist Slideshow now shows the Kodi artist fanart (if available) before anything else
+- added option to disable showing the Kodi artist fanart
+- added option to include Kodi album fanart in image list (defaults to False)
+
 v.3.0.0~beta10
 - fix for first artist startup if using fade through black
 
