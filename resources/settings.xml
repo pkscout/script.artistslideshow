@@ -2,14 +2,14 @@
 <settings>
     <category label="32000">
         <setting id="slide_delay" type="number" label="32137" default="10" />
-        <setting id="fadetoblack" type="bool" label="32138" default="true" />
         <setting id="slideshow" type="bool" label="32112" default="false" />
         <setting id="slideshow_path" type="folder" label="32113" default="" visible="eq(-1,true)" />
-		<setting id="include_artistfanart" type="bool" label="32114" default="true" />
-		<setting id="include_albumfanart" type="bool" label="32115" default="false" />
-        <setting id="disable_multiartist" type="bool" label="32120" default="false" visible="eq(-2,false)" />
-        <setting id="fallback" type="bool" label="32111" default="false" visible="eq(-3,false)" />
-        <setting id="fallback_path" type="folder" label="32113" default="" visible="eq(-1,true) + eq(-4,false)" />
+        <setting id="fadetoblack" type="bool" label="32138" default="true" visible="eq(-2,false)" />
+		<setting id="include_artistfanart" type="bool" label="32114" default="true" visible="eq(-3,false)" />
+		<setting id="include_albumfanart" type="bool" label="32115" default="false" visible="eq(-4,false)"/>
+        <setting id="disable_multiartist" type="bool" label="32120" default="false" visible="eq(-5,false)" />
+        <setting id="fallback" type="bool" label="32111" default="false" visible="eq(-6,false)" />
+        <setting id="fallback_path" type="folder" label="32113" default="" visible="eq(-1,true) + eq(-7,false)" />
     </category>
 	<category label="32001">
 	    <setting id="artist_image_storage" type="enum" label="32121" lvalues="32122|32123|32136" default="0" />
