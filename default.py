@@ -212,7 +212,7 @@ class Slideshow( threading.Thread ):
                 break
             if self.IMAGEADDED or self.IMAGESCLEARED or outofimages:
                 random.shuffle( self.IMAGES )
-                lw.log( ['the images available are', self.IMAGES] )
+#                lw.log( ['the images available are', self.IMAGES] )
                 self.IMAGEADDED = False
                 self.IMAGESCLEARED = False
                 outofimages = False
@@ -678,6 +678,8 @@ class Main( object ):
         self.FALLBACKPATH = getSettingString( addon, 'fallback_path' )
         self.USEOVERRIDE = getSettingBool( addon, 'slideshow' )
         self.OVERRIDEPATH = getSettingString( addon, 'slideshow_path' )
+        self.INCLUDEARTISTFANART = getSettingBool( addon, 'include_artistfanart', default=True )
+        self.INCLUDEALBUMFANART = getSettingBool( addon, 'include_albumfanart', default=False )
         self.DISABLEMULTIARTIST = getSettingBool( addon, 'disable_multiartist' )
         self.MAXCACHESIZE = getSettingInt( addon, 'max_cache_size', default=1024 ) * 1000000
         self.SLIDEDELAY = getSettingInt( addon, 'slide_delay', default=10 )
@@ -689,8 +691,6 @@ class Main( object ):
             self.RESTRICTCACHE = False
             self.USEFANARTFOLDER = False
             self.FANARTFOLDER = ''
-            self.INCLUDEFANARTJPG = False
-            self.INCLUDEFOLDERJPG = False
             response = xbmc.executeJSONRPC('{"jsonrpc":"2.0", "method":"Settings.GetSettingValue", "params":{"setting":"musiclibrary.artistsfolder"}, "id":1}')
             lw.log( ['got the following response back from Kodi for music artist folder', response] )
             try:
@@ -702,8 +702,6 @@ class Main( object ):
                 self.RESTRICTCACHE = getSettingBool( addon, 'restrict_cache' )
                 self.USEFANARTFOLDER = False
                 self.FANARTFOLDER = ''
-                self.INCLUDEFANARTJPG = False
-                self.INCLUDEFOLDERJPG = False                
         elif artist_image_storage == 2:
             self.KODILOCALSTORAGE = False
             self.LOCALARTISTSTORAGE = True
@@ -712,29 +710,21 @@ class Main( object ):
             self.USEFANARTFOLDER = getSettingBool( addon, 'use_extrafanart_folder', default=True )
             if self.USEFANARTFOLDER:
                 self.FANARTFOLDER = getSettingString( addon, 'fanart_folder', default='extrafanart' )
-                self.INCLUDEFANARTJPG = getSettingBool( addon, 'include_fanartjpg' )
-                self.INCLUDEFOLDERJPG = getSettingBool( addon, 'include_folderjpg' )
             else:
                 self.FANARTFOLDER = ''
-                self.INCLUDEFANARTJPG = False
-                self.INCLUDEFOLDERJPG = False
         else:
             self.KODILOCALSTORAGE = False
             self.LOCALARTISTSTORAGE = False
             self.LOCALARTISTPATH = ''
             self.USEFANARTFOLDER = False
             self.FANARTFOLDER = ''
-            self.INCLUDEFANARTJPG = False
-            self.INCLUDEFOLDERJPG = False
             self.RESTRICTCACHE = getSettingBool( addon, 'restrict_cache' )
-        lw.log( ['SLIDEDELAY is ' + str( self.SLIDEDELAY ), 'LOCALARTISTSTORAGE is ' + str( self.LOCALARTISTSTORAGE ), 'KODILOCALSTORAGE is ' + str( self.KODILOCALSTORAGE ), 'LOCALARTISTPATH is ' + self.LOCALARTISTPATH, 'RESTRICTCACHE is ' + str( self.RESTRICTCACHE ), 'INCLUDEFANARTJPG is ' + str( self.INCLUDEFANARTJPG ), 'INCLUDEFOLDERJPG is ' + str( self.INCLUDEFOLDERJPG ), 'FANARTFOLDER is ' + self.FANARTFOLDER] )
         if getSettingInt( addon, 'artist_info_storage' ) == 1:
             self.LOCALINFOSTORAGE = True
             self.LOCALINFOPATH = getSettingString( addon, 'local_info_path' )
         else:
             self.LOCALINFOSTORAGE = False
             self.LOCALINFOPATH = ''
-        lw.log( ['LOCALINFOSTORAGE is ' + str( self.LOCALINFOSTORAGE ), 'LOCALINFOPATH is ' + self.LOCALINFOPATH ] )
         pl = getSettingInt( addon, "storage_target" )
         if pl == 0:
             self.ENDREPLACE = getSettingString( addon, "end_replace" )
@@ -911,12 +901,6 @@ class Main( object ):
     def _set_artwork_from_dir( self, dir, files ):
         for file in files:
             self.SLIDESHOW.AddImage( os.path.join( dir, file ) )
-        if self.INCLUDEFANARTJPG or self.INCLUDEFOLDERJPG:
-            root_folder = os.path.join( dir, os.pardir )
-            files = self._get_file_list( root_folder )
-            for file in files:
-                if (self.INCLUDEFANARTJPG and file.lower().startswith('fanart')) or (self.INCLUDEFOLDERJPG and file.lower().startswith('folder')):
-                    self.SLIDESHOW.AddImage( os.path.join( root_folder, file ) )
     
 
     def _set_cachedir( self, theartist ):
@@ -1053,6 +1037,12 @@ class Main( object ):
             lw.log( ['using override directory for images'] )
             self._set_artwork_from_dir( self.OVERRIDEPATH, self._get_file_list( self.OVERRIDEPATH ) )
             return
+        if self.INCLUDEARTISTFANART and xbmc.getInfoLabel( 'Player.Art(artist.fanart)' ):
+            self.SLIDESHOW.AddImage( xbmc.getInfoLabel( 'Player.Art(artist.fanart)' ) ) 
+            self.IMAGESFOUND = True               
+        if self.INCLUDEALBUMFANART and xbmc.getInfoLabel( 'Player.Art(album.fanart)' ):
+            self.SLIDESHOW.AddImage( xbmc.getInfoLabel( 'Player.Art(album.fanart)' ) ) 
+            self.IMAGESFOUND = True               
         for artist, mbid in self._get_current_artists_info( ):
             got_one_artist_images = False
             self.ARTISTNUM += 1

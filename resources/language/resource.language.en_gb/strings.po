@@ -103,11 +103,11 @@ msgid "- Custom location"
 msgstr ""
 
 msgctxt "#32114"
-msgid "-- Include root level fanart.jpg"
+msgid "Include Kodi artist fanart"
 msgstr ""
 
 msgctxt "#32115"
-msgid "-- Include root level folder.jpg"
+msgid "Include Kodi album fanart"
 msgstr ""
 
 msgctxt "#32116"
