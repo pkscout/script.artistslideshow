@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.0~beta11">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.0~beta12">
 	<requires>
 		<import addon="xbmc.python" version="2.25.0" />
 		<import addon="xbmc.addon" version="17.0.0" />
@@ -11,6 +11,9 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
+v.3.0.0~beta12
+- fix for problem with settings display		
+
 v.3.0.0~beta11
 - Artist Slideshow now shows the Kodi artist fanart (if available) before anything else
 - added option to disable showing the Kodi artist fanart
