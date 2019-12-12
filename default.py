@@ -183,9 +183,14 @@ class Slideshow( threading.Thread ):
     
     
     def AddImage( self, path ):
-        self.IMAGES.append( path )
-        lw.log( ['Added to image display group: ' + path] )
-        self.IMAGEADDED = True
+        if path:
+            self.IMAGES.append( path )
+            lw.log( ['Added to image display group: ' + path] )
+            self.IMAGEADDED = True
+            return True
+        else:
+            lw.log( ['Image path was empty, nothing added'] )
+            return False
     
 
     def ClearImages( self ):
@@ -1037,12 +1042,10 @@ class Main( object ):
             lw.log( ['using override directory for images'] )
             self._set_artwork_from_dir( self.OVERRIDEPATH, self._get_file_list( self.OVERRIDEPATH ) )
             return
-        if self.INCLUDEARTISTFANART and xbmc.getInfoLabel( 'Player.Art(artist.fanart)' ):
-            self.SLIDESHOW.AddImage( xbmc.getInfoLabel( 'Player.Art(artist.fanart)' ) ) 
-            self.IMAGESFOUND = True               
-        if self.INCLUDEALBUMFANART and xbmc.getInfoLabel( 'Player.Art(album.fanart)' ):
-            self.SLIDESHOW.AddImage( xbmc.getInfoLabel( 'Player.Art(album.fanart)' ) ) 
-            self.IMAGESFOUND = True               
+        if self.INCLUDEARTISTFANART:
+            self.IMAGESFOUND = self.IMAGESFOUND or self.SLIDESHOW.AddImage( xbmc.getInfoLabel( 'Player.Art(artist.fanart)' ) )
+        if self.INCLUDEALBUMFANART:
+            self.IMAGESFOUND = self.IMAGESFOUND or self.SLIDESHOW.AddImage( xbmc.getInfoLabel( 'Player.Art(album.fanart)' ) )
         for artist, mbid in self._get_current_artists_info( ):
             got_one_artist_images = False
             self.ARTISTNUM += 1
@@ -1070,6 +1073,7 @@ class Main( object ):
                 self._set_artwork_from_dir( self.FALLBACKPATH, self._get_file_list( self.FALLBACKPATH ) )
             else:
                 self._set_property( 'ArtistSlideshow.Image' )
+
 
     def _update_check_file( self, path, text, message ):
         success, loglines = writeFile( text, path )
