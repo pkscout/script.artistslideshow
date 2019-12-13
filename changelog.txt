@@ -1,52 +1,16 @@
-v.3.0.0~beta12
-- fix for problem with settings display		
-
-v.3.0.0~beta11
-- Artist Slideshow now shows the Kodi artist fanart (if available) before anything else
-- added option to disable showing the Kodi artist fanart
-- added option to include Kodi album fanart in image list (defaults to False)
-
-v.3.0.0~beta10
-- fix for first artist startup if using fade through black
-
-v.3.0.0~beta9
-- artist transitions now fade through black
-- added option to turn off artist transition fade though black
-
-v.3.0.0~beta8
-- fix for progress bar not updating with more than 100 artists
-
-v.3.0.0~beta7
-- new logic for randomizing images
-
-v.3.0.0~beta6
-- fix for crash if no artist artwork found
-
-v.3.0.0~beta5
-- added routine in settings to move images to Kodi artist information folder
-- added alert image that skins will show if they have not been updated for new display method
-- fixed cache trim so it also deletes the image download cache list
-- added code so AS will delete empty artist folders more often
-
-v.3.0.0~beta4
-- fix for crash when moving image database
-
-v.3.0.0~beta3
+v.3.0.0
+- Python2/3 compatible
 - rewrite to use a single image control instead of multi-image control in skin
-- reworked settings
+- AS can now store and show music in Kodi 18 music artist folder
+- AS now shows the Kodi artist fanart (if available) before anything else (with option to disable)
+- added option to include Kodi album fanart in image list (defaults to False)
+- added routine in settings to move images to Kodi artist information folder
 - added option to disable extranfanart folder
 - added option to control time between slide transitions
-- outdated language files removed, so AS is English only for now (sorry)
-- removed option to have a pop up displayed when downloading artwork
 - AS can now store images and information files in separate directory structure
-
-v.3.0.0~beta2
-- updated settings to allow for storing music in Kodi music folder
 - AS now deletes empty artist information and artwork folders
-
-v.3.0.0~beta1
-- Python2/3 compatible
 - converted language files to current format for forward compatibility
+- removed option to have a pop up displayed when downloading artwork
 
 v.2.1.4
 - fix for fallback images not showing if all artists on a multi-artist song have no images
