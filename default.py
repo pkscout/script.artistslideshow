@@ -110,7 +110,6 @@ for module in resources.plugins.__all__:
         mbid_plugins['names'].append( [1, module] )
         lw.log( ['added %s to mbid plugins' % module] )
 
-
 LANGUAGES = (
 # Full Language name[0]         ISO 639-1[1]   Script Language[2]
     ("Albanian"                   , "sq",            "0"  ),
@@ -161,6 +160,16 @@ LANGUAGES = (
     ("Portuguese (Brazil)"        , "pb",            "32" ),
     ("Portuguese-BR"              , "pb",            "32" ),
     ("Brazilian"                  , "pb",            "32" ) )
+
+def _clean_dir( dir_path ):
+    try:
+        dirs, old_files = xbmcvfs.listdir( dir_path )
+    except Exception as e:
+        lw.log( ['unexpected error while getting directory list', e] )
+        return
+    for old_file in old_files:
+        success, loglines = deleteFile( os.path.join (dir_path, py2_decode( old_file ) ) )
+        lw.log( loglines )
 
 
 class Slideshow( threading.Thread ):
@@ -309,17 +318,6 @@ class Main( object ):
             with self.SLIDESHOWLOCK:
                 self.SLIDESHOWCMD.put( 'quit' )
             self.SLIDESHOW.join()
-
-
-    def _clean_dir( self, dir_path ):
-        try:
-            dirs, old_files = xbmcvfs.listdir( dir_path )
-        except Exception as e:
-            lw.log( ['unexpected error while getting directory list', e] )
-            return
-        for old_file in old_files:
-            success, loglines = deleteFile( os.path.join (dir_path, py2_decode( old_file ) ) )
-            lw.log( loglines )
 
 
     def _clean_text( self, text ):
@@ -744,7 +742,7 @@ class Main( object ):
     def _init_vars( self ):
         self.FANARTNUMBER = False
         self.CACHEDIR = ''
-        self.ARTISTINFO = []
+        self.ARTISTS_INFO = []
         self.DATAROOT = xbmc.translatePath( addon.getAddonInfo('profile') )
         self.IMGDB = '_imgdb.nfo'
         self._set_property( 'ArtistSlideshow.CleanupComplete' )
@@ -804,7 +802,7 @@ class Main( object ):
             kodi_music_artist_path = ''
         if not kodi_music_artist_path:
             lw.log( ['No artist information folder setting found. Aborting.'] )
-            ok = dialog.ok( language(32200) + ': ' + language(32202), language(32301) )
+            dialog.ok( language(32200) + ': ' + language(32202), language(32301) )
             return
         lw.log( ['Artist information folder set to %s' % kodi_music_artist_path] )
         pdialog = xbmcgui.DialogProgress()

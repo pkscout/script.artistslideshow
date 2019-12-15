@@ -3,7 +3,7 @@
 try:
     from kodi_six import xbmc
     LOGTYPE = 'xbmc'
-except:
+except ImportError:
     import logging, logging.handlers
     LOGTYPE = 'file'
 

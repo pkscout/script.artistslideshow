@@ -87,7 +87,7 @@ class URL( object ):
             params = {}
         try:
             data = kwargs['data']
-        except:
+        except IndexError:
             if self.returntype == 'json':
                 data = []
             else:

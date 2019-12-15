@@ -8,7 +8,7 @@ except NameError:
 try:
     from kodi_six import xbmcvfs
     isXBMC = True
-except:
+except ImportError:
     isXBMC= False
 
 if isXBMC:
@@ -158,10 +158,7 @@ def writeFile( data, filename, wtype='wb' ):
     log_lines = []
     if type(data).__name__=='unicode':
         data = data.encode('utf-8')
-    try:
-        thefile = xbmcvfs.File( filename, wtype )
-    except:
-        thefile = open( filename, wtype )
+        thefile = _open( filename, wtype )
     try:
         thefile.write( data )
         thefile.close()
