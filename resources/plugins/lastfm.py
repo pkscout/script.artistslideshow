@@ -51,7 +51,7 @@ class objectConfig( object ):
         self.loglines.append( 'trying to get artist albums from ' + self.URL )
         try:
             xmldata = _xmltree.fromstring( py2_encode( self._get_data( filepath, cachefilepath, url_params ) ) )
-        except ParseError:
+        except _xmltree.ParseError:
             self.loglines.append( 'error reading XML file' )
             return [], self.loglines
         match = False
@@ -87,7 +87,7 @@ class objectConfig( object ):
         self.loglines.append( 'trying to get artist bio from ' + self.URL )
         try:
             xmldata = _xmltree.fromstring( py2_encode( self._get_data( filepath, cachefilepath, url_params ) ) )
-        except ParseError:
+        except _xmltree.ParseError:
             self.loglines.append( 'error reading XML file' )
             return '', self.loglines
         for element in xmldata.getiterator():
@@ -146,7 +146,7 @@ class objectConfig( object ):
             self.loglines.extend( rloglines )
             try:
                 xmldata = _xmltree.fromstring( py2_encode( rawxml ) )
-            except ParseError:
+            except _xmltree.ParseError:
                 self.loglines.append( 'error reading musicbrainz ID from ' + filepath )
                 return '', self.loglines
             for element in xmldata.getiterator():
