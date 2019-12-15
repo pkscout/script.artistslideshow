@@ -13,28 +13,28 @@ def itemHash(item):
         try:
             hash_item = xbmc.getCacheThumbName(item).replace('.tbn', '')
         except TypeError:
-            hash_item = ''  
+            hash_item = ''
     else:
         try:
             hash_item = hashlib.md5( item.encode() ).hexdigest()
         except TypeError:
-            hash_item = ''  
+            hash_item = ''
     return hash_item
-    
+
 def itemHashwithPath(item, thepath):
     if isXBMC:
         try:
             thumb = xbmc.getCacheThumbName(item).replace('.tbn', '')
         except TypeError:
-            return ''  
+            return ''
     else:
         try:
             thumb = hashlib.md5( item.encode() ).hexdigest()
         except TypeError:
-            return ''  
+            return ''
     thumbpath = os.path.join( thepath, thumb.encode( 'utf-8' ) )
     return thumbpath
-    
+
 def getImageType( filename ):
     try:
         new_ext = '.' + imghdr.what( filename ).replace( 'jpeg', 'jpg' )

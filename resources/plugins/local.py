@@ -16,7 +16,7 @@ class objectConfig( object ):
 
     def provides( self ):
         return ['bio', 'albums', 'similar', 'mbid']
-        
+
 
     def getAlbumList( self, album_params ):
         self.loglines = []
@@ -45,8 +45,8 @@ class objectConfig( object ):
             return [], self.loglines
         else:
             return albums, self.loglines
-        
-        
+
+
     def getBio( self, bio_params ):
         self.loglines = []
         bio = ''

@@ -14,7 +14,7 @@ class Logger( object ):
         self.LOGPREAMBLE = preamble
         self.LOGDEBUG = logdebug
         if LOGTYPE == 'file':
-            self.logger = logging.getLogger( logname )                
+            self.logger = logging.getLogger( logname )
             self.logger.setLevel( logging.DEBUG )
             if logconfig == 'timed':
                 lr = logging.handlers.TimedRotatingFileHandler( logfile, when=when, backupCount=numbackups)
@@ -39,7 +39,7 @@ class Logger( object ):
                 loglevel = self.logger.critical
             else:
                 loglevel = self.logger.debug
-            
+
         for line in loglines:
             try:
                 if type(line).__name__=='unicode':
@@ -59,7 +59,7 @@ class Logger( object ):
         else:
             self._output_xbmc( line, loglevel )
 
-                
+
     def _output_file( self, line, loglevel ):
         if self.LOGDEBUG or loglevel != self.logger.debug:
             try:

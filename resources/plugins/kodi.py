@@ -11,8 +11,8 @@ class objectConfig( object ):
 
     def provides( self ):
         return ['bio']
-        
-        
+
+
     def getBio( self, bio_params ):
         self.loglines = []
         response = xbmc.executeJSONRPC (

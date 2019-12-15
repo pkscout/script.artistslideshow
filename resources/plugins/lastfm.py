@@ -46,7 +46,7 @@ class objectConfig( object ):
         albums = []
         filepath = os.path.join( album_params.get( 'infodir', '' ), self.ALBUMFILENAME )
         cachefilepath = os.path.join( album_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
-        additionalparams = {'artist': album_params.get( 'artist', '' )}  
+        additionalparams = {'artist': album_params.get( 'artist', '' )}
         url_params = dict( list(self.ALBUMPARAMS.items()) + list(additionalparams.items()) )
         self.loglines.append( 'trying to get artist albums from ' + self.URL )
         try:
@@ -75,14 +75,14 @@ class objectConfig( object ):
         else:
             return albums, self.loglines
 
-        
+
     def getBio( self, bio_params ):
         self.loglines = []
         url_params = {}
         bio = ''
         filepath = os.path.join( bio_params.get( 'infodir', '' ), self.BIOFILENAME )
         cachefilepath = os.path.join( bio_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
-        additionalparams = {'artist': bio_params.get( 'artist', '' ), 'lang':bio_params.get( 'lang', '' )}  
+        additionalparams = {'artist': bio_params.get( 'artist', '' ), 'lang':bio_params.get( 'lang', '' )}
         url_params = dict( list(self.ARTISTPARAMS.items()) + list(additionalparams.items()) )
         self.loglines.append( 'trying to get artist bio from ' + self.URL )
         try:
@@ -98,7 +98,7 @@ class objectConfig( object ):
             return '', self.loglines
         else:
             return bio, self.loglines
-        
+
 
     def getSimilarArtists( self, sim_params ):
         self.loglines = []
@@ -106,7 +106,7 @@ class objectConfig( object ):
         similar_artists = []
         filepath = os.path.join( sim_params.get( 'infodir', '' ), self.SIMILARFILENAME )
         cachefilepath = os.path.join( sim_params.get( 'infodir', '' ), self.CACHETIMEFILENAME )
-        additionalparams = {'artist': sim_params.get( 'artist', '' )}  
+        additionalparams = {'artist': sim_params.get( 'artist', '' )}
         url_params = dict( list(self.SIMILARPARAMS.items()) + list(additionalparams.items()) )
         self.loglines.append( 'trying to get similar artists from ' + self.URL )
         try:
@@ -168,7 +168,7 @@ class objectConfig( object ):
         else:
             success = self._put_cache_time( cachefilepath )
         if success:
-            rloglines, rawdata = readFile( cachefilepath ) 
+            rloglines, rawdata = readFile( cachefilepath )
             self.loglines.extend( rloglines )
         try:
             cachetime = int( rawdata )

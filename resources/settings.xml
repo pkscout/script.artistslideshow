@@ -14,7 +14,7 @@
 	<category label="32001">
 	    <setting id="artist_image_storage" type="enum" label="32121" lvalues="32122|32123|32136" default="0" />
         <setting id="local_artist_path" type="folder" label="32113" default="" visible="eq(-1,2)" />
-        <setting id="use_extrafanart_folder" type="bool" label="32127" default="true" visible="eq(-2,2)" />        
+        <setting id="use_extrafanart_folder" type="bool" label="32127" default="true" visible="eq(-2,2)" /> 
 		<setting id="fanart_folder" type="text" label="32118" default="extrafanart" visible="eq(-3,2) + eq(-1,true)"/>
         <setting id="restrict_cache" type="bool" label="32116" default="false" visible="eq(-4,0)" />
         <setting id="max_cache_size" label="32117" type="labelenum" values="128|256|512|768|1024|2048|3072|4096" visible="eq(-1,true) + eq(-5,0)" default="1024" />

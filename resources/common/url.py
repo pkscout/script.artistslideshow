@@ -2,7 +2,7 @@
 
 import socket
 import requests as _requests
-    
+
 
 class URL( object ):
 
@@ -11,22 +11,22 @@ class URL( object ):
         self.headers = headers
         self.returntype = returntype
 
-    
+
     def Get( self, url, **kwargs ):
         params, data = self._unpack_args( kwargs )
         return self._urlcall( url, params, '', 'get' )
-    
-    
+
+
     def Post( self, url, **kwargs ):
         params, data = self._unpack_args( kwargs )
-        return self._urlcall( url, params, data, 'post' ) 
-    
-    
+        return self._urlcall( url, params, data, 'post' )
+
+
     def Delete( self, url, **kwargs ):
         params, data = self._unpack_args( kwargs )
         return self._urlcall( url, params, data, 'delete' )
-    
-    
+
+
     def _urlcall( self, url, params, data, urltype ):
         loglines = []
         urldata = ''
@@ -77,8 +77,8 @@ class URL( object ):
         loglines.append( '-----URL OBJECT RETURNED-----' )
         loglines.append( data )
         return success, loglines, data
-    
-    
+
+
     def _unpack_args( self, kwargs ):
         try:
             params = kwargs['params']

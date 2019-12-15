@@ -8,7 +8,7 @@
 # *  sfaxman for smartUnicode
 # *
 # *  code from all scripts/examples are used in script.artistslideshow
-# *  
+# *
 # *  Last.fm:      http://www.last.fm/
 # *  fanart.tv:    http://www.fanart.tv
 # *  theaudiodb:   http://www.theaudiodb.com
@@ -56,7 +56,7 @@ def _get_plugin_settings( preamble, module, description ):
         active = 'false'
     except Exception as e:
         lw.log( ['unexpected error while parsing %s setting for %s' % (description, module), e] )
-        active = 'false'        
+        active = 'false'
     if active == 'true':
         try:
             priority = int( addon.getSetting( preamble + "priority_" + module ) )
@@ -161,16 +161,6 @@ LANGUAGES = (
     ("Portuguese-BR"              , "pb",            "32" ),
     ("Brazilian"                  , "pb",            "32" ) )
 
-def _clean_dir( dir_path ):
-    try:
-        dirs, old_files = xbmcvfs.listdir( dir_path )
-    except Exception as e:
-        lw.log( ['unexpected error while getting directory list', e] )
-        return
-    for old_file in old_files:
-        success, loglines = deleteFile( os.path.join (dir_path, py2_decode( old_file ) ) )
-        lw.log( loglines )
-
 
 class Slideshow( threading.Thread ):
 
@@ -186,8 +176,8 @@ class Slideshow( threading.Thread ):
         self.SHOW = True
         self.FADETOBLACK = fadetoblack
         lw.log( ['Slideshow thread started'] )
-    
-    
+
+
     def AddImage( self, path ):
         if path:
             self.IMAGES.append( path )
@@ -197,18 +187,18 @@ class Slideshow( threading.Thread ):
         else:
             lw.log( ['Image path was empty, nothing added'] )
             return False
-    
+
 
     def ClearImages( self ):
         self.IMAGES = []
         if self.FADETOBLACK:
-            self._set_property( 'ArtistSlideshow.Image', os.path.join( addonpath, 'resources', 'images', 'black-hd.png' ) )  
+            self._set_property( 'ArtistSlideshow.Image', os.path.join( addonpath, 'resources', 'images', 'black-hd.png' ) )
         else:
-            self._set_property( 'ArtistSlideshow.Image' )  
+            self._set_property( 'ArtistSlideshow.Image' )
         lw.log( ['images cleared'] )
         self.IMAGESCLEARED = True
 
-    
+
     def run( self ):
         cmd = ''
         last_image = ''
@@ -239,8 +229,8 @@ class Slideshow( threading.Thread ):
                 if not self.SHOW:
                     break
         lw.log( ['Slideshow thread stopping'] )
-                
-             
+
+
     def _set_property( self, property_name, value="" ):
         try:
           self.WINDOW.setProperty( property_name, value )
@@ -320,6 +310,17 @@ class Main( object ):
             self.SLIDESHOW.join()
 
 
+    def _clean_dir( self, dir_path ):
+        try:
+            dirs, old_files = xbmcvfs.listdir( dir_path )
+        except Exception as e:
+            lw.log( ['unexpected error while getting directory list', e] )
+            return
+        for old_file in old_files:
+            success, loglines = deleteFile( os.path.join (dir_path, py2_decode( old_file ) ) )
+            lw.log( loglines )
+
+
     def _clean_text( self, text ):
         text = re.sub('<a [^>]*>|</a>|<span[^>]*>|</span>','',text)
         text = re.sub('&quot;','"',text)
@@ -330,7 +331,7 @@ class Main( object ):
         text = re.sub('Read more about .* on Last.fm.','',text)
         return text.strip()
 
-    
+
     def _clear_properties( self ):
         self.MBID = ''
         self.FANARTNUMBER = False
@@ -406,7 +407,7 @@ class Main( object ):
         if not image_downloaded:
             lw.log( ['no new images downloaded'] )
         return image_downloaded
-    
+
 
     def _get_artistinfo( self ):
         bio = ''
@@ -569,7 +570,7 @@ class Main( object ):
                     filtered_files.append( file )
             files = filtered_files
         return files
-        
+
 
     def _get_featured_artists( self, data ):
         replace_regex = re.compile( r"ft\.", re.IGNORECASE )
@@ -606,7 +607,7 @@ class Main( object ):
             image_list, loglines = image_plugins['objs'][plugin_name[1]].getImageList( image_params )
             lw.log( loglines )
             images.extend( image_list )
-            image_params['mbid'] = self._get_musicbrainz_id( self.NAME, self.MBID ) 
+            image_params['mbid'] = self._get_musicbrainz_id( self.NAME, self.MBID )
         return images
 
 
@@ -648,7 +649,7 @@ class Main( object ):
                 if item == 'album':
                     playing_item = xbmc.Player().getMusicInfoTag().getAlbum()
                 elif item == 'title':
-                    playing_item = xbmc.Player().getMusicInfoTag().getTitle()                
+                    playing_item = xbmc.Player().getMusicInfoTag().getTitle()
                 got_item = True
             except RuntimeError:
                 got_item = False
@@ -706,7 +707,7 @@ class Main( object ):
         elif artist_image_storage == 2:
             self.KODILOCALSTORAGE = False
             self.LOCALARTISTSTORAGE = True
-            self.LOCALARTISTPATH = getSettingString( addon, 'local_artist_path' )        
+            self.LOCALARTISTPATH = getSettingString( addon, 'local_artist_path' )
             self.RESTRICTCACHE = False
             self.USEFANARTFOLDER = getSettingBool( addon, 'use_extrafanart_folder', default=True )
             if self.USEFANARTFOLDER:
@@ -849,14 +850,14 @@ class Main( object ):
             pdialog.update( int( progress ) )
             lw.log( ['using increment of %s updating progress to %s' % (str( increment ), str( progress ))] )
         pdialog.close()
-        dialog.ok( language(32200) + ': ' + language(32203), language(32306) )       
+        dialog.ok( language(32200) + ': ' + language(32203), language(32306) )
 
 
     def _parse_argv( self ):
         try:
             params = dict( arg.split( "=" ) for arg in sys.argv[ 1 ].split( "&" ) )
         except IndexError:
-            params = {}        
+            params = {}
         except Exception as e:
             lw.log( ['unexpected error while parsing arguments', e] )
             params = {}
@@ -873,7 +874,7 @@ class Main( object ):
         self.RUNFROMSETTINGS = False
         self.MOVETOKODISTORAGE = False
         checkmove = params.get( "movetokodistorage", "False" )
-        if checkmove.lower() == 'true': 
+        if checkmove.lower() == 'true':
             self.MOVETOKODISTORAGE = True
             self.RUNFROMSETTINGS = True
 
@@ -891,7 +892,7 @@ class Main( object ):
             return self._remove_trailing_dot( thename[:-1] + self.ENDREPLACE )
         else:
             return thename
-    
+
 
     def _run_from_settings( self ):
         if self.MOVETOKODISTORAGE:
@@ -903,7 +904,7 @@ class Main( object ):
     def _set_artwork_from_dir( self, thedir, files ):
         for file in files:
             self.SLIDESHOW.AddImage( os.path.join( thedir, file ) )
-    
+
 
     def _set_cachedir( self, theartist ):
         self.CACHEDIR = self._set_thedir( theartist, 'ArtistSlideshow' )
@@ -937,7 +938,7 @@ class Main( object ):
         else:
             self.FANARTNUMBER = self._set_fanart_number( thedir )
         return "fanart" + str( self.FANARTNUMBER ) + ext
-            
+
 
     def _set_infodir( self, theartist ):
         self.INFODIR = self._set_thedir( theartist, 'ArtistInformation' )
@@ -957,7 +958,7 @@ class Main( object ):
             album_total = str( count )
         self._set_property( "ArtistSlideshow.SimilarCount", similar_total )
         self._set_property( "ArtistSlideshow.AlbumCount", album_total )
-        
+
 
     def _set_property( self, property_name, value='' ):
         try:
@@ -974,7 +975,7 @@ class Main( object ):
             if c in self.ILLEGALCHARS:
                 s_name = s_name + self.ILLEGALREPLACE
             else:
-                s_name = s_name + c  
+                s_name = s_name + c
         return py2_decode( s_name )
 
 
@@ -1134,7 +1135,7 @@ class Main( object ):
                         success, loglines = moveFile( src, dst )
                         lw.log( loglines )
             self._update_check_file( checkfile, '3.0.0', 'preference conversion complete' )
-        
+
 
     def _wait( self, wait_time ):
         waited = 0

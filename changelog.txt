@@ -345,7 +345,7 @@ v0.0.4 (beta 4)
 
 v0.0.3 (beta 3)
 - better song change detection
-- don't try to download when no artist name is provided 
+- don't try to download when no artist name is provided
 - try to make sure the script doesn't fail when listening to online radio
 
 v0.0.2 (beta 2)

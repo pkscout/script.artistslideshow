@@ -35,7 +35,7 @@ class objectConfig( object ):
     def provides( self ):
         return ['images']
         
-        
+
     def getImageList( self, img_params ):
         self.loglines = []
         url_params = {}
@@ -53,7 +53,7 @@ class objectConfig( object ):
                 self.CACHEEXPIRE['high'] = self.CACHEEXPIREWITHDONATION
             else:
                 self.CACHEEXPIRE['low'] = self.CACHEEXPIREWITHCLIENTKEY
-                self.CACHEEXPIRE['high'] = self.CACHEEXPIREWITHCLIENTKEY            
+                self.CACHEEXPIRE['high'] = self.CACHEEXPIREWITHCLIENTKEY 
         json_data = self._get_data( filepath, cachefilepath, url, url_params )
         if json_data:
             image_list = json_data.get( 'artistbackground', [] )
@@ -76,7 +76,7 @@ class objectConfig( object ):
         else:
             success = self._put_cache_time( cachefilepath )
         if success:
-            rloglines, rawdata = readFile( cachefilepath ) 
+            rloglines, rawdata = readFile( cachefilepath )
             self.loglines.extend( rloglines )
         try:
             cachetime = int( rawdata )

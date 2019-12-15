@@ -61,7 +61,7 @@ class objectConfig( object ):
                     albums.append( ( album.get( 'strAlbum', '' ), album.get( 'strAlbumThumb', '' ) ) )
         return albums, self.loglines
 
-        
+
     def getBio( self, bio_params ):
         self.loglines = []
         self._set_filepaths( bio_params )
@@ -78,8 +78,8 @@ class objectConfig( object ):
             if artist is not None:
                 bio = artist[0].get( 'strBiography' + bio_params.get( 'lang', '' ).upper(), '' )
         return bio, self.loglines
-        
-        
+
+
     def getImageList( self, img_params ):
         self.loglines = []
         self._set_filepaths( img_params )
@@ -129,7 +129,7 @@ class objectConfig( object ):
                 return '', self.loglines
         else:
             return '', self.loglines
-        
+
 
     def _check_donation( self, donation ):
         if donation == 'true':
@@ -153,7 +153,7 @@ class objectConfig( object ):
                 self.loglines.append( 'found tadbid, using tadbidurl to get information from theaudiodb' )
                 return tadbidurl, url_params
         if nameurl:
-            url_params['s'] = params.get( 'artist', '' ) 
+            url_params['s'] = params.get( 'artist', '' )
             self.loglines.append( 'no mbid or tadbid found, using artist name to get information from theaudiodb' )
             return nameurl, url_params
         return '', ''
@@ -186,7 +186,7 @@ class objectConfig( object ):
                     self.loglines.extend( wloglines )
         rloglines, audiodbid = readFile( self.IDFILEPATH )
         self.loglines.extend( rloglines )
-        return audiodbid    
+        return audiodbid
 
 
     def _get_cache_time( self, cachefilepath ):
@@ -199,7 +199,7 @@ class objectConfig( object ):
         else:
             success = self._put_cache_time( cachefilepath )
         if success:
-            rloglines, rawdata = readFile( cachefilepath ) 
+            rloglines, rawdata = readFile( cachefilepath )
             self.loglines.extend( rloglines )
         try:
             cachetime = int( rawdata )
