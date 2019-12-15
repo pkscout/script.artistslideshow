@@ -62,7 +62,7 @@ class objectConfig( object ):
             if element.tag == "content":
                 bio = element.text
         if not bio:
-            self.loglines.append( 'no %s found in local xml file' % item )
+            self.loglines.append( 'no bio found in local xml file' )
             return '', self.loglines
         else:
             return bio, self.loglines

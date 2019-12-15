@@ -1,6 +1,5 @@
 #v.0.2.0
 
-import sys
 from kodi_six import xbmc
 import json as _json
 
@@ -16,7 +15,8 @@ class objectConfig( object ):
         
     def getBio( self, bio_params ):
         self.loglines = []
-        response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "description"]},"id":1}' )
+        response = xbmc.executeJSONRPC (
+            '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "description"]},"id":1}' )
         try:
             bio = _json.loads(response).get( 'result', {} ).get( 'item', {} ).get( 'description', '' )
         except UnicodeDecodeError:

@@ -1,15 +1,10 @@
-# v.0.6.2
+# v.0.7.0
 
-import os, re, shutil, time
+import os, re
 try:
     _range = range
 except NameError:
     _range = xrange
-try:
-    import subprocess
-    hasSubprocess = True
-except:
-    hasSubprocess = False
 try:
     from kodi_six import xbmcvfs
     isXBMC = True
@@ -24,6 +19,7 @@ if isXBMC:
     _copy   = xbmcvfs.copy
     _open   = xbmcvfs.File
 else:
+    import shutil
     _mkdirs = os.makedirs
     _rmdir  = os.rmdir
     _exists = os.path.exists

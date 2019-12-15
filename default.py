@@ -296,7 +296,7 @@ class Main( object ):
                             self._trim_cache()
                     else:
                         time.sleep(2) # doublecheck if playback really stopped
-                        if( xbmc.Player().isPlayingAudio() == False and self._get_infolabel( self.EXTERNALCALL ) == '' ):
+                        if( not xbmc.Player().isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '' ):
                             if ( self.DAEMON == "False" ):
                                 self._set_property( "ArtistSlideshowRunning" )
                 else:
@@ -503,7 +503,8 @@ class Main( object ):
                 return artists_info
             if playing_file != self.LASTPLAYINGFILE:
                 # if the same file is playing, use cached JSON response instead of doing a new query
-                response = xbmc.executeJSONRPC ( '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "musicbrainzartistid"]},"id":1}' )
+                response = xbmc.executeJSONRPC (
+                    '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "musicbrainzartistid"]},"id":1}' )
                 self.LASTPLAYINGFILE = playing_file
             else:
                 lw.log( ['same file playing, returning cached artists_info'] )
@@ -743,6 +744,7 @@ class Main( object ):
     def _init_vars( self ):
         self.FANARTNUMBER = False
         self.CACHEDIR = ''
+        self.ARTISTINFO = []
         self.DATAROOT = xbmc.translatePath( addon.getAddonInfo('profile') )
         self.IMGDB = '_imgdb.nfo'
         self._set_property( 'ArtistSlideshow.CleanupComplete' )
@@ -821,7 +823,7 @@ class Main( object ):
             dirs = []
         if not dirs:
             pdialog.close()
-            ok = dialog.ok( language(32200) + ': ' + language(32203), language(32306) )
+            dialog.ok( language(32200) + ': ' + language(32203), language(32306) )
             return
         increment = 100/len( dirs )
         progress = 0.0

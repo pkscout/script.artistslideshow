@@ -18,9 +18,12 @@ except AttributeError:
 class objectConfig( object ):
     def __init__( self ):
         secsinweek = int( 7*24*60*60 )
-        self.ARTISTPARAMS = {'autocorrect':'1', 'api_key':base64.b64decode(clowncar.encode('ascii')).decode('ascii'), 'method':'artist.getInfo'}
-        self.ALBUMPARAMS = {'autocorrect':'1', 'api_key':base64.b64decode(clowncar.encode('ascii')).decode('ascii'), 'method':'artist.getTopAlbums'}
-        self.SIMILARPARAMS = {'autocorrect':'1', 'api_key':base64.b64decode(clowncar.encode('ascii')).decode('ascii'), 'limit':'50', 'method':'artist.getSimilar'}
+        self.ARTISTPARAMS = {'autocorrect':'1',
+                             'api_key':base64.b64decode(clowncar.encode('ascii')).decode('ascii'), 'method':'artist.getInfo'}
+        self.ALBUMPARAMS = {'autocorrect':'1',
+                            'api_key':base64.b64decode(clowncar.encode('ascii')).decode('ascii'), 'method':'artist.getTopAlbums'}
+        self.SIMILARPARAMS = {'autocorrect':'1',
+                              'api_key':base64.b64decode(clowncar.encode('ascii')).decode('ascii'), 'limit':'50', 'method':'artist.getSimilar'}
         self.URL = 'http://ws.audioscrobbler.com/2.0/'
         self.BIOFILENAME = 'lastfmartistbio.nfo'
         self.ALBUMFILENAME = 'lastfmartistalbums.nfo'
