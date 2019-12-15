@@ -23,16 +23,13 @@ try:
 except ImportError:
     from Queue import Queue
 import os, random, re, sys, threading, time
-import xml.etree.ElementTree as _xmltree
 import json as _json
 from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 from kodi_six.utils import py2_encode, py2_decode
-from collections import OrderedDict as _ordereddict
-from resources.common.fileops import checkPath, writeFile, readFile, deleteFile, deleteFolder, copyFile, moveFile, naturalKeys
+from resources.common.fileops import checkPath, writeFile, readFile, deleteFile, deleteFolder, moveFile, naturalKeys
 from resources.common.url import URL
-from resources.common.transforms import getImageType, itemHash, itemHashwithPath
 from resources.common.xlogger import Logger
-from resources.common.kodisettings import getSettingBool, getSettingInt, getSettingNumber, getSettingString
+from resources.common.kodisettings import getSettingBool, getSettingInt, getSettingString
 import resources.plugins
 
 addon        = xbmcaddon.Addon()
@@ -279,7 +276,7 @@ class Main( object ):
                 self._set_property( 'ArtistSlideshow.Image', os.path.join( addonpath, 'resources', 'images', 'black-hd.png' ) )
             self.SLIDESHOW.setDaemon(True)
             self.SLIDESHOW.start()
-            if( xbmc.Player().isPlayingAudio() == False and self._get_infolabel( self.EXTERNALCALL ) == '' ):
+            if( not xbmc.Player().isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '' ):
                 lw.log( ['no music playing'] )
                 if( self.DAEMON == 'False' ):
                     self._set_property( 'ArtistSlideshowRunning' )
@@ -292,7 +289,7 @@ class Main( object ):
             while (not xbmc.abortRequested):
                 time.sleep(1)
                 if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
-                    if( xbmc.Player().isPlayingAudio() == True or self._get_infolabel( self.EXTERNALCALL ) != '' ):
+                    if( xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '' ):
                         if set( self.ALLARTISTS ) != set( self._get_current_artists() ):
                             self._clear_properties()
                             self._use_correct_artwork()
@@ -496,7 +493,7 @@ class Main( object ):
         artist_names = []
         artists_info = []
         mbids = []
-        if( xbmc.Player().isPlayingAudio() == True ):
+        if xbmc.Player().isPlayingAudio():
             try:
                 playing_file = xbmc.Player().getPlayingFile()
             except RuntimeError:
@@ -655,9 +652,9 @@ class Main( object ):
                     playing_item = xbmc.Player().getMusicInfoTag().getTitle()                
                 got_item = True
             except RuntimeError:
-                got_title = False
+                got_item = False
             except Exception as e:
-                got_title = False
+                got_item = False
                 lw.log( ['unexpected error getting %s from Kodi' % item, e] )
             if num_trys > max_trys:
                 break
@@ -852,7 +849,7 @@ class Main( object ):
             pdialog.update( int( progress ) )
             lw.log( ['using increment of %s updating progress to %s' % (str( increment ), str( progress ))] )
         pdialog.close()
-        ok = dialog.ok( language(32200) + ': ' + language(32203), language(32306) )       
+        dialog.ok( language(32200) + ': ' + language(32203), language(32306) )       
 
 
     def _parse_argv( self ):
@@ -921,7 +918,7 @@ class Main( object ):
             try:
                 tmpname = os.path.splitext( lastfile )[0]
             except IndexError:
-                return url.rsplit('/', 1)[-1]
+                fanart_number = 1
             try:
                 fanart_number = int( re.search('(\d+)$', tmpname).group(0) ) + 1
             except:
