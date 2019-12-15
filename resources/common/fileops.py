@@ -63,13 +63,13 @@ def copyFile( thesource, thedest ):
 
 
 def deleteFile( thesource ):
-    return deleteFolder( thesource, type='file')
+    return deleteFolder( thesource, thetype='file')
 
 
-def deleteFolder( thesource, type='folder' ):
+def deleteFolder( thesource, thetype='folder' ):
     log_lines = []
     if _exists( thesource ):
-        if type == 'folder':
+        if thetype == 'folder':
             #in Mac OSX the .DS_Store file, if present, will block a folder from being deleted, so delete the file
             try:
                 _delete( os.path.join( thesource, '.DS_Store' ) )
@@ -82,7 +82,7 @@ def deleteFolder( thesource, type='folder' ):
         else:
             _action = _delete
         try:
-            log_lines.append( 'deleting %s %s' % (type, thesource) )
+            log_lines.append( 'deleting %s %s' % (thetype, thesource) )
             if isXBMC:
                 if not _action( thesource ):
                     raise IOError( 'unable to delete item' )

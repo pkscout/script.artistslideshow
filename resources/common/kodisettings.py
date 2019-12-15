@@ -1,7 +1,7 @@
 #v.0.0.1
 
-def _get_setting( addon, setting_name, default, type="string" ):
-    if type.lower() == "bool":
+def _get_setting( addon, setting_name, default, thetype="string" ):
+    if thetype.lower() == "bool":
         try:
             thebool = addon.getSettingBool( setting_name )
             if thebool == 0:
@@ -18,7 +18,7 @@ def _get_setting( addon, setting_name, default, type="string" ):
             if addon.getSetting( setting_name ).lower() == 'false':
                 return False
             return default
-    if type.lower() == "int":
+    if thetype.lower() == "int":
         try:
             return addon.getSettingInt( setting_name )
         except TypeError:
@@ -28,7 +28,7 @@ def _get_setting( addon, setting_name, default, type="string" ):
                 return int( addon.getSetting( setting_name ) )
             except:
                 return default
-    if type.lower() == "number":
+    if thetype.lower() == "number":
         try:
             return addon.getSettingNumber( setting_name )
         except TypeError:
