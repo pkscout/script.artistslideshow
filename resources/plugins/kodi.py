@@ -1,4 +1,4 @@
-#v.0.2.0
+#v.0.3.0
 
 from kodi_six import xbmc
 import json as _json
