@@ -3,6 +3,7 @@
 		<import addon="xbmc.python" version="2.26.0" />
 		<import addon="xbmc.addon" version="17.9.0" />
 		<import addon="script.module.requests" version="2.3.0" />
+		<import addon="script.module.defusedxml" version="0.6.0" />
 		<import addon="script.module.kodi-six" version="0.0.3" />
 		<import addon="script.module.future" version="0.16.0.4" />
 	</requires>
