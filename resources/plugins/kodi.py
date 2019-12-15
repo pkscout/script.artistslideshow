@@ -1,6 +1,7 @@
-#v.0.1.0
+#v.0.2.0
 
-import sys, xbmc
+import sys
+from kodi_six import xbmc
 import json as _json
 
 

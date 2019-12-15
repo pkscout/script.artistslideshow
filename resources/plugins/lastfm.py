@@ -1,4 +1,4 @@
-#v.0.1.0
+#v.0.2.0
 
 import base64, os, time, random
 import xml.etree.ElementTree as _xmltree

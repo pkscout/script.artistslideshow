@@ -1,6 +1,7 @@
-#v.0.1.0
+#v.0.2.0
 
-import base64, os, time, sys, random, xbmc, xbmcvfs
+import base64, os, time, sys, random
+from kodi_six import xbmcvfs
 from ..common.url import URL
 from ..common.fileops import readFile, writeFile, deleteFile, checkPath
 from kodi_six.utils import py2_encode
