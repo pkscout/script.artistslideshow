@@ -134,32 +134,6 @@ def naturalKeys( text ):
     return [ atoi( c ) for c in re.split( r'(\d+)', text ) ]
 
 
-def popenWithTimeout( command, timeout ):
-    log_lines = []
-    log_lines.append( 'running command ' + command)
-    if hasSubprocess:
-        try:
-            p = subprocess.Popen( command, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-        except OSError:
-            log_lines.append( 'error finding external script, terminating' )
-            return False, log_lines
-        except Exception as e:
-            log_lines.append( 'unknown error while attempting to run %s' % command )
-            log_lines.append( e )
-            return False, log_lines
-        for t in _range( timeout * 4 ):
-            time.sleep( 0.25 )
-            if p.poll() is not None:
-                return p.communicate(), log_lines
-        p.kill()
-        log_lines.append( 'script took too long to run, terminating' )
-        return False, log_lines
-    else:
-        log_lines.append( 'running command with os.system' )
-        os.system( command )
-        return True, log_lines
-
-
 def readFile( filename ):
     log_lines = []
     if _exists( filename ):
