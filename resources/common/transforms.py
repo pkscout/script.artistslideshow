@@ -39,6 +39,7 @@ def getImageType( filename ):
     try:
         new_ext = '.' + imghdr.what( filename ).replace( 'jpeg', 'jpg' )
     except Exception as e:
+        xbmc.log( 'Exception: %s. Using .tbn as extension' % e )
         new_ext = '.tbn'
     return new_ext
 

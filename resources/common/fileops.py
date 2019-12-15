@@ -91,7 +91,7 @@ def deleteFolder( src, type='folder' ):
                 if not _action( src ):
                     raise IOError( 'unable to delete item' )
             else:
-                _action( src )                
+                _action( src )
         except IOError:
             log_lines.append( 'unable to delete %s' % src )
             return False, log_lines

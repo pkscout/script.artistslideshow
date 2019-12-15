@@ -1,6 +1,6 @@
 #v.0.0.1
 
-def _getsetting( addon, name, default, type="string" ):
+def _get_setting( addon, name, default, type="string" ):
     if type.lower() == "bool":
         try:
             thebool = addon.getSettingBool( name )
@@ -47,17 +47,17 @@ def _getsetting( addon, name, default, type="string" ):
 
 
 def getSettingBool( addon, name, default=False ):
-    return _getsetting( addon, name, default, 'bool' )
+    return _get_setting( addon, name, default, 'bool' )
 
 
 def getSettingInt( addon, name, default=0 ):
-    return _getsetting( addon, name, default, 'int')
+    return _get_setting( addon, name, default, 'int')
 
 
 def getSettingNumber( addon, name, default=0.0 ):
-    return _getsetting( addon, name, default, 'number')
+    return _get_setting( addon, name, default, 'number')
 
 
 def getSettingString( addon, name, default='' ):
-    return _getsetting( addon, name, default, 'string')
+    return _get_setting( addon, name, default, 'string')
 

@@ -28,7 +28,7 @@ class URL( object ):
     
     
     def _urlcall( self, url, params, data, urltype ):
-        loglines = []        
+        loglines = []
         urldata = ''
         try:
             if urltype == "get":
