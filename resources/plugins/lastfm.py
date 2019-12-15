@@ -111,7 +111,7 @@ class objectConfig( object ):
         self.loglines.append( 'trying to get similar artists from ' + self.URL )
         try:
             xmldata = _xmltree.fromstring( py2_encode( self._get_data( filepath, cachefilepath, url_params ) ) )
-        except ParseError:
+        except _xmltree.ParseError:
             self.loglines.append( 'error reading XML file' )
             return [], self.loglines
         match = False
