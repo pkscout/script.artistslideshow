@@ -1,4 +1,4 @@
-# v.0.6.1
+# v.0.6.2
 
 import os, re, shutil, time
 try:
@@ -22,12 +22,14 @@ if isXBMC:
     _exists = xbmcvfs.exists
     _delete = xbmcvfs.delete
     _copy   = xbmcvfs.copy
+    _open   = xbmcvfs.File
 else:
     _mkdirs = os.makedirs
     _rmdir  = os.rmdir
     _exists = os.path.exists
     _delete = os.remove
     _copy   = shutil.copyfile
+    _open   = open
 
 
 def checkPath( path, create=True ):
@@ -161,10 +163,7 @@ def popenWithTimeout( command, timeout ):
 def readFile( filename ):
     log_lines = []
     if _exists( filename ):
-        try:
-            thefile = xbmcvfs.File( filename, 'r' )
-        except:
-            thefile = open( filename, 'r' )
+        thefile = _open( filename, 'r' )
         try:
             data = thefile.read()
             thefile.close()
