@@ -32,11 +32,11 @@ class URL( object ):
         urldata = ''
         try:
             if urltype == "get":
-                urldata = _requests.get( url, params=params, timeout=self.timeout, verify=False )
+                urldata = _requests.get( url, params=params, timeout=self.timeout )
             elif urltype == "post":
-                urldata = _requests.post( url, params=params, data=data, headers=self.headers, timeout=self.timeout, verify=False )
+                urldata = _requests.post( url, params=params, data=data, headers=self.headers, timeout=self.timeout )
             elif urltype == "delete":
-                urldata = _requests.delete( url, params=params, data=data, headers=self.headers, timeout=self.timeout, verify=False )
+                urldata = _requests.delete( url, params=params, data=data, headers=self.headers, timeout=self.timeout )
             loglines.append( "the url is: " + urldata.url )
             loglines.append( 'the params are: ')
             loglines.append( params )

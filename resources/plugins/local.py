@@ -1,8 +1,8 @@
-#v.0.2.0
+#v.0.3.0
 
 import os
-import xml.etree.ElementTree as _xmltree
-from ..common.fileops import readFile, checkPath
+import defusedxml.ElementTree as _xmltree
+from resources.common.fileops import readFile, checkPath
 from kodi_six.utils import py2_encode, py2_decode
 
 
@@ -27,7 +27,7 @@ class objectConfig( object ):
         rloglines, rawxml = readFile( filepath )
         self.loglines.extend( rloglines )
         if rawxml:
-            xmldata = _xmltree.fromstring( rawxml )
+            xmldata = _xmltree.fromstring( py2_encode( rawxml ) )
         else:
             return [], self.loglines
         for element in xmldata.getiterator():
@@ -55,7 +55,7 @@ class objectConfig( object ):
         loglines, rawxml = readFile( filepath )
         self.loglines.extend( loglines )
         if rawxml:
-            xmldata = _xmltree.fromstring( rawxml )
+            xmldata = _xmltree.fromstring( py2_encode( rawxml ) )
         else:
             return '', self.loglines
         for element in xmldata.getiterator():
@@ -90,7 +90,7 @@ class objectConfig( object ):
         rloglines, rawxml = readFile( filepath )
         self.loglines.extend( rloglines )
         if rawxml:
-            xmldata = _xmltree.fromstring( rawxml )
+            xmldata = _xmltree.fromstring( py2_encode( rawxml ) )
         else:
             return [], self.loglines
         for element in xmldata.getiterator():

@@ -1,9 +1,9 @@
-#v.0.2.0
+#v.0.3.0
 
 import base64, os, time, random
-import xml.etree.ElementTree as _xmltree
-from ..common.url import URL
-from ..common.fileops import readFile, writeFile, checkPath
+import defusedxml.ElementTree as _xmltree
+from resources.common.url import URL
+from resources.common.fileops import readFile, writeFile, checkPath
 from kodi_six.utils import py2_encode
 try:
     from . import lastfm_info as settings
@@ -50,9 +50,10 @@ class objectConfig( object ):
         url_params = dict( list(self.ALBUMPARAMS.items()) + list(additionalparams.items()) )
         self.loglines.append( 'trying to get artist albums from ' + self.URL )
         try:
-           xmldata = _xmltree.fromstring( self._get_data( filepath, cachefilepath, url_params ) )
+            xmldata = _xmltree.fromstring( py2_encode( self._get_data( filepath, cachefilepath, url_params ) ) )
         except:
-          return [], self.loglines
+            self.loglines.append( 'error reading XML file' )
+            return [], self.loglines
         match = False
         for element in xmldata.getiterator():
             if element.tag == "name":
@@ -85,9 +86,10 @@ class objectConfig( object ):
         url_params = dict( list(self.ARTISTPARAMS.items()) + list(additionalparams.items()) )
         self.loglines.append( 'trying to get artist bio from ' + self.URL )
         try:
-           xmldata = _xmltree.fromstring( self._get_data( filepath, cachefilepath, url_params ) )
+            xmldata = _xmltree.fromstring( py2_encode( self._get_data( filepath, cachefilepath, url_params ) ) )
         except:
-          return '', self.loglines
+            self.loglines.append( 'error reading XML file' )
+            return '', self.loglines
         for element in xmldata.getiterator():
             if element.tag == "content":
                 bio = element.text
@@ -108,9 +110,10 @@ class objectConfig( object ):
         url_params = dict( list(self.SIMILARPARAMS.items()) + list(additionalparams.items()) )
         self.loglines.append( 'trying to get similar artists from ' + self.URL )
         try:
-           xmldata = _xmltree.fromstring( self._get_data( filepath, cachefilepath, url_params ) )
+            xmldata = _xmltree.fromstring( py2_encode( self._get_data( filepath, cachefilepath, url_params ) ) )
         except:
-          return [], self.loglines
+            self.loglines.append( 'error reading XML file' )
+            return [], self.loglines
         match = False
         for element in xmldata.getiterator():
             if element.tag == "name":
@@ -142,7 +145,7 @@ class objectConfig( object ):
             rloglines, rawxml = readFile( filepath )
             self.loglines.extend( rloglines )
             try:
-                xmldata = _xmltree.fromstring( rawxml )
+                xmldata = _xmltree.fromstring( py2_encode( rawxml ) )
             except:
                 self.loglines.append( 'error reading musicbrainz ID from ' + filepath )
                 return '', self.loglines
