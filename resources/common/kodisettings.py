@@ -26,7 +26,7 @@ def _get_setting( addon, setting_name, default, thetype="string" ):
         except AttributeError:
             try:
                 return int( addon.getSetting( setting_name ) )
-            except:
+            except ValueError:
                 return default
     if thetype.lower() == "number":
         try:
@@ -36,7 +36,7 @@ def _get_setting( addon, setting_name, default, thetype="string" ):
         except AttributeError:
             try:
                 return float( addon.getSetting( setting_name ) )
-            except:
+            except ValueError:
                 return default
     else:
         setting = addon.getSetting( setting_name )

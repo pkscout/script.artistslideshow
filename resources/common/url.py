@@ -60,14 +60,13 @@ class URL( object ):
         if urldata:
             success = True
             loglines.append( 'returning URL as ' + self.returntype )
-            try:
-                if self.returntype == 'text':
-                    data = urldata.text
-                elif self.returntype == 'binary':
-                    data = urldata.content
-                elif self.returntype == 'json':
-                    data = urldata.json()
-            except:
+            if self.returntype == 'text':
+                data = urldata.text
+            elif self.returntype == 'binary':
+                data = urldata.content
+            elif self.returntype == 'json':
+                data = urldata.json()
+            else:
                 success = False
                 data = ''
                 loglines.append( 'unable to convert returned object to acceptable type' )
@@ -83,7 +82,7 @@ class URL( object ):
     def _unpack_args( self, kwargs ):
         try:
             params = kwargs['params']
-        except:
+        except IndexError:
             params = {}
         try:
             data = kwargs['data']

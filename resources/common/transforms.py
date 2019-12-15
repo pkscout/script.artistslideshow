@@ -4,7 +4,7 @@ import imghdr, os, re
 try:
     from kodi_six import xbmc
     isXBMC = True
-except:
+except ImportError:
     import hashlib
     isXBMC = False
 
