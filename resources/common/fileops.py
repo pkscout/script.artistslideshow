@@ -28,51 +28,51 @@ else:
     _open   = open
 
 
-def checkPath( path, create=True ):
+def checkPath( thepath, createdir=True ):
     log_lines = []
-    log_lines.append( 'checking for %s' % path )
-    if not _exists( path ):
-        if create:
-            log_lines.append( '%s does not exist, creating it' % path )
-            _mkdirs( path )
+    log_lines.append( 'checking for %s' % thepath )
+    if not _exists( thepath ):
+        if createdir:
+            log_lines.append( '%s does not exist, creating it' % thepath )
+            _mkdirs( thepath )
         else:
-            log_lines.append( '%s does not exist' % path )
+            log_lines.append( '%s does not exist' % thepath )
         return False, log_lines
     else:
-        log_lines.append( '%s exists' % path )
+        log_lines.append( '%s exists' % thepath )
         return True, log_lines
 
 
-def copyFile( src, dst ):
+def copyFile( thesource, thedest ):
     log_lines = []
-    if _exists( src ):
+    if _exists( thesource ):
         try:
-            log_lines.append( 'copying file %s to %s' % (src, dst) )
-            _copy( src, dst )
+            log_lines.append( 'copying file %s to %s' % (thesource, thedest) )
+            _copy( thesource, thedest )
         except IOError:
-            log_lines.append( 'unable to copy %s to %s' % (src, dst) )
+            log_lines.append( 'unable to copy %s to %s' % (thesource, thedest) )
             return False, log_lines
         except Exception as e:
-            log_lines.append( 'unknown error while attempting to copy %s to %s' % (src, dst) )
+            log_lines.append( 'unknown error while attempting to copy %s to %s' % (thesource, thedest) )
             log_lines.append( e )
             return False, log_lines
         return True, log_lines
     else:
-        log_lines.append( '%s does not exist' % src )
+        log_lines.append( '%s does not exist' % thesource )
         return False, log_lines
 
 
-def deleteFile( src ):
-    return deleteFolder( src, type='file')
+def deleteFile( thesource ):
+    return deleteFolder( thesource, type='file')
 
 
-def deleteFolder( src, type='folder' ):
+def deleteFolder( thesource, type='folder' ):
     log_lines = []
-    if _exists( src ):
+    if _exists( thesource ):
         if type == 'folder':
             #in Mac OSX the .DS_Store file, if present, will block a folder from being deleted, so delete the file
             try:
-                _delete( os.path.join( src, '.DS_Store' ) )
+                _delete( os.path.join( thesource, '.DS_Store' ) )
             except IOError:
                 log_lines.append( 'unable to delete .DS_Store file' )
             except Exception as e:
@@ -82,38 +82,38 @@ def deleteFolder( src, type='folder' ):
         else:
             _action = _delete
         try:
-            log_lines.append( 'deleting %s %s' % (type, src) )
+            log_lines.append( 'deleting %s %s' % (type, thesource) )
             if isXBMC:
-                if not _action( src ):
+                if not _action( thesource ):
                     raise IOError( 'unable to delete item' )
             else:
-                _action( src )
+                _action( thesource )
         except IOError:
-            log_lines.append( 'unable to delete %s' % src )
+            log_lines.append( 'unable to delete %s' % thesource )
             return False, log_lines
         except Exception as e:
-            log_lines.append( 'unknown error while attempting to delete %s' % src )
+            log_lines.append( 'unknown error while attempting to delete %s' % thesource )
             log_lines.append( e )
             return False, log_lines
         return True, log_lines
     else:
-        log_lines.append( '%s does not exist' % src )
+        log_lines.append( '%s does not exist' % thesource )
         return False, log_lines
 
 
-def moveFile( src, dst ):
+def moveFile( thesource, thedest ):
     log_lines = []
     cp_loglines = []
     dl_loglines = []
     success = False
-    if _exists( src ):
-        cp_success, cp_loglines = copyFile( src, dst )
+    if _exists( thesource ):
+        cp_success, cp_loglines = copyFile( thesource, thedest )
         if cp_success:
-            dl_success, dl_loglines = deleteFile( src )
+            dl_success, dl_loglines = deleteFile( thesource )
             if dl_success:
                 success = True
     else:
-        log_lines.append( '%s does not exist' % src)
+        log_lines.append( '%s does not exist' % thesource)
         success = False
     return success, log_lines + cp_loglines + dl_loglines
 
@@ -150,8 +150,8 @@ def readFile( filename ):
         return log_lines, ''
 
 
-def renameFile ( src, dst ):
-    return moveFile( src, dst )
+def renameFile ( thesource, thedest ):
+    return moveFile( thesource, thedest )
 
 
 def writeFile( data, filename, wtype='wb' ):

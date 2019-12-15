@@ -9,7 +9,7 @@ except ImportError:
 
 #this class creates an object used to log stuff to the xbmc log file
 class Logger( object ):
-    def __init__( self, logconfig="file", format='%(asctime)-15s %(levelname)-8s %(message)s', logfile='logfile.log',
+    def __init__( self, logconfig="file", logformat='%(asctime)-15s %(levelname)-8s %(message)s', logfile='logfile.log',
                   logname='_logger', numbackups=5, logdebug=False, maxsize=100000, when='midnight', interval=1, preamble='' ):
         self.LOGPREAMBLE = preamble
         self.LOGDEBUG = logdebug
@@ -21,7 +21,7 @@ class Logger( object ):
             else:
                 lr = logging.handlers.RotatingFileHandler( logfile, maxBytes=maxsize, backupCount=numbackups )
             lr.setLevel( logging.DEBUG )
-            lr.setFormatter( logging.Formatter( format ) )
+            lr.setFormatter( logging.Formatter( logformat ) )
             self.logger.addHandler( lr )
 
 

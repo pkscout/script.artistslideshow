@@ -792,7 +792,7 @@ class Main( object ):
             return
         if self.KODILOCALSTORAGE:
             lw.log( ['Kodi artist information storage already selected. Aborting.'] )
-            ok = dialog.ok( language(32200) + ': ' + language(32202), language(32302) )
+            dialog.ok( language(32200) + ': ' + language(32202), language(32302) )
             return
         response = xbmc.executeJSONRPC('{"jsonrpc":"2.0", "method":"Settings.GetSettingValue", "params":{"setting":"musiclibrary.artistsfolder"}, "id":1}')
         lw.log( ['Got the following response back from Kodi for artist information folder', response] )
@@ -825,12 +825,12 @@ class Main( object ):
             return
         increment = 100/len( dirs )
         progress = 0.0
-        for dir in dirs:
+        for thedir in dirs:
             if (src == self.LOCALARTISTPATH) and self.USEFANARTFOLDER:
-                image_src = os.path.join( self.LOCALARTISTPATH, py2_decode( dir ), self.FANARTFOLDER )
+                image_src = os.path.join( self.LOCALARTISTPATH, py2_decode( thedir ), self.FANARTFOLDER )
             else:
-                image_src = os.path.join( src, py2_decode( dir ) )
-            image_dest = os.path.join( kodi_music_artist_path, py2_decode( dir ) )
+                image_src = os.path.join( src, py2_decode( thedir ) )
+            image_dest = os.path.join( kodi_music_artist_path, py2_decode( thedir ) )
             lw.log( ['moving images from %s to %s' % (image_src, image_dest)] )
             files = self._get_file_list( image_src )
             self.FANARTNUMBER = False
@@ -900,17 +900,17 @@ class Main( object ):
         return False
 
 
-    def _set_artwork_from_dir( self, dir, files ):
+    def _set_artwork_from_dir( self, thedir, files ):
         for file in files:
-            self.SLIDESHOW.AddImage( os.path.join( dir, file ) )
+            self.SLIDESHOW.AddImage( os.path.join( thedir, file ) )
     
 
     def _set_cachedir( self, theartist ):
         self.CACHEDIR = self._set_thedir( theartist, 'ArtistSlideshow' )
 
 
-    def _set_fanart_number( self, dir ):
-        files = self._get_file_list( dir, do_filter=True )
+    def _set_fanart_number( self, thedir ):
+        files = self._get_file_list( thedir, do_filter=True )
         files.sort( key=naturalKeys )
         lw.log( files )
         if files:
@@ -928,14 +928,14 @@ class Main( object ):
         return fanart_number
 
 
-    def _set_image_name( self, url, dir, kodi_storage ):
+    def _set_image_name( self, url, thedir, kodi_storage ):
         if not kodi_storage:
             return url.rsplit('/', 1)[-1]
         ext = os.path.splitext( url )[1]
         if self.FANARTNUMBER:
             self.FANARTNUMBER += 1
         else:
-            self.FANARTNUMBER = self._set_fanart_number( dir )
+            self.FANARTNUMBER = self._set_fanart_number( thedir )
         return "fanart" + str( self.FANARTNUMBER ) + ext
             
 
