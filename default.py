@@ -39,7 +39,7 @@ addonpath    = addon.getAddonInfo('path')
 addonicon    = xbmc.translatePath('%s/icon.png' % addonpath )
 language     = addon.getLocalizedString
 preamble     = '[Artist Slideshow]'
-logdebug     = getSettingBool( addon, "logging" ) 
+logdebug     = getSettingBool( addon, "logging" )
 
 lw      = Logger( preamble=preamble, logdebug=logdebug )
 JSONURL = URL( 'json' )
@@ -73,7 +73,7 @@ bio_plugins = {'names':[], 'objs':{}}
 image_plugins = {'names':[], 'objs':{}}
 album_plugins = {'names':[], 'objs':{}}
 similar_plugins = {'names':[], 'objs':{}}
-mbid_plugins = {'names':[], 'objs':{}} 
+mbid_plugins = {'names':[], 'objs':{}}
 for module in resources.plugins.__all__:
     full_plugin = 'resources.plugins.' + module
     __import__( full_plugin )
@@ -204,7 +204,7 @@ class Slideshow( threading.Thread ):
         cmd = ''
         last_image = ''
         if self.FADETOBLACK:
-            self._set_property( 'ArtistSlideshow.Image', os.path.join( addonpath, 'resources', 'images', 'black-hd.png' ) )        
+            self._set_property( 'ArtistSlideshow.Image', os.path.join( addonpath, 'resources', 'images', 'black-hd.png' ) )
         while self.SHOW:
             outofimages = True
             with self.QUEUELOCK:
@@ -483,8 +483,8 @@ class Main( object ):
 
     def _get_current_artists( self ):
         current_artists = []
-        for artist, mbid in self._get_current_artists_info( ):
-            current_artists.append( artist )
+        for artist_info in self._get_current_artists_info( ):
+            current_artists.append( artist_info[0] )
         return current_artists
 
 
@@ -984,13 +984,14 @@ class Main( object ):
             if self.FANARTFOLDER:
                 thedir = os.path.join( self.LOCALARTISTPATH, CacheName, self.FANARTFOLDER )
             else:
-                thedir = os.path.join( self.LOCALARTISTPATH, CacheName )            
+                thedir = os.path.join( self.LOCALARTISTPATH, CacheName )
         elif dirtype == 'ArtistInformation' and self.LOCALINFOSTORAGE and self.LOCALINFOPATH:
             thedir = os.path.join( self.LOCALINFOPATH, CacheName, 'information' )
         else:
             thedir = os.path.join( self.DATAROOT, dirtype, CacheName )
         exists, loglines = checkPath( os.path.join( thedir, '' ) )
-        lw.log( loglines )
+        if exists:
+            lw.log( loglines )
         return thedir
 
 
@@ -1110,9 +1111,9 @@ class Main( object ):
                     lw.log( ['unexpected error getting directory list', e] )
                     dirs = []
                 if dirs:
-                    for dir in dirs:
-                        src = os.path.join( src_root, py2_decode( dir ), self.IMGDB )
-                        dst = os.path.join( dst_root, py2_decode( dir ), self.IMGDB )
+                    for thedir in dirs:
+                        src = os.path.join( src_root, py2_decode( thedir ), self.IMGDB )
+                        dst = os.path.join( dst_root, py2_decode( thedir ), self.IMGDB )
                         success, loglines = moveFile( src, dst )
                         lw.log( loglines )
             src_root = getSettingString( addon, 'local_artist_path' )
@@ -1127,9 +1128,9 @@ class Main( object ):
                     lw.log( ['unexpected error getting directory list', e] )
                     dirs = []
                 if dirs:
-                    for dir in dirs:
-                        src = os.path.join( src_root, py2_decode( dir ), self.FANARTFOLDER, self.IMGDB )
-                        dst = os.path.join( dst_root, py2_decode( dir ), 'information', self.IMGDB )
+                    for thedir in dirs:
+                        src = os.path.join( src_root, py2_decode( thedir ), self.FANARTFOLDER, self.IMGDB )
+                        dst = os.path.join( dst_root, py2_decode( thedir ), 'information', self.IMGDB )
                         success, loglines = moveFile( src, dst )
                         lw.log( loglines )
             self._update_check_file( checkfile, '3.0.0', 'preference conversion complete' )
