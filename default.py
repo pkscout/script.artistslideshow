@@ -286,7 +286,7 @@ class Main( object ):
                 xbmc.sleep(1000) # it may take some time for Kodi to read the tag info after playback started
                 self._use_correct_artwork()
                 self._trim_cache()
-            while (not xbmc.abortRequested):
+            while not xbmc.Monitor().abortRequested():
                 xbmc.sleep(1000)
                 if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
                     if( xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '' ):
@@ -373,7 +373,7 @@ class Main( object ):
             path = os.path.join( self.CACHEDIR, self._set_image_name( url, self.CACHEDIR, self.KODILOCALSTORAGE ) )
             lw.log( ['checking %s against %s' % (url_image_name, cachelist_str)] )
             if not (url_image_name in cachelist_str):
-                if (not xbmc.abortRequested):
+                if not xbmc.Monitor().abortRequested():
                     tmpname = os.path.join( self.DATAROOT, 'temp', url.rsplit('/', 1)[-1] )
                     lw.log( ['the tmpname is ' + tmpname] )
                     if xbmcvfs.exists( tmpname ):
