@@ -158,7 +158,7 @@ def writeFile( data, filename, wtype='wb' ):
     log_lines = []
     if type(data).__name__=='unicode':
         data = data.encode('utf-8')
-        thefile = _open( filename, wtype )
+    thefile = _open( filename, wtype )
     try:
         thefile.write( data )
         thefile.close()
