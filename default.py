@@ -242,9 +242,10 @@ class Slideshow( threading.Thread ):
     def _wait( self, wait_time ):
         cmd = ''
         waited = 0
-        while( waited < wait_time ):
-            time.sleep(0.1)
-            waited = waited + 0.1
+        m_wait_time = wait_time*1000
+        while( waited < m_wait_time ):
+            xbmc.sleep(100)
+            waited = waited + 100
             with self.QUEUELOCK:
                 if not self.WORKQUEUE.empty():
                     cmd = self.WORKQUEUE.get()
@@ -282,11 +283,11 @@ class Main( object ):
                     self._set_property( 'ArtistSlideshow.Image' )
             else:
                 lw.log( ['first song started'] )
-                time.sleep(1) # it may take some time for Kodi to read the tag info after playback started
+                xbmc.sleep(1000) # it may take some time for Kodi to read the tag info after playback started
                 self._use_correct_artwork()
                 self._trim_cache()
             while (not xbmc.abortRequested):
-                time.sleep(1)
+                xbmc.sleep(1000)
                 if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
                     if( xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '' ):
                         if set( self.ALLARTISTS ) != set( self._get_current_artists() ):
@@ -294,7 +295,7 @@ class Main( object ):
                             self._use_correct_artwork()
                             self._trim_cache()
                     else:
-                        time.sleep(2) # doublecheck if playback really stopped
+                        xbmc.sleep(2000) # doublecheck if playback really stopped
                         if( not xbmc.Player().isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '' ):
                             if ( self.DAEMON == "False" ):
                                 self._set_property( "ArtistSlideshowRunning" )
@@ -1139,9 +1140,10 @@ class Main( object ):
 
     def _wait( self, wait_time ):
         waited = 0
-        while( waited < wait_time ):
-            time.sleep(0.1)
-            waited = waited + 0.1
+        m_wait_time = wait_time*1000
+        while( waited < m_wait_time ):
+            xbmc.sleep(100)
+            waited = waited + 100
             if self._playback_stopped_or_changed():
                 self._clear_properties()
                 return
