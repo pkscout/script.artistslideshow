@@ -242,10 +242,11 @@ class Slideshow( threading.Thread ):
     def _wait( self, wait_time ):
         cmd = ''
         waited = 0
-        m_wait_time = wait_time*1000
+        sleep_time = 100
+        m_wait_time = wait_time * 1000
         while( waited < m_wait_time ):
-            xbmc.sleep(100)
-            waited = waited + 100
+            xbmc.sleep( sleep_time )
+            waited = waited + sleep_time
             with self.QUEUELOCK:
                 if not self.WORKQUEUE.empty():
                     cmd = self.WORKQUEUE.get()
@@ -1140,10 +1141,11 @@ class Main( object ):
 
     def _wait( self, wait_time ):
         waited = 0
-        m_wait_time = wait_time*1000
+        sleep_time = 100
+        m_wait_time = wait_time * 1000
         while( waited < m_wait_time ):
-            xbmc.sleep(100)
-            waited = waited + 100
+            xbmc.sleep( sleep_time )
+            waited = waited + sleep_time
             if self._playback_stopped_or_changed():
                 self._clear_properties()
                 return
