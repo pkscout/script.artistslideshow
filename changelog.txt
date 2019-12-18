@@ -1,3 +1,6 @@
+v.3.0.1~beta1
+- fix for crash if artist image name has an extended character in it
+
 v.3.0.0
 - Python2/3 compatible
 - rewrite to use a single image control instead of multi-image control in skin
