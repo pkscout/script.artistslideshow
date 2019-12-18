@@ -904,8 +904,8 @@ class Main( object ):
 
 
     def _set_artwork_from_dir( self, thedir, files ):
-        for file in files:
-            self.SLIDESHOW.AddImage( os.path.join( thedir, file ) )
+        for thefile in files:
+            self.SLIDESHOW.AddImage( os.path.join( thedir, py2_decode( thefile ) ) )
 
 
     def _set_cachedir( self, theartist ):
