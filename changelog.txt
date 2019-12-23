@@ -1,3 +1,6 @@
+v.3.0.1~beta2
+- fix for high CPU usage when using AS in daemon mode and no music playing
+
 v.3.0.1~beta1
 - fix for crash if artist image name has an extended character in it
 
