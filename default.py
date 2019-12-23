@@ -164,7 +164,7 @@ LANGUAGES = (
 
 class Slideshow( threading.Thread ):
 
-    def __init__( self, workqueue, queuelock, window, delay, fadetoblack ):
+    def __init__( self, workqueue, queuelock, window, delay, fadetoblack, externalcall ):
         super( Slideshow , self).__init__()
         self.WORKQUEUE = workqueue
         self.QUEUELOCK= queuelock
@@ -175,6 +175,7 @@ class Slideshow( threading.Thread ):
         self.IMAGESCLEARED = False
         self.SHOW = True
         self.FADETOBLACK = fadetoblack
+        self.EXTERNALCALL = externalcall
         lw.log( ['Slideshow thread started'] )
 
 
@@ -226,9 +227,22 @@ class Slideshow( threading.Thread ):
                     lw.log( ['ArtistSlideshow.Image set to ' + image] )
                     self._wait( self.DELAY )
                     last_image = image
-                if not self.SHOW:
+                if not self.SHOW or (not xbmc.Player().isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == ''):
                     break
+            if not xbmc.Player().isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
+                lw.log( ['no music playing, sleeping some while waiting for music'] )
+                self._wait( 300, sleep_time=10000, wait_for_music=True )
+                
         lw.log( ['Slideshow thread stopping'] )
+
+
+    def _get_infolabel( self, item ):
+        try:
+            infolabel = xbmc.getInfoLabel( item )
+        except:
+            lw.log( ['problem reading information from %s, returning blank' % item] )
+            infolabel = ''
+        return infolabel
 
 
     def _set_property( self, property_name, value="" ):
@@ -239,10 +253,9 @@ class Slideshow( threading.Thread ):
           lw.log( ["Exception: Couldn't set propery " + property_name + " value " + value , e])
 
 
-    def _wait( self, wait_time ):
+    def _wait( self, wait_time, sleep_time=1000, wait_for_music=False ):
         cmd = ''
         waited = 0
-        sleep_time = 100
         m_wait_time = wait_time * 1000
         while( waited < m_wait_time ):
             xbmc.sleep( sleep_time )
@@ -254,6 +267,8 @@ class Slideshow( threading.Thread ):
                 self.SHOW = False
                 return
             if cmd == 'reset':
+                return
+            if wait_for_music and (xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != ''):
                 return
 
 
@@ -290,14 +305,14 @@ class Main( object ):
             while not xbmc.Monitor().abortRequested():
                 xbmc.sleep(1000)
                 if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == "True":
-                    if( xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '' ):
+                    if xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
                         if set( self.ALLARTISTS ) != set( self._get_current_artists() ):
                             self._clear_properties()
                             self._use_correct_artwork()
                             self._trim_cache()
                     else:
                         xbmc.sleep(2000) # doublecheck if playback really stopped
-                        if( not xbmc.Player().isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '' ):
+                        if not xbmc.Player().isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
                             if ( self.DAEMON == "False" ):
                                 self._set_property( "ArtistSlideshowRunning" )
                 else:
@@ -769,7 +784,7 @@ class Main( object ):
         self.PARAMS = {}
         self.SLIDESHOWLOCK = threading.Lock()
         self.SLIDESHOWCMD = Queue()
-        self.SLIDESHOW = Slideshow( self.SLIDESHOWCMD, self.SLIDESHOWLOCK, self.WINDOW, self.SLIDEDELAY, self.FADETOBLACK )
+        self.SLIDESHOW = Slideshow( self.SLIDESHOWCMD, self.SLIDESHOWLOCK, self.WINDOW, self.SLIDEDELAY, self.FADETOBLACK, self.EXTERNALCALL )
 
 
     def _init_window( self ):
@@ -1141,7 +1156,7 @@ class Main( object ):
 
     def _wait( self, wait_time ):
         waited = 0
-        sleep_time = 100
+        sleep_time = 1000
         m_wait_time = wait_time * 1000
         while( waited < m_wait_time ):
             xbmc.sleep( sleep_time )
