@@ -51,13 +51,11 @@ def getSettingBool( addon, setting_name, default=False ):
 
 
 def getSettingInt( addon, setting_name, default=0 ):
-    return _get_setting( addon, setting_name, default, 'int')
+    return _get_setting( addon, setting_name, default, 'int' )
 
 
 def getSettingNumber( addon, setting_name, default=0.0 ):
-    return _get_setting( addon, setting_name, default, 'number')
-
+    return _get_setting( addon, setting_name, default, 'number' )
 
 def getSettingString( addon, setting_name, default='' ):
-    return _get_setting( addon, setting_name, default, 'string')
-
+    return _get_setting( addon, setting_name, default, 'string' )
