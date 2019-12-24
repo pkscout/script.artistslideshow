@@ -1,3 +1,8 @@
+v.3.0.1~beta4
+- added options to change sleep time for main and slideshow threads
+- fix for property cleaning
+- changed entry point default.py to be less complex
+
 v.3.0.1~beta3
 - further refinements to reduce CPU usage
 - fix for AS taking too long to quit on Kodi exit when in daemon mode

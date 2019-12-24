@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.1~beta3">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.1~beta4">
 	<requires>
 		<import addon="xbmc.python" version="2.26.0" />
 		<import addon="xbmc.addon" version="17.9.0" />
@@ -12,6 +12,11 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
+v.3.0.1~beta4
+- added options to change sleep time for main and slideshow threads
+- fix for property cleaning
+- changed entry point default.py to be less complex
+
 v.3.0.1~beta3
 - further refinements to reduce CPU usage
 - fix for AS taking too long to quit on Kodi exit when in daemon mode
