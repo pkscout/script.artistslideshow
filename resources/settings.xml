@@ -58,7 +58,6 @@
         <setting id="main_sleep" type="number" label="32139" default="1" />
         <setting id="main_idle_sleep" type="number" label="32140" default="10" />
         <setting id="slideshow_sleep" type="number" label="32141" default="1" />
-        <setting id="slideshow_idle_sleep" type="number" label="32142" default="10" />
         <setting id="logging" type="bool" label="32119" default="false" />
         <setting type="sep" />
         <setting label="32134" type="action" action="RunScript(script.artistslideshow, movetokodistorage=True)" />

@@ -214,10 +214,6 @@ msgctxt "#32141"
 msgid "Slideshow thread sleep time (in seconds)"
 msgstr ""
 
-msgctxt "#32142"
-msgid "Slideshow thread idle sleep time (in seconds)"
-msgstr ""
-
 
 # empty strings from id 32142 to 32199
 
