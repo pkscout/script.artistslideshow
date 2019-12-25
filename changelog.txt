@@ -1,3 +1,7 @@
+v.3.0.1~beta5
+- set slideshow thread to close if no music playing
+- removed slideshow idle sleep time setting (no longer needed)
+
 v.3.0.1~beta4
 - added options to change sleep time for main and slideshow threads
 - fix for property cleaning
