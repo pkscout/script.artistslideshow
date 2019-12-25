@@ -165,6 +165,7 @@ LANGUAGES = (
     ("Brazilian"                  , "pb",            "32" ) )
 
 
+
 class Slideshow( threading.Thread ):
 
     def __init__( self, workqueue, queuelock, window, delay, fadetoblack ):
