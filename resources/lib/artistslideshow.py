@@ -937,7 +937,7 @@ class Main( object ):
                 fanart_number = 1
             try:
                 fanart_number = int( re.search('(\d+)$', tmpname).group(0) ) + 1
-            except ValueError:
+            except (ValueError, AttributeError):
                 fanart_number = 1
         else:
             fanart_number = 1
