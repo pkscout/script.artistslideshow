@@ -275,7 +275,6 @@ class Main( object ):
             if self._run_from_settings():
                 return
             self._set_property( 'ArtistSlideshowRunning', 'True' )
-            self._slideshow_thread_start()
             if self.FADETOBLACK:
                 self._set_property( 'ArtistSlideshow.Image', os.path.join( addonpath, 'resources', 'images', 'black-hd.png' ) )
             if not xbmc.Player().isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
@@ -286,6 +285,7 @@ class Main( object ):
             else:
                 lw.log( ['first song started'] )
                 if not xbmc.Monitor().waitForAbort( 1 ): # it may take some time for Kodi to read the tag info after playback started
+                    self._slideshow_thread_start()
                     self._use_correct_artwork()
                     self._trim_cache()
                 else:
@@ -1056,7 +1056,11 @@ class Main( object ):
 
 
     def _slideshow_thread_stop( self ):
-        if self.SLIDESHOW.is_alive():
+        try:
+            alive = self.SLIDESHOW.is_alive()
+        except AttributeError:
+            alive = False
+        if alive:
             with self.SLIDESHOWLOCK:
                 self.SLIDESHOWCMD.put( 'quit' )
             self.SLIDESHOW.join()
