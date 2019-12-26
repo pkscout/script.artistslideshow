@@ -313,7 +313,7 @@ class Main( object ):
             lw.log( ['unexpected error while getting directory list', e] )
             return
         for old_file in old_files:
-            success, loglines = deleteFile( os.path.join (dir_path, py2_decode( old_file ) ) )
+            success, loglines = deleteFile( os.path.join (dir_path, py2_encode( old_file ) ) )
             lw.log( loglines )
 
 
@@ -1021,10 +1021,12 @@ class Main( object ):
             cache_trim_delay = 0
             if (now - self.LASTCACHETRIM > cache_trim_delay):
                 lw.log( ['trimming the cache down to %s bytes' % self.MAXCACHESIZE]  )
-                cache_root = os.path.join( self.DATAROOT, 'ArtistSlideshow', '')
+                cache_root = py2_encode( os.path.join( self.DATAROOT, 'ArtistSlideshow', '') )
                 folders, fls = xbmcvfs.listdir( cache_root )
+                lw.log( ['cache folders returned:'] )
+                lw.log( folders )
                 try:
-                    folders.sort( key=lambda x: os.path.getmtime( os.path.join( cache_root, x ) ), reverse=True )
+                    folders.sort( key=lambda x: os.path.getmtime( os.path.join( cache_root, py2_encode( x ) ) ), reverse=True )
                 except Exception as e:
                     lw.log( ['unexpected error sorting cache directory', e] )
                     return
@@ -1033,12 +1035,12 @@ class Main( object ):
                 for folder in folders:
                     if( self._playback_stopped_or_changed() ):
                         break
-                    cache_size = cache_size + self._get_folder_size( os.path.join (cache_root, folder ) )
+                    cache_size = cache_size + self._get_folder_size( os.path.join ( cache_root, py2_encode( folder ) ) )
                     lw.log( ['looking at folder %s cache size is now %s' % (folder, cache_size)] )
                     if( cache_size > self.MAXCACHESIZE and not first_folder ):
-                        self._clean_dir( os.path.join( cache_root, folder ) )
+                        self._clean_dir( os.path.join( cache_root, py2_encode( folder ) ) )
                         lw.log( ['deleted files in folder %s' % folder] )
-                        self._delete_folder( os.path.join( cache_root, folder ) )
+                        self._delete_folder( os.path.join( cache_root, py2_encode( folder ) ) )
                         if self.LOCALINFOSTORAGE and self.LOCALINFOPATH:
                             deleteFile( os.path.join( self.LOCALINFOPATH, py2_decode( folder ), 'information', self.IMGDB ) )
                         else:
