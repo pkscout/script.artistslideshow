@@ -1,3 +1,6 @@
+v.3.0.1~beta7
+- fix for slideshow thread starting too early when skin starts AS without any music playing
+
 v.3.0.1~beta6
 - fix for crash when trying to get last fanart number from Kodi Artist Information Folder
 - fix for unicode errors causing cache trimming not to work
