@@ -14,6 +14,7 @@
 		<news>
 v.3.0.1~beta6
 - fix for crash when trying to get last fanart number from Kodi Artist Information Folder
+- fix for unicode errors causing cache trimming not to work
 
 v.3.0.1~beta5
 - set slideshow thread to close if no music playing
@@ -33,20 +34,6 @@ v.3.0.1~beta2
 
 v.3.0.1~beta1
 - fix for crash if artist image name has an extended character in it
-
-v.3.0.0
-- rewrite to use a single image control instead of multi-image control in skin
-- AS can now store and show music in Kodi 18 music artist folder
-- AS now shows the Kodi artist fanart (if available) before anything else (with option to disable)
-- added option to include Kodi album fanart in image list (defaults to False)
-- added routine in settings to move images to Kodi artist information folder
-- added option to disable extranfanart folder
-- added option to control time between slide transitions
-- AS can now store images and information files in separate directory structure
-- AS now deletes empty artist information and artwork folders
-- converted language files to current format for forward compatibility
-- removed option to have a pop up displayed when downloading artwork
-- Python2/3 compatible
 		</news>
 		<assets>
         	<icon>icon.png</icon>

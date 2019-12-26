@@ -1,5 +1,6 @@
 v.3.0.1~beta6
 - fix for crash when trying to get last fanart number from Kodi Artist Information Folder
+- fix for unicode errors causing cache trimming not to work
 
 v.3.0.1~beta5
 - set slideshow thread to close if no music playing
