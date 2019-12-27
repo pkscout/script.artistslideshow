@@ -814,11 +814,11 @@ class Main( object ):
         ret = dialog.yesno( language(32200) + ': ' + language(32201), language(32300) )
         if not ret:
             lw.log( ['Image move aborted by user'] )
-            return
+            return ''
         if self.KODILOCALSTORAGE:
             lw.log( ['Kodi artist information storage already selected. Aborting.'] )
             dialog.ok( language(32200) + ': ' + language(32202), language(32302) )
-            return
+            return ''
         response = xbmc.executeJSONRPC('{"jsonrpc":"2.0", "method":"Settings.GetSettingValue", "params":{"setting":"musiclibrary.artistsfolder"}, "id":1}')
         lw.log( ['Got the following response back from Kodi for artist information folder', response] )
         try:
@@ -835,6 +835,8 @@ class Main( object ):
 
     def _move_to_kodi_storage( self ):
         kodi_music_artist_path = _get_kodi_artist_storage_path()
+        if not kodi_music_artist_path:
+            return
         pdialog = xbmcgui.DialogProgress()
         if self.LOCALARTISTSTORAGE and self.LOCALARTISTPATH:
             pdialog.create( language(32200) + ': ' + language(32203), language(32303) )
