@@ -2,8 +2,8 @@
 
 import base64, os, time, random
 import defusedxml.ElementTree as _xmltree
-from resources.common.url import URL
-from resources.common.fileops import readFile, writeFile, checkPath
+from resources.lib.url import URL
+from resources.lib.fileops import readFile, writeFile, checkPath
 from kodi_six.utils import py2_encode
 try:
     from . import lastfm_info as settings

@@ -2,8 +2,8 @@
 
 import base64, os, time, random
 from kodi_six import xbmcvfs
-from resources.common.url import URL
-from resources.common.fileops import readFile, writeFile, deleteFile, checkPath
+from resources.lib.url import URL
+from resources.lib.fileops import readFile, writeFile, deleteFile, checkPath
 from kodi_six.utils import py2_encode
 import json as _json
 try:
