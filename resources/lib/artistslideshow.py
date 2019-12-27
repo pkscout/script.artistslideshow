@@ -168,13 +168,12 @@ LANGUAGES = (
 
 class Slideshow( threading.Thread ):
 
-    def __init__( self, workqueue, queuelock, window, delay, fadetoblack ):
+    def __init__( self, workqueue, queuelock, window, delay ):
         super( Slideshow , self).__init__()
         self.WORKQUEUE = workqueue
         self.QUEUELOCK= queuelock
         self.WINDOW = window
         self.DELAY = delay
-        self.FADETOBLACK = fadetoblack
         self.IMAGES = []
         self.IMAGEADDED = False
         self.IMAGESCLEARED = False
@@ -194,9 +193,9 @@ class Slideshow( threading.Thread ):
             return False
 
 
-    def ClearImages( self ):
+    def ClearImages( self, fadetoblack ):
         self.IMAGES = []
-        if self.FADETOBLACK:
+        if fadetoblack:
             self._set_property( 'ArtistSlideshow.Image', os.path.join( addonpath, 'resources', 'images', 'black-hd.png' ) )
         else:
             self._set_property( 'ArtistSlideshow.Image' )
@@ -206,8 +205,6 @@ class Slideshow( threading.Thread ):
 
     def run( self ):
         last_image = ''
-        if self.FADETOBLACK:
-            self._set_property( 'ArtistSlideshow.Image', os.path.join( addonpath, 'resources', 'images', 'black-hd.png' ) )
         while self.SHOW:
             outofimages = True
             if self._check_for_quit():
@@ -275,8 +272,6 @@ class Main( object ):
             if self._run_from_settings():
                 return
             self._set_property( 'ArtistSlideshowRunning', 'True' )
-            if self.FADETOBLACK:
-                self._set_property( 'ArtistSlideshow.Image', os.path.join( addonpath, 'resources', 'images', 'black-hd.png' ) )
             if not xbmc.Player().isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
                 lw.log( ['no music playing'] )
                 if not self.DAEMON:
@@ -293,17 +288,17 @@ class Main( object ):
             while not xbmc.Monitor().abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
                 if xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
                     if not self._wait( self.MAINSLEEP, sleep_time=self.MAINSLEEP ) and set( self.ALLARTISTS ) != set( self._get_current_artists() ):
-                        self._clear_properties()
+                        self._clear_properties( fadetoblack=self.FADETOBLACK )
                         self._use_correct_artwork()
                         self._trim_cache()
                 elif self.DAEMON:
+                    self.ALLARTISTS = ''
+                    self._clear_properties( fadetoblack=False )
                     if self._wait( self.MAINIDLESLEEP*30, sleep_time=self.MAINIDLESLEEP ):
                         break
                 elif not self.DAEMON:
                     break
-            self._slideshow_thread_stop()
-            self._clear_properties()
-            self._set_property( 'ArtistSlideshow.Image' )
+            self._clear_properties( fadetoblack=False )
             self._set_property( "ArtistSlideshowRunning" )
             self._set_property("ArtistSlideshow.CleanupComplete", "True")
 
@@ -330,13 +325,13 @@ class Main( object ):
         return text.strip()
 
 
-    def _clear_properties( self ):
+    def _clear_properties( self, fadetoblack ):
         lw.log( ['main thread is cleaning all the properties'] )
         self.MBID = ''
         self.FANARTNUMBER = False
         as_image = self._get_infolabel( 'ArtistSlideshow.Image' )
         if as_image and 'black-hd.png' not in as_image:
-            self.SLIDESHOW.ClearImages()
+            self.SLIDESHOW.ClearImages( fadetoblack=fadetoblack )
         self._slideshow_thread_stop()
         if xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
             self._slideshow_thread_start()
@@ -688,7 +683,6 @@ class Main( object ):
                 num_trys = num_trys + 1
                 if self._wait( self.MAINSLEEP, sleep_time=self.MAINSLEEP ) or self._playback_stopped_or_changed():
                     break
-        #if nothing is playing, assume the information was passed by another add-on
         if not playing_item:
             playing_item = self._get_infolabel( self.SKININFO[item] )
         return playing_item
@@ -919,7 +913,6 @@ class Main( object ):
 
     def _playback_stopped_or_changed( self ):
         if set( self.ALLARTISTS ) != set( self._get_current_artists() ) or self.EXTERNALCALLSTATUS != self._get_infolabel( self.EXTERNALCALL ):
-            self._clear_properties()
             return True
         else:
             return False
@@ -1073,7 +1066,7 @@ class Main( object ):
 
 
     def _slideshow_thread_start( self ):
-        self.SLIDESHOW = Slideshow( self.SLIDESHOWCMD, self.SLIDESHOWLOCK, self.WINDOW, self.SLIDEDELAY, self.FADETOBLACK )
+        self.SLIDESHOW = Slideshow( self.SLIDESHOWCMD, self.SLIDESHOWLOCK, self.WINDOW, self.SLIDEDELAY )
         self.SLIDESHOW.setDaemon(True)
         self.SLIDESHOW.start()
 
@@ -1200,9 +1193,7 @@ class Main( object ):
         waited = 0
         while waited < wait_time:
             if xbmc.Monitor().waitForAbort( sleep_time ):
-                self._clear_properties()
                 return True
             waited = waited + sleep_time
             if self._playback_stopped_or_changed():
-                self._clear_properties()
                 return False
