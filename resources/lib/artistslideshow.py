@@ -302,6 +302,8 @@ class Main( object ):
                 elif not self.DAEMON:
                     break
             self._slideshow_thread_stop()
+            self._clear_properties()
+            self._set_property( 'ArtistSlideshow.Image' )
             self._set_property( "ArtistSlideshowRunning" )
             self._set_property("ArtistSlideshow.CleanupComplete", "True")
 
