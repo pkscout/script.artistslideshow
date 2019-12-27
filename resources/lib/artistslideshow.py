@@ -768,7 +768,7 @@ class Main( object ):
         self.DATAROOT = xbmc.translatePath( addon.getAddonInfo('profile') )
         self.IMGDB = '_imgdb.nfo'
         self._set_property( 'ArtistSlideshow.CleanupComplete' )
-        self._set_property( 'ArtistSlideshow', os.path.join( addonpath, 'resources', 'update-slide', '' ) )
+        self._set_property( 'ArtistSlideshow', os.path.join( addonpath, 'resources', 'images', 'update-slide', '' ) )
         self.SKININFO = {}
         for item in self.FIELDLIST:
             if self.PASSEDFIELDS[item]:
