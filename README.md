@@ -3,23 +3,23 @@ Artist Slideshow is a Kodi addon that downloads images and additional informatio
 
 ## Donations
 Donations are **not** accepted for Artist Slideshow.  If you find this addon useful, please consider instead supporting the services that make Artist Slideshow possible.
-* fanart.tv: <https://fanart.tv/contribute/>
-* theaudiodb: <http://theaudiodb.com> (look for the "donate with PayPal button)
-* musicbrainz: <https://metabrainz.org/donate>
+  * fanart.tv: <https://fanart.tv/contribute/>
+  * theaudiodb: <http://theaudiodb.com> (look for the "donate with PayPal button)
+  * musicbrainz: <https://metabrainz.org/donate>
 
 ## Features
-* displays slideshow as background for music visualization (must use a compatible skin or update skin using the instructions below)
-  * option to have artist images downloaded and/or use a local directory of artist images
-  * option for a fallback slideshow if no local or remote images are found
-  * option to have a single slideshow displayed regardless of artist playing
-* options to download artwork from fanart.tv and theaudiodb.com to display as background for music visualization
-* option to download artist bio and other additional information from Kodi's internal database, theaudiodb.com, or last.fm (skin must support display of this information)
-* support for overriding the artist bio, discography, and similar artists list with local information
-* option to limit size of download cache
-* support for multiple artists for a single song (as passed by Kodi)
+  * displays slideshow as background for music visualization (must use a compatible skin or update skin using the instructions below)
+    * option for a fallback slideshow if no local or remote images are found
+    * option to have a single slideshow displayed regardless of artist playing
+    * options to download artwork from fanart.tv and theaudiodb.com to display as background for music visualization
+  * artist images can be downloaded (from fanart.tv and theaudiodb.com) and/or use a local directory of existing artist images
+  * option to download artist bio and other additional information from Kodi's internal database, theaudiodb.com, or last.fm (skin must support display of this information)
+  * support for overriding the artist bio, discography, and similar artists list with local information
+  * option to limit size of download cache
+  * support for multiple artists for a single song (as passed by Kodi)
   * also supports iTunes/Amazon standard of song name (feat. artist 2) in title MP3 tag
-* support for internet streams that put the artist name in the Kodi title field
-* support for other addons using Artist Slideshow to provide the background
+  * support for internet streams that put the artist name in the Kodi title field
+  * support for other addons using Artist Slideshow to provide the background
 
 ## How to use this addon
 
@@ -193,7 +193,7 @@ This will run a script to rename all your artwork to the Kodi music artist folde
 
 ### Directory Structure
 To override the downloaded information, you need to create another directory in the folder you defined in the settings as the Local artist folder. Your folder structure will look something like this:
-```
+```xml
     <artistname>
         extrafanart
         override
@@ -259,24 +259,19 @@ You might want to use Artist Slideshow to display images somewhere other than on
 *Window(Visualisation).Property(ArtistSlideshow.Image)*<br />
 This is one of the randomly selected images of the currently playing artist
 
-
 *Window(Visualisation).Property(ArtistSlideshowRunning)*</br >
 This one is used internally by the script to check if it is already running. There's no need to use this property in your skin.
 
-
 *Window(Visualisation).Property(ArtistSlideshow.ArtistBiography)*<br />
 Artist biography from theaudiodb.com (or last.fm as fallback)
-
 
 *Window(Visualisation).Property(ArtistSlideshow.%d.SimilarName)<br />
 Window(Visualisation).Property(ArtistSlideshow.%d.SimilarThumb)*<br />
 Similar artists (from last.fm)
 
-
 *Window(Visualisation).Property(ArtistSlideshow.%d.AlbumName)<br />
 Window(Visualisation).Property(ArtistSlideshow.%d.AlbumThumb)*<br />
 Albums by the artist (from theaudiodb.com)
-
 
 ## How to call this addon from another addon
 To use this addon to provide the background for another addon, the calling addon must create a window that uses a single image control. See the section on changes to MusicVisualisation.xml.
@@ -327,7 +322,6 @@ Similar artists from last.fm
 *Window.Property(ArtistSlideshow.%d.AlbumName)<br />
 Window.Property(ArtistSlideshow.%d.AlbumThumb)*<br />
 Albums by the artist from theaudiodb.com
-
 
 *Window.Property(ArtistSlideshowRunning)*<br />
 This one is used internally by Artist Slideshow to check if it is already running. There's no need to use this property in the calling addon's skin.
