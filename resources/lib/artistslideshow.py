@@ -809,7 +809,7 @@ class Main( object ):
             lw.log( loglines )
 
 
-   def _get_kodi_artist_storage_path( self ):
+    def _get_kodi_artist_storage_path( self ):
         dialog = xbmcgui.Dialog()
         ret = dialog.yesno( language(32200) + ': ' + language(32201), language(32300) )
         if not ret:
