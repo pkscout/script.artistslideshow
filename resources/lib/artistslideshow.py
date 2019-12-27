@@ -834,7 +834,8 @@ class Main( object ):
 
 
     def _move_to_kodi_storage( self ):
-        kodi_music_artist_path = _get_kodi_artist_storage_path()
+        dialog = xbmcgui.Dialog()
+        kodi_music_artist_path = self._get_kodi_artist_storage_path()
         if not kodi_music_artist_path:
             return
         pdialog = xbmcgui.DialogProgress()
