@@ -3,23 +3,23 @@ Artist Slideshow is a Kodi addon that downloads images and additional informatio
 
 ## Donations
 Donations are **not** accepted for Artist Slideshow.  If you find this addon useful, please consider instead supporting the services that make Artist Slideshow possible.
-  * fanart.tv: <https://fanart.tv/contribute/>
-  * theaudiodb: <http://theaudiodb.com> (look for the "donate with PayPal button)
-  * musicbrainz: <https://metabrainz.org/donate>
+* fanart.tv: <https://fanart.tv/contribute/>
+* theaudiodb: <http://theaudiodb.com> (look for the "donate with PayPal button)
+* musicbrainz: <https://metabrainz.org/donate>
 
 ## Features
-  * displays slideshow as background for music visualization (must use a compatible skin or update skin using the instructions below)
-    * option for a fallback slideshow if no local or remote images are found
-    * option to have a single slideshow displayed regardless of artist playing
-    * options to download artwork from fanart.tv and theaudiodb.com to display as background for music visualization
-  * artist images can be downloaded (from fanart.tv and theaudiodb.com) and/or use a local directory of existing artist images
-  * option to download artist bio and other additional information from Kodi's internal database, theaudiodb.com, or last.fm (skin must support display of this information)
-  * support for overriding the artist bio, discography, and similar artists list with local information
-  * option to limit size of download cache
-  * support for multiple artists for a single song (as passed by Kodi)
-  * also supports iTunes/Amazon standard of song name (feat. artist 2) in title MP3 tag
-  * support for internet streams that put the artist name in the Kodi title field
-  * support for other addons using Artist Slideshow to provide the background
+* displays slideshow as background for music visualization (must use a compatible skin or update skin using the instructions below)
+  * option for a fallback slideshow if no local or remote images are found
+  * option to have a single slideshow displayed regardless of artist playing
+  * options to download artwork from fanart.tv and theaudiodb.com to display as background for music visualization
+* artist images can be downloaded (from fanart.tv and theaudiodb.com) and/or use a local directory of existing artist images
+* option to download artist bio and other additional information from Kodi's internal database, theaudiodb.com, or last.fm (skin must support display of this information)
+* support for overriding the artist bio, discography, and similar artists list with local information
+* option to limit size of download cache
+* support for multiple artists for a single song (as passed by Kodi)
+* also supports iTunes/Amazon standard of song name (feat. artist 2) in title MP3 tag
+* support for internet streams that put the artist name in the Kodi title field
+* support for other addons using Artist Slideshow to provide the background
 
 ## How to use this addon
 

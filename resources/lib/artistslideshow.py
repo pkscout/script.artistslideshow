@@ -333,7 +333,7 @@ class Main( object ):
         self.MBID = ''
         self.FANARTNUMBER = False
         as_image = self._get_infolabel( 'ArtistSlideshow.Image' )
-        if as_image and not 'black-hd.png' in as_image:
+        if as_image and 'black-hd.png' not in as_image:
             self.SLIDESHOW.ClearImages()
         self._slideshow_thread_stop()
         if xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
@@ -412,7 +412,7 @@ class Main( object ):
         return image_downloaded
 
 
-    def _get_artistinfo( self ):
+    def _get_artistbio( self ):
         bio = ''
         bio_params = {}
         bio_params['mbid'] = self.MBID
@@ -434,9 +434,12 @@ class Main( object ):
                 lw.log( ['got a bio from %s, so stop looking' % plugin_name] )
                 break
         if bio:
-            self.biography = self._clean_text(bio)
+            return self._clean_text(bio)
         else:
-            self.biography = ''
+            return ''
+
+
+    def _get_artistalbums( self ):
         album_params = {}
         album_params['infodir'] = self.INFODIR
         album_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, py2_decode( self.NAME ) )
@@ -455,10 +458,13 @@ class Main( object ):
             if not albums == []:
                 lw.log( ['got album list from %s, so stop looking' % plugin_name] )
                 break
-        if albums == []:
-            self.albums = []
+        if albums:
+            return albums
         else:
-            self.albums = albums
+            return []
+
+
+    def _get_artistsimilar( self ):
         similar_params = {}
         similar_params['infodir'] = self.INFODIR
         similar_params['localartistdir'] = os.path.join( self.LOCALARTISTPATH, py2_decode( self.NAME ) )
@@ -476,76 +482,50 @@ class Main( object ):
             if not similar_artists == []:
                 lw.log( ['got similar artist list from %s, so stop looking' % plugin_name] )
                 break
-        if  similar_artists == []:
-            self.similar = []
+        if similar_artists:
+            return similar_artists
         else:
-            self.similar = similar_artists
+            return []
+
+
+    def _get_artistinfo( self ):
+        self.BIOGRAPHY = self._get_artistbio()
+        self.ALBUMS = self._get_artistalbums()
+        self.SIMILAR = self._get_artistsimilar()
         self._set_properties()
 
 
     def _get_current_artists( self ):
         current_artists = []
-        for artist_info in self._get_current_artists_info( ):
+        self._get_current_artists_info()
+        for artist_info in self.ARTISTS_INFO:
             if xbmc.Monitor().abortRequested():
                 return []
             current_artists.append( artist_info[0] )
         return current_artists
 
 
-    def _get_current_artists_info( self ):
-        featured_artists = ''
-        artist_names = []
-        artists_info = []
-        mbids = []
-        if xbmc.Player().isPlayingAudio():
-            try:
-                playing_file = xbmc.Player().getPlayingFile()
-            except RuntimeError:
-                return artists_info
-            except Exception as e:
-                lw.log( ['unexpected error getting playing file back from Kodi', e] )
-                return artists_info
-            if playing_file != self.LASTPLAYINGFILE:
-                # if the same file is playing, use cached JSON response instead of doing a new query
-                response = xbmc.executeJSONRPC (
-                    '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "musicbrainzartistid"]},"id":1}' )
-                self.LASTPLAYINGFILE = playing_file
-            else:
-                lw.log( ['same file playing, returning cached artists_info'] )
-                return self.ARTISTS_INFO
-            artist_names = _json.loads(response).get( 'result', {} ).get( 'item', {} ).get( 'artist', [] )
-            mbids = _json.loads(response).get( 'result', {} ).get( 'item', {} ).get( 'musicbrainzartistid', [] )
-            try:
-                playing_song = xbmc.Player().getMusicInfoTag().getTitle()
-            except RuntimeError:
-                playing_song = ''
-            except Exception as e:
-                lw.log( ['unexpected error gettting playing song back from XBMC', e] )
-                playing_song = ''
-            if not artist_names:
-                lw.log( ['No artist names returned from JSON call, assuming this is an internet stream'] )
-                try:
-                    playingartist = playing_song[0:(playing_song.find('-'))-1]
-                except RuntimeError:
-                    playingartist = ''
-                    playing_song = ''
-                except Exception as e:
-                    lw.log( ['unexpected error gettting playing song back from Kodi', e] )
-                    playingartist = ''
-                    playing_song = ''
-                artist_names = self._split_artists( playingartist )
-            featured_artists = self._get_featured_artists( playing_song )
-        elif self._get_infolabel( self.SKININFO['artist'] ):
-            artist_names = self._split_artists( self._get_infolabel(self.SKININFO['artist']) )
-            mbids = self._get_infolabel( self.SKININFO['mbid'] ).split( ',' )
-            featured_artists = self._get_featured_artists( self._get_infolabel(self.SKININFO['title']) )
-        if featured_artists:
-            for one_artist in featured_artists:
-                artist_names.append( one_artist.strip(' ()') )
+    def _get_current_artist_names_mbids( self, playing_song ):
+        response = xbmc.executeJSONRPC (
+            '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "musicbrainzartistid"]},"id":1}' )
+        artist_names = _json.loads( response ).get( 'result', {} ).get( 'item', {} ).get( 'artist', [] )
+        mbids = _json.loads( response ).get( 'result', {} ).get( 'item', {} ).get( 'musicbrainzartistid', [] )
         if not artist_names:
-            return []
+            lw.log( ['No artist names returned from JSON call, assuming this is an internet stream'] )
+            try:
+                playingartist = playing_song[0:(playing_song.find('-'))-1]
+            except RuntimeError:
+                playingartist = ''
+            except Exception as e:
+                lw.log( ['unexpected error gettting playing song back from Kodi', e] )
+                playingartist = ''
+            artist_names = self._split_artists( playingartist )
+        return artist_names, mbids
+
+
+    def _get_current_artists_filtered( self, artist_names, mbids ):
+        artists_info = []
         lw.log( ['starting with the following artists', artist_names] )
-        lw.log( ['disable multi artist is set to ' + str( self.DISABLEMULTIARTIST )] )
         if self.DISABLEMULTIARTIST:
             if len( artist_names ) > 1:
                 lw.log( ['deleting extra artists'] )
@@ -557,8 +537,42 @@ class Main( object ):
         for artist_name, mbid in _zip_longest( artist_names, mbids, fillvalue='' ):
             if artist_name:
                 artists_info.append( (py2_encode( artist_name ), self._get_musicbrainz_id( py2_encode( artist_name ), mbid )) )
-        self.ARTISTS_INFO = artists_info
         return artists_info
+
+
+    def _get_current_artists_info( self ):
+        featured_artists = ''
+        artist_names = []
+        mbids = []
+        if xbmc.Player().isPlayingAudio():
+            try:
+                playing_file = xbmc.Player().getPlayingFile()
+                playing_song = xbmc.Player().getMusicInfoTag().getTitle()
+            except RuntimeError:
+                lw.log( ['RuntimeError getting playing file/song back from Kodi'] )
+                self.ARTISTS_INFO = []
+                return
+            except Exception as e:
+                lw.log( ['unexpected error getting playing file/song back from Kodi', e] )
+                self.ARTISTS_INFO = []
+                return
+            if playing_file != self.LASTPLAYINGFILE:
+                self.LASTPLAYINGFILE = playing_file
+                artist_names, mbids = self._get_current_artist_names_mbids( playing_song )
+                featured_artists = self._get_featured_artists( playing_song )
+            else:
+                lw.log( ['same file playing, using cached artists_info'] )
+                return
+        elif self._get_infolabel( self.SKININFO['artist'] ):
+            artist_names = self._split_artists( self._get_infolabel(self.SKININFO['artist']) )
+            mbids = self._get_infolabel( self.SKININFO['mbid'] ).split( ',' )
+            featured_artists = self._get_featured_artists( self._get_infolabel(self.SKININFO['title']) )
+        if featured_artists:
+            for one_artist in featured_artists:
+                artist_names.append( one_artist.strip(' ()') )
+        if not artist_names:
+            return []
+        self.ARTISTS_INFO = self._get_current_artists_filtered( artist_names, mbids )
 
 
     def _get_file_list( self, path, do_filter=False ):
@@ -654,7 +668,6 @@ class Main( object ):
         playing_item = ''
         max_trys = 3
         num_trys = 1
-        main_sleep = getSettingInt(  )
         while not got_item:
             try:
                 if item == 'album':
@@ -772,7 +785,7 @@ class Main( object ):
         self.ALLARTISTS = []
         self.MBID = ''
         self.VARIOUSARTISTSMBID = '89ad4ac3-39f7-470e-963a-56509c546377'
-        self.LASTPLAYINGFILE = ''
+        self.LASTPLAYINGFILE = 'Garbage 4jfi09a8fy987w3r2fwgerg'
         self.LASTJSONRESPONSE = ''
         self.LASTARTISTREFRESH = 0
         self.LASTCACHETRIM = 0
@@ -962,12 +975,12 @@ class Main( object ):
     def _set_properties( self ):
         similar_total = ''
         album_total = ''
-        self._set_property( "ArtistSlideshow.ArtistBiography", self.biography )
-        for count, item in enumerate( self.similar ):
+        self._set_property( "ArtistSlideshow.ArtistBiography", self.BIOGRAPHY )
+        for count, item in enumerate( self.SIMILAR ):
             self._set_property( "ArtistSlideshow.%d.SimilarName" % ( count + 1 ), item[0] )
             self._set_property( "ArtistSlideshow.%d.SimilarThumb" % ( count + 1 ), item[1] )
             similar_total = str( count )
-        for count, item in enumerate( self.albums ):
+        for count, item in enumerate( self.ALBUMS ):
             self._set_property( "ArtistSlideshow.%d.AlbumName" % ( count + 1 ), item[0] )
             self._set_property( "ArtistSlideshow.%d.AlbumThumb" % ( count + 1 ), item[1] )
             album_total = str( count )
@@ -1079,7 +1092,7 @@ class Main( object ):
             self.IMAGESFOUND = self.IMAGESFOUND or self.SLIDESHOW.AddImage( xbmc.getInfoLabel( 'Player.Art(artist.fanart)' ) )
         if self.INCLUDEALBUMFANART:
             self.IMAGESFOUND = self.IMAGESFOUND or self.SLIDESHOW.AddImage( xbmc.getInfoLabel( 'Player.Art(album.fanart)' ) )
-        for artist, mbid in self._get_current_artists_info( ):
+        for artist, mbid in self.ARTISTS_INFO:
             if xbmc.Monitor().abortRequested() or not self.SLIDESHOW.is_alive():
                 return
             got_one_artist_images = False
