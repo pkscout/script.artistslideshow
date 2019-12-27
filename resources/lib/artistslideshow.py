@@ -809,7 +809,7 @@ class Main( object ):
             lw.log( loglines )
 
 
-    def _move_to_kodi_storage( self ):
+   def _get_kodi_artist_storage_path( self ):
         dialog = xbmcgui.Dialog()
         ret = dialog.yesno( language(32200) + ': ' + language(32201), language(32300) )
         if not ret:
@@ -828,8 +828,13 @@ class Main( object ):
         if not kodi_music_artist_path:
             lw.log( ['No artist information folder setting found. Aborting.'] )
             dialog.ok( language(32200) + ': ' + language(32202), language(32301) )
-            return
+            return ''
         lw.log( ['Artist information folder set to %s' % kodi_music_artist_path] )
+        return kodi_music_artist_path
+
+
+    def _move_to_kodi_storage( self ):
+        kodi_music_artist_path = _get_kodi_artist_storage_path()
         pdialog = xbmcgui.DialogProgress()
         if self.LOCALARTISTSTORAGE and self.LOCALARTISTPATH:
             pdialog.create( language(32200) + ': ' + language(32203), language(32303) )
