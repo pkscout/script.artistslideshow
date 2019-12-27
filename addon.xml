@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.1~beta7">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.1~beta8">
 	<requires>
 		<import addon="xbmc.python" version="2.26.0" />
 		<import addon="xbmc.addon" version="17.9.0" />
@@ -12,6 +12,11 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
+v.3.0.1~beta8
+- fixed issue where slideshow might not start when in daemon mode
+- moved common libraries to lib folder
+- move update image slideshow to images folder
+
 v.3.0.1~beta7
 - fix for slideshow thread starting too early when skin starts AS without any music playing
 
