@@ -26,10 +26,10 @@ import os, random, re, sys, threading, time
 import json as _json
 from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 from kodi_six.utils import py2_encode, py2_decode
-from resources.common.fileops import checkPath, writeFile, readFile, deleteFile, deleteFolder, moveFile, naturalKeys
-from resources.common.url import URL
-from resources.common.xlogger import Logger
-from resources.common.kodisettings import getSettingBool, getSettingInt, getSettingString
+from resources.lib.fileops import checkPath, writeFile, readFile, deleteFile, deleteFolder, moveFile, naturalKeys
+from resources.lib.url import URL
+from resources.lib.xlogger import Logger
+from resources.lib.kodisettings import getSettingBool, getSettingInt, getSettingString
 import resources.plugins
 
 addon        = xbmcaddon.Addon()
