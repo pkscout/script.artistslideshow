@@ -287,7 +287,7 @@ class Main( object ):
                     self._set_property( 'ArtistSlideshowRunning' )
             while not xbmc.Monitor().abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
                 if xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
-                    if not self._wait( self.MAINSLEEP, sleep_time=self.MAINSLEEP ) and set( self.ALLARTISTS ) != set( self._get_current_artists() ):
+                    if not self._wait( self.MAINSLEEP, sleep_time=self.MAINSLEEP ):
                         self._clear_properties( fadetoblack=self.FADETOBLACK )
                         self._use_correct_artwork()
                         self._trim_cache()
@@ -553,8 +553,9 @@ class Main( object ):
                 lw.log( ['unexpected error getting playing file/song back from Kodi', e] )
                 self.ARTISTS_INFO = []
                 return
-            if playing_file != self.LASTPLAYINGFILE:
+            if playing_file != self.LASTPLAYINGFILE or playing_song != self.LASTPLAYINGSONG:
                 self.LASTPLAYINGFILE = playing_file
+                self.LASTPLAYINGSONG = playing_song
                 artist_names, mbids = self._get_current_artist_names_mbids( playing_song )
                 featured_artists = self._get_featured_artists( playing_song )
             else:
@@ -681,7 +682,7 @@ class Main( object ):
                 break
             else:
                 num_trys = num_trys + 1
-                if self._wait( self.MAINSLEEP, sleep_time=self.MAINSLEEP ) or self._playback_stopped_or_changed():
+                if self._wait( self.MAINSLEEP, sleep_time=self.MAINSLEEP ):
                     break
         if not playing_item:
             playing_item = self._get_infolabel( self.SKININFO[item] )
@@ -781,7 +782,8 @@ class Main( object ):
         self.ALLARTISTS = []
         self.MBID = ''
         self.VARIOUSARTISTSMBID = '89ad4ac3-39f7-470e-963a-56509c546377'
-        self.LASTPLAYINGFILE = 'Garbage 4jfi09a8fy987w3r2fwgerg'
+        self.LASTPLAYINGFILE = ''
+        self.LASTPLAYINGSONG = ''
         self.LASTJSONRESPONSE = ''
         self.LASTARTISTREFRESH = 0
         self.LASTCACHETRIM = 0
@@ -912,7 +914,15 @@ class Main( object ):
 
 
     def _playback_stopped_or_changed( self ):
-        if set( self.ALLARTISTS ) != set( self._get_current_artists() ) or self.EXTERNALCALLSTATUS != self._get_infolabel( self.EXTERNALCALL ):
+        current_artists = self._get_infolabel( self.EXTERNALCALL )
+        if current_artists:
+            cached_artists = self.EXTERNALCALLSTATUS
+        else:
+            current_artists = self._get_current_artists()
+            cached_artists = self.ALLARTISTS
+        current_artists.sort()
+        cached_artists.sort()
+        if cached_artists != current_artists:
             return True
         else:
             return False
@@ -1193,7 +1203,9 @@ class Main( object ):
         waited = 0
         while waited < wait_time:
             if xbmc.Monitor().waitForAbort( sleep_time ):
+                self._set_property( "ArtistSlideshowRunning" )
                 return True
-            waited = waited + sleep_time
             if self._playback_stopped_or_changed():
                 return False
+            waited = waited + sleep_time
+        return True
