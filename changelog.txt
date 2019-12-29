@@ -1,3 +1,6 @@
+v.3.0.1~beta9
+- fix for artist images not changing when using a radio stream
+
 v.3.0.1~beta8
 - fixed issue where slideshow might not start when in daemon mode
 - moved common libraries to lib folder
