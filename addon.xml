@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.1~beta9">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.1~beta10">
 	<requires>
 		<import addon="xbmc.python" version="2.26.0" />
 		<import addon="xbmc.addon" version="17.9.0" />
@@ -12,6 +12,10 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
+v.3.0.1~beta10
+- updates to logic for waiting and checking for change in music
+- updated service plugins to use https for API calls
+
 v.3.0.1~beta9
 - fix for artist images not changing when using a radio stream
 
