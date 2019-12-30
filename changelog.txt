@@ -1,3 +1,7 @@
+v.3.0.1~beta10
+- updates to logic for waiting and checking for change in music
+- updated service plugins to use https for API calls
+
 v.3.0.1~beta9
 - fix for artist images not changing when using a radio stream
 
