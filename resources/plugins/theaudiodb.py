@@ -19,7 +19,7 @@ except AttributeError:
 
 class objectConfig( object ):
     def __init__( self ):
-        url = 'http://www.theaudiodb.com/api/v1/json/%s/' % base64.b64decode(clowncar.encode('ascii')).decode('ascii')
+        url = 'https://www.theaudiodb.com/api/v1/json/%s/' % base64.b64decode(clowncar.encode('ascii')).decode('ascii')
         secsinweek = int( 7*24*60*60 )
         self.ARTISTMBIDURL = url + 'artist-mb.php'
         self.ARTISTSEARCHURL = url + 'search.php'

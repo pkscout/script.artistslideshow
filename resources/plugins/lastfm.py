@@ -24,7 +24,7 @@ class objectConfig( object ):
                             'api_key':base64.b64decode(clowncar.encode('ascii')).decode('ascii'), 'method':'artist.getTopAlbums'}
         self.SIMILARPARAMS = {'autocorrect':'1',
                               'api_key':base64.b64decode(clowncar.encode('ascii')).decode('ascii'), 'limit':'50', 'method':'artist.getSimilar'}
-        self.URL = 'http://ws.audioscrobbler.com/2.0/'
+        self.URL = 'https://ws.audioscrobbler.com/2.0/'
         self.BIOFILENAME = 'lastfmartistbio.nfo'
         self.ALBUMFILENAME = 'lastfmartistalbums.nfo'
         self.SIMILARFILENAME = 'lastfmartistsimilar.nfo'

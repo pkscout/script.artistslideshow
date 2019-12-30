@@ -18,7 +18,7 @@ except AttributeError:
 class objectConfig( object ):
     def __init__( self ):
         secsinweek = int( 7*24*60*60 )
-        self.URL = 'http://webservice.fanart.tv/v3/music/'
+        self.URL = 'https://webservice.fanart.tv/v3/music/'
         self.FILENAME = 'fanarttvartistimages.nfo'
         self.CACHETIMEFILENAME = 'fanarttvcachetime.nfo'
         self.HASCLIENTKEY = False
