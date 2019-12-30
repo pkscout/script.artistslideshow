@@ -221,7 +221,7 @@ class Slideshow( threading.Thread ):
                 if not image == last_image:
                     self._set_property( 'ArtistSlideshow.Image', image )
                     lw.log( ['ArtistSlideshow.Image set to ' + image] )
-                    self._wait( self.DELAY, sleep_time=self.SLIDESHOWSLEEP )
+                    self._wait( wait_time=self.DELAY, sleep_time=self.SLIDESHOWSLEEP )
                     last_image = image
                 if self._check_for_quit():
                     break
@@ -246,7 +246,7 @@ class Slideshow( threading.Thread ):
           lw.log( ['Exception: Could not set property %s to value %s' % (property_name, value), e] )
 
 
-    def _wait( self, wait_time, sleep_time=1, wait_for_music=False ):
+    def _wait( self, wait_time=1, sleep_time=1 ):
         waited = 0
         while waited < wait_time:
             xbmc.sleep( sleep_time*1000 )
@@ -287,18 +287,17 @@ class Main( object ):
                     self._set_property( 'ArtistSlideshowRunning' )
             while not xbmc.Monitor().abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
                 if xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
-                    if not self._wait( self.MAINSLEEP, sleep_time=self.MAINSLEEP ):
+                    if self._playback_stopped_or_changed( wait_time=self.MAINSLEEP ):
                         self._clear_properties( fadetoblack=self.FADETOBLACK )
                         self._use_correct_artwork()
                         self._trim_cache()
                 elif self.DAEMON:
-                    self.ALLARTISTS = ''
-                    self._clear_properties( fadetoblack=False )
-                    if self._wait( self.MAINIDLESLEEP*30, sleep_time=self.MAINIDLESLEEP ):
+                    self._clear_properties( clearartists=True )
+                    if self._waitForAbort( wait_time=self.MAINIDLESLEEP ):
                         break
                 elif not self.DAEMON:
                     break
-            self._clear_properties( fadetoblack=False )
+            self._clear_properties()
             self._set_property( "ArtistSlideshowRunning" )
             self._set_property("ArtistSlideshow.CleanupComplete", "True")
 
@@ -325,10 +324,12 @@ class Main( object ):
         return text.strip()
 
 
-    def _clear_properties( self, fadetoblack ):
+    def _clear_properties( self, fadetoblack=False, clearartists=False ):
         lw.log( ['main thread is cleaning all the properties'] )
         self.MBID = ''
         self.FANARTNUMBER = False
+        if clearartists:
+            self.ALLARTISTS = []
         as_image = self._get_infolabel( 'ArtistSlideshow.Image' )
         if as_image and 'black-hd.png' not in as_image:
             self.SLIDESHOW.ClearImages( fadetoblack=fadetoblack )
@@ -358,7 +359,7 @@ class Main( object ):
         image_downloaded = False
         if not self.NAME:
             lw.log( ['no artist name provided'] )
-            return
+            return False
         lw.log( ['downloading images'] )
         imgdb = os.path.join( self.INFODIR, self.IMGDB )
         lw.log( ['checking download cache file ' + imgdb] )
@@ -366,8 +367,8 @@ class Main( object ):
         lw.log( loglines )
         for url in self._get_image_list():
             lw.log( ['the url to check is ' + url] )
-            if( self._playback_stopped_or_changed() ):
-                return
+            if self._playback_stopped_or_changed():
+                return False
             url_image_name = url.rsplit('/', 1)[-1]
             path = os.path.join( self.CACHEDIR, self._set_image_name( url, self.CACHEDIR, self.KODILOCALSTORAGE ) )
             lw.log( ['checking %s against %s' % (url_image_name, cachelist_str)] )
@@ -682,7 +683,7 @@ class Main( object ):
                 break
             else:
                 num_trys = num_trys + 1
-                if self._wait( self.MAINSLEEP, sleep_time=self.MAINSLEEP ):
+                if self._playback_stopped_or_changed():
                     break
         if not playing_item:
             playing_item = self._get_infolabel( self.SKININFO[item] )
@@ -913,7 +914,11 @@ class Main( object ):
             self.RUNFROMSETTINGS = True
 
 
-    def _playback_stopped_or_changed( self ):
+    def _playback_stopped_or_changed( self, wait_time=1 ):
+        if self._waitForAbort( wait_time=wait_time ):
+            return True
+        if not xbmc.Player().isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
+            return True
         current_artists = self._get_infolabel( self.EXTERNALCALL )
         if current_artists:
             cached_artists = self.EXTERNALCALLSTATUS
@@ -1059,7 +1064,7 @@ class Main( object ):
                 cache_size = 0
                 first_folder = True
                 for folder in folders:
-                    if( self._playback_stopped_or_changed() ):
+                    if self._playback_stopped_or_changed():
                         break
                     cache_size = cache_size + self._get_folder_size( os.path.join ( cache_root, py2_encode( folder ) ) )
                     lw.log( ['looking at folder %s cache size is now %s' % (folder, cache_size)] )
@@ -1106,7 +1111,7 @@ class Main( object ):
         if self.INCLUDEALBUMFANART:
             self.IMAGESFOUND = self.IMAGESFOUND or self.SLIDESHOW.AddImage( xbmc.getInfoLabel( 'Player.Art(album.fanart)' ) )
         for artist, mbid in self.ARTISTS_INFO:
-            if xbmc.Monitor().abortRequested() or not self.SLIDESHOW.is_alive():
+            if self._playback_stopped_or_changed():
                 return
             got_one_artist_images = False
             self.ARTISTNUM += 1
@@ -1199,13 +1204,9 @@ class Main( object ):
             self._update_check_file( checkfile, '3.0.0', 'preference conversion complete' )
 
 
-    def _wait( self, wait_time, sleep_time=1 ):
-        waited = 0
-        while waited < wait_time:
-            if xbmc.Monitor().waitForAbort( sleep_time ):
-                self._set_property( "ArtistSlideshowRunning" )
-                return True
-            if self._playback_stopped_or_changed():
-                return False
-            waited = waited + sleep_time
-        return True
+    def _waitForAbort( self, wait_time=1 ):
+        if xbmc.Monitor().waitForAbort( wait_time ):
+            self._set_property( "ArtistSlideshowRunning" )
+            return True
+        else:
+            return False
