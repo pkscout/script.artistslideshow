@@ -1,3 +1,6 @@
+v.3.0.1~beta12
+- added back option to show notifications when downloading new images
+
 v.3.0.1~beta11
 - updates for some setting retrievals that were still using old method
 - updates for code style consistency
