@@ -39,7 +39,7 @@ addonpath    = addon.getAddonInfo('path')
 addonicon    = xbmc.translatePath('%s/icon.png' % addonpath )
 language     = addon.getLocalizedString
 preamble     = '[Artist Slideshow]'
-logdebug     = getSettingBool( addon, "logging" )
+logdebug     = getSettingBool( addon, 'logging' )
 
 lw      = Logger( preamble=preamble, logdebug=logdebug )
 JSONURL = URL( 'json' )
@@ -50,24 +50,12 @@ lw.log( ['script version %s started' % addonversion], xbmc.LOGNOTICE )
 lw.log( ['debug logging set to %s' % logdebug], xbmc.LOGNOTICE )
 
 # this section imports all the scraper plugins, initializes, and sorts them
-def _get_plugin_settings( preamble, module, description ):
+def _get_plugin_settings( service_name, module, description ):
     if module == 'local':
-        return 'true', 0
-    try:
-        active = addon.getSetting( preamble + module )
-    except ValueError:
-        active = 'false'
-    except Exception as e:
-        lw.log( ['unexpected error while parsing %s setting for %s' % (description, module), e] )
-        active = 'false'
-    if active == 'true':
-        try:
-            priority = int( addon.getSetting( preamble + "priority_" + module ) )
-        except ValueError:
-            priority = 10
-        except Exception as e:
-            lw.log( ['unexpected error while parsing %s priority for %s' % (description, module), e] )
-            priority = 10
+        return True, 0
+    active = getSettingBool( addon, service_name + module, False )
+    if active:
+        priority = getSettingInt( addon, service_name + 'priority_' + module, 10 )
     else:
         priority = 10
     return active, priority
@@ -86,25 +74,25 @@ for module in resources.plugins.__all__:
     scrapers = plugin.provides()
     if 'bio' in scrapers:
         bio_active, bio_priority = _get_plugin_settings( 'ab_', module, 'artist bio' )
-        if bio_active == 'true':
+        if bio_active:
             bio_plugins['objs'][module] = plugin
             bio_plugins['names'].append( [bio_priority, module] )
             lw.log( ['added %s to bio plugins' % module] )
     if 'images' in scrapers:
         img_active, img_priority = _get_plugin_settings( '', module, 'artist images' )
-        if img_active == 'true':
+        if img_active:
             image_plugins['objs'][module] = plugin
             image_plugins['names'].append( [img_priority, module] )
             lw.log( ['added %s to image plugins' % module] )
     if 'albums' in scrapers:
         ai_active, ai_priority = _get_plugin_settings( 'ai_', module, 'artist albums' )
-        if ai_active == 'true':
+        if ai_active:
             album_plugins['objs'][module] = plugin
             album_plugins['names'].append( [ai_priority, module] )
             lw.log( ['added %s to album info plugins' % module] )
     if 'similar' in scrapers:
         sa_active, sa_priority = _get_plugin_settings( 'sa_', module, 'similar artists' )
-        if sa_active == 'true':
+        if sa_active:
             similar_plugins['objs'][module] = plugin
             similar_plugins['names'].append( [ai_priority, module] )
             lw.log( ['added %s to similar artist plugins' % module] )
@@ -115,54 +103,54 @@ for module in resources.plugins.__all__:
 
 LANGUAGES = (
 # Full Language name[0]         ISO 639-1[1]   Script Language[2]
-    ("Albanian"                   , "sq",            "0"  ),
-    ("Arabic"                     , "ar",            "1"  ),
-    ("Belarusian"                 , "hy",            "2"  ),
-    ("Bosnian"                    , "bs",            "3"  ),
-    ("Bulgarian"                  , "bg",            "4"  ),
-    ("Catalan"                    , "ca",            "5"  ),
-    ("Chinese"                    , "zh",            "6"  ),
-    ("Croatian"                   , "hr",            "7"  ),
-    ("Czech"                      , "cs",            "8"  ),
-    ("Danish"                     , "da",            "9"  ),
-    ("Dutch"                      , "nl",            "10" ),
-    ("English"                    , "en",            "11" ),
-    ("Estonian"                   , "et",            "12" ),
-    ("Persian"                    , "fa",            "13" ),
-    ("Finnish"                    , "fi",            "14" ),
-    ("French"                     , "fr",            "15" ),
-    ("German"                     , "de",            "16" ),
-    ("Greek"                      , "el",            "17" ),
-    ("Hebrew"                     , "he",            "18" ),
-    ("Hindi"                      , "hi",            "19" ),
-    ("Hungarian"                  , "hu",            "20" ),
-    ("Icelandic"                  , "is",            "21" ),
-    ("Indonesian"                 , "id",            "22" ),
-    ("Italian"                    , "it",            "23" ),
-    ("Japanese"                   , "ja",            "24" ),
-    ("Korean"                     , "ko",            "25" ),
-    ("Latvian"                    , "lv",            "26" ),
-    ("Lithuanian"                 , "lt",            "27" ),
-    ("Macedonian"                 , "mk",            "28" ),
-    ("Norwegian"                  , "no",            "29" ),
-    ("Polish"                     , "pl",            "30" ),
-    ("Portuguese"                 , "pt",            "31" ),
-    ("PortugueseBrazil"           , "pb",            "32" ),
-    ("Romanian"                   , "ro",            "33" ),
-    ("Russian"                    , "ru",            "34" ),
-    ("Serbian"                    , "sr",            "35" ),
-    ("Slovak"                     , "sk",            "36" ),
-    ("Slovenian"                  , "sl",            "37" ),
-    ("Spanish"                    , "es",            "38" ),
-    ("Swedish"                    , "sv",            "39" ),
-    ("Thai"                       , "th",            "40" ),
-    ("Turkish"                    , "tr",            "41" ),
-    ("Ukrainian"                  , "uk",            "42" ),
-    ("Vietnamese"                 , "vi",            "43" ),
-    ("Farsi"                      , "fa",            "13" ),
-    ("Portuguese (Brazil)"        , "pb",            "32" ),
-    ("Portuguese-BR"              , "pb",            "32" ),
-    ("Brazilian"                  , "pb",            "32" ) )
+    ('Albanian'                   , 'sq',            '0'  ),
+    ('Arabic'                     , 'ar',            '1'  ),
+    ('Belarusian'                 , 'hy',            '2'  ),
+    ('Bosnian'                    , 'bs',            '3'  ),
+    ('Bulgarian'                  , 'bg',            '4'  ),
+    ('Catalan'                    , 'ca',            '5'  ),
+    ('Chinese'                    , 'zh',            '6'  ),
+    ('Croatian'                   , 'hr',            '7'  ),
+    ('Czech'                      , 'cs',            '8'  ),
+    ('Danish'                     , 'da',            '9'  ),
+    ('Dutch'                      , 'nl',            '10' ),
+    ('English'                    , 'en',            '11' ),
+    ('Estonian'                   , 'et',            '12' ),
+    ('Persian'                    , 'fa',            '13' ),
+    ('Finnish'                    , 'fi',            '14' ),
+    ('French'                     , 'fr',            '15' ),
+    ('German'                     , 'de',            '16' ),
+    ('Greek'                      , 'el',            '17' ),
+    ('Hebrew'                     , 'he',            '18' ),
+    ('Hindi'                      , 'hi',            '19' ),
+    ('Hungarian'                  , 'hu',            '20' ),
+    ('Icelandic'                  , 'is',            '21' ),
+    ('Indonesian'                 , 'id',            '22' ),
+    ('Italian'                    , 'it',            '23' ),
+    ('Japanese'                   , 'ja',            '24' ),
+    ('Korean'                     , 'ko',            '25' ),
+    ('Latvian'                    , 'lv',            '26' ),
+    ('Lithuanian'                 , 'lt',            '27' ),
+    ('Macedonian'                 , 'mk',            '28' ),
+    ('Norwegian'                  , 'no',            '29' ),
+    ('Polish'                     , 'pl',            '30' ),
+    ('Portuguese'                 , 'pt',            '31' ),
+    ('PortugueseBrazil'           , 'pb',            '32' ),
+    ('Romanian'                   , 'ro',            '33' ),
+    ('Russian'                    , 'ru',            '34' ),
+    ('Serbian'                    , 'sr',            '35' ),
+    ('Slovak'                     , 'sk',            '36' ),
+    ('Slovenian'                  , 'sl',            '37' ),
+    ('Spanish'                    , 'es',            '38' ),
+    ('Swedish'                    , 'sv',            '39' ),
+    ('Thai'                       , 'th',            '40' ),
+    ('Turkish'                    , 'tr',            '41' ),
+    ('Ukrainian'                  , 'uk',            '42' ),
+    ('Vietnamese'                 , 'vi',            '43' ),
+    ('Farsi'                      , 'fa',            '13' ),
+    ('Portuguese (Brazil)'        , 'pb',            '32' ),
+    ('Portuguese-BR'              , 'pb',            '32' ),
+    ('Brazilian'                  , 'pb',            '32' ) )
 
 
 
@@ -261,7 +249,7 @@ class Main( object ):
     def __init__( self ):
         self._parse_argv()
         self._init_window()
-        if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == "True" and not self.RUNFROMSETTINGS:
+        if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True' and not self.RUNFROMSETTINGS:
             lw.log( ['script already running'] )
         else:
             self._upgrade_settings()
@@ -298,8 +286,8 @@ class Main( object ):
                 elif not self.DAEMON:
                     break
             self._clear_properties()
-            self._set_property( "ArtistSlideshowRunning" )
-            self._set_property("ArtistSlideshow.CleanupComplete", "True")
+            self._set_property( 'ArtistSlideshowRunning' )
+            self._set_property( 'ArtistSlideshow.CleanupComplete', 'True' )
 
 
     def _clean_dir( self, dir_path ):
@@ -337,13 +325,13 @@ class Main( object ):
         if xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
             self._slideshow_thread_start()
         if self._get_infolabel( 'ArtistSlideshow.ArtistBiography' ):
-            self._set_property( "ArtistSlideshow.ArtistBiography" )
+            self._set_property( 'ArtistSlideshow.ArtistBiography' )
         if self._get_infolabel( 'ArtistSlideshow.1.SimilarName' ):
             for count in range( 50 ):
-                self._set_property( "ArtistSlideshow.%d.SimilarName" % ( count + 1 ) )
-                self._set_property( "ArtistSlideshow.%d.SimilarThumb" % ( count + 1 ) )
-                self._set_property( "ArtistSlideshow.%d.AlbumName" % ( count + 1 ) )
-                self._set_property( "ArtistSlideshow.%d.AlbumThumb" % ( count + 1 ) )
+                self._set_property( 'ArtistSlideshow.%d.SimilarName' % ( count + 1 ) )
+                self._set_property( 'ArtistSlideshow.%d.SimilarThumb' % ( count + 1 ) )
+                self._set_property( 'ArtistSlideshow.%d.AlbumName' % ( count + 1 ) )
+                self._set_property( 'ArtistSlideshow.%d.AlbumThumb' % ( count + 1 ) )
 
 
     def _delete_folder( self, folder ):
@@ -425,7 +413,7 @@ class Main( object ):
             pass
         for plugin_name in bio_plugins['names']:
             lw.log( ['checking %s for bio' % plugin_name[1]] )
-            bio_params['donated'] = addon.getSetting( plugin_name[1] + "_donated" )
+            bio_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated', False )
             bio, loglines = bio_plugins['objs'][plugin_name[1]].getBio( bio_params )
             lw.log( loglines )
             if bio:
@@ -450,7 +438,7 @@ class Main( object ):
             pass
         for plugin_name in album_plugins['names']:
             lw.log( ['checking %s for album info' % plugin_name[1]] )
-            album_params['donated'] = addon.getSetting( plugin_name[1] + "_donated" )
+            album_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated', False )
             albums, loglines = album_plugins['objs'][plugin_name[1]].getAlbumList( album_params )
             lw.log( loglines )
             if not albums == []:
@@ -593,8 +581,8 @@ class Main( object ):
 
 
     def _get_featured_artists( self, data ):
-        replace_regex = re.compile( r"ft\.", re.IGNORECASE )
-        split_regex = re.compile( r"feat\.", re.IGNORECASE )
+        replace_regex = re.compile( r'ft\.', re.IGNORECASE )
+        split_regex = re.compile( r'feat\.', re.IGNORECASE )
         the_split = split_regex.split( replace_regex.sub( 'feat.', data ) )
         if len( the_split ) > 1:
             return self._split_artists( the_split[-1] )
@@ -621,9 +609,9 @@ class Main( object ):
         for plugin_name in image_plugins['names']:
             image_list = []
             lw.log( ['checking %s for images' % plugin_name[1]] )
-            image_params['getall'] = addon.getSetting( plugin_name[1] + "_all" )
-            image_params['clientapikey'] = addon.getSetting( plugin_name[1] + "_clientapikey" )
-            image_params['donated'] = addon.getSetting( plugin_name[1] + "_donated" )
+            image_params['getall'] = getSettingBool( addon, plugin_name[1] + '_all', False )
+            image_params['clientapikey'] = getSettingString( addon, plugin_name[1] + '_clientapikey', '' )
+            image_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated', False )
             image_list, loglines = image_plugins['objs'][plugin_name[1]].getImageList( image_params )
             lw.log( loglines )
             images.extend( image_list )
@@ -750,9 +738,9 @@ class Main( object ):
         else:
             self.LOCALINFOSTORAGE = False
             self.LOCALINFOPATH = ''
-        pl = getSettingInt( addon, "storage_target" )
+        pl = getSettingInt( addon, 'storage_target' )
         if pl == 0:
-            self.ENDREPLACE = getSettingString( addon, "end_replace" )
+            self.ENDREPLACE = getSettingString( addon, 'end_replace' )
             self.ILLEGALCHARS = list( '<>:"/\|?*' )
         elif pl == 2:
             self.ENDREPLACE = '.'
@@ -760,7 +748,7 @@ class Main( object ):
         else:
             self.ENDREPLACE = '.'
             self.ILLEGALCHARS = [os.path.sep]
-        self.ILLEGALREPLACE = addon.getSetting( "illegal_replace" )
+        self.ILLEGALREPLACE = getSettingString( addon, 'illegal_replace', '' )
 
 
     def _init_vars( self ):
@@ -886,21 +874,21 @@ class Main( object ):
 
     def _parse_argv( self ):
         try:
-            params = dict( arg.split( "=" ) for arg in sys.argv[ 1 ].split( "&" ) )
+            params = dict( arg.split( '=' ) for arg in sys.argv[ 1 ].split( '&' ) )
         except IndexError:
             params = {}
         except Exception as e:
             lw.log( ['unexpected error while parsing arguments', e] )
             params = {}
-        self.WINDOWID = params.get( "windowid", "12006")
+        self.WINDOWID = params.get( 'windowid', '12006' )
         lw.log( ['window id is set to %s' % self.WINDOWID] )
         self.PASSEDFIELDS = {}
         self.FIELDLIST = ['artistfield', 'titlefield', 'albumfield', 'mbidfield']
         for item in self.FIELDLIST:
             self.PASSEDFIELDS[item] = params.get( item, '' )
             lw.log( ['%s is set to %s' % (item, self.PASSEDFIELDS[item])] )
-        daemon = params.get( "daemon", "False" )
-        if daemon == "True":
+        daemon = params.get( 'daemon', 'False' )
+        if daemon == 'True':
             self.DAEMON = True
         else:
             self.DAEMON = False
@@ -908,7 +896,7 @@ class Main( object ):
             lw.log( ['daemonizing'] )
         self.RUNFROMSETTINGS = False
         self.MOVETOKODISTORAGE = False
-        checkmove = params.get( "movetokodistorage", "False" )
+        checkmove = params.get( 'movetokodistorage', 'False' )
         if checkmove.lower() == 'true':
             self.MOVETOKODISTORAGE = True
             self.RUNFROMSETTINGS = True
@@ -983,7 +971,7 @@ class Main( object ):
             self.FANARTNUMBER += 1
         else:
             self.FANARTNUMBER = self._set_fanart_number( thedir )
-        return "fanart" + str( self.FANARTNUMBER ) + ext
+        return 'fanart' + str( self.FANARTNUMBER ) + ext
 
 
     def _set_infodir( self, theartist ):
@@ -993,17 +981,17 @@ class Main( object ):
     def _set_properties( self ):
         similar_total = ''
         album_total = ''
-        self._set_property( "ArtistSlideshow.ArtistBiography", self.BIOGRAPHY )
+        self._set_property( 'ArtistSlideshow.ArtistBiography', self.BIOGRAPHY )
         for count, item in enumerate( self.SIMILAR ):
-            self._set_property( "ArtistSlideshow.%d.SimilarName" % ( count + 1 ), item[0] )
-            self._set_property( "ArtistSlideshow.%d.SimilarThumb" % ( count + 1 ), item[1] )
+            self._set_property( 'ArtistSlideshow.%d.SimilarName' % ( count + 1 ), item[0] )
+            self._set_property( 'ArtistSlideshow.%d.SimilarThumb' % ( count + 1 ), item[1] )
             similar_total = str( count )
         for count, item in enumerate( self.ALBUMS ):
-            self._set_property( "ArtistSlideshow.%d.AlbumName" % ( count + 1 ), item[0] )
-            self._set_property( "ArtistSlideshow.%d.AlbumThumb" % ( count + 1 ), item[1] )
+            self._set_property( 'ArtistSlideshow.%d.AlbumName' % ( count + 1 ), item[0] )
+            self._set_property( 'ArtistSlideshow.%d.AlbumThumb' % ( count + 1 ), item[1] )
             album_total = str( count )
-        self._set_property( "ArtistSlideshow.SimilarCount", similar_total )
-        self._set_property( "ArtistSlideshow.AlbumCount", album_total )
+        self._set_property( 'ArtistSlideshow.SimilarCount', similar_total )
+        self._set_property( 'ArtistSlideshow.AlbumCount', album_total )
 
 
     def _set_property( self, property_name, value='' ):
@@ -1158,7 +1146,7 @@ class Main( object ):
                 addon.setSetting( 'artist_image_storage', '2' )
             if getSettingBool( addon, 'localinfostorage' ):
                 addon.setSetting( 'artist_info_storage', '1')
-                addon.setSetting( 'local_info_path', addon.getSetting( 'local_artist_path' ))
+                addon.setSetting( 'local_info_path', getSettingString( addon, 'local_artist_path', '' ) )
 
 
     def _upgrade( self ):
@@ -1206,7 +1194,7 @@ class Main( object ):
 
     def _waitForAbort( self, wait_time=1 ):
         if xbmc.Monitor().waitForAbort( wait_time ):
-            self._set_property( "ArtistSlideshowRunning" )
+            self._set_property( 'ArtistSlideshowRunning' )
             return True
         else:
             return False
