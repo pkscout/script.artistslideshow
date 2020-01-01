@@ -31,6 +31,7 @@
         <setting id="theaudiodb" type="bool" label="32102" default="false" />
         <setting id="theaudiodb_all" type="bool" label="32108" visible="eq(-1,true)" default="false" />
         <setting id="theaudiodb_donated" type="bool" label="32110" visible="eq(-2,true)" default="false" />
+        <setting id="downloadnotification" type="bool" label="32142" visible="eq(-7,true) || eq(-3,true)" default="false" />
     </category>
     <category label="32003">
         <setting id="ai_theaudiodb" type="bool" label="32103" default="false" />

@@ -53,7 +53,7 @@ lw.log( ['debug logging set to %s' % logdebug], xbmc.LOGNOTICE )
 def _get_plugin_settings( service_name, module, description ):
     if module == 'local':
         return True, 0
-    active = getSettingBool( addon, service_name + module, False )
+    active = getSettingBool( addon, service_name + module, default=False )
     if active:
         priority = getSettingInt( addon, service_name + 'priority_' + module, 10 )
     else:
@@ -345,6 +345,7 @@ class Main( object ):
     def _download( self ):
         self.FANARTNUMBER = False
         image_downloaded = False
+        image_dl_count = 0
         if not self.NAME:
             lw.log( ['no artist name provided'] )
             return False
@@ -355,13 +356,11 @@ class Main( object ):
         lw.log( loglines )
         for url in self._get_image_list():
             lw.log( ['the url to check is ' + url] )
-            if self._playback_stopped_or_changed():
-                return False
             url_image_name = url.rsplit('/', 1)[-1]
             path = os.path.join( self.CACHEDIR, self._set_image_name( url, self.CACHEDIR, self.KODILOCALSTORAGE ) )
             lw.log( ['checking %s against %s' % (url_image_name, cachelist_str)] )
-            if not (url_image_name in cachelist_str):
-                if not xbmc.Monitor().abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
+            if not self._playback_stopped_or_changed():
+                if not (url_image_name in cachelist_str):
                     tmpname = os.path.join( self.DATAROOT, 'temp', url.rsplit('/', 1)[-1] )
                     lw.log( ['the tmpname is ' + tmpname] )
                     if xbmcvfs.exists( tmpname ):
@@ -376,6 +375,8 @@ class Main( object ):
                         return False
                     if xbmcvfs.Stat( tmpname ).st_size() > 999:
                         if not xbmcvfs.exists ( path ):
+                            if not image_downloaded and self.DOWNLOADNOTIFICATION:
+                                xbmcgui.Dialog().notification( language( 32204 ), language( 32307 ), icon=addonicon )
                             success, loglines = moveFile( tmpname, path )
                             lw.log( loglines )
                             lw.log( ['downloaded %s to %s' % (url, path)]  )
@@ -386,6 +387,7 @@ class Main( object ):
                             self.SLIDESHOW.AddImage( path )
                             self.IMAGESFOUND = True
                             image_downloaded = True
+                            image_dl_count += 1
                         else:
                             lw.log( ['image already exists, deleting temporary file'] )
                             success, loglines = deleteFile( tmpname )
@@ -393,8 +395,17 @@ class Main( object ):
                     else:
                         success, loglines = deleteFile( tmpname )
                         lw.log( loglines )
-        if not image_downloaded:
+        if image_downloaded:
+            if self.DOWNLOADNOTIFICATION:
+                if image_dl_count > 1:
+                    msg_end = language( 32308 )
+                else:
+                    msg_end = language( 32309 )
+                msg = '%s %s' % (str( image_dl_count ), msg_end)
+                xbmcgui.Dialog().notification( language( 32205 ), msg, icon=addonicon )
+        else:
             lw.log( ['no new images downloaded'] )
+            
         return image_downloaded
 
 
@@ -413,7 +424,7 @@ class Main( object ):
             pass
         for plugin_name in bio_plugins['names']:
             lw.log( ['checking %s for bio' % plugin_name[1]] )
-            bio_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated', False )
+            bio_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated', default=False )
             bio, loglines = bio_plugins['objs'][plugin_name[1]].getBio( bio_params )
             lw.log( loglines )
             if bio:
@@ -438,7 +449,7 @@ class Main( object ):
             pass
         for plugin_name in album_plugins['names']:
             lw.log( ['checking %s for album info' % plugin_name[1]] )
-            album_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated', False )
+            album_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated', default=False )
             albums, loglines = album_plugins['objs'][plugin_name[1]].getAlbumList( album_params )
             lw.log( loglines )
             if not albums == []:
@@ -609,9 +620,9 @@ class Main( object ):
         for plugin_name in image_plugins['names']:
             image_list = []
             lw.log( ['checking %s for images' % plugin_name[1]] )
-            image_params['getall'] = getSettingBool( addon, plugin_name[1] + '_all', False )
+            image_params['getall'] = getSettingBool( addon, plugin_name[1] + '_all', default=False )
             image_params['clientapikey'] = getSettingString( addon, plugin_name[1] + '_clientapikey', '' )
-            image_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated', False )
+            image_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated', default=False )
             image_list, loglines = image_plugins['objs'][plugin_name[1]].getImageList( image_params )
             lw.log( loglines )
             images.extend( image_list )
@@ -695,6 +706,7 @@ class Main( object ):
         self.MAXCACHESIZE = int( getSettingString( addon, 'max_cache_size', default='1024' ) ) * 1000000
         self.SLIDEDELAY = getSettingInt( addon, 'slide_delay', default=10 )
         self.FADETOBLACK = getSettingBool( addon, 'fadetoblack', default=True )
+        self.DOWNLOADNOTIFICATION = getSettingBool( addon, 'downloadnotification', default=False )
         self.MAINSLEEP = getSettingInt( addon, 'main_sleep', default=1 )
         self.MAINIDLESLEEP = getSettingInt( addon, 'main_idle_sleep', default=10 )
         artist_image_storage = getSettingInt( addon, 'artist_image_storage', default=0 )
