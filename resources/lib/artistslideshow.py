@@ -358,8 +358,8 @@ class Main( object ):
             lw.log( ['the url to check is ' + url] )
             url_image_name = url.rsplit('/', 1)[-1]
             path = os.path.join( self.CACHEDIR, self._set_image_name( url, self.CACHEDIR, self.KODILOCALSTORAGE ) )
-            lw.log( ['checking %s against %s' % (url_image_name, cachelist_str)] )
             if not self._playback_stopped_or_changed():
+                lw.log( ['checking %s against %s' % (url_image_name, cachelist_str)] )
                 if not (url_image_name in cachelist_str):
                     tmpname = os.path.join( self.DATAROOT, 'temp', url.rsplit('/', 1)[-1] )
                     lw.log( ['the tmpname is ' + tmpname] )
