@@ -405,7 +405,6 @@ class Main( object ):
                 xbmcgui.Dialog().notification( language( 32205 ), msg, icon=addonicon )
         else:
             lw.log( ['no new images downloaded'] )
-            
         return image_downloaded
 
 
