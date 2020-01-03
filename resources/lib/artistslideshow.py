@@ -403,16 +403,16 @@ class Main( object ):
         return image_downloaded
 
 
-    def _download_notification( self, type, image_dl_count=0, dialog_displayed=False ):
+    def _download_notification( self, dl_type, image_dl_count=0, dialog_displayed=False ):
         if not self.DOWNLOADNOTIFICATION:
             return False
-        if type == 'before' and not self.DNONLYONDOWNLOAD:
+        if dl_type == 'before' and not self.DNONLYONDOWNLOAD:
             xbmcgui.Dialog().notification( language( 32204 ), language( 32307 ), icon=addonicon )
             dialog_displayed = True
-        elif type == 'begin' and self.DNONLYONDOWNLOAD and not dialog_displayed:
+        elif dl_type == 'begin' and self.DNONLYONDOWNLOAD and not dialog_displayed:
             xbmcgui.Dialog().notification( language( 32204 ), language( 32307 ), icon=addonicon )
             dialog_displayed = True
-        elif type == 'end' and dialog_displayed:
+        elif dl_type == 'end' and dialog_displayed:
             if image_dl_count == 1:
                 msg_end = language( 32309 )
             else:
