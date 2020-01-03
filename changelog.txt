@@ -1,3 +1,7 @@
+v.3.0.1~beta13
+- changed download notification to show even if no images are downloaded
+- fix for theaudiodb.com plugin not downloading all three images for an artist
+
 v.3.0.1~beta12
 - added back option to show notifications when downloading new images
 
