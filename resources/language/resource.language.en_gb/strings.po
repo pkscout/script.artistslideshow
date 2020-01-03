@@ -218,7 +218,12 @@ msgctxt "#32142"
 msgid "Show notification during image downloads"
 msgstr ""
 
-# empty strings from id 32143 to 32199
+msgctxt "#32143"
+msgid "- Only show notification if there are images to download"
+msgstr ""
+
+
+# empty strings from id 32144 to 32199
 
 # Dialog headings
 

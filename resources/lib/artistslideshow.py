@@ -318,9 +318,7 @@ class Main( object ):
         self.FANARTNUMBER = False
         if clearartists:
             self.ALLARTISTS = []
-        as_image = self._get_infolabel( 'ArtistSlideshow.Image' )
-#        if as_image and 'black-hd.png' not in as_image:
-        if as_image:
+        if self._get_infolabel( 'ArtistSlideshow.Image' ):
             self.SLIDESHOW.ClearImages( fadetoblack=fadetoblack )
         self._slideshow_thread_stop()
         if xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
@@ -329,10 +327,13 @@ class Main( object ):
             self._set_property( 'ArtistSlideshow.ArtistBiography' )
         if self._get_infolabel( 'ArtistSlideshow.1.SimilarName' ):
             for count in range( 50 ):
-                self._set_property( 'ArtistSlideshow.%d.SimilarName' % ( count + 1 ) )
-                self._set_property( 'ArtistSlideshow.%d.SimilarThumb' % ( count + 1 ) )
-                self._set_property( 'ArtistSlideshow.%d.AlbumName' % ( count + 1 ) )
-                self._set_property( 'ArtistSlideshow.%d.AlbumThumb' % ( count + 1 ) )
+                self._set_property( 'ArtistSlideshow.%d.SimilarName' % (count + 1) )
+                self._set_property( 'ArtistSlideshow.%d.SimilarThumb' % (count + 1) )
+        if self._get_infolabel( 'ArtistSlideshow.1.AlbumName' ):
+            for count in range( 50 ):
+                self._set_property( 'ArtistSlideshow.%d.AlbumName' % (count + 1) )
+                self._set_property( 'ArtistSlideshow.%d.AlbumThumb' % (count + 1) )
+
 
 
     def _delete_folder( self, folder ):
@@ -351,7 +352,7 @@ class Main( object ):
             lw.log( ['no artist name provided'] )
             return False
         lw.log( ['downloading images'] )
-        self._download_notification( 'begin' )
+        dialog_displayed = self._download_notification( 'before' )
         imgdb = os.path.join( self.INFODIR, self.IMGDB )
         lw.log( ['checking download cache file ' + imgdb] )
         loglines, cachelist_str = readFile( imgdb )
@@ -363,6 +364,7 @@ class Main( object ):
             if not self._playback_stopped_or_changed( wait_time=0.1 ):
                 lw.log( ['checking %s against %s' % (url_image_name, cachelist_str)] )
                 if not (url_image_name in cachelist_str):
+                    dialog_displayed = self._download_notification( 'begin', dialog_displayed=dialog_displayed )
                     tmpname = os.path.join( self.DATAROOT, 'temp', url.rsplit('/', 1)[-1] )
                     lw.log( ['the tmpname is ' + tmpname] )
                     if xbmcvfs.exists( tmpname ):
@@ -395,24 +397,30 @@ class Main( object ):
                     else:
                         success, loglines = deleteFile( tmpname )
                         lw.log( loglines )
-        self._download_notification( 'end', image_dl_count=image_dl_count )
+        self._download_notification( 'end', image_dl_count=image_dl_count, dialog_displayed=dialog_displayed )
         if not image_downloaded:
             lw.log( ['no new images downloaded'] )
         return image_downloaded
 
 
-    def _download_notification( self, type, image_dl_count=0 ):
+    def _download_notification( self, type, image_dl_count=0, dialog_displayed=False ):
         if not self.DOWNLOADNOTIFICATION:
-            return
-        if type == 'begin':
+            return False
+        if type == 'before' and not self.DNONLYONDOWNLOAD:
             xbmcgui.Dialog().notification( language( 32204 ), language( 32307 ), icon=addonicon )
-        elif type == 'end':
+            dialog_displayed = True
+        elif type == 'begin' and self.DNONLYONDOWNLOAD and not dialog_displayed:
+            xbmcgui.Dialog().notification( language( 32204 ), language( 32307 ), icon=addonicon )
+            dialog_displayed = True
+        elif type == 'end' and dialog_displayed:
             if image_dl_count == 1:
                 msg_end = language( 32309 )
             else:
                 msg_end = language( 32308 )
             msg = '%s %s' % (str( image_dl_count ), msg_end)
             xbmcgui.Dialog().notification( language( 32205 ), msg, icon=addonicon )
+            dialog_displayed = True
+        return dialog_displayed
 
 
     def _get_artistbio( self ):
@@ -712,7 +720,8 @@ class Main( object ):
         self.MAXCACHESIZE = int( getSettingString( addon, 'max_cache_size', default='1024' ) ) * 1000000
         self.SLIDEDELAY = getSettingInt( addon, 'slide_delay', default=10 )
         self.FADETOBLACK = getSettingBool( addon, 'fadetoblack', default=True )
-        self.DOWNLOADNOTIFICATION = getSettingBool( addon, 'downloadnotification', default=False )
+        self.DOWNLOADNOTIFICATION = getSettingBool( addon, 'download_notification', default=False )
+        self.DNONLYONDOWNLOAD = getSettingBool( addon, 'dn_download_only', default=False )
         self.MAINSLEEP = getSettingInt( addon, 'main_sleep', default=1 )
         self.MAINIDLESLEEP = getSettingInt( addon, 'main_idle_sleep', default=10 )
         artist_image_storage = getSettingInt( addon, 'artist_image_storage', default=0 )
