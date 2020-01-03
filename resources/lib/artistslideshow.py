@@ -319,7 +319,8 @@ class Main( object ):
         if clearartists:
             self.ALLARTISTS = []
         as_image = self._get_infolabel( 'ArtistSlideshow.Image' )
-        if as_image and 'black-hd.png' not in as_image:
+#        if as_image and 'black-hd.png' not in as_image:
+        if as_image:
             self.SLIDESHOW.ClearImages( fadetoblack=fadetoblack )
         self._slideshow_thread_stop()
         if xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
@@ -350,6 +351,7 @@ class Main( object ):
             lw.log( ['no artist name provided'] )
             return False
         lw.log( ['downloading images'] )
+        self._download_notification( 'begin' )
         imgdb = os.path.join( self.INFODIR, self.IMGDB )
         lw.log( ['checking download cache file ' + imgdb] )
         loglines, cachelist_str = readFile( imgdb )
@@ -358,7 +360,7 @@ class Main( object ):
             lw.log( ['the url to check is ' + url] )
             url_image_name = url.rsplit('/', 1)[-1]
             path = os.path.join( self.CACHEDIR, self._set_image_name( url, self.CACHEDIR, self.KODILOCALSTORAGE ) )
-            if not self._playback_stopped_or_changed():
+            if not self._playback_stopped_or_changed( wait_time=0.1 ):
                 lw.log( ['checking %s against %s' % (url_image_name, cachelist_str)] )
                 if not (url_image_name in cachelist_str):
                     tmpname = os.path.join( self.DATAROOT, 'temp', url.rsplit('/', 1)[-1] )
@@ -375,8 +377,6 @@ class Main( object ):
                         return False
                     if xbmcvfs.Stat( tmpname ).st_size() > 999:
                         if not xbmcvfs.exists ( path ):
-                            if not image_downloaded and self.DOWNLOADNOTIFICATION:
-                                xbmcgui.Dialog().notification( language( 32204 ), language( 32307 ), icon=addonicon )
                             success, loglines = moveFile( tmpname, path )
                             lw.log( loglines )
                             lw.log( ['downloaded %s to %s' % (url, path)]  )
@@ -395,17 +395,24 @@ class Main( object ):
                     else:
                         success, loglines = deleteFile( tmpname )
                         lw.log( loglines )
-        if image_downloaded:
-            if self.DOWNLOADNOTIFICATION:
-                if image_dl_count > 1:
-                    msg_end = language( 32308 )
-                else:
-                    msg_end = language( 32309 )
-                msg = '%s %s' % (str( image_dl_count ), msg_end)
-                xbmcgui.Dialog().notification( language( 32205 ), msg, icon=addonicon )
-        else:
+        self._download_notification( 'end', image_dl_count=image_dl_count )
+        if not image_downloaded:
             lw.log( ['no new images downloaded'] )
         return image_downloaded
+
+
+    def _download_notification( self, type, image_dl_count=0 ):
+        if not self.DOWNLOADNOTIFICATION:
+            return
+        if type == 'begin':
+            xbmcgui.Dialog().notification( language( 32204 ), language( 32307 ), icon=addonicon )
+        elif type == 'end':
+            if image_dl_count == 1:
+                msg_end = language( 32309 )
+            else:
+                msg_end = language( 32308 )
+            msg = '%s %s' % (str( image_dl_count ), msg_end)
+            xbmcgui.Dialog().notification( language( 32205 ), msg, icon=addonicon )
 
 
     def _get_artistbio( self ):
@@ -681,7 +688,7 @@ class Main( object ):
                 break
             else:
                 num_trys = num_trys + 1
-                if self._playback_stopped_or_changed():
+                if self._playback_stopped_or_changed( wait_time=1 ):
                     break
         if not playing_item:
             playing_item = self._get_infolabel( self.SKININFO[item] )
@@ -1063,7 +1070,7 @@ class Main( object ):
                 cache_size = 0
                 first_folder = True
                 for folder in folders:
-                    if self._playback_stopped_or_changed():
+                    if self._playback_stopped_or_changed( wait_time=0.1 ):
                         break
                     cache_size = cache_size + self._get_folder_size( os.path.join ( cache_root, py2_encode( folder ) ) )
                     lw.log( ['looking at folder %s cache size is now %s' % (folder, cache_size)] )
@@ -1110,7 +1117,7 @@ class Main( object ):
         if self.INCLUDEALBUMFANART:
             self.IMAGESFOUND = self.IMAGESFOUND or self.SLIDESHOW.AddImage( xbmc.getInfoLabel( 'Player.Art(album.fanart)' ) )
         for artist, mbid in self.ARTISTS_INFO:
-            if self._playback_stopped_or_changed():
+            if self._playback_stopped_or_changed( wait_time=0.1 ):
                 return
             got_one_artist_images = False
             self.ARTISTNUM += 1
