@@ -93,7 +93,7 @@ class objectConfig( object ):
         if json_data:
             artist = json_data.get( 'artists' )
             if artist is not None:
-                for i in range( 1, 3 ):
+                for i in range( 1, 4 ):
                     if i == 1:
                         num = ''
                     else:
