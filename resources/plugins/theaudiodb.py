@@ -93,11 +93,11 @@ class objectConfig( object ):
         if json_data:
             artist = json_data.get( 'artists' )
             if artist is not None:
-                for i in range( 1, 4 ):
-                    if i == 1:
+                for count in range( 3 ):
+                    if count == 0:
                         num = ''
                     else:
-                        num = str( i )
+                        num = str( count + 1 )
                     image = artist[0].get( 'strArtistFanart' + num, '' )
                     if image:
                         images.append( image )
