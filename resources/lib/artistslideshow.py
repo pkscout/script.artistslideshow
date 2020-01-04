@@ -50,15 +50,10 @@ lw.log( ['script version %s started' % addonversion], xbmc.LOGNOTICE )
 lw.log( ['debug logging set to %s' % logdebug], xbmc.LOGNOTICE )
 
 # this section imports all the scraper plugins, initializes, and sorts them
-def _get_plugin_settings( service_name, module, description ):
+def _get_plugin_settings( service_name, module ):
     if module == 'local':
         return True, 0
-    active = getSettingBool( addon, service_name + module, default=False )
-    if active:
-        priority = getSettingInt( addon, service_name + 'priority_' + module, 10 )
-    else:
-        priority = 10
-    return active, priority
+    return getSettingBool( addon, service_name + module ), getSettingInt( addon, service_name + 'priority_' + module, default=10 )
 
 bio_plugins = {'names':[], 'objs':{}}
 image_plugins = {'names':[], 'objs':{}}
@@ -73,25 +68,25 @@ for module in resources.plugins.__all__:
     plugin = imp_plugin.objectConfig()
     scrapers = plugin.provides()
     if 'bio' in scrapers:
-        bio_active, bio_priority = _get_plugin_settings( 'ab_', module, 'artist bio' )
+        bio_active, bio_priority = _get_plugin_settings( 'ab_', module )
         if bio_active:
             bio_plugins['objs'][module] = plugin
             bio_plugins['names'].append( [bio_priority, module] )
             lw.log( ['added %s to bio plugins' % module] )
     if 'images' in scrapers:
-        img_active, img_priority = _get_plugin_settings( '', module, 'artist images' )
+        img_active, img_priority = _get_plugin_settings( '', module )
         if img_active:
             image_plugins['objs'][module] = plugin
             image_plugins['names'].append( [img_priority, module] )
             lw.log( ['added %s to image plugins' % module] )
     if 'albums' in scrapers:
-        ai_active, ai_priority = _get_plugin_settings( 'ai_', module, 'artist albums' )
+        ai_active, ai_priority = _get_plugin_settings( 'ai_', module )
         if ai_active:
             album_plugins['objs'][module] = plugin
             album_plugins['names'].append( [ai_priority, module] )
             lw.log( ['added %s to album info plugins' % module] )
     if 'similar' in scrapers:
-        sa_active, sa_priority = _get_plugin_settings( 'sa_', module, 'similar artists' )
+        sa_active, sa_priority = _get_plugin_settings( 'sa_', module )
         if sa_active:
             similar_plugins['objs'][module] = plugin
             similar_plugins['names'].append( [ai_priority, module] )
@@ -336,14 +331,18 @@ class Main( object ):
             self._slideshow_thread_start()
         if self._get_infolabel( 'ArtistSlideshow.ArtistBiography' ):
             self._set_property( 'ArtistSlideshow.ArtistBiography' )
-        if self._get_infolabel( 'ArtistSlideshow.1.SimilarName' ):
-            for count in range( 50 ):
+        similar_count = self._get_infolabel( 'ArtistSlideshow.SimilarCount' )
+        if similar_count:
+            for count in range( int( similar_count ) ):
                 self._set_property( 'ArtistSlideshow.%d.SimilarName' % (count + 1) )
                 self._set_property( 'ArtistSlideshow.%d.SimilarThumb' % (count + 1) )
-        if self._get_infolabel( 'ArtistSlideshow.1.AlbumName' ):
-            for count in range( 50 ):
+            self._set_property( 'ArtistSlideshow.SimilarCount' )
+        album_count = self._get_infolabel( 'ArtistSlideshow.AlbumCount' )
+        if album_count:
+            for count in range( int( album_count ) ):
                 self._set_property( 'ArtistSlideshow.%d.AlbumName' % (count + 1) )
                 self._set_property( 'ArtistSlideshow.%d.AlbumThumb' % (count + 1) )
+            self._set_property( 'ArtistSlideshow.AlbumCount' )
 
 
 
@@ -449,7 +448,7 @@ class Main( object ):
             pass
         for plugin_name in bio_plugins['names']:
             lw.log( ['checking %s for bio' % plugin_name[1]] )
-            bio_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated', default=False )
+            bio_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated' )
             bio, loglines = bio_plugins['objs'][plugin_name[1]].getBio( bio_params )
             lw.log( loglines )
             if bio:
@@ -474,7 +473,7 @@ class Main( object ):
             pass
         for plugin_name in album_plugins['names']:
             lw.log( ['checking %s for album info' % plugin_name[1]] )
-            album_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated', default=False )
+            album_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated' )
             albums, loglines = album_plugins['objs'][plugin_name[1]].getAlbumList( album_params )
             lw.log( loglines )
             if not albums == []:
@@ -645,9 +644,9 @@ class Main( object ):
         for plugin_name in image_plugins['names']:
             image_list = []
             lw.log( ['checking %s for images' % plugin_name[1]] )
-            image_params['getall'] = getSettingBool( addon, plugin_name[1] + '_all', default=False )
-            image_params['clientapikey'] = getSettingString( addon, plugin_name[1] + '_clientapikey', '' )
-            image_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated', default=False )
+            image_params['getall'] = getSettingBool( addon, plugin_name[1] + '_all' )
+            image_params['clientapikey'] = getSettingString( addon, plugin_name[1] + '_clientapikey' )
+            image_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated' )
             image_list, loglines = image_plugins['objs'][plugin_name[1]].getImageList( image_params )
             lw.log( loglines )
             images.extend( image_list )
@@ -726,16 +725,16 @@ class Main( object ):
         self.USEOVERRIDE = getSettingBool( addon, 'slideshow' )
         self.OVERRIDEPATH = getSettingString( addon, 'slideshow_path' )
         self.INCLUDEARTISTFANART = getSettingBool( addon, 'include_artistfanart', default=True )
-        self.INCLUDEALBUMFANART = getSettingBool( addon, 'include_albumfanart', default=False )
+        self.INCLUDEALBUMFANART = getSettingBool( addon, 'include_albumfanart' )
         self.DISABLEMULTIARTIST = getSettingBool( addon, 'disable_multiartist' )
-        self.MAXCACHESIZE = int( getSettingString( addon, 'max_cache_size', default='1024' ) ) * 1000000
+        self.MAXCACHESIZE = getSettingInt( addon, 'max_cache_size', default=1024 ) * 1000000
         self.SLIDEDELAY = getSettingInt( addon, 'slide_delay', default=10 )
         self.FADETOBLACK = getSettingBool( addon, 'fadetoblack', default=True )
-        self.DOWNLOADNOTIFICATION = getSettingBool( addon, 'download_notification', default=False )
-        self.DNONLYONDOWNLOAD = getSettingBool( addon, 'dn_download_only', default=False )
+        self.DOWNLOADNOTIFICATION = getSettingBool( addon, 'download_notification' )
+        self.DNONLYONDOWNLOAD = getSettingBool( addon, 'dn_download_only' )
         self.MAINSLEEP = getSettingInt( addon, 'main_sleep', default=1 )
         self.MAINIDLESLEEP = getSettingInt( addon, 'main_idle_sleep', default=10 )
-        artist_image_storage = getSettingInt( addon, 'artist_image_storage', default=0 )
+        artist_image_storage = getSettingInt( addon, 'artist_image_storage' )
         if artist_image_storage == 1:
             self.KODILOCALSTORAGE = True
             self.LOCALARTISTSTORAGE = False
@@ -786,7 +785,7 @@ class Main( object ):
         else:
             self.ENDREPLACE = '.'
             self.ILLEGALCHARS = [os.path.sep]
-        self.ILLEGALREPLACE = getSettingString( addon, 'illegal_replace', '' )
+        self.ILLEGALREPLACE = getSettingString( addon, 'illegal_replace' )
 
 
     def _init_vars( self ):
