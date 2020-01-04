@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.1~beta13">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.1~beta14">
 	<requires>
 		<import addon="xbmc.python" version="2.26.0" />
 		<import addon="xbmc.addon" version="17.9.0" />
@@ -12,6 +12,9 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
+v.3.0.1~beta14
+- fix for non-images getting added to image list and showing a black screen
+
 v.3.0.1~beta13
 - changed download notification to show even if no images are downloaded
 - fix for theaudiodb.com plugin not downloading all three images for an artist
