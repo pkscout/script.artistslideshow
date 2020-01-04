@@ -1,3 +1,6 @@
+v.3.0.1~beta16
+- fixes to eliminate Setting Type Error in Kodi logs
+
 v.3.0.1~beta15
 - In daemon mode you can now change AS settings without having to restart Kodi
 - fix for runaway loop if there is only one image in an artist's slideshow
