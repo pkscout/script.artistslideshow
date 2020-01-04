@@ -215,7 +215,6 @@ class Slideshow( threading.Thread ):
                     self._set_property( 'ArtistSlideshow.Image', image )
                     lw.log( ['ArtistSlideshow.Image set to ' + image] )
                     self._wait( wait_time=self.DELAY, sleep_time=self.SLIDESHOWSLEEP )
-                    last_image = image
                 if self._check_for_quit():
                     break
         lw.log( ['slideshow thread stopping'] )
@@ -278,14 +277,20 @@ class Main( object ):
                     self._trim_cache()
                 else:
                     self._set_property( 'ArtistSlideshowRunning' )
+            sleeping = False
             while not xbmc.Monitor().abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
                 if xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
                     if self._playback_stopped_or_changed( wait_time=self.MAINSLEEP ):
+                        if sleeping:
+                            self._get_settings()
+                            sleeping = False
                         self._clear_properties( fadetoblack=self.FADETOBLACK )
                         self._use_correct_artwork()
                         self._trim_cache()
                 elif self.DAEMON:
-                    self._clear_properties( clearartists=True )
+                    if not sleeping:
+                        self._clear_properties( clearartists=True )
+                        sleeping = True
                     if self._waitForAbort( wait_time=self.MAINIDLESLEEP ):
                         break
                 elif not self.DAEMON:
