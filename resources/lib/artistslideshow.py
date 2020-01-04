@@ -167,17 +167,22 @@ class Slideshow( threading.Thread ):
         self.IMAGESCLEARED = False
         self.SHOW = True
         self.SLIDESHOWSLEEP = getSettingInt( addon, 'slideshow_sleep', default=1 )
+        self.VALIDIMAGETYPES = tuple( xbmc.getSupportedMedia( 'picture' ).split( '|' )[:-2] )
         lw.log( ['slideshow thread started'] )
 
 
     def AddImage( self, path ):
-        if path:
+        if not path:
+            lw.log( ['Image path was empty, nothing added'] )
+            return False
+        if path.endswith( self.VALIDIMAGETYPES ):
             self.IMAGES.append( path )
             lw.log( ['Added to image display group: ' + path] )
             self.IMAGEADDED = True
             return True
         else:
-            lw.log( ['Image path was empty, nothing added'] )
+            lw.log( ['Image was not a valid Kodi image type, nothing added: ' + path] )
+            lw.log( ['Valid Kodi image types are:', self.VALIDIMAGETYPES] )
             return False
 
 
