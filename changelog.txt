@@ -1,3 +1,7 @@
+v.3.0.1~beta15
+- In daemon mode you can now change AS settings without having to restart Kodi
+- fix for runaway loop if there is only one image in an artist's slideshow
+
 v.3.0.1~beta14
 - fix for non-images getting added to image list and showing a black screen
 

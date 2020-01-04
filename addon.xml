@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.1~beta14">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.0.1~beta15">
 	<requires>
 		<import addon="xbmc.python" version="2.26.0" />
 		<import addon="xbmc.addon" version="17.9.0" />
@@ -12,6 +12,10 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
+v.3.0.1~beta15
+- In daemon mode you can now change AS settings without having to restart Kodi
+- fix for runaway loop if there is only one image in an artist's slideshow
+
 v.3.0.1~beta14
 - fix for non-images getting added to image list and showing a black screen
 
