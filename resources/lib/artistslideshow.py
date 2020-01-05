@@ -533,14 +533,11 @@ class Main( object ):
         mbids = _json.loads( response ).get( 'result', {} ).get( 'item', {} ).get( 'musicbrainzartistid', [] )
         if not artist_names:
             lw.log( ['No artist names returned from JSON call, assuming this is an internet stream'] )
-            try:
-                playingartist = playing_song[0:(playing_song.find('-'))-1]
-            except RuntimeError:
-                playingartist = ''
-            except Exception as e:
-                lw.log( ['unexpected error gettting playing song back from Kodi', e] )
-                playingartist = ''
-            artist_names = self._split_artists( playingartist )
+            playingartists = playing_song.split( ' - ', 1 )
+            if not self.AGRESSIVESTREAMSEARCH and len( playingartists ) > 1:
+                del playingartists[1:]                
+            for playingartist in playingartists:
+                artist_names.extend( self._split_artists( playingartist ) )
         return artist_names, mbids
 
 
@@ -734,6 +731,7 @@ class Main( object ):
         self.DNONLYONDOWNLOAD = getSettingBool( addon, 'dn_download_only' )
         self.MAINSLEEP = getSettingInt( addon, 'main_sleep', default=1 )
         self.MAINIDLESLEEP = getSettingInt( addon, 'main_idle_sleep', default=10 )
+        self.AGRESSIVESTREAMSEARCH = getSettingBool( addon, 'agressive_stream_search' )
         artist_image_storage = getSettingInt( addon, 'artist_image_storage' )
         if artist_image_storage == 1:
             self.KODILOCALSTORAGE = True

@@ -222,8 +222,11 @@ msgctxt "#32143"
 msgid "- Only show notification if there are images to download"
 msgstr ""
 
+msgctxt "#32144"
+msgid "Use more agressive artist search for streams"
+msgstr ""
 
-# empty strings from id 32144 to 32199
+# empty strings from id 32145 to 32199
 
 # Dialog headings
 
