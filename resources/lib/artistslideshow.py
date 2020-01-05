@@ -298,7 +298,7 @@ class Main( object ):
 
     def _clean_dir( self, dir_path ):
         try:
-            dirs, old_files = xbmcvfs.listdir( dir_path )
+            thedirs, old_files = xbmcvfs.listdir( dir_path )
         except Exception as e:
             lw.log( ['unexpected error while getting directory list', e] )
             return
@@ -1152,10 +1152,15 @@ class Main( object ):
                 self.IMAGESFOUND = True
                 got_one_artist_images = True
             if not self._download() and not got_one_artist_images:
-                self._delete_folder( os.path.join( self.INFODIR ) )
-                self._delete_folder( os.path.join( self.CACHEDIR ) )
-                self._delete_folder( os.path.abspath( os.path.join( self.INFODIR, os.pardir ) ) )
-                self._delete_folder( os.path.abspath( os.path.join( self.CACHEDIR, os.pardir ) ) )
+                self._clean_dir( self.CACHEDIR )
+                self._delete_folder( self.CACHEDIR )
+                self._clean_dir( self.INFODIR )
+                self._delete_folder( self.INFODIR )
+                if self.FANARTFOLDER:
+                    self._delete_folder( os.path.abspath( os.path.join( self.CACHEDIR, os.pardir ) ) )
+                elif self.LOCALINFOSTORAGE:
+                    self._delete_folder( os.path.abspath( os.path.join( self.INFODIR, os.pardir ) ) )
+                
         if not self.IMAGESFOUND:
             lw.log( ['no images found for any currently playing artists'] )
             if self.USEFALLBACK:
