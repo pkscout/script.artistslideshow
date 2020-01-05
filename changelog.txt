@@ -4,6 +4,7 @@ v.3.1.0
 - updated service plugins to use https for API calls
 - added options to change sleep time for main and slideshow threads
 - set slideshow thread to close if no music playing
+- added option to search stream titles more aggressively for an artist name
 - fix for crash if artist image name has an extended character in it
 - fix for crash when trying to get last fanart number from Kodi Artist Information Folder
 - fix for artist images not changing when using a radio stream
@@ -15,6 +16,7 @@ v.3.1.0
 - fix for runaway loop if there is only one image in an artist's slideshow
 - fix for AS taking too long to quit on Kodi exit when in daemon mode
 - fix for Setting Type Error in Kodi logs
+- changed logic for deleting folders when no artist images are found
 - changed entry point default.py to be less complex
 - moved common libraries to lib folder
 - moved update image slideshow to images folder
