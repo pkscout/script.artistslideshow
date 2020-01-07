@@ -238,7 +238,9 @@ class Slideshow( threading.Thread ):
     def _wait( self, wait_time=1, sleep_time=1 ):
         waited = 0
         while waited < wait_time:
-            xbmc.sleep( sleep_time*1000 )
+            if self.MONITOR.waitForAbort( sleep_time ):
+                self.SHOW = False
+                return
             waited = waited + sleep_time
             if self._check_for_quit():
                 return
