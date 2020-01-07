@@ -535,7 +535,7 @@ class Main( object ):
             lw.log( ['No artist names returned from JSON call, assuming this is an internet stream'] )
             playingartists = playing_song.split( ' - ', 1 )
             if not self.AGRESSIVESTREAMSEARCH and len( playingartists ) > 1:
-                del playingartists[1:]                
+                del playingartists[1:]
             for playingartist in playingartists:
                 artist_names.extend( self._split_artists( playingartist ) )
         return artist_names, mbids
@@ -1158,7 +1158,7 @@ class Main( object ):
                     self._delete_folder( os.path.abspath( os.path.join( self.CACHEDIR, os.pardir ) ) )
                 elif self.LOCALINFOSTORAGE:
                     self._delete_folder( os.path.abspath( os.path.join( self.INFODIR, os.pardir ) ) )
-                
+
         if not self.IMAGESFOUND:
             lw.log( ['no images found for any currently playing artists'] )
             if self.USEFALLBACK:
