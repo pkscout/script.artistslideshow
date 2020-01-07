@@ -153,6 +153,7 @@ class Slideshow( threading.Thread ):
 
     def __init__( self, workqueue, queuelock, window, delay ):
         super( Slideshow , self).__init__()
+        self.MONITOR = xbmc.Monitor()
         self.WORKQUEUE = workqueue
         self.QUEUELOCK= queuelock
         self.WINDOW = window
@@ -260,22 +261,22 @@ class Main( object ):
             if self._run_from_settings():
                 return
             self._set_property( 'ArtistSlideshowRunning', 'True' )
-            if not xbmc.Player().isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
+            if not self.PLAYER.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
                 lw.log( ['no music playing'] )
                 if not self.DAEMON:
                     self._set_property( 'ArtistSlideshowRunning' )
                     self._set_property( 'ArtistSlideshow.Image' )
             else:
                 lw.log( ['first song started'] )
-                if not xbmc.Monitor().waitForAbort( 1 ): # it may take some time for Kodi to read the tag info after playback started
+                if not self.MONITOR.waitForAbort( 1 ): # it may take some time for Kodi to read the tag info after playback started
                     self._slideshow_thread_start()
                     self._use_correct_artwork()
                     self._trim_cache()
                 else:
                     self._set_property( 'ArtistSlideshowRunning' )
             sleeping = False
-            while not xbmc.Monitor().abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
-                if xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
+            while not self.MONITOR.abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
+                if self.PLAYER.isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
                     if self._playback_stopped_or_changed( wait_time=self.MAINSLEEP ):
                         if sleeping:
                             self._get_settings()
@@ -327,7 +328,7 @@ class Main( object ):
         if self._get_infolabel( 'ArtistSlideshow.Image' ):
             self.SLIDESHOW.ClearImages( fadetoblack=fadetoblack )
         self._slideshow_thread_stop()
-        if xbmc.Player().isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
+        if self.PLAYER.isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
             self._slideshow_thread_start()
         if self._get_infolabel( 'ArtistSlideshow.ArtistBiography' ):
             self._set_property( 'ArtistSlideshow.ArtistBiography' )
@@ -520,7 +521,7 @@ class Main( object ):
         current_artists = []
         self._get_current_artists_info()
         for artist_info in self.ARTISTS_INFO:
-            if xbmc.Monitor().abortRequested():
+            if self.MONITOR.abortRequested():
                 return []
             current_artists.append( artist_info[0] )
         return current_artists
@@ -562,10 +563,10 @@ class Main( object ):
         featured_artists = ''
         artist_names = []
         mbids = []
-        if xbmc.Player().isPlayingAudio():
+        if self.PLAYER.isPlayingAudio():
             try:
-                playing_file = xbmc.Player().getPlayingFile()
-                playing_song = xbmc.Player().getMusicInfoTag().getTitle()
+                playing_file = self.PLAYER.getPlayingFile()
+                playing_song = self.PLAYER.getMusicInfoTag().getTitle()
             except RuntimeError:
                 lw.log( ['RuntimeError getting playing file/song back from Kodi'] )
                 self.ARTISTS_INFO = []
@@ -690,9 +691,9 @@ class Main( object ):
         while not got_item:
             try:
                 if item == 'album':
-                    playing_item = xbmc.Player().getMusicInfoTag().getAlbum()
+                    playing_item = self.PLAYER.getMusicInfoTag().getAlbum()
                 elif item == 'title':
-                    playing_item = xbmc.Player().getMusicInfoTag().getTitle()
+                    playing_item = self.PLAYER.getMusicInfoTag().getTitle()
                 got_item = True
             except RuntimeError:
                 got_item = False
@@ -787,6 +788,8 @@ class Main( object ):
 
 
     def _init_vars( self ):
+        self.MONITOR = xbmc.Monitor()
+        self.PLAYER = xbmc.Player()
         self.FANARTNUMBER = False
         self.CACHEDIR = ''
         self.ARTISTS_INFO = []
@@ -940,7 +943,7 @@ class Main( object ):
     def _playback_stopped_or_changed( self, wait_time=1 ):
         if self._waitForAbort( wait_time=wait_time ):
             return True
-        if not xbmc.Player().isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
+        if not self.PLAYER.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
             return True
         current_artists = self._get_infolabel( self.EXTERNALCALL )
         if current_artists:
@@ -1233,7 +1236,8 @@ class Main( object ):
 
 
     def _waitForAbort( self, wait_time=1 ):
-        if xbmc.Monitor().waitForAbort( wait_time ):
+        if self.MONITOR.waitForAbort( wait_time ):
+            lw.log( ['saw an abort request in the main thread'] )
             self._set_property( 'ArtistSlideshowRunning' )
             return True
         else:
