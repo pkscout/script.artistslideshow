@@ -18,10 +18,6 @@ try:
     from itertools import izip_longest as _zip_longest
 except ImportError:
     from itertools import zip_longest as _zip_longest
-try:
-    from queue import Queue
-except ImportError:
-    from Queue import Queue
 import os, random, re, sys, threading, time
 import json as _json
 from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcvfs
