@@ -280,17 +280,18 @@ class Main( xbmc.Player ):
             if not self.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
                 lw.log( ['no music playing'] )
                 if self.DAEMON:
+                    self._set_property( 'ArtistSlideshowRunning', 'True' )
                     self.Run()
             else:
                 lw.log( ['first song started'] )
                 if not self.MONITOR.waitForAbort( 1 ): # it may take some time for Kodi to read the tag info after playback started
+                    self._set_property( 'ArtistSlideshowRunning', 'True' )
                     self._use_correct_artwork()
                     self._trim_cache()
                     self.Run( change_override_slideshow=False )
 
 
     def Run( self, change_override_slideshow=True ):
-        self._set_property( 'ArtistSlideshowRunning', 'True' )
         sleeping = False
         while not self.MONITOR.abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
             if self.isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
