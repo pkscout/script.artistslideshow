@@ -192,10 +192,12 @@ class Slideshow( threading.Thread ):
 
 
     def PauseSlideshow( self ):
+        lw.log( ['pausing slideshow'] )
         self.PAUSESLIDESHOW = True
 
 
     def ResumeSlideshow( self ):
+        lw.log( ['resuming slideshow'] )
         self.PAUSESLIDESHOW = False
 
 
@@ -249,11 +251,13 @@ class Slideshow( threading.Thread ):
 class Main( xbmc.Player ):
 
     def onPlayBackPaused( self ):
+        lw.log( ['got a PlaybackPaused event'] )
         if self.PAUSESLIDESHOW:
             self.SLIDESHOW.PauseSlideshow()
 
 
     def onPlayBackResumed( self ):
+        lw.log( ['got a PlaybackResumed event'] )
         if self.PAUSESLIDESHOW:
             self.SLIDESHOW.ResumeSlideshow()
 
