@@ -151,11 +151,9 @@ LANGUAGES = (
 
 class Slideshow( threading.Thread ):
 
-    def __init__( self, workqueue, queuelock, window, delay ):
+    def __init__( self, window, delay ):
         super( Slideshow , self).__init__()
         self.MONITOR = xbmc.Monitor()
-        self.WORKQUEUE = workqueue
-        self.QUEUELOCK= queuelock
         self.WINDOW = window
         self.DELAY = delay
         self.IMAGES = []
@@ -201,12 +199,14 @@ class Slideshow( threading.Thread ):
         self.PAUSESLIDESHOW = False
 
 
+    def StopSlideshow( self ):
+        self.SHOW = False
+
+
     def run( self ):
         last_image = ''
         while self.SHOW:
             outofimages = True
-            if self._check_for_quit():
-                break
             if self.IMAGEADDED or self.IMAGESCLEARED or outofimages:
                 random.shuffle( self.IMAGES )
                 self.IMAGEADDED = False
@@ -221,19 +221,9 @@ class Slideshow( threading.Thread ):
                         self._set_property( 'ArtistSlideshow.Image', image )
                         last_image = image
                     self._wait( wait_time=self.DELAY, sleep_time=self.SLIDESHOWSLEEP )
-                if self._check_for_quit():
+                if not self.SHOW:
                     break
         lw.log( ['slideshow thread stopping'] )
-
-
-    def _check_for_quit( self ):
-        cmd = ''
-        with self.QUEUELOCK:
-            if not self.WORKQUEUE.empty():
-                cmd = self.WORKQUEUE.get()
-            if cmd == 'quit':
-                self.SHOW = False
-        return not self.SHOW
 
 
     def _set_property( self, property_name, value='' ):
@@ -251,7 +241,7 @@ class Slideshow( threading.Thread ):
                 self.SHOW = False
                 return
             waited = waited + sleep_time
-            if self._check_for_quit():
+            if not self.SHOW:
                 return
 
 
@@ -842,8 +832,6 @@ class Main( xbmc.Player ):
         self.LASTARTISTREFRESH = 0
         self.LASTCACHETRIM = 0
         self.PARAMS = {}
-        self.SLIDESHOWLOCK = threading.Lock()
-        self.SLIDESHOWCMD = Queue()
 
 
     def _init_window( self ):
@@ -1134,20 +1122,14 @@ class Main( xbmc.Player ):
 
 
     def _slideshow_thread_start( self ):
-        self.SLIDESHOW = Slideshow( self.SLIDESHOWCMD, self.SLIDESHOWLOCK, self.WINDOW, self.SLIDEDELAY )
+        self.SLIDESHOW = Slideshow( self.WINDOW, self.SLIDEDELAY )
         self.SLIDESHOW.setDaemon(True)
         self.SLIDESHOW.start()
 
 
     def _slideshow_thread_stop( self ):
-        try:
-            alive = self.SLIDESHOW.is_alive()
-        except AttributeError:
-            alive = False
-        if alive:
-            with self.SLIDESHOWLOCK:
-                self.SLIDESHOWCMD.put( 'quit' )
-            self.SLIDESHOW.join()
+        self.SLIDESHOW.StopSlideshow()
+        self.SLIDESHOW.join()
 
 
     def _use_correct_artwork( self ):
