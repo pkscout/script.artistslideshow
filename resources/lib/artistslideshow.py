@@ -272,46 +272,45 @@ class Main( xbmc.Player ):
             self._upgrade()
             if self._run_from_settings():
                 return
-            self._set_property( 'ArtistSlideshowRunning', 'True' )
+            self._slideshow_thread_start()
             if not self.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
                 lw.log( ['no music playing'] )
-                change_override_slideshow = True
-                if not self.DAEMON:
-                    self._set_property( 'ArtistSlideshowRunning' )
-                    self._set_property( 'ArtistSlideshow.Image' )
+                if self.DAEMON:
+                    self.Run()
             else:
                 lw.log( ['first song started'] )
                 if not self.MONITOR.waitForAbort( 1 ): # it may take some time for Kodi to read the tag info after playback started
-                    self._slideshow_thread_start()
                     self._use_correct_artwork()
                     self._trim_cache()
-                    change_override_slideshow = False
-                else:
-                    self._set_property( 'ArtistSlideshowRunning' )
-            sleeping = False
-            while not self.MONITOR.abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
-                if self.isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
-                    if self._playback_stopped_or_changed( wait_time=self.MAINSLEEP ):
-                        if sleeping:
-                            self._get_settings()
-                            sleeping = False
-                        if (self.USEOVERRIDE and change_override_slideshow) or not self.USEOVERRIDE:
-                            self._clear_properties( fadetoblack=self.FADETOBLACK )
-                            self._use_correct_artwork()
-                            self._trim_cache()
-                            change_override_slideshow = False
-                elif self.DAEMON:
-                    if not sleeping:
-                        self._clear_properties( clearartists=True )
-                        sleeping = True
-                        change_override_slideshow = True
-                    if self._waitForAbort( wait_time=self.MAINIDLESLEEP ):
-                        break
-                elif not self.DAEMON:
+                    self.Run( change_override_slideshow=False )
+
+
+    def Run( self, change_override_slideshow=True ):
+        self._set_property( 'ArtistSlideshowRunning', 'True' )
+        sleeping = False
+        while not self.MONITOR.abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
+            if self.isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
+                if self._playback_stopped_or_changed( wait_time=self.MAINSLEEP ):
+                    if sleeping:
+                        self._get_settings()
+                        sleeping = False
+                    if (self.USEOVERRIDE and change_override_slideshow) or not self.USEOVERRIDE:
+                        self._clear_properties( fadetoblack=self.FADETOBLACK )
+                        self._use_correct_artwork()
+                        self._trim_cache()
+                        change_override_slideshow = False
+            elif self.DAEMON:
+                if not sleeping:
+                    self._clear_properties( clearartists=True )
+                    sleeping = True
+                    change_override_slideshow = True
+                if self._waitForAbort( wait_time=self.MAINIDLESLEEP ):
                     break
-            self._clear_properties()
-            self._set_property( 'ArtistSlideshowRunning' )
-            self._set_property( 'ArtistSlideshow.CleanupComplete', 'True' )
+            elif not self.DAEMON:
+                break
+        self._clear_properties()
+        self._set_property( 'ArtistSlideshowRunning' )
+        self._set_property( 'ArtistSlideshow.CleanupComplete', 'True' )
 
 
     def _clean_dir( self, dir_path ):
