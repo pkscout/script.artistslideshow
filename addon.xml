@@ -15,6 +15,7 @@
 v.3.2.0~beta1
 - added option to pause slideshow when playback pauses
 - override slideshow no longer resets at each song change
+- internal change to the way the main thread talks to the slideshow thread
 		</news>
 		<assets>
         	<icon>icon.png</icon>
