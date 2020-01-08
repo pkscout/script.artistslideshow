@@ -258,6 +258,10 @@ class Main( xbmc.Player ):
             self.SLIDESHOW.ResumeSlideshow()
 
 
+    def onAVChange( self ):
+        lw.log( ['got an AVChange event'] )
+
+
     def __init__( self ):
         xbmc.Player.__init__(self)
         self._parse_argv()
