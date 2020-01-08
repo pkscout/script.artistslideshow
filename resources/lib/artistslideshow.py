@@ -162,6 +162,7 @@ class Slideshow( threading.Thread ):
         self.IMAGEADDED = False
         self.IMAGESCLEARED = False
         self.SHOW = True
+        self.PAUSESLIDESHOW = False
         self.SLIDESHOWSLEEP = getSettingInt( addon, 'slideshow_sleep', default=1 )
         self.VALIDIMAGETYPES = tuple( xbmc.getSupportedMedia( 'picture' ).split( '|' )[:-2] )
         lw.log( ['slideshow thread started'] )
@@ -192,6 +193,14 @@ class Slideshow( threading.Thread ):
         self.IMAGESCLEARED = True
 
 
+    def PauseSlideshow( self ):
+        self.PAUSESLIDESHOW = True
+
+
+    def ResumeSlideshow( self ):
+        self.PAUSESLIDESHOW = False
+
+
     def run( self ):
         last_image = ''
         while self.SHOW:
@@ -208,7 +217,7 @@ class Slideshow( threading.Thread ):
                     lw.log( ['image list changed, resetting loop'] )
                     break
                 if not image == last_image or len( self.IMAGES ) == 1:
-                    if not image == last_image:
+                    if not image == last_image and not self.PAUSESLIDESHOW:
                         self._set_property( 'ArtistSlideshow.Image', image )
                         last_image = image
                     self._wait( wait_time=self.DELAY, sleep_time=self.SLIDESHOWSLEEP )
@@ -247,9 +256,20 @@ class Slideshow( threading.Thread ):
 
 
 
-class Main( object ):
+class Main( xbmc.Player ):
+
+    def onPlayBackPaused( self ):
+        if self.PAUSESLIDESHOW:
+            self.SLIDESHOW.PauseSlideshow()
+
+
+    def onPlayBackResumed( self ):
+        if self.PAUSESLIDESHOW:
+            self.SLIDESHOW.ResumeSlideshow()
+
 
     def __init__( self ):
+        xbmc.Player.__init__(self)
         self._parse_argv()
         self._init_window()
         if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True' and not self.RUNFROMSETTINGS:
@@ -263,7 +283,7 @@ class Main( object ):
             if self._run_from_settings():
                 return
             self._set_property( 'ArtistSlideshowRunning', 'True' )
-            if not self.PLAYER.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
+            if not self.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
                 lw.log( ['no music playing'] )
                 change_override_slideshow = True
                 if not self.DAEMON:
@@ -280,7 +300,7 @@ class Main( object ):
                     self._set_property( 'ArtistSlideshowRunning' )
             sleeping = False
             while not self.MONITOR.abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
-                if self.PLAYER.isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
+                if self.isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
                     if self._playback_stopped_or_changed( wait_time=self.MAINSLEEP ):
                         if sleeping:
                             self._get_settings()
@@ -335,7 +355,7 @@ class Main( object ):
         if self._get_infolabel( 'ArtistSlideshow.Image' ):
             self.SLIDESHOW.ClearImages( fadetoblack=fadetoblack )
         self._slideshow_thread_stop()
-        if self.PLAYER.isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
+        if self.isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
             self._slideshow_thread_start()
         if self._get_infolabel( 'ArtistSlideshow.ArtistBiography' ):
             self._set_property( 'ArtistSlideshow.ArtistBiography' )
@@ -570,10 +590,10 @@ class Main( object ):
         featured_artists = ''
         artist_names = []
         mbids = []
-        if self.PLAYER.isPlayingAudio():
+        if self.isPlayingAudio():
             try:
-                playing_file = self.PLAYER.getPlayingFile()
-                playing_song = self.PLAYER.getMusicInfoTag().getTitle()
+                playing_file = self.getPlayingFile()
+                playing_song = self.getMusicInfoTag().getTitle()
             except RuntimeError:
                 lw.log( ['RuntimeError getting playing file/song back from Kodi'] )
                 self.ARTISTS_INFO = []
@@ -698,9 +718,9 @@ class Main( object ):
         while not got_item:
             try:
                 if item == 'album':
-                    playing_item = self.PLAYER.getMusicInfoTag().getAlbum()
+                    playing_item = self.getMusicInfoTag().getAlbum()
                 elif item == 'title':
-                    playing_item = self.PLAYER.getMusicInfoTag().getTitle()
+                    playing_item = self.getMusicInfoTag().getTitle()
                 got_item = True
             except RuntimeError:
                 got_item = False
@@ -725,6 +745,7 @@ class Main( object ):
                 self.LANGUAGE = language[1]
                 lw.log( ['language = %s' % self.LANGUAGE] )
                 break
+        self.PAUSESLIDESHOW = getSettingBool( addon, 'pause_slideshow' )
         self.USEFALLBACK = getSettingBool( addon, 'fallback' )
         self.FALLBACKPATH = getSettingString( addon, 'fallback_path' )
         self.USEOVERRIDE = getSettingBool( addon, 'slideshow' )
@@ -796,7 +817,6 @@ class Main( object ):
 
     def _init_vars( self ):
         self.MONITOR = xbmc.Monitor()
-        self.PLAYER = xbmc.Player()
         self.FANARTNUMBER = False
         self.CACHEDIR = ''
         self.ARTISTS_INFO = []
@@ -950,7 +970,7 @@ class Main( object ):
     def _playback_stopped_or_changed( self, wait_time=1 ):
         if self._waitForAbort( wait_time=wait_time ):
             return True
-        if not self.PLAYER.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
+        if not self.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
             return True
         current_artists = self._get_infolabel( self.EXTERNALCALL )
         if current_artists:
