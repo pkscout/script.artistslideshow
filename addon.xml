@@ -12,7 +12,8 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
-v.3.1.1~beta1
+v.3.2.0~beta1
+- added option to pause slideshow when playback pauses
 - override slideshow no longer resets at each song change
 		</news>
 		<assets>
