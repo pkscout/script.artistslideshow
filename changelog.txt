@@ -1,3 +1,6 @@
+v.3.1.1~beta1
+- override slideshow no longer resets at each song change
+
 v.3.1.0
 - In daemon mode you can now change AS settings without having to restart Kodi
 - added back option to show notifications when downloading new images
