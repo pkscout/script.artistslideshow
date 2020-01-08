@@ -265,6 +265,7 @@ class Main( object ):
             self._set_property( 'ArtistSlideshowRunning', 'True' )
             if not self.PLAYER.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
                 lw.log( ['no music playing'] )
+                change_override_slideshow = True
                 if not self.DAEMON:
                     self._set_property( 'ArtistSlideshowRunning' )
                     self._set_property( 'ArtistSlideshow.Image' )
@@ -274,6 +275,7 @@ class Main( object ):
                     self._slideshow_thread_start()
                     self._use_correct_artwork()
                     self._trim_cache()
+                    change_override_slideshow = False
                 else:
                     self._set_property( 'ArtistSlideshowRunning' )
             sleeping = False
@@ -283,13 +285,16 @@ class Main( object ):
                         if sleeping:
                             self._get_settings()
                             sleeping = False
-                        self._clear_properties( fadetoblack=self.FADETOBLACK )
-                        self._use_correct_artwork()
-                        self._trim_cache()
+                        if (self.USEOVERRIDE and change_override_slideshow) or not self.USEOVERRIDE:
+                            self._clear_properties( fadetoblack=self.FADETOBLACK )
+                            self._use_correct_artwork()
+                            self._trim_cache()
+                            change_override_slideshow = False
                 elif self.DAEMON:
                     if not sleeping:
                         self._clear_properties( clearartists=True )
                         sleeping = True
+                        change_override_slideshow = True
                     if self._waitForAbort( wait_time=self.MAINIDLESLEEP ):
                         break
                 elif not self.DAEMON:
