@@ -19,6 +19,7 @@ try:
 except ImportError:
     from itertools import zip_longest as _zip_longest
 import os, random, re, sys, threading, time
+from resources.plugins import *
 import json as _json
 from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 from kodi_six.utils import py2_encode, py2_decode
@@ -26,10 +27,6 @@ from resources.lib.fileops import checkPath, writeFile, readFile, deleteFile, de
 from resources.lib.url import URL
 from resources.lib.xlogger import Logger
 from resources.lib.kodisettings import getSettingBool, getSettingInt, getSettingString
-import resources.plugins
-for module in resources.plugins.__all__:
-    full_plugin = 'resources.plugins.' + module
-    __import__( full_plugin )
 
 addon        = xbmcaddon.Addon()
 addonname    = addon.getAddonInfo('id')
@@ -733,7 +730,7 @@ class Main( xbmc.Player ):
         self.ALBUMPLUGINS = {'names':[], 'objs':{}}
         self.SIMILARPLUGINS = {'names':[], 'objs':{}}
         self.MBIDPLUGINS = {'names':[], 'objs':{}}
-        for module in resources.plugins.__all__:
+        for module in ['local', 'fanarttv', 'kodi', 'theaudiodb', 'lastfm']:
             full_plugin = 'resources.plugins.' + module
             imp_plugin = sys.modules[ full_plugin ]
             plugin = imp_plugin.objectConfig()
