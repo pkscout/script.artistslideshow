@@ -274,41 +274,41 @@ class Main( xbmc.Player ):
             self._init_vars()
             self._make_dirs()
             self._upgrade()
-            if self._run_from_settings():
-                return
-            self._slideshow_thread_start()
             if not self.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
                 lw.log( ['no music playing'] )
                 if self.DAEMON:
                     self._set_property( 'ArtistSlideshowRunning', 'True' )
-                    self.Run()
             else:
-                lw.log( ['first song started'] )
-                if not self.MONITOR.waitForAbort( 1 ): # it may take some time for Kodi to read the tag info after playback started
-                    self._set_property( 'ArtistSlideshowRunning', 'True' )
+                lw.log( ['music playing'] )
+                self._set_property( 'ArtistSlideshowRunning', 'True' )
+
+
+    def run( self ):
+        if self._run_from_settings():
+            return
+        sleeping = False
+        change_slideshow = True
+        while not self.MONITOR.abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
+            if self.MONITOR.waitForAbort( 1 ):
+                break
+            if self.isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
+                if sleeping:
+                    self._get_settings()
+                    sleeping = False
+                if change_slideshow:
+                    self._clear_properties( fadetoblack=self.FADETOBLACK )
                     self._use_correct_artwork()
                     self._trim_cache()
-                    self.Run( change_override_slideshow=False )
-
-
-    def Run( self, change_override_slideshow=True ):
-        sleeping = False
-        while not self.MONITOR.abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
-            if self.isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
-                if self._playback_stopped_or_changed( wait_time=self.MAINSLEEP ):
-                    if sleeping:
-                        self._get_settings()
-                        sleeping = False
-                    if (self.USEOVERRIDE and change_override_slideshow) or not self.USEOVERRIDE:
-                        self._clear_properties( fadetoblack=self.FADETOBLACK )
-                        self._use_correct_artwork()
-                        self._trim_cache()
-                        change_override_slideshow = False
+                    change_slideshow = False
+                if self.USEOVERRIDE:
+                    change_slideshow = False
+                else:
+                    change_slideshow = self._playback_stopped_or_changed( wait_time=self.MAINSLEEP )
             elif self.DAEMON:
                 if not sleeping:
                     self._clear_properties( clearartists=True )
                     sleeping = True
-                    change_override_slideshow = True
+                    change_slideshow = True
                 if self._waitForAbort( wait_time=self.MAINIDLESLEEP ):
                     break
             elif not self.DAEMON:
@@ -947,10 +947,9 @@ class Main( xbmc.Player ):
         daemon = params.get( 'daemon', 'False' )
         if daemon == 'True':
             self.DAEMON = True
+            lw.log( ['daemonizing'] )
         else:
             self.DAEMON = False
-        if self.DAEMON:
-            lw.log( ['daemonizing'] )
         self.RUNFROMSETTINGS = False
         self.MOVETOKODISTORAGE = False
         checkmove = params.get( 'movetokodistorage', 'False' )
@@ -1132,19 +1131,22 @@ class Main( xbmc.Player ):
 
 
     def _slideshow_thread_stop( self ):
-        self.SLIDESHOW.StopSlideshow()
+        try:
+            self.SLIDESHOW.StopSlideshow()
+        except AttributeError:
+            return
         self.SLIDESHOW.join()
 
 
     def _use_correct_artwork( self ):
-        self.ALLARTISTS = self._get_current_artists()
-        self.ARTISTNUM = 0
-        self.TOTALARTISTS = len( self.ALLARTISTS )
-        self.IMAGESFOUND = False
         if self.USEOVERRIDE:
             lw.log( ['using override directory for images'] )
             self._set_artwork_from_dir( self.OVERRIDEPATH, self._get_file_list( self.OVERRIDEPATH ) )
             return
+        self.ALLARTISTS = self._get_current_artists()
+        self.ARTISTNUM = 0
+        self.TOTALARTISTS = len( self.ALLARTISTS )
+        self.IMAGESFOUND = False
         if self.INCLUDEARTISTFANART:
             self.IMAGESFOUND = self.IMAGESFOUND or self.SLIDESHOW.AddImage( xbmc.getInfoLabel( 'Player.Art(artist.fanart)' ) )
         if self.INCLUDEALBUMFANART:
