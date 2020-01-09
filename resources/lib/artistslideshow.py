@@ -27,6 +27,9 @@ from resources.lib.url import URL
 from resources.lib.xlogger import Logger
 from resources.lib.kodisettings import getSettingBool, getSettingInt, getSettingString
 import resources.plugins
+for module in resources.plugins.__all__:
+    full_plugin = 'resources.plugins.' + module
+    __import__( full_plugin )
 
 addon        = xbmcaddon.Addon()
 addonname    = addon.getAddonInfo('id')
@@ -44,53 +47,6 @@ imgURL  = URL( 'binary' )
 
 lw.log( ['script version %s started' % addonversion], xbmc.LOGNOTICE )
 lw.log( ['debug logging set to %s' % logdebug], xbmc.LOGNOTICE )
-
-# this section imports all the scraper plugins, initializes, and sorts them
-def _get_plugin_settings( service_name, module ):
-    if module == 'local':
-        return True, 0
-    return getSettingBool( addon, service_name + module ), getSettingInt( addon, service_name + 'priority_' + module, default=10 )
-
-bio_plugins = {'names':[], 'objs':{}}
-image_plugins = {'names':[], 'objs':{}}
-album_plugins = {'names':[], 'objs':{}}
-similar_plugins = {'names':[], 'objs':{}}
-mbid_plugins = {'names':[], 'objs':{}}
-for module in resources.plugins.__all__:
-    full_plugin = 'resources.plugins.' + module
-    __import__( full_plugin )
-    imp_plugin = sys.modules[ full_plugin ]
-    lw.log( ['loaded plugin ' + module] )
-    plugin = imp_plugin.objectConfig()
-    scrapers = plugin.provides()
-    if 'bio' in scrapers:
-        bio_active, bio_priority = _get_plugin_settings( 'ab_', module )
-        if bio_active:
-            bio_plugins['objs'][module] = plugin
-            bio_plugins['names'].append( [bio_priority, module] )
-            lw.log( ['added %s to bio plugins' % module] )
-    if 'images' in scrapers:
-        img_active, img_priority = _get_plugin_settings( '', module )
-        if img_active:
-            image_plugins['objs'][module] = plugin
-            image_plugins['names'].append( [img_priority, module] )
-            lw.log( ['added %s to image plugins' % module] )
-    if 'albums' in scrapers:
-        ai_active, ai_priority = _get_plugin_settings( 'ai_', module )
-        if ai_active:
-            album_plugins['objs'][module] = plugin
-            album_plugins['names'].append( [ai_priority, module] )
-            lw.log( ['added %s to album info plugins' % module] )
-    if 'similar' in scrapers:
-        sa_active, sa_priority = _get_plugin_settings( 'sa_', module )
-        if sa_active:
-            similar_plugins['objs'][module] = plugin
-            similar_plugins['names'].append( [ai_priority, module] )
-            lw.log( ['added %s to similar artist plugins' % module] )
-    if 'mbid' in scrapers:
-        mbid_plugins['objs'][module] = plugin
-        mbid_plugins['names'].append( [1, module] )
-        lw.log( ['added %s to mbid plugins' % module] )
 
 LANGUAGES = (
 # Full Language name[0]         ISO 639-1[1]   Script Language[2]
@@ -148,7 +104,7 @@ LANGUAGES = (
 class Slideshow( threading.Thread ):
 
     def __init__( self, window, delay ):
-        super( Slideshow , self).__init__()
+        super( Slideshow , self ).__init__()
         self.MONITOR = xbmc.Monitor()
         self.WINDOW = window
         self.DELAY = delay
@@ -244,17 +200,37 @@ class Slideshow( threading.Thread ):
 
 
 
+class SlideshowMonitor( xbmc.Monitor ):
+
+    def __init__( self ):
+        super( SlideshowMonitor , self ).__init__()
+        self.CHANGED = False
+
+
+    def onSettingsChanged( self ):
+        lw.log( ['the settings have changed'] )
+        self.CHANGED = True
+
+
+    def SettingsChanged( self ):
+        return self.CHANGED
+
+
+    def UpdatedSettings( self ):
+        self.CHANGED = False
+
+
+
 class Main( xbmc.Player ):
 
     def __init__( self ):
-        xbmc.Player.__init__(self)
+        super( Main , self ).__init__()
         self._parse_argv()
         self._init_window()
         self._upgrade_settings()
         self._get_settings()
         self._init_vars()
         self._make_dirs()
-        self._upgrade()
 
 
     def onPlayBackPaused( self ):
@@ -287,6 +263,10 @@ class Main( xbmc.Player ):
 
 
     def Start( self ):
+        self._upgrade()
+        self._get_plugins()
+        sleeping = False
+        change_slideshow = True
         if self._is_playing():
             lw.log( ['music playing'] )
             self._set_property( 'ArtistSlideshowRunning', 'True' )
@@ -294,15 +274,15 @@ class Main( xbmc.Player ):
             lw.log( ['no music playing'] )
             if self.DAEMON:
                 self._set_property( 'ArtistSlideshowRunning', 'True' )
-        sleeping = False
-        change_slideshow = True
         while not self.MONITOR.abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
             if self.MONITOR.waitForAbort( 1 ):
                 break
+            if self.MONITOR.SettingsChanged():
+                self._get_settings()
+                self._get_plugins()
+                self.MONITOR.UpdatedSettings()
             if self._is_playing():
-                if sleeping:
-                    self._get_settings()
-                    sleeping = False
+                sleeping = False
                 if change_slideshow:
                     self._clear_properties( fadetoblack=self.FADETOBLACK )
                     self._use_correct_artwork()
@@ -473,13 +453,13 @@ class Main( xbmc.Player ):
         bio_params['artist'] = self.NAME
         bio = ''
         try:
-            bio_plugins['names'].sort( key=lambda x: x[0] )
+            self.BIOPLUGINS['names'].sort( key=lambda x: x[0] )
         except TypeError:
             pass
-        for plugin_name in bio_plugins['names']:
+        for plugin_name in self.BIOPLUGINS['names']:
             lw.log( ['checking %s for bio' % plugin_name[1]] )
             bio_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated' )
-            bio, loglines = bio_plugins['objs'][plugin_name[1]].getBio( bio_params )
+            bio, loglines = self.BIOPLUGINS['objs'][plugin_name[1]].getBio( bio_params )
             lw.log( loglines )
             if bio:
                 lw.log( ['got a bio from %s, so stop looking' % plugin_name] )
@@ -498,13 +478,13 @@ class Main( xbmc.Player ):
         album_params['artist'] = self.NAME
         albums = []
         try:
-            album_plugins['names'].sort( key=lambda x: x[0] )
+            self.ALBUMPLUGINS['names'].sort( key=lambda x: x[0] )
         except TypeError:
             pass
-        for plugin_name in album_plugins['names']:
+        for plugin_name in self.ALBUMPLUGINS['names']:
             lw.log( ['checking %s for album info' % plugin_name[1]] )
             album_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated' )
-            albums, loglines = album_plugins['objs'][plugin_name[1]].getAlbumList( album_params )
+            albums, loglines = self.ALBUMPLUGINS['objs'][plugin_name[1]].getAlbumList( album_params )
             lw.log( loglines )
             if not albums == []:
                 lw.log( ['got album list from %s, so stop looking' % plugin_name] )
@@ -523,12 +503,12 @@ class Main( xbmc.Player ):
         similar_params['artist'] = self.NAME
         similar_artists = []
         try:
-            similar_plugins['names'].sort( key=lambda x: x[0] )
+            self.SIMILARPLUGINS['names'].sort( key=lambda x: x[0] )
         except TypeError:
             pass
-        for plugin_name in similar_plugins['names']:
+        for plugin_name in self.SIMILARPLUGINS['names']:
             lw.log( ['checking %s for similar artist info' % plugin_name[1]] )
-            similar_artists, loglines = similar_plugins['objs'][plugin_name[1]].getSimilarArtists( similar_params )
+            similar_artists, loglines = self.SIMILARPLUGINS['objs'][plugin_name[1]].getSimilarArtists( similar_params )
             lw.log( loglines )
             if not similar_artists == []:
                 lw.log( ['got similar artist list from %s, so stop looking' % plugin_name] )
@@ -668,13 +648,13 @@ class Main( xbmc.Player ):
         image_params['lang'] = self.LANGUAGE
         image_params['artist'] = self.NAME
         image_params['infodir'] = self.INFODIR
-        for plugin_name in image_plugins['names']:
+        for plugin_name in self.IMAGEPLUGINS['names']:
             image_list = []
             lw.log( ['checking %s for images' % plugin_name[1]] )
             image_params['getall'] = getSettingBool( addon, plugin_name[1] + '_all' )
             image_params['clientapikey'] = getSettingString( addon, plugin_name[1] + '_clientapikey' )
             image_params['donated'] = getSettingBool( addon, plugin_name[1] + '_donated' )
-            image_list, loglines = image_plugins['objs'][plugin_name[1]].getImageList( image_params )
+            image_list, loglines = self.IMAGEPLUGINS['objs'][plugin_name[1]].getImageList( image_params )
             lw.log( loglines )
             images.extend( image_list )
             image_params['mbid'] = self._get_musicbrainz_id( self.NAME, self.MBID )
@@ -701,9 +681,9 @@ class Main( xbmc.Player ):
             return mbid
         mbid_params = {}
         mbid_params['infodir'] = self.INFODIR
-        for plugin_name in mbid_plugins['names']:
+        for plugin_name in self.MBIDPLUGINS['names']:
             lw.log( ['checking %s for mbid' % plugin_name[1]] )
-            mbid, loglines = mbid_plugins['objs'][plugin_name[1]].getMBID( mbid_params )
+            mbid, loglines = self.MBIDPLUGINS['objs'][plugin_name[1]].getMBID( mbid_params )
             lw.log( loglines )
             if mbid:
                 lw.log( ['returning ' + mbid] )
@@ -740,7 +720,57 @@ class Main( xbmc.Player ):
         return playing_item
 
 
+    def _get_plugin_settings( self, service_name, module ):
+        if module == 'local':
+            return True, 0
+        return getSettingBool( addon, service_name + module ), getSettingInt( addon, service_name + 'priority_' + module, default=10 )
+
+
+    def _get_plugins( self ):
+        lw.log( ['loading plugins'] )
+        self.BIOPLUGINS = {'names':[], 'objs':{}}
+        self.IMAGEPLUGINS = {'names':[], 'objs':{}}
+        self.ALBUMPLUGINS = {'names':[], 'objs':{}}
+        self.SIMILARPLUGINS = {'names':[], 'objs':{}}
+        self.MBIDPLUGINS = {'names':[], 'objs':{}}
+        for module in resources.plugins.__all__:
+            full_plugin = 'resources.plugins.' + module
+            imp_plugin = sys.modules[ full_plugin ]
+            plugin = imp_plugin.objectConfig()
+            lw.log( ['loaded plugin ' + module] )
+            scrapers = plugin.provides()
+            if 'bio' in scrapers:
+                bio_active, bio_priority = self._get_plugin_settings( 'ab_', module )
+                if bio_active:
+                    self.BIOPLUGINS['objs'][module] = plugin
+                    self.BIOPLUGINS['names'].append( [bio_priority, module] )
+                    lw.log( ['added %s to bio plugins' % module] )
+            if 'images' in scrapers:
+                img_active, img_priority = self._get_plugin_settings( '', module )
+                if img_active:
+                    self.IMAGEPLUGINS['objs'][module] = plugin
+                    self.IMAGEPLUGINS['names'].append( [img_priority, module] )
+                    lw.log( ['added %s to image plugins' % module] )
+            if 'albums' in scrapers:
+                ai_active, ai_priority = self._get_plugin_settings( 'ai_', module )
+                if ai_active:
+                    self.ALBUMPLUGINS['objs'][module] = plugin
+                    self.ALBUMPLUGINS['names'].append( [ai_priority, module] )
+                    lw.log( ['added %s to album info plugins' % module] )
+            if 'similar' in scrapers:
+                sa_active, sa_priority = self._get_plugin_settings( 'sa_', module )
+                if sa_active:
+                    self.SIMILARPLUGINS['objs'][module] = plugin
+                    self.SIMILARPLUGINS['names'].append( [ai_priority, module] )
+                    lw.log( ['added %s to similar artist plugins' % module] )
+            if 'mbid' in scrapers:
+                self.MBIDPLUGINS['objs'][module] = plugin
+                self.MBIDPLUGINS['names'].append( [1, module] )
+                lw.log( ['added %s to mbid plugins' % module] )
+
+
     def _get_settings( self ):
+        lw.log( ['loading settings'] )
         self.LANGUAGE = getSettingString( addon, 'language', default='11' )
         for language in LANGUAGES:
             if self.LANGUAGE == language[2]:
@@ -818,7 +848,7 @@ class Main( xbmc.Player ):
 
 
     def _init_vars( self ):
-        self.MONITOR = xbmc.Monitor()
+        self.MONITOR = SlideshowMonitor()
         self.FANARTNUMBER = False
         self.CACHEDIR = ''
         self.ARTISTS_INFO = []
