@@ -266,26 +266,26 @@ class Main( xbmc.Player ):
         xbmc.Player.__init__(self)
         self._parse_argv()
         self._init_window()
-        if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True' and not self.RUNFROMSETTINGS:
-            lw.log( ['script already running'] )
-        else:
-            self._upgrade_settings()
-            self._get_settings()
-            self._init_vars()
-            self._make_dirs()
-            self._upgrade()
-            if not self.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
-                lw.log( ['no music playing'] )
-                if self.DAEMON:
-                    self._set_property( 'ArtistSlideshowRunning', 'True' )
-            else:
-                lw.log( ['music playing'] )
-                self._set_property( 'ArtistSlideshowRunning', 'True' )
+        self._upgrade_settings()
+        self._get_settings()
+        self._init_vars()
+        self._make_dirs()
+        self._upgrade()
 
 
     def run( self ):
         if self._run_from_settings():
             return
+        if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
+            lw.log( ['script already running'] )
+            return
+        if not self.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
+            lw.log( ['no music playing'] )
+            if self.DAEMON:
+                self._set_property( 'ArtistSlideshowRunning', 'True' )
+        else:
+            lw.log( ['music playing'] )
+            self._set_property( 'ArtistSlideshowRunning', 'True' )
         sleeping = False
         change_slideshow = True
         while not self.MONITOR.abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
@@ -950,12 +950,10 @@ class Main( xbmc.Player ):
             lw.log( ['daemonizing'] )
         else:
             self.DAEMON = False
-        self.RUNFROMSETTINGS = False
         self.MOVETOKODISTORAGE = False
         checkmove = params.get( 'movetokodistorage', 'False' )
         if checkmove.lower() == 'true':
             self.MOVETOKODISTORAGE = True
-            self.RUNFROMSETTINGS = True
 
 
     def _playback_stopped_or_changed( self, wait_time=1 ):
