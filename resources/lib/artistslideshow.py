@@ -246,6 +246,17 @@ class Slideshow( threading.Thread ):
 
 class Main( xbmc.Player ):
 
+    def __init__( self ):
+        xbmc.Player.__init__(self)
+        self._parse_argv()
+        self._init_window()
+        self._upgrade_settings()
+        self._get_settings()
+        self._init_vars()
+        self._make_dirs()
+        self._upgrade()
+
+
     def onPlayBackPaused( self ):
         lw.log( ['got a PlaybackPaused event'] )
         if self.PAUSESLIDESHOW:
@@ -258,27 +269,24 @@ class Main( xbmc.Player ):
             self.SLIDESHOW.ResumeSlideshow()
 
 
-    def onAVChange( self ):
-        lw.log( ['got an AVChange event'] )
+    def RunFromSettings( self ):
+        lw.log( ['checking to see if the script was run from the settings'] )
+        return self.RUNFROMSETTINGS
 
 
-    def __init__( self ):
-        xbmc.Player.__init__(self)
-        self._parse_argv()
-        self._init_window()
-        self._upgrade_settings()
-        self._get_settings()
-        self._init_vars()
-        self._make_dirs()
-        self._upgrade()
+    def SlideshowRunning( self ):
+        lw.log( ['checking to see if script is running'] )
+        return self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True'
 
 
-    def run( self ):
-        if self._run_from_settings():
-            return
-        if self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
-            lw.log( ['script already running'] )
-            return
+    def DoSettingsRoutines( self ):
+        lw.log( ['running script from a settings call with action ' + self.SETTINGSACTION] )
+        if self.SETTINGSACTION.lower() == 'movetokodistorage':
+            lw.log( ['starting process to move images to Kodi artist folder'] )
+            self._move_to_kodi_storage()
+
+
+    def Start( self ):
         if not self.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
             lw.log( ['no music playing'] )
             if self.DAEMON:
@@ -937,6 +945,7 @@ class Main( xbmc.Player ):
         except Exception as e:
             lw.log( ['unexpected error while parsing arguments', e] )
             params = {}
+        lw.log( ['the params from the script are:', params] )
         self.WINDOWID = params.get( 'windowid', '12006' )
         lw.log( ['window id is set to %s' % self.WINDOWID] )
         self.PASSEDFIELDS = {}
@@ -950,10 +959,13 @@ class Main( xbmc.Player ):
             lw.log( ['daemonizing'] )
         else:
             self.DAEMON = False
-        self.MOVETOKODISTORAGE = False
-        checkmove = params.get( 'movetokodistorage', 'False' )
-        if checkmove.lower() == 'true':
-            self.MOVETOKODISTORAGE = True
+        checkrun = params.get( 'runfromsettings', 'False' )
+        if checkrun.lower() == 'true':
+            self.RUNFROMSETTINGS = True
+            self.SETTINGSACTION = params.get( 'action', '' )
+        else:
+            self.RUNFROMSETTINGS = False
+            self.SETTINGSACTION = ''
 
 
     def _playback_stopped_or_changed( self, wait_time=1 ):
@@ -980,13 +992,6 @@ class Main( xbmc.Player ):
             return self._remove_trailing_dot( thename[:-1] + self.ENDREPLACE )
         else:
             return thename
-
-
-    def _run_from_settings( self ):
-        if self.MOVETOKODISTORAGE:
-            self._move_to_kodi_storage()
-            return True
-        return False
 
 
     def _set_artwork_from_dir( self, thedir, files ):
