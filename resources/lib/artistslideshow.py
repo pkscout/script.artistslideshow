@@ -287,19 +287,19 @@ class Main( xbmc.Player ):
 
 
     def Start( self ):
-        if not self.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
+        if self._is_playing():
+            lw.log( ['music playing'] )
+            self._set_property( 'ArtistSlideshowRunning', 'True' )
+        else:
             lw.log( ['no music playing'] )
             if self.DAEMON:
                 self._set_property( 'ArtistSlideshowRunning', 'True' )
-        else:
-            lw.log( ['music playing'] )
-            self._set_property( 'ArtistSlideshowRunning', 'True' )
         sleeping = False
         change_slideshow = True
         while not self.MONITOR.abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
             if self.MONITOR.waitForAbort( 1 ):
                 break
-            if self.isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
+            if self._is_playing():
                 if sleeping:
                     self._get_settings()
                     sleeping = False
@@ -357,7 +357,7 @@ class Main( xbmc.Player ):
         if self._get_infolabel( 'ArtistSlideshow.Image' ):
             self.SLIDESHOW.ClearImages( fadetoblack=fadetoblack )
         self._slideshow_thread_stop()
-        if self.isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != '':
+        if self._is_playing():
             self._slideshow_thread_start()
         if self._get_infolabel( 'ArtistSlideshow.ArtistBiography' ):
             self._set_property( 'ArtistSlideshow.ArtistBiography' )
@@ -852,6 +852,10 @@ class Main( xbmc.Player ):
         self.EXTERNALCALL = 'ArtistSlideshow.ExternalCall'
 
 
+    def _is_playing( self ):
+        return self.isPlayingAudio() or self._get_infolabel( self.EXTERNALCALL ) != ''
+
+
     def _make_dirs( self ):
         exists, loglines = checkPath( os.path.join( self.DATAROOT, '' ) )
         lw.log( loglines )
@@ -971,7 +975,7 @@ class Main( xbmc.Player ):
     def _playback_stopped_or_changed( self, wait_time=1 ):
         if self._waitForAbort( wait_time=wait_time ):
             return True
-        if not self.isPlayingAudio() and self._get_infolabel( self.EXTERNALCALL ) == '':
+        if not self._is_playing():
             return True
         current_artists = self._get_infolabel( self.EXTERNALCALL )
         if current_artists:
