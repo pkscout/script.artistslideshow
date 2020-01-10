@@ -274,9 +274,9 @@ class Main( xbmc.Player ):
             lw.log( ['no music playing'], xbmc.LOGNOTICE )
             if self.DAEMON:
                 self._set_property( 'ArtistSlideshowRunning', 'True' )
+        if self.MONITOR.waitForAbort( 1 ):
+            return
         while not self.MONITOR.abortRequested() and self._get_infolabel( self.ARTISTSLIDESHOWRUNNING ) == 'True':
-            if self.MONITOR.waitForAbort( 1 ):
-                break
             if self.MONITOR.SettingsChanged():
                 self._get_settings()
                 self._get_plugins()
