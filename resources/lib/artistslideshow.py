@@ -288,10 +288,7 @@ class Main( xbmc.Player ):
                     self._use_correct_artwork()
                     self._trim_cache()
                     change_slideshow = False
-                if self.USEOVERRIDE:
-                    change_slideshow = False
-                else:
-                    change_slideshow = self._playback_stopped_or_changed( wait_time=self.MAINSLEEP )
+                change_slideshow = self._playback_stopped_or_changed( wait_time=self.MAINSLEEP )
             elif self.DAEMON:
                 if not sleeping:
                     self._clear_properties( clearartists=True )
@@ -1011,6 +1008,8 @@ class Main( xbmc.Player ):
             return True
         if not self._is_playing():
             return True
+        if self.USEOVERRIDE:
+            return False
         current_artists = self._get_infolabel( self.EXTERNALCALL )
         if current_artists:
             cached_artists = self.EXTERNALCALLSTATUS
