@@ -1112,18 +1112,18 @@ class Main( xbmc.Player ):
 
 
     def _set_thedir( self, theartist, dirtype ):
-        CacheName = self._set_safe_artist_name( theartist )
-        if not CacheName:
+        cache_name = self._set_safe_artist_name( theartist )
+        if not cache_name:
             return ''
         if dirtype == 'ArtistSlideshow' and (self.LOCALARTISTSTORAGE or self.KODILOCALSTORAGE) and self.LOCALARTISTPATH:
             if self.FANARTFOLDER:
-                thedir = os.path.join( self.LOCALARTISTPATH, CacheName, self.FANARTFOLDER )
+                thedir = os.path.join( self.LOCALARTISTPATH, cache_name, self.FANARTFOLDER )
             else:
-                thedir = os.path.join( self.LOCALARTISTPATH, CacheName )
+                thedir = os.path.join( self.LOCALARTISTPATH, cache_name )
         elif dirtype == 'ArtistInformation' and self.LOCALINFOSTORAGE and self.LOCALINFOPATH:
-            thedir = os.path.join( self.LOCALINFOPATH, CacheName, 'information' )
+            thedir = os.path.join( self.LOCALINFOPATH, cache_name, 'information' )
         else:
-            thedir = os.path.join( self.DATAROOT, dirtype, CacheName )
+            thedir = os.path.join( self.DATAROOT, dirtype, cache_name )
         exists, loglines = checkPath( os.path.join( thedir, '' ) )
         if exists:
             lw.log( loglines )
