@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.1.1~beta1">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.2.0~beta1">
 	<requires>
 		<import addon="xbmc.python" version="2.26.0" />
 		<import addon="xbmc.addon" version="17.9.0" />
@@ -13,6 +13,8 @@
 	<extension point="xbmc.addon.metadata">
 		<news>
 v.3.2.0~beta1
+- fix for AS not reloading settings properly when in daemon mode
+- fixes for miscellaneous UTF8 errors
 - added option to pause slideshow when playback pauses
 - override slideshow no longer resets at each song change
 - internal change to the way the main thread talks to the slideshow thread
