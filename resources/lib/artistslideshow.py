@@ -1223,7 +1223,6 @@ class Main( xbmc.Player ):
                     self._delete_folder( os.path.abspath( os.path.join( self.CACHEDIR, os.pardir ) ) )
                 elif self.LOCALINFOSTORAGE:
                     self._delete_folder( os.path.abspath( os.path.join( self.INFODIR, os.pardir ) ) )
-
         if not self.IMAGESFOUND:
             lw.log( ['no images found for any currently playing artists'] )
             if self.USEFALLBACK:
@@ -1231,6 +1230,7 @@ class Main( xbmc.Player ):
                 lw.log( ['fallbackdir = ' + self.FALLBACKPATH] )
                 self._set_artwork_from_dir( self.FALLBACKPATH, self._get_file_list( self.FALLBACKPATH ) )
             else:
+                self._slideshow_thread_stop()
                 self._set_property( 'ArtistSlideshow.Image' )
 
 
