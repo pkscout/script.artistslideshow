@@ -164,15 +164,15 @@ class Slideshow( threading.Thread ):
                 self.IMAGESCLEARED = False
                 outofimages = False
             for image in self.IMAGES:
-                if self.IMAGEADDED or self.IMAGESCLEARED:
-                    lw.log( ['image list changed, resetting loop'] )
-                    break
                 if not image == last_image or len( self.IMAGES ) == 1:
-                    if not image == last_image and not self.PAUSESLIDESHOW:
+                    if not self.PAUSESLIDESHOW:
                         self._set_property( 'ArtistSlideshow.Image', image )
                         last_image = image
                     self._wait( wait_time=self.DELAY, sleep_time=self.SLIDESHOWSLEEP )
                 if not self.SHOW:
+                    break
+                if self.IMAGEADDED or self.IMAGESCLEARED:
+                    lw.log( ['image list changed, resetting loop'] )
                     break
         lw.log( ['slideshow thread stopping'] )
 
