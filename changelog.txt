@@ -1,8 +1,8 @@
 v.3.2.0~beta1
-- fix for AS not reloading settings properly when in daemon mode
-- fixes for miscellaneous UTF8 errors
 - added option to pause slideshow when playback pauses
 - override slideshow no longer resets at each song change
+- fix for AS not reloading settings properly when in daemon mode
+- fixes for miscellaneous UTF8 errors
 - internal change to the way the main thread talks to the slideshow thread
 
 v.3.1.0
