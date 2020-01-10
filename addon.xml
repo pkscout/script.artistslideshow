@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.2.0~beta1">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.2.0~beta2">
 	<requires>
 		<import addon="xbmc.python" version="2.26.0" />
 		<import addon="xbmc.addon" version="17.9.0" />
@@ -12,6 +12,11 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
+v.3.2.0~beta2
+- logic change to load first slideshow image sooner
+- fix for potential runaway loop
+- fix for slow slideshow change when artist changes
+
 v.3.2.0~beta1
 - added option to pause slideshow when playback pauses
 - override slideshow no longer resets at each song change
