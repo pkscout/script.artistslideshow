@@ -534,10 +534,14 @@ class Main( xbmc.Player ):
 
 
     def _get_current_artist_names_mbids( self, playing_song ):
-        response = xbmc.executeJSONRPC (
-            '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "musicbrainzartistid"]},"id":1}' )
-        artist_names = _json.loads( response ).get( 'result', {} ).get( 'item', {} ).get( 'artist', [] )
-        mbids = _json.loads( response ).get( 'result', {} ).get( 'item', {} ).get( 'musicbrainzartistid', [] )
+        try:
+            response = xbmc.executeJSONRPC (
+                '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "musicbrainzartistid"]},"id":1}' )
+            artist_names = _json.loads( response ).get( 'result', {} ).get( 'item', {} ).get( 'artist', [] )
+            mbids = _json.loads( response ).get( 'result', {} ).get( 'item', {} ).get( 'musicbrainzartistid', [] )
+        except LookupError:
+            artist_names = []
+            mbids = []
         if not artist_names:
             lw.log( ['No artist names returned from JSON call, assuming this is an internet stream'] )
             playingartists = playing_song.split( ' - ', 1 )
@@ -1100,11 +1104,17 @@ class Main( xbmc.Player ):
                 s_name = s_name + self.ILLEGALREPLACE
             else:
                 s_name = s_name + c
-        return py2_decode( s_name )
+        try:
+            s_name = py2_decode( s_name )
+        except UnicodeDecodeError:
+            s_name = ''
+        return s_name
 
 
     def _set_thedir( self, theartist, dirtype ):
         CacheName = self._set_safe_artist_name( theartist )
+        if not CacheName:
+            return ''
         if dirtype == 'ArtistSlideshow' and (self.LOCALARTISTSTORAGE or self.KODILOCALSTORAGE) and self.LOCALARTISTPATH:
             if self.FANARTFOLDER:
                 thedir = os.path.join( self.LOCALARTISTPATH, CacheName, self.FANARTFOLDER )
