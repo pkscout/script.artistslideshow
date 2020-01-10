@@ -201,20 +201,20 @@ class SlideshowMonitor( xbmc.Monitor ):
 
     def __init__( self ):
         super( SlideshowMonitor , self ).__init__()
-        self.CHANGED = False
+        self.SETTINGSCHANGED = False
 
 
     def onSettingsChanged( self ):
         lw.log( ['the settings have changed'] )
-        self.CHANGED = True
+        self.SETTINGSCHANGED = True
 
 
     def SettingsChanged( self ):
-        return self.CHANGED
+        return self.SETTINGSCHANGED
 
 
     def UpdatedSettings( self ):
-        self.CHANGED = False
+        self.SETTINGSCHANGED = False
 
 
 
