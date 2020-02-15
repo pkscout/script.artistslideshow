@@ -1,12 +1,9 @@
-v.3.2.0~beta2
+v.3.2.0
+- added option to pause slideshow when playback pauses
 - logic change to load first slideshow image sooner
+- override slideshow no longer resets at each song change
 - fix for potential runaway loop
 - fix for slow slideshow change when artist changes
-- adjusted image service download cache to match with time restrictions from services
-
-v.3.2.0~beta1
-- added option to pause slideshow when playback pauses
-- override slideshow no longer resets at each song change
 - fix for AS not reloading settings properly when in daemon mode
 - fixes for miscellaneous UTF8 errors
 - internal change to the way the main thread talks to the slideshow thread
