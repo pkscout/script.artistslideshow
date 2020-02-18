@@ -1,4 +1,4 @@
-v.3.2.0
+v.3.2.1
 - added option to pause slideshow when playback pauses
 - logic change to load first slideshow image sooner
 - override slideshow no longer resets at each song change
