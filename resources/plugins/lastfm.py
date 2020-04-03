@@ -1,4 +1,4 @@
-#v.0.3.0
+#v.0.4.0
 
 import base64, os, time, random
 import defusedxml.ElementTree as _xmltree
@@ -203,14 +203,15 @@ class objectConfig( object ):
 
     def _update_cache( self, filepath, cachefilepath ):
         exists, cloglines = checkPath( filepath, False )
-        self.loglines.extend( cloglines )
+        self.LOGLINES.extend( cloglines )
         if exists:
-            if time.time() - os.path.getmtime( filepath ) < self._get_cache_time( cachefilepath ):
-                self.loglines.append( 'cached artist info found for last.fm' )
+            st = xbmcvfs.Stat( filepath )
+            if time.time() - st.st_mtime() < self._get_cache_time( cachefilepath ):
+                self.LOGLINES.append( 'cached info found for last.fm' )
                 return False
             else:
-                self.loglines.append( 'outdated cached artist info found for last.fm' )
+                self.LOGLINES.append( 'outdated cached info found for last.fm' )
                 return self._put_cache_time( cachefilepath )
         else:
-            self.loglines.append( 'no last.fm cachetime file found, creating it' )
+            self.LOGLINES.append( 'no last.fm cachetime file found, creating it' )
             return self._put_cache_time( cachefilepath )

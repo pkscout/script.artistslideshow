@@ -1,3 +1,6 @@
+v.3.2.2~beta1
+- fix for crash if Artist Information folder is stored on a network volume
+
 v.3.2.1
 - added option to pause slideshow when playback pauses
 - logic change to load first slideshow image sooner
