@@ -116,7 +116,7 @@ msgstr "- Limitar tamaño de la caché de descarga"
 
 msgctxt "#32117"
 msgid "-- Maximum cache size (in megabytes)"
-msgstr "-- Tamaño máximo caché"(en megabytes)
+msgstr "-- Tamaño máximo caché (en megabytes)"
 
 msgctxt "#32118"
 msgid "-- Alternate name for local fanart folder"

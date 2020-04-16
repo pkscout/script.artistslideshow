@@ -14,6 +14,7 @@
 		<news>
 v.3.2.2
 - fix for crash if Artist Information folder is stored on a network volume
+- Spanish translations
 		</news>
 		<assets>
         	<icon>icon.png</icon>
