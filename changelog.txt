@@ -1,4 +1,4 @@
-v.3.2.2~beta1
+v.3.2.2
 - fix for crash if Artist Information folder is stored on a network volume
 
 v.3.2.1
