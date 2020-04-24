@@ -184,7 +184,7 @@ Artist Slideshow checks every second by default to see if the song/artist has ch
 When the skin starts Artist Slideshow in daemon mode, it is always running.  When no music is playing, Artist Slideshow enters an idle mode and only checks every 10 seconds by default to see if music is playing to help reduce CPU load. You can change this to change CPU usage, and the tradeoff is that the longer you set the delay, the longer the slideshow will be delayed after the first song starts.
 
 **Enable debug logging:** (default false)<br />
-When enabled, if you have XBMC logging set the DEBUG you will get a very verbose set of information in your log file. You should only need to activate this when troubleshooting issues.
+When enabled, if you have Kodi logging set to DEBUG you will get a very verbose set of information in your log file. You should only need to activate this when troubleshooting issues.
 
 **Move images to Kodi music artist folder**<br />
 This will run a script to rename all your artwork to the Kodi music artist folder standard (fanart1, fanart2, etc). It cannot be undone, so please backup your artist images before you do this.
