@@ -1,3 +1,6 @@
+v.3.2.3~beta1
+- changing in logging to accomodate new logging requirements for Kodi 19
+
 v.3.2.2
 - fix for crash if Artist Information folder is stored on a network volume
 
