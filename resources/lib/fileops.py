@@ -1,4 +1,4 @@
-# v.0.7.0
+# v.0.8.0
 
 import os, re
 try:
@@ -18,6 +18,7 @@ if isXBMC:
     _delete = xbmcvfs.delete
     _copy   = xbmcvfs.copy
     _open   = xbmcvfs.File
+    _rename = xbmcvfs.rename
 else:
     import shutil
     _mkdirs = os.makedirs
@@ -26,6 +27,7 @@ else:
     _delete = os.remove
     _copy   = shutil.copyfile
     _open   = open
+    _rename = os.rename
 
 
 def checkPath( thepath, createdir=True ):
@@ -135,7 +137,7 @@ def readFile( filename ):
     if _exists( filename ):
         thefile = _open( filename, 'r' )
         try:
-            data = thefile.read()
+            thedata = thefile.read()
             thefile.close()
         except IOError:
             log_lines.append( 'unable to read data from ' + filename )
@@ -144,14 +146,25 @@ def readFile( filename ):
             log_lines.append( 'unknown error while reading data from ' + filename )
             log_lines.append( e )
             return log_lines, ''
-        return log_lines, data
+        return log_lines, thedata
     else:
         log_lines.append( '%s does not exist' % filename )
         return log_lines, ''
 
 
 def renameFile ( thesource, thedest ):
-    return moveFile( thesource, thedest )
+    log_lines = []
+    try:
+        log_lines.append( 'renaming file %s to %s' % (thesource, thedest) )
+        _rename( thesource, thedest )
+    except IOError:
+        log_lines.append( 'unable to rename %s to %s' % (thesource, thedest) )
+        return False, log_lines
+    except Exception as e:
+        log_lines.append( 'unknown error while attempting to rename %s to %s' % (thesource, thedest) )
+        log_lines.append( e )
+        return False, log_lines
+    return True, log_lines
 
 
 def writeFile( data, filename, wtype='wb' ):
