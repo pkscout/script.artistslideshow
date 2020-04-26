@@ -1,4 +1,4 @@
-#v.0.4.3
+#v.0.4.4
 
 try:
     from kodi_six import xbmc
@@ -39,7 +39,6 @@ class Logger( object ):
                 loglevel = self.logger.critical
             else:
                 loglevel = self.logger.debug
-
         for line in loglines:
             try:
                 if type(line).__name__=='unicode':
@@ -63,16 +62,16 @@ class Logger( object ):
     def _output_file( self, line, loglevel ):
         if self.LOGDEBUG or loglevel != self.logger.debug:
             try:
-                loglevel( "%s %s" % (self.LOGPREAMBLE, line.__str__()) )
+                loglevel( '%s %s' % (self.LOGPREAMBLE, line.__str__()) )
             except Exception as e:
-                self.logger.debug( "%s unable to output logline" % self.LOGPREAMBLE )
-                self.logger.debug( "%s %s" % (self.LOGPREAMBLE, e.__str__()) )
+                self.logger.debug( '%s unable to output logline' % self.LOGPREAMBLE )
+                self.logger.debug( '%s %s' % (self.LOGPREAMBLE, e.__str__()) )
 
 
     def _output_xbmc( self, line, loglevel ):
         if self.LOGDEBUG or loglevel != xbmc.LOGDEBUG:
             try:
-                xbmc.log( "%s %s" % (self.LOGPREAMBLE, line.__str__()), loglevel)
+                xbmc.log( '%s %s' % (self.LOGPREAMBLE, line.__str__()), loglevel)
             except Exception as e:
-                xbmc.log( "%s unable to output logline" % self.LOGPREAMBLE, loglevel)
-                xbmc.log ("%s %s" % (self.LOGPREAMBLE, e.__str__()), loglevel)
+                xbmc.log( '%s unable to output logline' % self.LOGPREAMBLE, loglevel)
+                xbmc.log ('%s %s' % (self.LOGPREAMBLE, e.__str__()), loglevel)

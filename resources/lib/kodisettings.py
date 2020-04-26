@@ -1,4 +1,4 @@
-#v.0.0.1
+#v.0.2.0
 
 def _get_setting( addon, setting_name, default, thetype="string" ):
     if thetype.lower() == "bool":
