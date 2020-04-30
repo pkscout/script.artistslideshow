@@ -1,4 +1,4 @@
-#v.0.3.0
+#v.0.3.1
 
 from kodi_six import xbmc, xbmcaddon
 
@@ -46,6 +46,7 @@ def getSettingInt( setting_name, default=0 ):
 
 def getSettingNumber( setting_name, default=0.0 ):
     return _get_setting( setting_name, default, 'number' )
+
 
 def getSettingString( setting_name, default='' ):
     return _get_setting( setting_name, default, 'string' )

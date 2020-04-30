@@ -1,4 +1,4 @@
-#v.0.4.4
+#v.0.4.5
 
 try:
     from kodi_six import xbmc
@@ -7,7 +7,8 @@ except ImportError:
     import logging, logging.handlers
     LOGTYPE = 'file'
 
-#this class creates an object used to log stuff to the xbmc log file
+
+
 class Logger( object ):
     def __init__( self, logconfig="timed", logformat='%(asctime)-15s %(levelname)-8s %(message)s', logfile='logfile.log',
                   logname='_logger', numbackups=5, logdebug=False, maxsize=100000, when='midnight', preamble='' ):
