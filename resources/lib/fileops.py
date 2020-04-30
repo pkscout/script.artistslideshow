@@ -1,6 +1,6 @@
-# v.0.8.0
+# v.0.10.0
 
-import os, re
+import os, re, sys
 try:
     _range = range
 except NameError:
@@ -48,8 +48,8 @@ def checkPath( thepath, createdir=True ):
 def copyFile( thesource, thedest ):
     log_lines = []
     if _exists( thesource ):
+        log_lines.append( 'copying file %s to %s' % (thesource, thedest) )
         try:
-            log_lines.append( 'copying file %s to %s' % (thesource, thedest) )
             _copy( thesource, thedest )
         except IOError:
             log_lines.append( 'unable to copy %s to %s' % (thesource, thedest) )
@@ -83,8 +83,8 @@ def deleteFolder( thesource, thetype='folder' ):
             _action = _rmdir
         else:
             _action = _delete
+        log_lines.append( 'deleting %s %s' % (thetype, thesource) )
         try:
-            log_lines.append( 'deleting %s %s' % (thetype, thesource) )
             if isXBMC:
                 if not _action( thesource ):
                     raise IOError( 'unable to delete item' )
@@ -120,25 +120,37 @@ def moveFile( thesource, thedest ):
     return success, log_lines + cp_loglines + dl_loglines
 
 
-def atoi( text ):
+def _atoi( text ):
     return int(text) if text.isdigit() else text
 
 
-def naturalKeys( text ):
+def naturalKeys( thelist ):
     '''
     alist.sort( key=naturalKeys ) sorts in human order
     http://nedbatchelder.com/blog/200712/human_sorting.html
     '''
-    return [ atoi( c ) for c in re.split( r'(\d+)', text ) ]
+    return [ _atoi( c ) for c in re.split( r'(\d+)', thelist ) ]
+
+
+def osPathFromString( spath, sep='/' ):
+    pathlist = spath.split( sep )
+    if spath.startswith( sep ):
+        pathlist.insert( 0, os.sep )
+        pathlist[2] = pathlist[2] + os.sep
+    return os.path.join(*pathlist)
 
 
 def readFile( filename ):
     log_lines = []
     if _exists( filename ):
-        thefile = _open( filename, 'r' )
         try:
-            thedata = thefile.read()
-            thefile.close()
+            if sys.version_info >= (3, 0):
+                with _open( filename, 'r') as thefile:
+                    thedata = thefile.read()
+            else:
+                thefile = _open( filename, 'r' )
+                thedata = thefile.read()
+                thefile.close()
         except IOError:
             log_lines.append( 'unable to read data from ' + filename )
             return log_lines, ''
@@ -154,8 +166,8 @@ def readFile( filename ):
 
 def renameFile ( thesource, thedest ):
     log_lines = []
+    log_lines.append( 'renaming file %s to %s' % (thesource, thedest) )
     try:
-        log_lines.append( 'renaming file %s to %s' % (thesource, thedest) )
         _rename( thesource, thedest )
     except IOError:
         log_lines.append( 'unable to rename %s to %s' % (thesource, thedest) )
@@ -171,10 +183,14 @@ def writeFile( data, filename, wtype='wb' ):
     log_lines = []
     if type(data).__name__=='unicode':
         data = data.encode('utf-8')
-    thefile = _open( filename, wtype )
     try:
-        thefile.write( data )
-        thefile.close()
+        if sys.version_info >= (3, 0):
+            with _open( filename, wtype) as thefile:
+                thefile.write( data )
+        else:
+            thefile = _open( filename, wtype )
+            thefile.write( data )
+            thefile.close()
     except IOError as e:
         log_lines.append( 'unable to write data to ' + filename )
         log_lines.append( e )

@@ -1,3 +1,8 @@
+v.3.2.4~beta1
+- changed method for loading Kodi addon variables
+- code reformatting for consistent capitalization meaning in variables
+- updated read/write functions to use Python 3 features when running in Python 3
+
 v.3.2.3
 - changes in logging to accommodate new logging requirements for Kodi 19
 
