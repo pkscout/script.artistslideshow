@@ -1,4 +1,4 @@
-#v.0.4.9
+#v.0.4.10
 
 try:
     from kodi_six import xbmc
