@@ -1,10 +1,6 @@
-# v.0.10.0
+# v.0.12.3
 
 import os, re, sys
-try:
-    _range = range
-except NameError:
-    _range = xrange
 try:
     from kodi_six import xbmcvfs
     isXBMC = True
@@ -12,22 +8,22 @@ except ImportError:
     isXBMC= False
 
 if isXBMC:
-    _mkdirs = xbmcvfs.mkdirs
-    _rmdir  = xbmcvfs.rmdir
-    _exists = xbmcvfs.exists
-    _delete = xbmcvfs.delete
-    _copy   = xbmcvfs.copy
-    _open   = xbmcvfs.File
-    _rename = xbmcvfs.rename
+    _mkdirs  = xbmcvfs.mkdirs
+    _rmdir   = xbmcvfs.rmdir
+    _exists  = xbmcvfs.exists
+    _delete  = xbmcvfs.delete
+    _copy    = xbmcvfs.copy
+    _open    = xbmcvfs.File
+    _rename  = xbmcvfs.rename
 else:
     import shutil
-    _mkdirs = os.makedirs
-    _rmdir  = os.rmdir
-    _exists = os.path.exists
-    _delete = os.remove
-    _copy   = shutil.copyfile
-    _open   = open
-    _rename = os.rename
+    _mkdirs  = os.makedirs
+    _rmdir   = os.rmdir
+    _exists  = os.path.exists
+    _delete  = os.remove
+    _copy    = shutil.copyfile
+    _open    = open
+    _rename  = os.rename
 
 
 def checkPath( thepath, createdir=True ):
@@ -103,6 +99,45 @@ def deleteFolder( thesource, thetype='folder' ):
         return False, log_lines
 
 
+def listDirectory( thesource, thefilter='all' ):
+    log_lines = []
+    log_lines.append( 'getting contents of folder %s' % thesource )
+    if isXBMC:
+        try:
+            dirs, files = xbmcvfs.listdir( thesource )
+        except OSError:
+            log_lines.append( 'OSError getting directory list' )
+            return [], log_lines
+        except Exception as e:
+            log_lines.append( 'unexpected error getting directory list' )
+            log_lines.append( e )
+            return [], log_lines
+        if thefilter == 'files':
+            log_lines.append( 'returning files from %s' % thesource )
+            log_lines.append( files )
+            return files, log_lines
+        elif thefilter =='folders':
+            log_lines.append( 'returning folders from %s' % thesource )
+            log_lines.append( dirs )
+            return dirs, log_lines
+        else:
+            log_lines.append( 'returning files and folders from %s' % thesource )
+            log_lines.append( files + dirs )
+            return files + dirs, log_lines
+    else:
+        try:
+            contents = os.listdir( thesource )
+        except OSError:
+            log_lines.append( 'OSError getting directory list' )
+            return [], log_lines
+        except Exception as e:
+            log_lines.append( 'unexpected error getting directory list' )
+            log_lines.append( e )
+            return [], log_lines
+        log_lines.append( 'returning files and folders from %s' % thesource )
+        return contents, log_lines
+
+
 def moveFile( thesource, thedest ):
     log_lines = []
     cp_loglines = []
@@ -125,10 +160,7 @@ def _atoi( text ):
 
 
 def naturalKeys( thelist ):
-    '''
-    alist.sort( key=naturalKeys ) sorts in human order
-    http://nedbatchelder.com/blog/200712/human_sorting.html
-    '''
+    # from http://nedbatchelder.com/blog/200712/human_sorting.html
     return [ _atoi( c ) for c in re.split( r'(\d+)', thelist ) ]
 
 
@@ -177,6 +209,30 @@ def renameFile ( thesource, thedest ):
         log_lines.append( e )
         return False, log_lines
     return True, log_lines
+
+
+def _remove_trailing_dot( thename, endreplace='' ):
+    if thename[-1] == '.' and len( thename ) > 1 and endreplace != '.':
+        return _remove_trailing_dot( thename[:-1] + endreplace )
+    else:
+        return thename
+
+
+def setSafeName( thename, illegalchars='<>:"/\|?*', illegalreplace='_', endreplace='' ):
+    loglines = []
+    if not thename:
+        loglines.append( 'name is empty, returning it' )
+        return thename, loglines
+    s_name = ''
+    loglines.append( 'started with %s' % thename )
+    loglines.append( 'the illegal characters are %s and the replacement is %s' % (illegalchars, illegalreplace) )
+    for c in list( _remove_trailing_dot( thename, endreplace=endreplace ) ):
+        if c in illegalchars:
+            s_name = s_name + illegalreplace
+        else:
+            s_name = s_name + c
+    loglines.append( 'finished with %s' % s_name )
+    return s_name, loglines
 
 
 def writeFile( data, filename, wtype='wb' ):

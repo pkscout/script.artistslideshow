@@ -1,20 +1,24 @@
-#v.0.4.5
+#v.0.4.9
 
 try:
     from kodi_six import xbmc
     LOGTYPE = 'xbmc'
 except ImportError:
-    import logging, logging.handlers
+    import os, logging, logging.handlers
     LOGTYPE = 'file'
 
-
-
+#this class creates an object used to log stuff to the xbmc log file
 class Logger( object ):
     def __init__( self, logconfig="timed", logformat='%(asctime)-15s %(levelname)-8s %(message)s', logfile='logfile.log',
                   logname='_logger', numbackups=5, logdebug=False, maxsize=100000, when='midnight', preamble='' ):
+        """Logs interactions."""
         self.LOGPREAMBLE = preamble
         self.LOGDEBUG = logdebug
         if LOGTYPE == 'file':
+            checkdir = os.sep.join( logfile.split(os.sep)[:-1] )
+            if not checkdir == 'logfile.log':
+                if not os.path.exists( checkdir ):
+                    os.makedirs( checkdir )
             self.logger = logging.getLogger( logname )
             self.logger.setLevel( logging.DEBUG )
             if logconfig == 'timed':
