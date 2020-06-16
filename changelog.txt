@@ -1,4 +1,15 @@
-v.3.2.0
+v.3.2.4~beta1
+- changed method for loading Kodi addon variables
+- code reformatting for consistent capitalization meaning in variables
+- updated read/write functions to use Python 3 features when running in Python 3
+
+v.3.2.3
+- changes in logging to accommodate new logging requirements for Kodi 19
+
+v.3.2.2
+- fix for crash if Artist Information folder is stored on a network volume
+
+v.3.2.1
 - added option to pause slideshow when playback pauses
 - logic change to load first slideshow image sooner
 - override slideshow no longer resets at each song change
