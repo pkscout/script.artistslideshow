@@ -129,3 +129,4 @@ dmypy.json
 
 # the gitignore file
 .gitignore
+.DS_Store
