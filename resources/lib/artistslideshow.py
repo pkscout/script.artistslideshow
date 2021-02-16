@@ -1073,11 +1073,11 @@ class Main( xbmc.Player ):
         for count, item in enumerate( self.SIMILAR ):
             self._set_property( 'ArtistSlideshow.%d.SimilarName' % ( count + 1 ), item[0] )
             self._set_property( 'ArtistSlideshow.%d.SimilarThumb' % ( count + 1 ), item[1] )
-            similar_total = str( count )
+            similar_total = str( count + 1 )
         for count, item in enumerate( self.ALBUMS ):
             self._set_property( 'ArtistSlideshow.%d.AlbumName' % ( count + 1 ), item[0] )
             self._set_property( 'ArtistSlideshow.%d.AlbumThumb' % ( count + 1 ), item[1] )
-            album_total = str( count )
+            album_total = str( count + 1 )
         self._set_property( 'ArtistSlideshow.SimilarCount', similar_total )
         self._set_property( 'ArtistSlideshow.AlbumCount', album_total )
 
