@@ -1,6 +1,6 @@
-#v.0.3.4
+#v.0.3.5
 
-from kodi_six import xbmc, xbmcaddon, xbmcvfs
+import xbmc, xbmcaddon, xbmcvfs
 
 ADDON         = xbmcaddon.Addon()
 ADDONNAME     = ADDON.getAddonInfo('id')
