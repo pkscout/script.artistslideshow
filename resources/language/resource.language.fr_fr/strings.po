@@ -5,9 +5,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC Addons\n"
-"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"Report-Msgid-Bugs-To: translations@kodi.tv\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2021-07-10 16:29+0000\n"
+"PO-Revision-Date: 2021-07-26 22:29+0000\n"
 "Last-Translator: Nanomani <nicolas.pouliquen@gmail.com>\n"
 "Language-Team: French (France) <https://kodi.weblate.cloud/projects/kodi-add-ons-scripts/script-artistslideshow/fr_fr/>\n"
 "Language: fr_fr\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.7.1\n"
+"X-Generator: Weblate 4.7.2\n"
 
 msgctxt "Addon Summary"
 msgid "Download images and additional info of the currently playing artist"
@@ -23,7 +23,7 @@ msgstr "Télécharger les images et les informations additionnelles de l'artiste
 
 msgctxt "Addon Description"
 msgid "Addon to download images and additional information from fanart.tv and theaudiodb.com of the currently playing artist. The images, along with local artists' images, and info can be used by the skin to create a slideshow for the artist being listened to."
-msgstr ""
+msgstr "Extension permettant de télécharger des images et des informations supplémentaires depuis fanart.tv et depuis theaudiodb.com de l'artiste en cours d'écoute. Les images téléchargées, les images locales des artistes et les informations peuvent être utilisées par le skin pour créer un diaporama pour l'artiste écouté."
 
 # Section Headings
 msgctxt "#32000"
@@ -221,7 +221,7 @@ msgstr ""
 
 msgctxt "#32141"
 msgid "Slideshow thread sleep time (in seconds)"
-msgstr ""
+msgstr "Temps entre chaque diapositive (en secondes)"
 
 msgctxt "#32142"
 msgid "Show notification during image downloads"
@@ -269,23 +269,23 @@ msgstr "Téléchargement complet"
 # Dialog texts
 msgctxt "#32300"
 msgid "This will move and rename your image files and cannot be undone. Are you sure you want to do this?"
-msgstr ""
+msgstr "Cette opération déplacera et renommera vos fichiers d'images et ne pourra pas être annulée. Êtes-vous sûr de vouloir faire cela ?"
 
 msgctxt "#32301"
 msgid "Unable to retrieve path to Kodi music artist image storage. Please check Settings > Media > Music and ensure the Artist Information Folder is set."
-msgstr ""
+msgstr "Impossible de récupérer le chemin d'accès au stockage des images des artistes musicaux de Kodi. Veuillez vérifier Paramètres > Médiathèque > Musique et assurez-vous que le Dossier d'informations de l'artiste est défini."
 
 msgctxt "#32302"
 msgid "Artist Slideshow is already set to use the Kodi artist information folder. Please set to use either addon_data folder or a custom location and try again."
-msgstr ""
+msgstr "Artist Slideshow est déjà configuré pour utiliser le dossier des informations de l'artiste de Kodi. Veuillez le configurer pour utiliser soit le dossier addon_data ou soit un emplacement personnalisé et réessayez."
 
 msgctxt "#32303"
 msgid "Moving and renaming images from custom location..."
-msgstr ""
+msgstr "Déplacement et renommage des images à partir d'un emplacement personnalisé..."
 
 msgctxt "#32304"
 msgid "Moving and renaming images from addon_data folder..."
-msgstr ""
+msgstr "Déplacement et renommage des images depuis le dossier addon_data..."
 
 msgctxt "#32305"
 msgid "No artist directories found."
@@ -293,7 +293,7 @@ msgstr "Aucun répertoire d'artistes n'a été trouvé."
 
 msgctxt "#32306"
 msgid "Image move complete. You may now change the Artist Slideshow storage location to Kodi artist information folder."
-msgstr ""
+msgstr "Déplacement de l'image terminé. Vous pouvez maintenant changer l'emplacement de stockage du diaporama de l'artiste vers le dossier d'informations de l'artiste Kodi."
 
 msgctxt "#32307"
 msgid "Downloading new artist images"
