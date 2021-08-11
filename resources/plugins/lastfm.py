@@ -56,7 +56,7 @@ class objectConfig( object ):
             self.LOGLINES.append( 'error reading XML file' )
             return [], self.LOGLINES
         match = False
-        for element in xmldata.getiterator():
+        for element in xmldata.iter():
             if element.tag == "name":
                 if match:
                     match = False
@@ -91,7 +91,7 @@ class objectConfig( object ):
         except _xmltree.ParseError:
             self.LOGLINES.append( 'error reading XML file' )
             return '', self.LOGLINES
-        for element in xmldata.getiterator():
+        for element in xmldata.iter():
             if element.tag == "content":
                 bio = element.text
         if not bio:
@@ -116,7 +116,7 @@ class objectConfig( object ):
             self.LOGLINES.append( 'error reading XML file' )
             return [], self.LOGLINES
         match = False
-        for element in xmldata.getiterator():
+        for element in xmldata.iter():
             if element.tag == "name":
                 if match:
                     match = False
@@ -150,7 +150,7 @@ class objectConfig( object ):
             except _xmltree.ParseError:
                 self.LOGLINES.append( 'error reading musicbrainz ID from ' + filepath )
                 return '', self.LOGLINES
-            for element in xmldata.getiterator():
+            for element in xmldata.iter():
                 if element.tag == "mbid":
                     return element.text, self.LOGLINES
             self.LOGLINES.append( 'no mbid found in' + filepath )
