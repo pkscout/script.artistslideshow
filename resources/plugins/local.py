@@ -30,7 +30,7 @@ class objectConfig(object):
             xmldata = _xmltree.fromstring(py2_encode(rawxml))
         else:
             return [], self.loglines
-        for element in xmldata.getiterator():
+        for element in xmldata.iter():
             if element.tag == "name":
                 name = py2_encode(element.text)
             elif element.tag == "image":
@@ -58,7 +58,7 @@ class objectConfig(object):
             xmldata = _xmltree.fromstring(py2_encode(rawxml))
         else:
             return '', self.loglines
-        for element in xmldata.getiterator():
+        for element in xmldata.iter():
             if element.tag == "content":
                 bio = element.text
         if not bio:
@@ -94,7 +94,7 @@ class objectConfig(object):
             xmldata = _xmltree.fromstring(py2_encode(rawxml))
         else:
             return [], self.loglines
-        for element in xmldata.getiterator():
+        for element in xmldata.iter():
             if element.tag == "name":
                 name = py2_encode(element.text)
             elif element.tag == "image":
