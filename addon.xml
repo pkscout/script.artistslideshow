@@ -11,9 +11,8 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
-v.3.3.1
-- fix for Python3 logging issue
-- new translations
+v.3.3.2
+- fix for future Python 3.9 compatibility
 		</news>
 		<assets>
         	<icon>icon.png</icon>
