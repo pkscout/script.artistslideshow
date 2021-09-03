@@ -5,16 +5,17 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC Addons\n"
-"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"Report-Msgid-Bugs-To: translations@kodi.tv\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2021-09-03 07:29+0000\n"
+"Last-Translator: Frodo19 <bilbohu@gmail.com>\n"
+"Language-Team: Hungarian <https://kodi.weblate.cloud/projects/kodi-add-ons-scripts/script-artistslideshow/hu_hu/>\n"
 "Language: hu_hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.8\n"
 
 msgctxt "Addon Summary"
 msgid "Download images and additional info of the currently playing artist"
@@ -27,45 +28,45 @@ msgstr "A Kiegészítő letölt képeket és infromációkat a fanart.tv és the
 # Section Headings
 msgctxt "#32000"
 msgid "Slideshow"
-msgstr ""
+msgstr "Diavetítés"
 
 msgctxt "#32001"
 msgid "Storage"
-msgstr ""
+msgstr "Tároló"
 
 msgctxt "#32002"
 msgid "Images"
-msgstr ""
+msgstr "Képek"
 
 msgctxt "#32003"
 msgid "Album Info"
-msgstr ""
+msgstr "Album Infó"
 
 msgctxt "#32004"
 msgid "Artist Bio"
-msgstr ""
+msgstr "Művész életút"
 
 msgctxt "#32005"
 msgid "Similar Artists"
-msgstr ""
+msgstr "Hasonló előadók"
 
 msgctxt "#32006"
 msgid "Advanced"
-msgstr ""
+msgstr "Haladó"
 
 # empty strings from id 32007 to 32099
 # Settings
 msgctxt "#32101"
 msgid "Download images from fanart.tv"
-msgstr ""
+msgstr "Képek letöltése a fanart.tv-ről"
 
 msgctxt "#32102"
 msgid "Download images from theaudiodb.com"
-msgstr ""
+msgstr "Képek letöltése a theaudiodb.com-ról"
 
 msgctxt "#32103"
 msgid "Download album info from the audiodb.com"
-msgstr ""
+msgstr "Album infó az audiodb.com-ról"
 
 msgctxt "#32104"
 msgid "Download album info from the last.fm"
