@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: XBMC Addons\n"
 "Report-Msgid-Bugs-To: translations@kodi.tv\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2021-07-26 22:29+0000\n"
+"PO-Revision-Date: 2022-01-28 11:13+0000\n"
 "Last-Translator: Christian Gade <gade@kodi.tv>\n"
 "Language-Team: Danish <https://kodi.weblate.cloud/projects/kodi-add-ons-scripts/script-artistslideshow/da_dk/>\n"
 "Language: da_dk\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.7.2\n"
+"X-Generator: Weblate 4.10.1\n"
 
 msgctxt "Addon Summary"
 msgid "Download images and additional info of the currently playing artist"
@@ -23,7 +23,7 @@ msgstr "Download billeder og ekstra info om kunstneren, der spiller i øjeblikke
 
 msgctxt "Addon Description"
 msgid "Addon to download images and additional information from fanart.tv and theaudiodb.com of the currently playing artist. The images, along with local artists' images, and info can be used by the skin to create a slideshow for the artist being listened to."
-msgstr ""
+msgstr "Add-on til at downloade billeder og yderligere information fra fanart.tv og theaudiodb.com af den aktuelt afspillede kunstner. Billederne kan sammen med lokale kunstneres billeder og info bruges af dit skin til at skabe et diasshow for kunstneren, der lyttes til."
 
 # Section Headings
 msgctxt "#32000"
@@ -102,7 +102,7 @@ msgstr "Anvend reserve-diasshow"
 
 msgctxt "#32112"
 msgid "Use override slideshow"
-msgstr ""
+msgstr "Brug prioriteret diasshow"
 
 msgctxt "#32113"
 msgid "- Custom location"
@@ -118,7 +118,7 @@ msgstr "Inkludér album-fankunst fra Kodi"
 
 msgctxt "#32116"
 msgid "- Limit size of download cache"
-msgstr ""
+msgstr "- Begræns størrelse på cache til download"
 
 msgctxt "#32117"
 msgid "-- Maximum cache size (in megabytes)"
@@ -126,7 +126,7 @@ msgstr "-- Maksimal cache-størrelse (i megabyte)"
 
 msgctxt "#32118"
 msgid "-- Alternate name for local fanart folder"
-msgstr "-- Alternativt navn til mappen til lokal fankunst"
+msgstr "-- Alternativt navn til mappen med lokal fankunst"
 
 msgctxt "#32119"
 msgid "Enable debug logging"
@@ -142,7 +142,7 @@ msgstr "Gem kunstnerbilleder i"
 
 msgctxt "#32122"
 msgid "addon_data folder"
-msgstr "mappe til addon_data"
+msgstr "Mappe til addon_data"
 
 msgctxt "#32123"
 msgid "Kodi artist information folder"
@@ -162,51 +162,51 @@ msgstr "Foretrukket sprog til kunstnerbiografi"
 
 msgctxt "#32127"
 msgid "- Use extrafanart folder"
-msgstr ""
+msgstr "- Brug mappe til ekstrafankunst"
 
 msgctxt "#32128"
 msgid "Platform for image storage"
-msgstr ""
+msgstr "Platform til lagring af billeder"
 
 msgctxt "#32129"
 msgid "Replace illegal path characters in artist name with"
-msgstr ""
+msgstr "Erstat ulovlige tegn i kunstnernavnets sti med"
 
 msgctxt "#32130"
 msgid "Replace trailing period in artist name with"
-msgstr ""
+msgstr "Erstat punktum i slutningen af kunstnernavn med"
 
 msgctxt "#32131"
 msgid "Windows"
-msgstr ""
+msgstr "Windows"
 
 msgctxt "#32132"
 msgid "Other"
-msgstr ""
+msgstr "Anden"
 
 msgctxt "#32133"
 msgid "MacOS"
-msgstr ""
+msgstr "MacOS"
 
 msgctxt "#32134"
 msgid "Move images to Kodi music artist folder"
-msgstr ""
+msgstr "Flyt billeder til Kodis mappe med kunstnere"
 
 msgctxt "#32135"
 msgid "Get artist bio from Kodi"
-msgstr ""
+msgstr "Hent kunstnerbiografi fra Kodi"
 
 msgctxt "#32136"
 msgid "Custom location"
-msgstr ""
+msgstr "Brugerdefineret placering"
 
 msgctxt "#32137"
 msgid "Delay between slide transitions (in seconds)"
-msgstr ""
+msgstr "Forsinkelse mellem diasovergange (i sekunder)"
 
 msgctxt "#32138"
 msgid "Fade to black during change in artists"
-msgstr ""
+msgstr "Mix til sort mellem ændring af kunstnere"
 
 msgctxt "#32139"
 msgid "Main thread sleep time (in seconds)"
@@ -222,55 +222,55 @@ msgstr ""
 
 msgctxt "#32142"
 msgid "Show notification during image downloads"
-msgstr ""
+msgstr "Vis notifikation under download af billeder"
 
 msgctxt "#32143"
 msgid "- Only show notification if there are images to download"
-msgstr ""
+msgstr "- Vis kun notifikation hvis der er billeder at downloade"
 
 msgctxt "#32144"
 msgid "Use more agressive artist search for streams"
-msgstr ""
+msgstr "Brug mere aggressiv søgning efter kunstnere for streams"
 
 msgctxt "#32145"
 msgid "Pause slideshow on playback pause"
-msgstr ""
+msgstr "Sæt diasshow på pause ved afspilningspause"
 
 # empty strings from id 32145 to 32199
 # Dialog headings
 msgctxt "#32200"
 msgid "Artist Slideshow"
-msgstr ""
+msgstr "Artist Slideshow"
 
 msgctxt "#32201"
 msgid "Warning"
-msgstr ""
+msgstr "Advarsel"
 
 msgctxt "#32202"
 msgid "Error"
-msgstr ""
+msgstr "Fejl"
 
 msgctxt "#32203"
 msgid "Progress"
-msgstr ""
+msgstr "Fremgang"
 
 msgctxt "#32204"
 msgid "Downloading"
-msgstr ""
+msgstr "Downloader"
 
 msgctxt "#32205"
 msgid "Download Complete"
-msgstr ""
+msgstr "Download fuldført"
 
 # empty strings from id 32206 to 32299
 # Dialog texts
 msgctxt "#32300"
 msgid "This will move and rename your image files and cannot be undone. Are you sure you want to do this?"
-msgstr ""
+msgstr "Dette vil flytte og omdøbe dine billedfiler og kan ikke fortrydes. Er du sikker på, at du vil gøre dette?"
 
 msgctxt "#32301"
 msgid "Unable to retrieve path to Kodi music artist image storage. Please check Settings > Media > Music and ensure the Artist Information Folder is set."
-msgstr ""
+msgstr "Kan ikke hente Kodis sti til billedlagring af kunstner. Tjek venligst Indstillinger > Medier > Musik, og sørg for, at mappen med kunstneroplysninger er indstillet."
 
 msgctxt "#32302"
 msgid "Artist Slideshow is already set to use the Kodi artist information folder. Please set to use either addon_data folder or a custom location and try again."
