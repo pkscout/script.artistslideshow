@@ -35,7 +35,7 @@ v.3.3.2
 		<summary lang="es_AR">Bajá imágenes e información adicional sobre el artista</summary>
 		<summary lang="es_ES">Descarga imágenes e información adicional del intérprete que esté sonando</summary>
 		<summary lang="es_MX">Descargar imágenes e información adicional del artista actualmente en reproducción</summary>
-		<summary lang="fi_FI">Lataa kuvia ja lisätietoja parhaillaan toistettavasta esittäjästä</summary>
+		<summary lang="fi_FI">Noutaa kuvia ja lisätietoja parhaillaan toistettavasta esittäjästä</summary>
 		<summary lang="fr_CA">Télécharger des images et des infos additionnelles sur l&apos;artiste écouté</summary>
 		<summary lang="fr_FR">Télécharger les images et les informations additionnelles de l&apos;artiste en cours de lecture</summary>
 		<summary lang="gl_ES">Descarga imaxes e info. adicional do artista que está a soar</summary>
@@ -66,6 +66,7 @@ v.3.3.2
 		<description lang="en_US">Addon to download images and additional information from fanart.tv and theaudiodb.com of the currently playing artist. The images, along with local artists&apos; images, and info can be used by the skin to create a slideshow for the artist being listened to.</description>
 		<description lang="es_ES">Addon para descargar imágenes e información adicional de fanart.tv y theaudiodb.com del intérprete que se está reproduciendo. Las imágenes, junto con imágenes de intérpretes locales, y la información puede ser utilizada por la piel para crear una presentación de diapositivas para el intérprete que se está escuchando.</description>
 		<description lang="es_MX">Complemento para descargar imágenes e información adicional de fanart.tv y theaudiodb.com del artista actualmente en reproducción. Las imágenes, junto con las imágenes e información locales de los artistas pueden ser utilizados por la máscara para crear una presentación del artista que estés escuchando.</description>
+		<description lang="fi_FI">Lisäosa parhaillaan kuunneltavan esittäjän kuvien ja tietojen noutoon mm. Fanart.tv- ja TheAudioDB.com-palveluista. Ulkoasut voivat luoda kuvaesityksiä kuunneltavasta esittäjästä käyttäen näitä tietoja ja esittäjien paikallisia kuvia.</description>
 		<description lang="fr_CA">Addiciel pour télécharger des images et des informations additionnelles sur fanart.tv et theaudiodb.com de l&apos;artiste en cours d&apos;écoute. Les images, ainsi que les images locales de l&apos;artiste, et les infos peuvent être utilisées par l&apos;habillage pour créer un diaporama pour l&apos;artiste en cours d&apos;écoute.</description>
 		<description lang="fr_FR">Extension permettant de télécharger des images et des informations supplémentaires depuis fanart.tv et depuis theaudiodb.com de l&apos;artiste en cours d&apos;écoute. Les images téléchargées, les images locales des artistes et les informations peuvent être utilisées par le skin pour créer un diaporama pour l&apos;artiste écouté.</description>
 		<description lang="gl_ES">Complemento para descargar imaxes e información adicional de fanart.tv e theaudiodb.com do artista que está a soar. Estas imaxes, xunto cas do artista gardadas en local e a información pódeas usar o tema para crear unha presentación.</description>
