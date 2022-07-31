@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: XBMC Addons\n"
 "Report-Msgid-Bugs-To: translations@kodi.tv\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2022-01-28 11:13+0000\n"
+"PO-Revision-Date: 2022-07-31 11:14+0000\n"
 "Last-Translator: Christian Gade <gade@kodi.tv>\n"
 "Language-Team: Danish <https://kodi.weblate.cloud/projects/kodi-add-ons-scripts/script-artistslideshow/da_dk/>\n"
 "Language: da_dk\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.10.1\n"
+"X-Generator: Weblate 4.13\n"
 
 msgctxt "Addon Summary"
 msgid "Download images and additional info of the currently playing artist"
@@ -210,15 +210,15 @@ msgstr "Mix til sort mellem ændring af kunstnere"
 
 msgctxt "#32139"
 msgid "Main thread sleep time (in seconds)"
-msgstr ""
+msgstr "Hovedtrådens dvaletid (i sekunder)"
 
 msgctxt "#32140"
 msgid "Main thread idle sleep time (in seconds)"
-msgstr ""
+msgstr "Hovedtrådens dvaletid ved inaktivitet (i sekunder)"
 
 msgctxt "#32141"
 msgid "Slideshow thread sleep time (in seconds)"
-msgstr ""
+msgstr "Slideshow-trådens dvaletid (i sekunder)"
 
 msgctxt "#32142"
 msgid "Show notification during image downloads"
@@ -274,213 +274,213 @@ msgstr "Kan ikke hente Kodis sti til billedlagring af kunstner. Tjek venligst In
 
 msgctxt "#32302"
 msgid "Artist Slideshow is already set to use the Kodi artist information folder. Please set to use either addon_data folder or a custom location and try again."
-msgstr ""
+msgstr "Artist Slideshow er allerede indstillet til at bruge Kodi kunstnerinformationsmappen. Indstil venligst til enten at bruge addon_data-mappen eller en brugerdefineret placering, og prøv igen."
 
 msgctxt "#32303"
 msgid "Moving and renaming images from custom location..."
-msgstr ""
+msgstr "Flytter og omdøber billeder fra brugerdefineret placering..."
 
 msgctxt "#32304"
 msgid "Moving and renaming images from addon_data folder..."
-msgstr ""
+msgstr "Flytter og omdøber billeder fra addon_data-mappe..."
 
 msgctxt "#32305"
 msgid "No artist directories found."
-msgstr ""
+msgstr "Ingen kunstnermapper fundet."
 
 msgctxt "#32306"
 msgid "Image move complete. You may now change the Artist Slideshow storage location to Kodi artist information folder."
-msgstr ""
+msgstr "Flytning af billede er fuldført. Du kan nu ændre Artist Slideshow-lagerpladsen til Kodi kunstnerinformationsmappen."
 
 msgctxt "#32307"
 msgid "Downloading new artist images"
-msgstr ""
+msgstr "Downloader nye kunstnerbilleder"
 
 msgctxt "#32308"
 msgid "artist images downloaded"
-msgstr ""
+msgstr "Kunstnerbilleder downloadet"
 
 msgctxt "#32309"
 msgid "artist image downloaded"
-msgstr ""
+msgstr "Kunstnerbillede downloadet"
 
 # empty strings from id 32310 to 32900
 # Languages
 msgctxt "#32901"
 msgid "Albanian"
-msgstr ""
+msgstr "Albansk"
 
 msgctxt "#32902"
 msgid "Arabic"
-msgstr ""
+msgstr "Arabisk"
 
 msgctxt "#32903"
 msgid "Belarusian"
-msgstr ""
+msgstr "Hviderussisk"
 
 msgctxt "#32904"
 msgid "Bosnian (Latin)"
-msgstr ""
+msgstr "Bosnisk (latinsk)"
 
 msgctxt "#32905"
 msgid "Bulgarian"
-msgstr ""
+msgstr "Bulgarsk"
 
 msgctxt "#32906"
 msgid "Catalan"
-msgstr ""
+msgstr "Catalansk"
 
 msgctxt "#32907"
 msgid "Chinese"
-msgstr ""
+msgstr "Kinesisk"
 
 msgctxt "#32908"
 msgid "Croatian"
-msgstr ""
+msgstr "Kroatisk"
 
 msgctxt "#32909"
 msgid "Czech"
-msgstr ""
+msgstr "Tjekkisk"
 
 msgctxt "#32910"
 msgid "Danish"
-msgstr ""
+msgstr "Dansk"
 
 msgctxt "#32911"
 msgid "Dutch"
-msgstr ""
+msgstr "Hollandsk"
 
 msgctxt "#32912"
 msgid "English"
-msgstr ""
+msgstr "Engelsk"
 
 msgctxt "#32913"
 msgid "Estonian"
-msgstr ""
+msgstr "Estisk"
 
 msgctxt "#32914"
 msgid "Finnish"
-msgstr ""
+msgstr "Finsk"
 
 msgctxt "#32915"
 msgid "French"
-msgstr ""
+msgstr "Fransk"
 
 msgctxt "#32916"
 msgid "German"
-msgstr ""
+msgstr "Tysk"
 
 msgctxt "#32917"
 msgid "Greek"
-msgstr ""
+msgstr "Græsk"
 
 msgctxt "#32918"
 msgid "Hebrew"
-msgstr ""
+msgstr "Hebraisk"
 
 msgctxt "#32919"
 msgid "Hindi"
-msgstr ""
+msgstr "Hindi"
 
 msgctxt "#32920"
 msgid "Hungarian"
-msgstr ""
+msgstr "Ungarsk"
 
 msgctxt "#32921"
 msgid "Icelandic"
-msgstr ""
+msgstr "Islandsk"
 
 msgctxt "#32922"
 msgid "Indonesian"
-msgstr ""
+msgstr "Indonesisk"
 
 # empty string with id 32923
 msgctxt "#32924"
 msgid "Italian"
-msgstr ""
+msgstr "Italiensk"
 
 msgctxt "#32925"
 msgid "Japanese"
-msgstr ""
+msgstr "Japansk"
 
 msgctxt "#32926"
 msgid "Korean"
-msgstr ""
+msgstr "Koreansk"
 
 msgctxt "#32927"
 msgid "Latvian"
-msgstr ""
+msgstr "Lettisk"
 
 msgctxt "#32928"
 msgid "Lithuanian"
-msgstr ""
+msgstr "Litauisk"
 
 msgctxt "#32929"
 msgid "Macedonian"
-msgstr ""
+msgstr "Makedonsk"
 
 msgctxt "#32930"
 msgid "Norwegian"
-msgstr ""
+msgstr "Norsk"
 
 # empty string with id 32931
 msgctxt "#32932"
 msgid "Polish"
-msgstr ""
+msgstr "Polsk"
 
 msgctxt "#32933"
 msgid "Portuguese"
-msgstr ""
+msgstr "Portugisisk"
 
 msgctxt "#32934"
 msgid "Portuguese (Brazil)"
-msgstr ""
+msgstr "Portugisisk (Brasilien)"
 
 msgctxt "#32935"
 msgid "Romanian"
-msgstr ""
+msgstr "Rumænsk"
 
 msgctxt "#32936"
 msgid "Russian"
-msgstr ""
+msgstr "Russisk"
 
 msgctxt "#32937"
 msgid "SerbianLatin"
-msgstr ""
+msgstr "Serbisk latin"
 
 msgctxt "#32938"
 msgid "Slovak"
-msgstr ""
+msgstr "Slovakisk"
 
 msgctxt "#32939"
 msgid "Slovenian"
-msgstr ""
+msgstr "Slovensk"
 
 msgctxt "#32940"
 msgid "Spanish"
-msgstr ""
+msgstr "Spansk"
 
 # empty string with id 32941
 msgctxt "#32942"
 msgid "Swedish"
-msgstr ""
+msgstr "Svensk"
 
 msgctxt "#32943"
 msgid "Thai"
-msgstr ""
+msgstr "Thai"
 
 msgctxt "#32944"
 msgid "Turkish"
-msgstr ""
+msgstr "Tyrkisk"
 
 msgctxt "#32945"
 msgid "Ukrainian"
-msgstr ""
+msgstr "Ukrainsk"
 
 msgctxt "#32946"
 msgid "Vietnamese"
-msgstr ""
+msgstr "Vietnamesisk"
 
 msgctxt "#32947"
 msgid "Farsi"
-msgstr ""
+msgstr "Farsi"
