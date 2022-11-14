@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: XBMC Addons\n"
 "Report-Msgid-Bugs-To: translations@kodi.tv\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2021-08-04 13:29+0000\n"
+"PO-Revision-Date: 2022-03-09 14:05+0000\n"
 "Last-Translator: Christian Gade <gade@kodi.tv>\n"
 "Language-Team: Belarusian <https://kodi.weblate.cloud/projects/kodi-add-ons-scripts/script-artistslideshow/be_by/>\n"
 "Language: be_by\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 4.7.2\n"
+"X-Generator: Weblate 4.11.2\n"
 
 msgctxt "Addon Summary"
 msgid "Download images and additional info of the currently playing artist"
@@ -52,7 +52,7 @@ msgstr ""
 
 msgctxt "#32006"
 msgid "Advanced"
-msgstr ""
+msgstr "Пашыраны"
 
 # empty strings from id 32007 to 32099
 # Settings
@@ -130,7 +130,7 @@ msgstr ""
 
 msgctxt "#32119"
 msgid "Enable debug logging"
-msgstr ""
+msgstr "Уключыць журнал адладкі"
 
 msgctxt "#32120"
 msgid "Disable secondary and featured artist images"
@@ -248,7 +248,7 @@ msgstr ""
 
 msgctxt "#32202"
 msgid "Error"
-msgstr ""
+msgstr "Памылка"
 
 msgctxt "#32203"
 msgid "Progress"
