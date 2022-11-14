@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.3.2">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.3.3~beta1">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="script.module.requests" version="2.22.0+matrix.1" />
@@ -11,8 +11,9 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>
-v.3.3.2
-- fix for future Python 3.9 compatibility
+v.3.3.3
+- trim_cache now deletes information as well as images
+- update to new settings format
 		</news>
 		<assets>
         	<icon>icon.png</icon>
