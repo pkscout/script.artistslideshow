@@ -97,7 +97,7 @@
 						<dependency type="visible">
 							<and>
 								<condition operator="is" setting="fallback">true</condition>
-								<condition on="property" name="InfoBool"> eq(-7,false)</condition>
+								<condition operator="is" setting="slideshow">false</condition>
 							</and>
 						</dependency>
 					</dependencies>
@@ -119,9 +119,9 @@
 							<option label="32136">2</option>
 						</options>
 					</constraints>
-					<control type="spinner" format="string"/>
+					<control type="list" format="string"/>
 				</setting>
-				<setting id="local_artist_path" type="path" label="32113" help="">
+				<setting id="local_artist_path" type="path" label="32113" parent="artist_image_storage" help="">
 					<level>0</level>
 					<default/>
 					<constraints>
@@ -137,7 +137,7 @@
 						<heading>32113</heading>
 					</control>
 				</setting>
-				<setting id="use_extrafanart_folder" type="boolean" label="32127" help="">
+				<setting id="use_extrafanart_folder" type="boolean" label="32127" parent="artist_image_storage" help="">
 					<level>0</level>
 					<default>true</default>
 					<dependencies>
@@ -147,14 +147,14 @@
 					</dependencies>
 					<control type="toggle"/>
 				</setting>
-				<setting id="fanart_folder" type="string" label="32118" help="">
+				<setting id="fanart_folder" type="string" label="32118" parent="use_extrafanart_folder" help="">
 					<level>0</level>
 					<default>extrafanart</default>
 					<dependencies>
 						<dependency type="visible">
 							<and>
 								<condition operator="is" setting="artist_image_storage">2</condition>
-								<condition on="property" name="InfoBool"> eq(-1,true)</condition>
+								<condition operator="is" setting="use_extrafanart_folder">true</condition>
 							</and>
 						</dependency>
 					</dependencies>
@@ -162,7 +162,7 @@
 						<heading>32118</heading>
 					</control>
 				</setting>
-				<setting id="restrict_cache" type="boolean" label="32116" help="">
+				<setting id="restrict_cache" type="boolean" label="32116" parent="fanart_folder" help="">
 					<level>0</level>
 					<default>false</default>
 					<dependencies>
@@ -172,30 +172,18 @@
 					</dependencies>
 					<control type="toggle"/>
 				</setting>
-				<setting id="max_cache_size" type="string" label="32117" help="">
+				<setting id="max_cache_size" type="integer" label="32117" parent="restrict_cache" help="">
 					<level>0</level>
 					<default>1024</default>
-					<constraints>
-						<options>
-							<option label="128">128</option>
-							<option label="256">256</option>
-							<option label="512">512</option>
-							<option label="768">768</option>
-							<option label="1024">1024</option>
-							<option label="2048">2048</option>
-							<option label="3072">3072</option>
-							<option label="4096">4096</option>
-						</options>
-					</constraints>
+					<control type="edit" format="integer">
+						<heading>32117</heading>
+					</control>
 					<dependencies>
 						<dependency type="visible">
-							<and>
-								<condition operator="is" setting="restrict_cache">true</condition>
-								<condition on="property" name="InfoBool"> eq(-5,0)</condition>
-							</and>
+							<condition operator="is" setting="restrict_cache">true</condition>
+							<condition operator="is" setting="artist_image_storage">0</condition>
 						</dependency>
 					</dependencies>
-					<control type="spinner" format="string"/>
 				</setting>
 				<setting id="artist_info_storage" type="integer" label="32125" help="">
 					<level>0</level>
@@ -206,9 +194,9 @@
 							<option label="32136">1</option>
 						</options>
 					</constraints>
-					<control type="spinner" format="string"/>
+					<control type="list" format="string"/>
 				</setting>
-				<setting id="local_info_path" type="path" label="32113" help="">
+				<setting id="local_info_path" type="path" label="32113" parent="artist_info_storage" help="">
 					<level>0</level>
 					<default/>
 					<constraints>
@@ -253,7 +241,7 @@
 					<default>false</default>
 					<control type="toggle"/>
 				</setting>
-				<setting id="fanarttv_clientapikey" type="string" label="32109" help="">
+				<setting id="fanarttv_clientapikey" type="string" label="32109" parent="fanarttv" help="">
 					<level>0</level>
 					<default/>
 					<constraints>
@@ -268,7 +256,7 @@
 						<heading>32109</heading>
 					</control>
 				</setting>
-				<setting id="fanarttv_all" type="boolean" label="32108" help="">
+				<setting id="fanarttv_all" type="boolean" label="32108" parent="fanarttv" help="">
 					<level>0</level>
 					<default>false</default>
 					<dependencies>
@@ -278,7 +266,7 @@
 					</dependencies>
 					<control type="toggle"/>
 				</setting>
-				<setting id="fanarttv_donated" type="boolean" label="32110" help="">
+				<setting id="fanarttv_donated" type="boolean" label="32110" parent="fanarttv" help="">
 					<level>0</level>
 					<default>false</default>
 					<dependencies>
@@ -293,7 +281,7 @@
 					<default>false</default>
 					<control type="toggle"/>
 				</setting>
-				<setting id="theaudiodb_all" type="boolean" label="32108" help="">
+				<setting id="theaudiodb_all" type="boolean" label="32108" parent="theaudiodb" help="">
 					<level>0</level>
 					<default>false</default>
 					<dependencies>
@@ -303,7 +291,7 @@
 					</dependencies>
 					<control type="toggle"/>
 				</setting>
-				<setting id="theaudiodb_donated" type="boolean" label="32110" help="">
+				<setting id="theaudiodb_donated" type="boolean" label="32110" parent="theaudiodb" help="">
 					<level>0</level>
 					<default>false</default>
 					<dependencies>
@@ -320,8 +308,7 @@
 						<dependency type="visible">
 							<or>
 								<condition operator="is" setting="fanarttv">true</condition>
-								<condition on="property" name="InfoBool"/>
-								<condition on="property" name="InfoBool"> eq(-3,true)</condition>
+								<condition operator="is" setting="theaudiodb">true</condition>
 							</or>
 						</dependency>
 					</dependencies>
@@ -334,7 +321,7 @@
 						<dependency type="visible">
 							<or>
 								<condition operator="is" setting="fanarttv">true</condition>
-								<condition on="property" name="InfoBool"> eq(-4,true)</condition>
+								<condition operator="is" setting="theaudiodb">true</condition>
 							</or>
 						</dependency>
 					</dependencies>
@@ -349,7 +336,7 @@
 					<default>false</default>
 					<control type="toggle"/>
 				</setting>
-				<setting id="ai_priority_theaudiodb" type="integer" label="32124" help="">
+				<setting id="ai_priority_theaudiodb" type="integer" label="32124" parent="ai_theaudiodb" help="">
 					<level>0</level>
 					<default>5</default>
 					<constraints>
@@ -371,7 +358,7 @@
 					<default>false</default>
 					<control type="toggle"/>
 				</setting>
-				<setting id="ai_priority_lastfm" type="integer" label="32124" help="">
+				<setting id="ai_priority_lastfm" type="integer" label="32124" parent="ai_lastfm" help="">
 					<level>0</level>
 					<default>5</default>
 					<constraints>
@@ -443,14 +430,14 @@
 							<option label="32946">43</option>
 						</options>
 					</constraints>
-					<control type="spinner" format="string"/>
+					<control type="list" format="string"/>
 				</setting>
 				<setting id="ab_kodi" type="boolean" label="32135" help="">
 					<level>0</level>
 					<default>true</default>
 					<control type="toggle"/>
 				</setting>
-				<setting id="ab_priority_kodi" type="integer" label="32124" help="">
+				<setting id="ab_priority_kodi" type="integer" label="32124" parent="ab_kodi" help="">
 					<level>0</level>
 					<default>1</default>
 					<constraints>
@@ -472,7 +459,7 @@
 					<default>false</default>
 					<control type="toggle"/>
 				</setting>
-				<setting id="ab_priority_theaudiodb" type="integer" label="32124" help="">
+				<setting id="ab_priority_theaudiodb" type="integer" label="32124" parent="ab_theaudiodb" help="">
 					<level>0</level>
 					<default>5</default>
 					<constraints>
@@ -494,7 +481,7 @@
 					<default>false</default>
 					<control type="toggle"/>
 				</setting>
-				<setting id="ab_priority_lastfm" type="integer" label="32124" help="">
+				<setting id="ab_priority_lastfm" type="integer" label="32124" parent="ab_lastfm" help="">
 					<level>0</level>
 					<default>5</default>
 					<constraints>
@@ -520,7 +507,7 @@
 					<default>false</default>
 					<control type="toggle"/>
 				</setting>
-				<setting id="sa_priority_lastfm" type="integer" label="32124" help="">
+				<setting id="sa_priority_lastfm" type="integer" label="32124" parent="sa_lastfm" help="">
 					<level>0</level>
 					<default>5</default>
 					<constraints>
@@ -551,7 +538,7 @@
 							<option label="32133">2</option>
 						</options>
 					</constraints>
-					<control type="spinner" format="string"/>
+					<control type="list" format="string"/>
 				</setting>
 				<setting id="illegal_replace" type="string" label=" 32129" help="">
 					<level>0</level>
