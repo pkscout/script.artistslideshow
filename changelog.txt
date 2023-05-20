@@ -1,3 +1,6 @@
+v.3.3.5
+- fix for AS not accepting images with uppcase extensions
+
 v.3.3.4
 - removed Leia to Matrix transition code
 

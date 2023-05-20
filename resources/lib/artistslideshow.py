@@ -116,7 +116,7 @@ class Slideshow(threading.Thread):
         if not path:
             LW.log(['Image path was empty, nothing added'])
             return False
-        if path.endswith(self.VALIDIMAGETYPES):
+        if path.lower().endswith(self.VALIDIMAGETYPES):
             self.IMAGES.append(path)
             LW.log(['Added to image display group: ' + path])
             self.IMAGEADDED = True
