@@ -12,6 +12,7 @@
 		<news>
 v.3.3.6
 - fix to allow blank as illegal replace character in Nexus
+- updated language files
 		</news>
 		<assets>
         	<icon>icon.png</icon>

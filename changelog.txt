@@ -1,5 +1,6 @@
 v.3.3.6
 - fix to allow blank as illegal replace character in Nexus
+- updated language files
 
 v.3.3.5
 - fix for AS not accepting images with uppcase extensions
