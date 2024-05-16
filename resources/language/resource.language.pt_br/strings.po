@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: XBMC Addons\n"
 "Report-Msgid-Bugs-To: translations@kodi.tv\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2024-05-13 23:04+0000\n"
-"Last-Translator: Havok Dan <havokdan@yahoo.com.br>\n"
+"PO-Revision-Date: 2024-05-16 02:13+0000\n"
+"Last-Translator: icarok99 <icarok00@gmail.com>\n"
 "Language-Team: Portuguese (Brazil) <https://kodi.weblate.cloud/projects/kodi-add-ons-scripts/script-artistslideshow/pt_br/>\n"
 "Language: pt_br\n"
 "MIME-Version: 1.0\n"
@@ -28,7 +28,7 @@ msgstr "Addon para download de imagens e informações adicionais do artista que
 # Section Headings
 msgctxt "#32000"
 msgid "Slideshow"
-msgstr ""
+msgstr "Apresentação de slides"
 
 msgctxt "#32001"
 msgid "Storage"
@@ -176,7 +176,6 @@ msgctxt "#32130"
 msgid "Replace trailing period in artist name with"
 msgstr "Substitua o ponto final no nome do artista por"
 
-#, fuzzy
 msgctxt "#32131"
 msgid "Windows"
 msgstr "Windows"
@@ -185,7 +184,6 @@ msgctxt "#32132"
 msgid "Other"
 msgstr "Outro"
 
-#, fuzzy
 msgctxt "#32133"
 msgid "MacOS"
 msgstr "MacOS"
@@ -318,7 +316,7 @@ msgstr "Árabe"
 
 msgctxt "#32903"
 msgid "Belarusian"
-msgstr ""
+msgstr "Bielorrusso"
 
 msgctxt "#32904"
 msgid "Bosnian (Latin)"
@@ -326,7 +324,7 @@ msgstr ""
 
 msgctxt "#32905"
 msgid "Bulgarian"
-msgstr ""
+msgstr "Búlgaro"
 
 msgctxt "#32906"
 msgid "Catalan"
@@ -334,15 +332,15 @@ msgstr ""
 
 msgctxt "#32907"
 msgid "Chinese"
-msgstr ""
+msgstr "Chinês"
 
 msgctxt "#32908"
 msgid "Croatian"
-msgstr ""
+msgstr "Croata"
 
 msgctxt "#32909"
 msgid "Czech"
-msgstr ""
+msgstr "Tcheco"
 
 msgctxt "#32910"
 msgid "Danish"
@@ -350,11 +348,11 @@ msgstr ""
 
 msgctxt "#32911"
 msgid "Dutch"
-msgstr ""
+msgstr "Holandês"
 
 msgctxt "#32912"
 msgid "English"
-msgstr ""
+msgstr "Inglês"
 
 msgctxt "#32913"
 msgid "Estonian"
@@ -362,23 +360,23 @@ msgstr ""
 
 msgctxt "#32914"
 msgid "Finnish"
-msgstr ""
+msgstr "Finlandês"
 
 msgctxt "#32915"
 msgid "French"
-msgstr ""
+msgstr "Francês"
 
 msgctxt "#32916"
 msgid "German"
-msgstr ""
+msgstr "Alemão"
 
 msgctxt "#32917"
 msgid "Greek"
-msgstr ""
+msgstr "Grego"
 
 msgctxt "#32918"
 msgid "Hebrew"
-msgstr ""
+msgstr "Hebraico"
 
 msgctxt "#32919"
 msgid "Hindi"
@@ -386,7 +384,7 @@ msgstr ""
 
 msgctxt "#32920"
 msgid "Hungarian"
-msgstr ""
+msgstr "Húngaro"
 
 msgctxt "#32921"
 msgid "Icelandic"
@@ -394,20 +392,20 @@ msgstr ""
 
 msgctxt "#32922"
 msgid "Indonesian"
-msgstr ""
+msgstr "Indonésio"
 
 # empty string with id 32923
 msgctxt "#32924"
 msgid "Italian"
-msgstr ""
+msgstr "Italiano"
 
 msgctxt "#32925"
 msgid "Japanese"
-msgstr ""
+msgstr "Japonês"
 
 msgctxt "#32926"
 msgid "Korean"
-msgstr ""
+msgstr "Coreano"
 
 msgctxt "#32927"
 msgid "Latvian"
@@ -428,7 +426,7 @@ msgstr ""
 # empty string with id 32931
 msgctxt "#32932"
 msgid "Polish"
-msgstr ""
+msgstr "Polonês"
 
 msgctxt "#32933"
 msgid "Portuguese"
@@ -444,7 +442,7 @@ msgstr ""
 
 msgctxt "#32936"
 msgid "Russian"
-msgstr ""
+msgstr "Russo"
 
 msgctxt "#32937"
 msgid "SerbianLatin"
@@ -460,28 +458,28 @@ msgstr ""
 
 msgctxt "#32940"
 msgid "Spanish"
-msgstr ""
+msgstr "Espanhol"
 
 # empty string with id 32941
 msgctxt "#32942"
 msgid "Swedish"
-msgstr ""
+msgstr "Sueco"
 
 msgctxt "#32943"
 msgid "Thai"
-msgstr ""
+msgstr "Tailandês"
 
 msgctxt "#32944"
 msgid "Turkish"
-msgstr ""
+msgstr "Turco"
 
 msgctxt "#32945"
 msgid "Ukrainian"
-msgstr ""
+msgstr "Ucraniano"
 
 msgctxt "#32946"
 msgid "Vietnamese"
-msgstr ""
+msgstr "Vietnamita"
 
 msgctxt "#32947"
 msgid "Farsi"
