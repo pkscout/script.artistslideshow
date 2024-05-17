@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: XBMC Addons\n"
 "Report-Msgid-Bugs-To: translations@kodi.tv\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2024-05-16 02:13+0000\n"
-"Last-Translator: icarok99 <icarok00@gmail.com>\n"
+"PO-Revision-Date: 2024-05-17 05:26+0000\n"
+"Last-Translator: Havok Dan <havokdan@yahoo.com.br>\n"
 "Language-Team: Portuguese (Brazil) <https://kodi.weblate.cloud/projects/kodi-add-ons-scripts/script-artistslideshow/pt_br/>\n"
 "Language: pt_br\n"
 "MIME-Version: 1.0\n"
@@ -320,7 +320,7 @@ msgstr "Bielorrusso"
 
 msgctxt "#32904"
 msgid "Bosnian (Latin)"
-msgstr ""
+msgstr "Bósnio (Latim)"
 
 msgctxt "#32905"
 msgid "Bulgarian"
@@ -328,7 +328,7 @@ msgstr "Búlgaro"
 
 msgctxt "#32906"
 msgid "Catalan"
-msgstr ""
+msgstr "Catalão"
 
 msgctxt "#32907"
 msgid "Chinese"
@@ -344,7 +344,7 @@ msgstr "Tcheco"
 
 msgctxt "#32910"
 msgid "Danish"
-msgstr ""
+msgstr "Dinamarquês"
 
 msgctxt "#32911"
 msgid "Dutch"
@@ -356,7 +356,7 @@ msgstr "Inglês"
 
 msgctxt "#32913"
 msgid "Estonian"
-msgstr ""
+msgstr "Estoniano"
 
 msgctxt "#32914"
 msgid "Finnish"
@@ -378,9 +378,10 @@ msgctxt "#32918"
 msgid "Hebrew"
 msgstr "Hebraico"
 
+#, fuzzy
 msgctxt "#32919"
 msgid "Hindi"
-msgstr ""
+msgstr "Hindi"
 
 msgctxt "#32920"
 msgid "Hungarian"
@@ -388,7 +389,7 @@ msgstr "Húngaro"
 
 msgctxt "#32921"
 msgid "Icelandic"
-msgstr ""
+msgstr "Islandês"
 
 msgctxt "#32922"
 msgid "Indonesian"
@@ -409,11 +410,11 @@ msgstr "Coreano"
 
 msgctxt "#32927"
 msgid "Latvian"
-msgstr ""
+msgstr "Letão"
 
 msgctxt "#32928"
 msgid "Lithuanian"
-msgstr ""
+msgstr "Lituano"
 
 msgctxt "#32929"
 msgid "Macedonian"
