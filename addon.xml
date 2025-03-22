@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.3.8~beta1">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.3.8">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="script.module.requests" version="2.22.0+matrix.1" />
