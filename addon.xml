@@ -23,6 +23,7 @@ v.3.3.8
 		<email>artistslideshow.xbmc@gmail.com</email>
 		<source>https://github.com/pkscout/script.artistslideshow</source>
 		<summary lang="bg_BG">Сваля изображения и допълнителна инф. за изпълнителя на текущата песен</summary>
+		<summary lang="bs_BA">Preuzmite slike i dodatne informacije o izvođaču koji trenutno svira</summary>
 		<summary lang="ca_ES">Descàrrega imatges i informació addicional de l&apos;artista que s&apos;està reproduint</summary>
 		<summary lang="da_DK">Download billeder og ekstra info om kunstneren, der spiller i øjeblikket</summary>
 		<summary lang="de_DE">Bilder und zusätzliche Informationen für den gerade wiedergegebenen Interpreten herunterladen</summary>
@@ -56,6 +57,7 @@ v.3.3.8
 		<summary lang="sv_SE">Ladda ner bilder samt ytterligare information om den spelade artisten</summary>
 		<summary lang="zh_CN">下载当前播放艺人的图片和附加信息</summary>
 		<description lang="bg_BG">Добавката сваля картинки и допълнителна информация от www.fanart.tv и www.theaudiodb.com за изпълнителя който звучи в момента. Картинките, заедно с фанарт изображенията на изпълнителя, може да се ползват от облика, за създаването на слайдшоу за изпълнителя, който звучи в момента.</description>
+		<description lang="bs_BA">Dodatak za preuzimanje slika i dodatnih informacija o izvođaču koji se trenutno reprodukuje sa fanart.tv i theaudiodb.com. Slike, zajedno sa slikama i informacijama lokalnih izvođača, skin može koristiti za kreiranje klizaja za izvođača kojeg slušate.</description>
 		<description lang="ca_ES">Complement per descarregar imatges i informació addicional de fanart.tv i theaudiodb.com de l&apos;artista que s&apos;està reproduint. Les imatges, juntament amb les imatges locals d&apos;artistes, i la informació, pot ser utilitzada per la pell per crear una presentació de diapositives per a l&apos;artista que s&apos;està escoltant.</description>
 		<description lang="da_DK">Add-on til at downloade billeder og yderligere information fra fanart.tv og theaudiodb.com af den aktuelt afspillede kunstner. Billederne kan sammen med lokale kunstneres billeder og info bruges af dit skin til at skabe et diasshow for kunstneren, der lyttes til.</description>
 		<description lang="de_DE">Addon zum Herunterladen von Bildern und zusätzlichen Informationen von fanart.tv und theaudiodb.com für den aktuell wiedergegebenen Interpreten. Diese Bilder können zusammen mit den lokalen Interpretenbildern und Informationen vom Skin genutzt werden, um eine Diashow für den aktuell angehörten Interpreten zu erstellen.</description>
