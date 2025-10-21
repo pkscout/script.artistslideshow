@@ -30,7 +30,6 @@ v.3.3.8
 		<summary lang="el_GR">Κατεβάστε εικόνες και επιπλέον πληροφορίες του τρέχοντος καλλιτέχνη</summary>
 		<summary lang="en_GB">Download images and additional info of the currently playing artist</summary>
 		<summary lang="en_NZ">Download images and additional info of the currently playing artist</summary>
-		<summary lang="en_NZ">Download images and additional info of the currently playing artist</summary>
 		<summary lang="en_US">Download images and additional info of the currently playing artist</summary>
 		<summary lang="en_US">Download images and additional info of the currently playing artist</summary>
 		<summary lang="es_AR">Bajá imágenes e información adicional sobre el artista</summary>
@@ -38,7 +37,6 @@ v.3.3.8
 		<summary lang="es_MX">Descargar imágenes e información adicional del artista actualmente en reproducción</summary>
 		<summary lang="et_EE">Lae alla pilte ja lisateavet hetkel mängiva esitaja kohta</summary>
 		<summary lang="fi_FI">Noutaa kuvia ja lisätietoja parhaillaan toistettavasta esittäjästä</summary>
-		<summary lang="fr_CA">Télécharger des images et des infos additionnelles sur l&apos;artiste écouté</summary>
 		<summary lang="fr_CA">Télécharger des images et des infos additionnelles sur l&apos;artiste écouté</summary>
 		<summary lang="fr_FR">Télécharger les images et les informations additionnelles de l&apos;artiste en cours de lecture</summary>
 		<summary lang="ga">Íoslódáil íomhánna agus eolas breise faoin ealaíontóir atá ag seinm faoi láthair</summary>
@@ -65,14 +63,12 @@ v.3.3.8
 		<description lang="el_GR">Πρόσθετο για τη λήψη εικόνων και επιπλέον πληροφοριών από το fanart.tv και το theaudiodb.com για τον τρέχοντα καλλιτέχνη. Οι εικόνες, μαζί με τοπικές εικόνες του καλλιτέχνη καθώς και πληροφορίες, μπορούν να χρησιμοποιηθούν από το κέλυφος για τη δημιουργία παρουσιάσεων διαφανειών του καλλιτέχνη η μουσική του οποίου ακούγεται.</description>
 		<description lang="en_GB">Addon to download images and additional information from fanart.tv and theaudiodb.com of the currently playing artist. The images, along with local artists&apos; images, and info can be used by the skin to create a slideshow for the artist being listened to.</description>
 		<description lang="en_NZ">Addon to download images and additional information from fanart.tv and theaudiodb.com of the currently playing artist. The images, along with local artists&apos; images, and info can be used by the skin to create a slideshow for the artist being listened to.</description>
-		<description lang="en_NZ">Addon to download images and additional information from fanart.tv and theaudiodb.com of the currently playing artist. The images, along with local artists&apos; images, and info can be used by the skin to create a slideshow for the artist being listened to.</description>
 		<description lang="en_US">Addon to download images and additional information from fanart.tv and theaudiodb.com of the currently playing artist. The images, along with local artists&apos; images, and info can be used by the skin to create a slideshow for the artist being listened to.</description>
 		<description lang="en_US">Addon to download images and additional information from fanart.tv and theaudiodb.com of the currently playing artist. The images, along with local artists&apos; images, and info can be used by the skin to create a slideshow for the artist being listened to.</description>
 		<description lang="es_ES">Addon para descargar imágenes e información adicional desde fanart.tv y theaudiodb.com del artista que se está reproduciendo. Las imágenes, junto con imágenes de artistas locales, y la información puede ser utilizada por el skin para crear una presentación de imágenes para el artista que se está escuchando.</description>
 		<description lang="es_MX">Complemento para descargar imágenes e información adicional de fanart.tv y theaudiodb.com del artista actualmente en reproducción. Las imágenes, junto con las imágenes e información locales de los artistas pueden ser utilizados por la máscara para crear una presentación del artista que estés escuchando.</description>
 		<description lang="et_EE">Lisamoodul, millega saab alla laadida pilte ja lisateavet fanart.tv ja theaudiodb.com saitidelt hetkel mängiva esitaja kohta. Koos meediakogus leiduvate esitajate piltide ja teabega saab rüü neid kasutada kuulatava esitaja slaidiseansi loomiseks.</description>
 		<description lang="fi_FI">Lisäosa parhaillaan kuunneltavan esittäjän kuvien ja tietojen noutoon mm. Fanart.tv- ja TheAudioDB.com-palveluista. Ulkoasut voivat luoda kuvaesityksiä kuunneltavasta esittäjästä käyttäen näitä tietoja ja esittäjien paikallisia kuvia.</description>
-		<description lang="fr_CA">Addiciel pour télécharger des images et des informations additionnelles sur fanart.tv et theaudiodb.com de l&apos;artiste en cours d&apos;écoute. Les images, ainsi que les images locales de l&apos;artiste, et les infos peuvent être utilisées par l&apos;habillage pour créer un diaporama pour l&apos;artiste en cours d&apos;écoute.</description>
 		<description lang="fr_CA">Addiciel pour télécharger des images et des informations additionnelles sur fanart.tv et theaudiodb.com de l&apos;artiste en cours d&apos;écoute. Les images, ainsi que les images locales de l&apos;artiste, et les infos peuvent être utilisées par l&apos;habillage pour créer un diaporama pour l&apos;artiste en cours d&apos;écoute.</description>
 		<description lang="fr_FR">Extension permettant de télécharger des images et des informations supplémentaires depuis fanart.tv et depuis theaudiodb.com de l&apos;artiste en cours d&apos;écoute. Les images téléchargées, les images locales des artistes et les informations peuvent être utilisées par le skin pour créer un diaporama pour l&apos;artiste écouté.</description>
 		<description lang="ga">Breiseán chun íomhánna agus faisnéis bhreise a íoslódáil ó fanart.tv agus theaudiodb.com den ealaíontóir atá ag seinm faoi láthair. Is féidir leis an gcraiceann na híomhánna, mar aon le híomhánna agus faisnéis na n-ealaíontóirí áitiúla, a úsáid chun sleamhnán a chruthú don ealaíontóir atá á éisteacht.</description>
