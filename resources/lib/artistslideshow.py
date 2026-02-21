@@ -553,6 +553,11 @@ class Main(xbmc.Player):
                     del playingartists[1:]
                 for playingartist in playingartists:
                     artist_names.extend(self._split_artists(playingartist))
+            # Also try RadioMonitor.Title as fallback (handles swapped artist/title in streams)
+            radio_title = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Title)')
+            if radio_title and radio_title not in artist_names:
+                LW.log(['adding RadioMonitor.Title as additional artist candidate: ' + radio_title])
+                artist_names.extend(self._split_artists(radio_title))
         return artist_names, mbids
 
     def _get_current_artists_filtered(self, artist_names, mbids):
@@ -1254,26 +1259,6 @@ class Main(xbmc.Player):
                 elif self.LOCALINFOSTORAGE:
                     self._delete_folder(os.path.abspath(
                         os.path.join(self.INFODIR, os.pardir)))
-        if not self.IMAGESFOUND:
-            # Fallback: try RadioMonitor.Title as artist name
-            fallback_artist = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Title)')
-            already_tried = [a for a, _ in self.ARTISTS_INFO] if self.ARTISTS_INFO else []
-            if fallback_artist and fallback_artist not in already_tried:
-                LW.log(['no images found, trying RadioMonitor.Title as fallback artist: ' + fallback_artist])
-                fallback_info = self._get_current_artists_filtered(self._split_artists(fallback_artist), [])
-                for artist, mbid in fallback_info:
-                    if self._playback_stopped_or_changed(wait_time=0.1):
-                        break
-                    self.NAME = artist
-                    self.MBID = mbid
-                    self._set_infodir(self.NAME)
-                    self._set_cachedir(self.NAME)
-                    images = self._get_file_list(self.CACHEDIR, do_filter=True)
-                    if images:
-                        self._set_artwork_from_dir(self.CACHEDIR, images)
-                        self.IMAGESFOUND = True
-                    elif self._download():
-                        self.IMAGESFOUND = True
         if not self.IMAGESFOUND:
             LW.log(['no images found for any currently playing artists'])
             if self.USEFALLBACK:
