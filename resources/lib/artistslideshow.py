@@ -544,26 +544,23 @@ class Main(xbmc.Player):
         if artist_names and all(name.strip().isdigit() for name in artist_names):
             LW.log(['artist names are all numeric IDs, treating as empty for stream lookup', artist_names])
             artist_names = []
+        radio_title = ''
+        radio_artist = ''
         if not artist_names:
             LW.log(
                 ['No artist names returned from JSON call, assuming this is an internet stream'])
-            # For radio streams, prefer the pre-parsed artist from the monitor service
+            # For radio streams, do NOT prefer RadioMonitor.Artist here —
+            # prefer parsing the playing title first and use RadioMonitor info
+            # only as a final fallback (per maintainer preference).
+            playingartists = playing_song.split(' - ', 1)
+            if not self.AGRESSIVESTREAMSEARCH and len(playingartists) > 1:
+                del playingartists[1:]
+            for playingartist in playingartists:
+                artist_names.extend(self._split_artists(playingartist))
+            # Capture RadioMonitor values for potential fallback use later
             radio_artist = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Artist)')
-            if radio_artist:
-                LW.log(['using RadioMonitor.Artist: ' + radio_artist])
-                artist_names = self._split_artists(radio_artist)
-            else:
-                playingartists = playing_song.split(' - ', 1)
-                if not self.AGRESSIVESTREAMSEARCH and len(playingartists) > 1:
-                    del playingartists[1:]
-                for playingartist in playingartists:
-                    artist_names.extend(self._split_artists(playingartist))
-            # Also try RadioMonitor.Title as fallback (handles swapped artist/title in streams)
             radio_title = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Title)')
-            if radio_title and radio_title not in artist_names:
-                LW.log(['adding RadioMonitor.Title as additional artist candidate: ' + radio_title])
-                artist_names.extend(self._split_artists(radio_title))
-        return artist_names, mbids
+        return artist_names, mbids, radio_title, radio_artist
 
     def _get_current_artists_filtered(self, artist_names, mbids):
         artists_info = []
@@ -604,8 +601,11 @@ class Main(xbmc.Player):
                 self.LASTPLAYINGFILE = playing_file
                 self.LASTPLAYINGSONG = playing_song
                 self.LASTRAUDIOARTIST = current_radio_artist
-                artist_names, mbids = self._get_current_artist_names_mbids(
+                artist_names, mbids, radio_title, radio_artist = self._get_current_artist_names_mbids(
                     playing_song)
+                # store potential fallback values for later use (decision made here)
+                self.FALLBACK_TITLE = radio_title
+                self.FALLBACK_RADIOARTIST = radio_artist
                 featured_artists = self._get_featured_artists(playing_song)
             else:
                 LW.log(['same file playing, using cached artists_info'])
@@ -1266,14 +1266,104 @@ class Main(xbmc.Player):
                         os.path.join(self.INFODIR, os.pardir)))
         if not self.IMAGESFOUND:
             LW.log(['no images found for any currently playing artists'])
-            if self.USEFALLBACK:
-                LW.log(['using fallback slideshow'])
-                LW.log(['fallbackdir = ' + self.FALLBACKPATH])
-                self._set_artwork_from_dir(
-                    self.FALLBACKPATH, self._get_file_list(self.FALLBACKPATH))
-            else:
-                self._slideshow_thread_stop()
-                self._set_property('ArtistSlideshow.Image')
+            # Try RadioMonitor.Artist first as requested (final-fallback priority change).
+            radio_artist = getattr(self, 'FALLBACK_RADIOARTIST', '')
+            tried_names = [a.lower() for a, _ in self.ARTISTS_INFO]
+            if radio_artist and radio_artist.strip() and radio_artist.lower() not in tried_names:
+                LW.log(['trying RadioMonitor.Artist as fallback artist: ' + radio_artist])
+                backup_artists_info = list(self.ARTISTS_INFO)
+                try:
+                    self.ARTISTS_INFO = [(radio_artist, '')]
+                    self.ARTISTNUM = 0
+                    self.TOTALARTISTS = 1
+                    for artist, mbid in self.ARTISTS_INFO:
+                        if self._playback_stopped_or_changed(wait_time=0.1):
+                            return
+                        got_one_artist_images = False
+                        self.ARTISTNUM += 1
+                        self.NAME = artist
+                        self.MBID = mbid
+                        self._set_infodir(self.NAME)
+                        self._set_cachedir(self.NAME)
+                        if (self.ARTISTNUM == 1):
+                            self._get_artistinfo()
+                        images = self._get_file_list(self.CACHEDIR, do_filter=True)
+                        if images:
+                            self._set_artwork_from_dir(self.CACHEDIR, images)
+                            self.IMAGESFOUND = True
+                            got_one_artist_images = True
+                        if not self._download() and not got_one_artist_images:
+                            self._clean_dir(self.CACHEDIR)
+                            self._delete_folder(self.CACHEDIR)
+                            self._clean_dir(self.INFODIR)
+                            self._delete_folder(self.INFODIR)
+                            if self.FANARTFOLDER:
+                                self._delete_folder(os.path.abspath(
+                                    os.path.join(self.CACHEDIR, os.pardir)))
+                            elif self.LOCALINFOSTORAGE:
+                                self._delete_folder(os.path.abspath(
+                                    os.path.join(self.INFODIR, os.pardir)))
+                finally:
+                    # restore ARTISTS_INFO if needed for later logic
+                    if not self.IMAGESFOUND:
+                        self.ARTISTS_INFO = backup_artists_info
+                        self.ARTISTNUM = 0
+                        self.TOTALARTISTS = len(self.ARTISTS_INFO)
+            # If still nothing, try RadioMonitor.Title as a single-title fallback
+            if not self.IMAGESFOUND:
+                radio_title = getattr(self, 'FALLBACK_TITLE', '')
+                tried_titles = [a.lower() for a, _ in self.ARTISTS_INFO]
+                if radio_title and radio_title.strip() and radio_title.lower() not in tried_titles:
+                    LW.log(['trying RadioMonitor.Title as fallback artist: ' + radio_title])
+                    # Attempt title as sole candidate
+                    backup_artists_info = list(self.ARTISTS_INFO)
+                    try:
+                        self.ARTISTS_INFO = [(radio_title, '')]
+                        self.ARTISTNUM = 0
+                        self.TOTALARTISTS = 1
+                        for artist, mbid in self.ARTISTS_INFO:
+                            if self._playback_stopped_or_changed(wait_time=0.1):
+                                return
+                            got_one_artist_images = False
+                            self.ARTISTNUM += 1
+                            self.NAME = artist
+                            self.MBID = mbid
+                            self._set_infodir(self.NAME)
+                            self._set_cachedir(self.NAME)
+                            if (self.ARTISTNUM == 1):
+                                self._get_artistinfo()
+                            images = self._get_file_list(self.CACHEDIR, do_filter=True)
+                            if images:
+                                self._set_artwork_from_dir(self.CACHEDIR, images)
+                                self.IMAGESFOUND = True
+                                got_one_artist_images = True
+                            if not self._download() and not got_one_artist_images:
+                                self._clean_dir(self.CACHEDIR)
+                                self._delete_folder(self.CACHEDIR)
+                                self._clean_dir(self.INFODIR)
+                                self._delete_folder(self.INFODIR)
+                                if self.FANARTFOLDER:
+                                    self._delete_folder(os.path.abspath(
+                                        os.path.join(self.CACHEDIR, os.pardir)))
+                                elif self.LOCALINFOSTORAGE:
+                                    self._delete_folder(os.path.abspath(
+                                        os.path.join(self.INFODIR, os.pardir)))
+                    finally:
+                        # restore ARTISTS_INFO if needed for later logic
+                        if not self.IMAGESFOUND:
+                            self.ARTISTS_INFO = backup_artists_info
+                            self.ARTISTNUM = 0
+                            self.TOTALARTISTS = len(self.ARTISTS_INFO)
+            # If still nothing, fall back to configured fallback directory or stop
+            if not self.IMAGESFOUND:
+                if self.USEFALLBACK:
+                    LW.log(['using fallback slideshow'])
+                    LW.log(['fallbackdir = ' + self.FALLBACKPATH])
+                    self._set_artwork_from_dir(
+                        self.FALLBACKPATH, self._get_file_list(self.FALLBACKPATH))
+                else:
+                    self._slideshow_thread_stop()
+                    self._set_property('ArtistSlideshow.Image')
 
     def _update_check_file(self, path, text, message):
         success, loglines = writeFile(text, path)
