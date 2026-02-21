@@ -539,6 +539,11 @@ class Main(xbmc.Player):
         except LookupError:
             artist_names = []
             mbids = []
+        # For radio streams, some stations return numeric IDs instead of artist names.
+        # Treat artist_names as empty if all entries are purely numeric.
+        if artist_names and all(name.strip().isdigit() for name in artist_names):
+            LW.log(['artist names are all numeric IDs, treating as empty for stream lookup', artist_names])
+            artist_names = []
         if not artist_names:
             LW.log(
                 ['No artist names returned from JSON call, assuming this is an internet stream'])
