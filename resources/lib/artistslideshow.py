@@ -542,11 +542,17 @@ class Main(xbmc.Player):
         if not artist_names:
             LW.log(
                 ['No artist names returned from JSON call, assuming this is an internet stream'])
-            playingartists = playing_song.split(' - ', 1)
-            if not self.AGRESSIVESTREAMSEARCH and len(playingartists) > 1:
-                del playingartists[1:]
-            for playingartist in playingartists:
-                artist_names.extend(self._split_artists(playingartist))
+            # For radio streams, prefer the pre-parsed artist from the monitor service
+            radio_artist = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Artist)')
+            if radio_artist:
+                LW.log(['using RadioMonitor.Artist: ' + radio_artist])
+                artist_names = self._split_artists(radio_artist)
+            else:
+                playingartists = playing_song.split(' - ', 1)
+                if not self.AGRESSIVESTREAMSEARCH and len(playingartists) > 1:
+                    del playingartists[1:]
+                for playingartist in playingartists:
+                    artist_names.extend(self._split_artists(playingartist))
         return artist_names, mbids
 
     def _get_current_artists_filtered(self, artist_names, mbids):
@@ -583,9 +589,11 @@ class Main(xbmc.Player):
                     ['unexpected error getting playing file/song back from Kodi', e])
                 self.ARTISTS_INFO = []
                 return
-            if playing_file != self.LASTPLAYINGFILE or playing_song != self.LASTPLAYINGSONG:
+            current_radio_artist = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Artist)')
+            if playing_file != self.LASTPLAYINGFILE or playing_song != self.LASTPLAYINGSONG or current_radio_artist != self.LASTRAUDIOARTIST:
                 self.LASTPLAYINGFILE = playing_file
                 self.LASTPLAYINGSONG = playing_song
+                self.LASTRAUDIOARTIST = current_radio_artist
                 artist_names, mbids = self._get_current_artist_names_mbids(
                     playing_song)
                 featured_artists = self._get_featured_artists(playing_song)
@@ -880,6 +888,7 @@ class Main(xbmc.Player):
         self.VARIOUSARTISTSMBID = '89ad4ac3-39f7-470e-963a-56509c546377'
         self.LASTPLAYINGFILE = ''
         self.LASTPLAYINGSONG = ''
+        self.LASTRAUDIOARTIST = ''
         self.LASTJSONRESPONSE = ''
         self.LASTARTISTREFRESH = 0
         self.LASTCACHETRIM = 0
@@ -1245,6 +1254,26 @@ class Main(xbmc.Player):
                 elif self.LOCALINFOSTORAGE:
                     self._delete_folder(os.path.abspath(
                         os.path.join(self.INFODIR, os.pardir)))
+        if not self.IMAGESFOUND:
+            # Fallback: try RadioMonitor.Title as artist name
+            fallback_artist = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Title)')
+            already_tried = [a for a, _ in self.ARTISTS_INFO] if self.ARTISTS_INFO else []
+            if fallback_artist and fallback_artist not in already_tried:
+                LW.log(['no images found, trying RadioMonitor.Title as fallback artist: ' + fallback_artist])
+                fallback_info = self._get_current_artists_filtered(self._split_artists(fallback_artist), [])
+                for artist, mbid in fallback_info:
+                    if self._playback_stopped_or_changed(wait_time=0.1):
+                        break
+                    self.NAME = artist
+                    self.MBID = mbid
+                    self._set_infodir(self.NAME)
+                    self._set_cachedir(self.NAME)
+                    images = self._get_file_list(self.CACHEDIR, do_filter=True)
+                    if images:
+                        self._set_artwork_from_dir(self.CACHEDIR, images)
+                        self.IMAGESFOUND = True
+                    elif self._download():
+                        self.IMAGESFOUND = True
         if not self.IMAGESFOUND:
             LW.log(['no images found for any currently playing artists'])
             if self.USEFALLBACK:
