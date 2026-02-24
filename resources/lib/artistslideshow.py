@@ -890,6 +890,7 @@ class Main(xbmc.Player):
         self.PARAMS = {}
         self.FALLBACK_RADIOARTIST = ''
         self.FALLBACK_TITLE = ''
+        self.LAST_RADIOMONITOR_ARTIST = ''
         self.SLIDESHOW = Slideshow(self.WINDOW, self.SLIDEDELAY)
 
     def _init_window(self):
@@ -1053,9 +1054,9 @@ class Main(xbmc.Player):
         # regular artist detection produced no change.
         if not current_artists or all(a == '' for a in current_artists):
             monitor_artist = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Artist)')
-            if monitor_artist and [monitor_artist] != cached_artists and [monitor_artist] != self.ALLARTISTS:
+            if monitor_artist and monitor_artist != self.LAST_RADIOMONITOR_ARTIST:
                 LW.log(['RadioMonitor.Artist changed, triggering slideshow update: ' + monitor_artist])
-                self.ALLARTISTS = [monitor_artist]
+                self.LAST_RADIOMONITOR_ARTIST = monitor_artist
                 return True
         return False
 
