@@ -1263,14 +1263,18 @@ class Main(xbmc.Player):
                         os.path.join(self.INFODIR, os.pardir)))
         if not self.IMAGESFOUND:
             LW.log(['no images found for any currently playing artists'])
-            # Fallback 1: RadioMonitor.Artist (vom Monitor-Addon korrekt ermittelt)
-            if not self.IMAGESFOUND and self.FALLBACK_RADIOARTIST:
-                LW.log(['trying RadioMonitor.Artist as fallback: ' + self.FALLBACK_RADIOARTIST])
-                self._try_fallback_artist(self.FALLBACK_RADIOARTIST)
+            # Fallback 1: RadioMonitor.Artist direkt lesen (nicht aus Cache,
+            # da bei Streams _get_current_artist_names_mbids wegen "same file playing"
+            # oft nicht erreicht wird)
+            radio_artist = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Artist)')
+            radio_title = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Title)')
+            if radio_artist and radio_artist.strip():
+                LW.log(['trying RadioMonitor.Artist as fallback: ' + radio_artist])
+                self._try_fallback_artist(radio_artist)
             # Fallback 2: RadioMonitor.Title (falls Artist/Title vertauscht im Stream)
-            if not self.IMAGESFOUND and self.FALLBACK_TITLE:
-                LW.log(['trying RadioMonitor.Title as fallback artist: ' + self.FALLBACK_TITLE])
-                self._try_fallback_artist(self.FALLBACK_TITLE)
+            if not self.IMAGESFOUND and radio_title and radio_title.strip():
+                LW.log(['trying RadioMonitor.Title as fallback artist: ' + radio_title])
+                self._try_fallback_artist(radio_title)
             # Fallback 3: konfigurierten Fallback-Ordner nutzen oder Slideshow stoppen
             if not self.IMAGESFOUND:
                 if self.USEFALLBACK:
