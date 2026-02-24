@@ -1053,8 +1053,9 @@ class Main(xbmc.Player):
         # regular artist detection produced no change.
         if not current_artists or all(a == '' for a in current_artists):
             monitor_artist = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Artist)')
-            if monitor_artist and [monitor_artist] != cached_artists:
+            if monitor_artist and [monitor_artist] != cached_artists and [monitor_artist] != self.ALLARTISTS:
                 LW.log(['RadioMonitor.Artist changed, triggering slideshow update: ' + monitor_artist])
+                self.ALLARTISTS = [monitor_artist]
                 return True
         return False
 
