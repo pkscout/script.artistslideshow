@@ -38,6 +38,8 @@ LOGDEBUG = getSettingBool('logging')
 LW = Logger(preamble='[Artist Slideshow]', logdebug=LOGDEBUG)
 JSONURL = URL('json')
 IMGURL = URL('binary')
+RADIOMONITOR_ARTIST_PROP = 'Window(10000).Property(RadioMonitor.Artist)'
+RADIOMONITOR_TITLE_PROP = 'Window(10000).Property(RadioMonitor.Title)'
 
 LW.log(['script version %s started' % ADDONVERSION], xbmc.LOGINFO)
 LW.log(['debug logging set to %s' % LOGDEBUG], xbmc.LOGINFO)
@@ -1048,7 +1050,7 @@ class Main(xbmc.Player):
         # parses the ICY stream metadata and is only consulted here if the
         # regular artist detection produced no change.
         if not current_artists or all(a == '' for a in current_artists):
-            monitor_artist = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Artist)')
+            monitor_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
             if monitor_artist and monitor_artist != self.LAST_RADIOMONITOR_ARTIST:
                 LW.log(['RadioMonitor.Artist changed, triggering slideshow update: ' + monitor_artist])
                 self.LAST_RADIOMONITOR_ARTIST = monitor_artist
@@ -1260,19 +1262,19 @@ class Main(xbmc.Player):
                         os.path.join(self.INFODIR, os.pardir)))
         if not self.IMAGESFOUND:
             LW.log(['no images found for any currently playing artists'])
-            # Fallback 1: RadioMonitor.Artist direkt lesen (nicht aus Cache,
-            # da bei Streams _get_current_artist_names_mbids wegen "same file playing"
-            # oft nicht erreicht wird)
-            radio_artist = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Artist)')
-            radio_title = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Title)')
+            # Fallback 1: Read RadioMonitor.Artist directly (bypass cache,
+            # as _get_current_artist_names_mbids is often skipped for streams
+            # due to "same file playing" logic)
+            radio_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
+            radio_title = xbmc.getInfoLabel(RADIOMONITOR_TITLE_PROP)
             if radio_artist and radio_artist.strip():
                 LW.log(['trying RadioMonitor.Artist as fallback: ' + radio_artist])
                 self._try_fallback_artist(radio_artist)
-            # Fallback 2: RadioMonitor.Title (falls Artist/Title vertauscht im Stream)
+            # Fallback 2: RadioMonitor.Title (in case Artist/Title are swapped in stream)
             if not self.IMAGESFOUND and radio_title and radio_title.strip():
                 LW.log(['trying RadioMonitor.Title as fallback artist: ' + radio_title])
                 self._try_fallback_artist(radio_title)
-            # Fallback 3: konfigurierten Fallback-Ordner nutzen oder Slideshow stoppen
+            # Fallback 3: Use configured fallback folder or stop slideshow
             if not self.IMAGESFOUND:
                 if self.USEFALLBACK:
                     LW.log(['using fallback slideshow'])
@@ -1284,10 +1286,10 @@ class Main(xbmc.Player):
                     self._set_property('ArtistSlideshow.Image')
 
     def _try_fallback_artist(self, artist_name):
-        """Versucht einen einzelnen Artist-Namen als Fallback für die Bildsuche.
-        Gibt True zurück wenn Bilder gefunden wurden.
-        Hinweis: nutzt self.NAME/MBID direkt, ohne _get_current_artists_info aufzurufen,
-        damit der Datei-Cache nicht greift und ARTISTS_INFO nicht überschrieben wird."""
+        """Attempts to use a single artist name as fallback for image search.
+        Returns True if images were found.
+        Note: uses self.NAME/MBID directly without calling _get_current_artists_info,
+        so the file cache is bypassed and ARTISTS_INFO is not overwritten."""
         if not artist_name or not artist_name.strip():
             return False
         already_tried = [a.lower() for a, _ in self.ARTISTS_INFO]
@@ -1327,7 +1329,7 @@ class Main(xbmc.Player):
                         os.path.join(self.INFODIR, os.pardir)))
         finally:
             if not self.IMAGESFOUND:
-                # Alles zurücksetzen wenn kein Erfolg
+                # Reset everything if no success
                 self.NAME = backup_name
                 self.MBID = backup_mbid
                 self.CACHEDIR = backup_cachedir
