@@ -547,9 +547,6 @@ class Main(xbmc.Player):
                 del playingartists[1:]
             for playingartist in playingartists:
                 artist_names.extend(self._split_artists(playingartist))
-            # Store RadioMonitor values for potential fallback use in _use_correct_artwork
-            self.FALLBACK_RADIOARTIST = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Artist)')
-            self.FALLBACK_TITLE = xbmc.getInfoLabel('Window(Home).Property(RadioMonitor.Title)')
         return artist_names, mbids
 
     def _get_current_artists_filtered(self, artist_names, mbids):
@@ -888,8 +885,6 @@ class Main(xbmc.Player):
         self.LASTARTISTREFRESH = 0
         self.LASTCACHETRIM = 0
         self.PARAMS = {}
-        self.FALLBACK_RADIOARTIST = ''
-        self.FALLBACK_TITLE = ''
         self.LAST_RADIOMONITOR_ARTIST = ''
         self.SLIDESHOW = Slideshow(self.WINDOW, self.SLIDEDELAY)
 
