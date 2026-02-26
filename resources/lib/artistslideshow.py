@@ -40,6 +40,7 @@ JSONURL = URL('json')
 IMGURL = URL('binary')
 RADIOMONITOR_ARTIST_PROP = 'Window(10000).Property(RadioMonitor.Artist)'
 RADIOMONITOR_TITLE_PROP = 'Window(10000).Property(RadioMonitor.Title)'
+RADIOMONITOR_MBID_PROP = 'Window(10000).Property(RadioMonitor.MBID)'
 
 LW.log(['script version %s started' % ADDONVERSION], xbmc.LOGINFO)
 LW.log(['debug logging set to %s' % LOGDEBUG], xbmc.LOGINFO)
@@ -1262,19 +1263,27 @@ class Main(xbmc.Player):
                         os.path.join(self.INFODIR, os.pardir)))
         if not self.IMAGESFOUND:
             LW.log(['no images found for any currently playing artists'])
-            # Fallback 1: Read RadioMonitor.Artist directly (bypass cache,
-            # as _get_current_artist_names_mbids is often skipped for streams
-            # due to "same file playing" logic)
+            # Fallback 1: Read RadioMonitor.MBID first.
+            # If available, use MBID as primary identifier and then use
+            # RadioMonitor.Artist as display/search name.
+            radio_mbid = xbmc.getInfoLabel(RADIOMONITOR_MBID_PROP)
             radio_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
             radio_title = xbmc.getInfoLabel(RADIOMONITOR_TITLE_PROP)
-            if radio_artist and radio_artist.strip():
+            if radio_mbid and radio_mbid.strip() and radio_artist and radio_artist.strip():
+                LW.log(['trying RadioMonitor.MBID as fallback: ' + radio_mbid])
+                self.MBID = radio_mbid.strip()
+                self._try_fallback_artist(radio_artist, fallback_mbid=radio_mbid.strip())
+            # Fallback 2: Read RadioMonitor.Artist directly (bypass cache,
+            # as _get_current_artist_names_mbids is often skipped for streams
+            # due to "same file playing" logic)
+            if not self.IMAGESFOUND and radio_artist and radio_artist.strip():
                 LW.log(['trying RadioMonitor.Artist as fallback: ' + radio_artist])
                 self._try_fallback_artist(radio_artist)
-            # Fallback 2: RadioMonitor.Title (in case Artist/Title are swapped in stream)
+            # Fallback 3: RadioMonitor.Title (in case Artist/Title are swapped in stream)
             if not self.IMAGESFOUND and radio_title and radio_title.strip():
                 LW.log(['trying RadioMonitor.Title as fallback artist: ' + radio_title])
                 self._try_fallback_artist(radio_title)
-            # Fallback 3: Use configured fallback folder or stop slideshow
+            # Fallback 4: Use configured fallback folder or stop slideshow
             if not self.IMAGESFOUND:
                 if self.USEFALLBACK:
                     LW.log(['using fallback slideshow'])
@@ -1285,7 +1294,7 @@ class Main(xbmc.Player):
                     self._slideshow_thread_stop()
                     self._set_property('ArtistSlideshow.Image')
 
-    def _try_fallback_artist(self, artist_name):
+    def _try_fallback_artist(self, artist_name, fallback_mbid=''):
         """Attempts to use a single artist name as fallback for image search.
         Returns True if images were found.
         Note: uses self.NAME/MBID directly without calling _get_current_artists_info,
@@ -1303,7 +1312,7 @@ class Main(xbmc.Player):
         backup_infodir = self.INFODIR
         try:
             self.NAME = artist_name
-            self.MBID = ''
+            self.MBID = fallback_mbid.strip() if fallback_mbid else ''
             self._set_infodir(self.NAME)
             self._set_cachedir(self.NAME)
             if self.MONITOR.abortRequested() or not self._is_playing():
