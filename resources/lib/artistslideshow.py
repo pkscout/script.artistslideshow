@@ -545,11 +545,21 @@ class Main(xbmc.Player):
         if not artist_names:
             LW.log(
                 ['No artist names returned from JSON call, assuming this is an internet stream'])
-            playingartists = playing_song.split(' - ', 1)
-            if not self.AGRESSIVESTREAMSEARCH and len(playingartists) > 1:
-                del playingartists[1:]
-            for playingartist in playingartists:
-                artist_names.extend(self._split_artists(playingartist))
+            monitor_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
+            if monitor_artist:
+                self.LAST_RADIOMONITOR_ARTIST = monitor_artist
+            if monitor_artist:
+                LW.log(['Using RadioMonitor.Artist: ' + monitor_artist])
+                artist_names = self._split_artists(monitor_artist)
+                monitor_mbid = xbmc.getInfoLabel(RADIOMONITOR_MBID_PROP)
+                if monitor_mbid:
+                    mbids = [monitor_mbid]
+            else:
+                playingartists = playing_song.split(' - ', 1)
+                if not self.AGRESSIVESTREAMSEARCH and len(playingartists) > 1:
+                    del playingartists[1:]
+                for playingartist in playingartists:
+                    artist_names.extend(self._split_artists(playingartist))
         return artist_names, mbids
 
     def _get_current_artists_filtered(self, artist_names, mbids):
@@ -1030,8 +1040,23 @@ class Main(xbmc.Player):
     def _playback_stopped_or_changed(self, wait_time=1):
         if self._waitForAbort(wait_time=wait_time):
             return True
-        if not self._is_playing():
-            return True
+
+        monitor_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
+        if monitor_artist and monitor_artist != self.LAST_RADIOMONITOR_ARTIST:
+            LW.log(['RadioMonitor.Artist changed. Handling this special case directly.'])
+            # Clear screen without black, then wait for other metadata to arrive.
+            self._clear_properties(fadetoblack=False)
+            self._slideshow_thread_start()
+            LW.log(['waiting 2 seconds for other RadioMonitor properties to update'])
+            self._waitForAbort(wait_time=2)
+            self.LAST_RADIOMONITOR_ARTIST = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
+            # Directly trigger the artwork update process.
+            self._use_correct_artwork()
+            self._trim_cache()
+            # Return False to prevent the main loop from running the update process again.
+            LW.log(['RadioMonitor change handled. Bypassing main loop update.'])
+            return False
+
         if self.USEOVERRIDE:
             return False
         current_artists = self._get_infolabel(self.EXTERNALCALL)
@@ -1044,18 +1069,6 @@ class Main(xbmc.Player):
         cached_artists.sort()
         if cached_artists != current_artists:
             return True
-        # For internet radio streams, Kodi always reports the same file URL,
-        # so the artist list never changes via the normal path above.
-        # As a last resort, check if RadioMonitor.Artist has changed — this
-        # property is maintained by an external monitor service that correctly
-        # parses the ICY stream metadata and is only consulted here if the
-        # regular artist detection produced no change.
-        if not current_artists or all(a == '' for a in current_artists):
-            monitor_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
-            if monitor_artist and monitor_artist != self.LAST_RADIOMONITOR_ARTIST:
-                LW.log(['RadioMonitor.Artist changed, triggering slideshow update: ' + monitor_artist])
-                self.LAST_RADIOMONITOR_ARTIST = monitor_artist
-                return True
         return False
 
     def _remove_trailing_dot(self, thename):
