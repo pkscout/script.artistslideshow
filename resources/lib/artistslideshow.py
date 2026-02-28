@@ -1314,10 +1314,16 @@ class Main(xbmc.Player):
         so the file cache is bypassed and ARTISTS_INFO is not overwritten."""
         if not artist_name or not artist_name.strip():
             return False
-        already_tried = [a.lower() for a, _ in self.ARTISTS_INFO]
-        if artist_name.lower() in already_tried:
-            LW.log(['fallback artist already tried: ' + artist_name])
-            return False
+        artist_lower = artist_name.lower()
+        already_tried = {a.lower(): mbid for a, mbid in self.ARTISTS_INFO}
+        if artist_lower in already_tried:
+            # Allow retry if this time we have an MBID but the previous attempt did not.
+            # Without MBID, fanart.tv returns 404 — so a retry with MBID is meaningful.
+            previous_had_mbid = bool(already_tried[artist_lower])
+            if previous_had_mbid or not fallback_mbid:
+                LW.log(['fallback artist already tried: ' + artist_name])
+                return False
+            LW.log(['retrying fallback artist with MBID: ' + artist_name + ' / ' + fallback_mbid])
         LW.log(['trying fallback artist: ' + artist_name])
         backup_name = self.NAME
         backup_mbid = self.MBID
