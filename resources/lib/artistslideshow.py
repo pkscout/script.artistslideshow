@@ -317,7 +317,7 @@ class Main(xbmc.Player):
         if self._get_infolabel('ArtistSlideshow.Image'):
             self.SLIDESHOW.ClearImages(fadetoblack=fadetoblack)
         self._slideshow_thread_stop()
-        if self._is_playing() and ( fadetoblack or clearartists ) and not slideshowstopping:
+        if self._is_playing() and (fadetoblack or clearartists) and not slideshowstopping:
             self._slideshow_thread_start()
         if self._get_infolabel('ArtistSlideshow.ArtistBiography'):
             self._set_property('ArtistSlideshow.ArtistBiography')
@@ -766,7 +766,7 @@ class Main(xbmc.Player):
                     'sa_', module)
                 if sa_active:
                     self.SIMILARPLUGINS['objs'][module] = plugin
-                    self.SIMILARPLUGINS['names'].append([ai_priority, module])
+                    self.SIMILARPLUGINS['names'].append([sa_priority, module])
                     LW.log(['added %s to similar artist plugins' % module])
             if 'mbid' in scrapers:
                 self.MBIDPLUGINS['objs'][module] = plugin
@@ -957,7 +957,7 @@ class Main(xbmc.Player):
             dialog.ok(ADDONLANGUAGE(32200) + ': ' +
                       ADDONLANGUAGE(32203), ADDONLANGUAGE(32306))
             return
-        increment = 100/len(dirs)
+        increment = float(100)/len(dirs)
         progress = 0.0
         for thedir in dirs:
             if (src == self.LOCALARTISTPATH) and self.USEFANARTFOLDER:
@@ -1043,10 +1043,10 @@ class Main(xbmc.Player):
             return False
 
     def _remove_trailing_dot(self, thename):
-        if thename[-1] == '.' and len(thename) > 1 and self.ENDREPLACE != '.':
-            return self._remove_trailing_dot(thename[:-1] + self.ENDREPLACE)
-        else:
-            return thename
+        if len(thename) > 1:
+            if thename[-1] == '.' and self.ENDREPLACE != '.':
+                return self._remove_trailing_dot(thename[:-1] + self.ENDREPLACE)
+        return thename
 
     def _set_artwork_from_dir(self, thedir, files):
         for thefile in files:
