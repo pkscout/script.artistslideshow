@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr view 87 --repo pkscout/script.artistslideshow)",
+      "Bash(gh pr reviews 87 --repo pkscout/script.artistslideshow)",
+      "Bash(gh api repos/pkscout/script.artistslideshow/pulls/87/reviews)",
+      "Bash(gh api repos/pkscout/script.artistslideshow/pulls/87/comments)",
+      "Bash(gh api repos/pkscout/script.artistslideshow/issues/87/comments)",
+      "Bash(gh api repos/pkscout/script.artistslideshow/pulls/87/commits)",
+      "Bash(python -c \"import json,sys; [print\\(c[''sha''][:7], c[''commit''][''author''][''date''][:10], c[''commit''][''message''].split\\(''\\\\n''\\)[0]\\) for c in json.load\\(sys.stdin\\)]\")",
+      "Bash(gh api repos/pkscout/script.artistslideshow/pulls/87 --jq '.head.sha')",
+      "Bash(xargs -I{} gh api repos/pkscout/script.artistslideshow/git/commits/{} --jq '.message')",
+      "Bash(gh api \"repos/pkscout/script.artistslideshow/pulls/87/files\")",
+      "Bash(python -c \":*)",
+      "Bash(git rm --cached .vscode/settings.json download-release-zip.bat download-release-zip.ps1)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(gh pr checks 87 --repo pkscout/script.artistslideshow)",
+      "Bash(gh api repos/blauesgruen/service.audio.stream.monitor/git/trees/HEAD --jq '.tree[] | .path')",
+      "Bash(gh api repos/blauesgruen/service.audio.stream.monitor/contents/service.py)",
+      "Bash(python -c \"import json,sys,base64; print\\(base64.b64decode\\(json.load\\(sys.stdin\\)[''content'']\\).decode\\(''utf-8''\\)\\)\")",
+      "Bash(python -c \"import json,sys,base64; sys.stdout.buffer.write\\(base64.b64decode\\(json.load\\(sys.stdin\\)[''content'']\\)\\)\")",
+      "Bash(gh api repos/pkscout/script.artistslideshow/issues/87/comments --method POST --field body=\"Hi @pkscout,:*)"
+    ]
+  }
+}
