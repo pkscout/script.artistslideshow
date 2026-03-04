@@ -136,3 +136,6 @@ dmypy.json
 .idea/
 download-release-zip.bat
 download-release-zip.ps1
+
+# Claude Code local settings
+.claude/
