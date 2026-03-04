@@ -38,6 +38,9 @@ LOGDEBUG = getSettingBool('logging')
 LW = Logger(preamble='[Artist Slideshow]', logdebug=LOGDEBUG)
 JSONURL = URL('json')
 IMGURL = URL('binary')
+RADIOMONITOR_ARTIST_PROP = 'Window(10000).Property(RadioMonitor.Artist)'
+RADIOMONITOR_TITLE_PROP = 'Window(10000).Property(RadioMonitor.Title)'
+RADIOMONITOR_MBID_PROP = 'Window(10000).Property(RadioMonitor.MBID)'
 
 LW.log(['script version %s started' % ADDONVERSION], xbmc.LOGINFO)
 LW.log(['debug logging set to %s' % LOGDEBUG], xbmc.LOGINFO)
@@ -317,7 +320,7 @@ class Main(xbmc.Player):
         if self._get_infolabel('ArtistSlideshow.Image'):
             self.SLIDESHOW.ClearImages(fadetoblack=fadetoblack)
         self._slideshow_thread_stop()
-        if self._is_playing() and ( fadetoblack or clearartists ) and not slideshowstopping:
+        if self._is_playing() and not slideshowstopping:
             self._slideshow_thread_start()
         if self._get_infolabel('ArtistSlideshow.ArtistBiography'):
             self._set_property('ArtistSlideshow.ArtistBiography')
@@ -428,6 +431,9 @@ class Main(xbmc.Player):
             else:
                 msg_end = ADDONLANGUAGE(32308)
             msg = '%s %s' % (str(image_dl_count), msg_end)
+            # Include artist name in notification so user knows which artist the images came from
+            if self.LAST_FOUND_ARTIST:
+                msg = '%s - %s' % (self.LAST_FOUND_ARTIST, msg)
             xbmcgui.Dialog().notification(ADDONLANGUAGE(32205), msg, icon=ADDONICON)
             dialog_displayed = True
         return dialog_displayed
@@ -529,6 +535,18 @@ class Main(xbmc.Player):
         return current_artists
 
     def _get_current_artist_names_mbids(self, playing_song):
+        # Check RadioMonitor.Artist first — highest priority for radio streams.
+        # Without this, JSON-RPC always returns something (even if wrong, e.g. when
+        # a station sends ICY metadata in "Title - Artist" order instead of "Artist - Title"),
+        # making the RadioMonitor check inside "if not artist_names" structurally unreachable.
+        monitor_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
+        if monitor_artist and monitor_artist.strip():
+            self.LAST_RADIOMONITOR_ARTIST = monitor_artist
+            LW.log(['RadioMonitor.Artist has priority: ' + monitor_artist])
+            artist_names = self._split_artists(monitor_artist)
+            monitor_mbid = xbmc.getInfoLabel(RADIOMONITOR_MBID_PROP)
+            mbids = [monitor_mbid] if monitor_mbid else []
+            return artist_names, mbids
         try:
             response = xbmc.executeJSONRPC(
                 '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "musicbrainzartistid"]},"id":1}')
@@ -860,6 +878,7 @@ class Main(xbmc.Player):
         self.MONITOR = SlideshowMonitor()
         self.FANARTNUMBER = False
         self.CACHEDIR = ''
+        self.INFODIR = ''
         self.ARTISTS_INFO = []
         self.IMGDB = '_imgdb.nfo'
         self._set_property('ArtistSlideshow.CleanupComplete')
@@ -884,6 +903,9 @@ class Main(xbmc.Player):
         self.LASTARTISTREFRESH = 0
         self.LASTCACHETRIM = 0
         self.PARAMS = {}
+        self.LAST_RADIOMONITOR_ARTIST = ''
+        # Tracks which artist's images were actually loaded (used in notifications to show search result)
+        self.LAST_FOUND_ARTIST = ''
         self.SLIDESHOW = Slideshow(self.WINDOW, self.SLIDEDELAY)
 
     def _init_window(self):
@@ -1025,6 +1047,44 @@ class Main(xbmc.Player):
     def _playback_stopped_or_changed(self, wait_time=1):
         if self._waitForAbort(wait_time=wait_time):
             return True
+
+        monitor_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
+        if monitor_artist and monitor_artist != self.LAST_RADIOMONITOR_ARTIST:
+            LW.log(['RadioMonitor.Artist changed. Handling this special case directly.'])
+            
+            # Step 1: Clear screen without fade to black (avoid black flicker during metadata update)
+            self._clear_properties(fadetoblack=False)
+            
+            # Step 2: Wait for other RadioMonitor properties to catch up (Title, MBID, etc.)
+            LW.log(['waiting 2 seconds for other RadioMonitor properties to update'])
+            self._waitForAbort(wait_time=2)
+            
+            # Step 3: Bypass "same file playing" cache so we force a fresh lookup with new artist
+            # Without this, _get_current_artists_info() would return previous artist from cache
+            self.LASTPLAYINGFILE = ''
+            self.LASTPLAYINGSONG = ''
+            self.ARTISTS_INFO = []
+            self.LAST_RADIOMONITOR_ARTIST = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
+            
+            # Step 4: Perform artwork update (will trigger RadioMonitor fallbacks if needed)
+            self._use_correct_artwork()
+            
+            # Step 5: Show which artist was actually used (helps debug stream metadata issues)
+            found_artist = self.LAST_FOUND_ARTIST or self.NAME
+            if self.DOWNLOADNOTIFICATION and found_artist:
+                xbmcgui.Dialog().notification(
+                    'Artist Slideshow (RadioMonitor)',
+                    ADDONLANGUAGE(32948) % found_artist,
+                    icon=ADDONICON,
+                    time=5000
+                )
+            
+            # Step 6: Trim cache and return False to skip main loop's default update
+            self._trim_cache()
+            LW.log(['RadioMonitor change handled. Bypassing main loop update.'])
+            return False
+
+        # Restored from pkscout original: exit early if playback has stopped
         if not self._is_playing():
             return True
         if self.USEOVERRIDE:
@@ -1039,8 +1099,7 @@ class Main(xbmc.Player):
         cached_artists.sort()
         if cached_artists != current_artists:
             return True
-        else:
-            return False
+        return False
 
     def _remove_trailing_dot(self, thename):
         if thename[-1] == '.' and len(thename) > 1 and self.ENDREPLACE != '.':
@@ -1212,6 +1271,7 @@ class Main(xbmc.Player):
         self.ARTISTNUM = 0
         self.TOTALARTISTS = len(self.ALLARTISTS)
         self.IMAGESFOUND = False
+        self.LAST_FOUND_ARTIST = ''
         if self.INCLUDEARTISTFANART:
             self.IMAGESFOUND = self.IMAGESFOUND or self.SLIDESHOW.AddImage(
                 xbmc.getInfoLabel('Player.Art(artist.fanart)'))
@@ -1233,6 +1293,8 @@ class Main(xbmc.Player):
             if images:
                 self._set_artwork_from_dir(self.CACHEDIR, images)
                 self.IMAGESFOUND = True
+                if not self.LAST_FOUND_ARTIST:
+                    self.LAST_FOUND_ARTIST = artist
                 got_one_artist_images = True
             if not self._download() and not got_one_artist_images:
                 self._clean_dir(self.CACHEDIR)
@@ -1245,16 +1307,139 @@ class Main(xbmc.Player):
                 elif self.LOCALINFOSTORAGE:
                     self._delete_folder(os.path.abspath(
                         os.path.join(self.INFODIR, os.pardir)))
+            else:
+                # _download() returned True (new images downloaded) — track the artist name
+                if not self.LAST_FOUND_ARTIST:
+                    self.LAST_FOUND_ARTIST = artist
         if not self.IMAGESFOUND:
             LW.log(['no images found for any currently playing artists'])
-            if self.USEFALLBACK:
-                LW.log(['using fallback slideshow'])
-                LW.log(['fallbackdir = ' + self.FALLBACKPATH])
-                self._set_artwork_from_dir(
-                    self.FALLBACKPATH, self._get_file_list(self.FALLBACKPATH))
+            # Try RadioMonitor fallbacks in order of reliability:
+            # For internet radio streams where standard artist lookup fails, RadioMonitor provides
+            # metadata. We try progressively less reliable identifiers to find images.
+            radio_mbid = xbmc.getInfoLabel(RADIOMONITOR_MBID_PROP)
+            radio_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
+            radio_title = xbmc.getInfoLabel(RADIOMONITOR_TITLE_PROP)
+            
+            # Fallback 1: MBID with RadioMonitor.Artist (most reliable if MBID available)
+            # Using MBID gives more accurate search results on fanart.tv
+            if radio_mbid and radio_mbid.strip() and radio_artist and radio_artist.strip():
+                LW.log(['trying RadioMonitor.MBID as fallback: ' + radio_mbid])
+                self.MBID = radio_mbid.strip()
+                self._try_fallback_artist(radio_artist, fallback_mbid=radio_mbid.strip(), show_notification=True)
+            
+            # Fallback 2: RadioMonitor.Artist directly (second priority)
+            # Works when artist metadata is available but MBID was not
+            # Bypasses cache as _get_current_artist_names_mbids is often skipped for streams
+            # due to "same file playing" logic
+            if not self.IMAGESFOUND and radio_artist and radio_artist.strip():
+                LW.log(['trying RadioMonitor.Artist as fallback: ' + radio_artist])
+                self._try_fallback_artist(radio_artist, show_notification=True)
+            
+            # Fallback 3: RadioMonitor.Title (last resort fallback)
+            # Used when stream metadata has Artist/Title swapped or title is more searchable
+            # Notification is suppressed for title-based searches (title contains " - ") to avoid confusing user
+            if not self.IMAGESFOUND and radio_title and radio_title.strip():
+                LW.log(['trying RadioMonitor.Title as fallback artist: ' + radio_title])
+                self._try_fallback_artist(radio_title, show_notification=True)
+            # Fallback 4: Use configured fallback folder or stop slideshow
+            if not self.IMAGESFOUND:
+                if self.USEFALLBACK:
+                    LW.log(['using fallback slideshow'])
+                    LW.log(['fallbackdir = ' + self.FALLBACKPATH])
+                    self._set_artwork_from_dir(
+                        self.FALLBACKPATH, self._get_file_list(self.FALLBACKPATH))
+                else:
+                    self._slideshow_thread_stop()
+                    self._set_property('ArtistSlideshow.Image')
+
+    def _try_fallback_artist(self, artist_name, fallback_mbid='', show_notification=False):
+        """Attempts to use a single artist name as fallback for image search.
+        
+        Args:
+            artist_name: Artist name to try searching for
+            fallback_mbid: Optional MusicBrainz ID to use for this artist
+            show_notification: If True, show search notification (typically True for RadioMonitor fallbacks)
+        
+        Returns:
+            True if images were found and loaded, False otherwise.
+        
+        Side Effects:
+            - Temporarily overwrites self.NAME, self.MBID, self.CACHEDIR, self.INFODIR
+            - Sets self.LAST_FOUND_ARTIST when images are found
+            - Restores backup values if images are not found
+            - Does NOT call _get_current_artists_info(), so ARTISTS_INFO stays unchanged
+            - Only shows notification if show_notification=True AND DOWNLOADNOTIFICATION=True
+              and artist_name does not contain " - " (to avoid confusing title-as-artist searches)
+        """
+        if not artist_name or not artist_name.strip():
+            return False
+        artist_lower = artist_name.lower()
+        already_tried = {a.lower(): mbid for a, mbid in self.ARTISTS_INFO}
+        if artist_lower in already_tried:
+            # Allow retry if this time we have an MBID but the previous attempt did not.
+            # Without MBID, fanart.tv returns 404 — so a retry with MBID is meaningful.
+            previous_had_mbid = bool(already_tried[artist_lower])
+            if previous_had_mbid or not fallback_mbid:
+                LW.log(['fallback artist already tried: ' + artist_name])
+                return False
+            LW.log(['retrying fallback artist with MBID: ' + artist_name + ' / ' + fallback_mbid])
+        LW.log(['trying fallback artist: ' + artist_name])
+        if show_notification and self.DOWNLOADNOTIFICATION:
+            # Only show notification if this might be a valid artist search.
+            # Avoid showing notification when radio_title was used as fallback (avoid confusion).
+            # Check if artist_name contains " - " which indicates it might be a song title.
+            if ' - ' not in artist_name:
+                xbmcgui.Dialog().notification(
+                    'Artist Slideshow (RadioMonitor)',
+                    ADDONLANGUAGE(32949) % artist_name.strip(),
+                    icon=ADDONICON,
+                    time=4000
+                )
+        # Backup current state before overwriting self.NAME, self.MBID, self.CACHEDIR, self.INFODIR
+        # (will restore if fallback search fails)
+        backup_name = self.NAME
+        backup_mbid = self.MBID
+        backup_cachedir = self.CACHEDIR
+        backup_infodir = self.INFODIR
+        try:
+            self.NAME = artist_name
+            self.MBID = fallback_mbid.strip() if fallback_mbid else ''
+            self._set_infodir(self.NAME)
+            self._set_cachedir(self.NAME)
+            if self.MONITOR.abortRequested() or not self._is_playing():
+                return False
+            self._get_artistinfo()
+            images = self._get_file_list(self.CACHEDIR, do_filter=True)
+            if images:
+                self._set_artwork_from_dir(self.CACHEDIR, images)
+                self.IMAGESFOUND = True
+                self.LAST_FOUND_ARTIST = artist_name
+                got_one_artist_images = True
             else:
-                self._slideshow_thread_stop()
-                self._set_property('ArtistSlideshow.Image')
+                got_one_artist_images = False
+            if not self._download() and not got_one_artist_images:
+                self._clean_dir(self.CACHEDIR)
+                self._delete_folder(self.CACHEDIR)
+                self._clean_dir(self.INFODIR)
+                self._delete_folder(self.INFODIR)
+                if self.FANARTFOLDER:
+                    self._delete_folder(os.path.abspath(
+                        os.path.join(self.CACHEDIR, os.pardir)))
+                elif self.LOCALINFOSTORAGE:
+                    self._delete_folder(os.path.abspath(
+                        os.path.join(self.INFODIR, os.pardir)))
+            else:
+                # _download() returned True (new images downloaded) — track the fallback artist name
+                if not self.LAST_FOUND_ARTIST:
+                    self.LAST_FOUND_ARTIST = artist_name
+        finally:
+            if not self.IMAGESFOUND:
+                # Reset everything if no success
+                self.NAME = backup_name
+                self.MBID = backup_mbid
+                self.CACHEDIR = backup_cachedir
+                self.INFODIR = backup_infodir
+        return self.IMAGESFOUND
 
     def _update_check_file(self, path, text, message):
         success, loglines = writeFile(text, path)
