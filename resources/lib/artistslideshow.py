@@ -262,6 +262,8 @@ class Main(xbmc.Player):
                 self._set_property('ArtistSlideshowRunning', 'True')
         if self.MONITOR.waitForAbort(1):
             return
+        if self._is_playing():
+            self._wait_for_radiomonitor(max_wait=5)
         while not self.MONITOR.abortRequested() and self._get_infolabel(self.ARTISTSLIDESHOWRUNNING) == 'True':
             if self.MONITOR.SettingsChanged():
                 self._get_settings()
@@ -1069,17 +1071,7 @@ class Main(xbmc.Player):
             # Step 4: Perform artwork update (will trigger RadioMonitor fallbacks if needed)
             self._use_correct_artwork()
             
-            # Step 5: Show which artist was actually used (helps debug stream metadata issues)
-            found_artist = self.LAST_FOUND_ARTIST or self.NAME
-            if self.DOWNLOADNOTIFICATION and found_artist:
-                xbmcgui.Dialog().notification(
-                    'Artist Slideshow (RadioMonitor)',
-                    ADDONLANGUAGE(32948) % found_artist,
-                    icon=ADDONICON,
-                    time=5000
-                )
-            
-            # Step 6: Trim cache and return False to skip main loop's default update
+            # Step 5: Trim cache and return False to skip main loop's default update
             self._trim_cache()
             LW.log(['RadioMonitor change handled. Bypassing main loop update.'])
             return False
@@ -1351,6 +1343,13 @@ class Main(xbmc.Player):
                 else:
                     self._slideshow_thread_stop()
                     self._set_property('ArtistSlideshow.Image')
+        if self.IMAGESFOUND and self.LAST_RADIOMONITOR_ARTIST and self.LAST_FOUND_ARTIST and self.DOWNLOADNOTIFICATION:
+            xbmcgui.Dialog().notification(
+                'Artist Slideshow',
+                ADDONLANGUAGE(32948) % self.LAST_FOUND_ARTIST,
+                icon=ADDONICON,
+                time=4000
+            )
 
     def _try_fallback_artist(self, artist_name, fallback_mbid='', show_notification=False):
         """Attempts to use a single artist name as fallback for image search.
@@ -1384,17 +1383,6 @@ class Main(xbmc.Player):
                 return False
             LW.log(['retrying fallback artist with MBID: ' + artist_name + ' / ' + fallback_mbid])
         LW.log(['trying fallback artist: ' + artist_name])
-        if show_notification and self.DOWNLOADNOTIFICATION:
-            # Only show notification if this might be a valid artist search.
-            # Avoid showing notification when radio_title was used as fallback (avoid confusion).
-            # Check if artist_name contains " - " which indicates it might be a song title.
-            if ' - ' not in artist_name:
-                xbmcgui.Dialog().notification(
-                    'Artist Slideshow (RadioMonitor)',
-                    ADDONLANGUAGE(32949) % artist_name.strip(),
-                    icon=ADDONICON,
-                    time=4000
-                )
         # Backup current state before overwriting self.NAME, self.MBID, self.CACHEDIR, self.INFODIR
         # (will restore if fallback search fails)
         backup_name = self.NAME
@@ -1504,6 +1492,35 @@ class Main(xbmc.Player):
                         LW.log(loglines)
             self._update_check_file(
                 checkfile, '3.0.0', 'preference conversion complete')
+
+    def _wait_for_radiomonitor(self, max_wait=5):
+        """Wait briefly for RadioMonitor.Artist to be populated by AudioStreamMonitor.
+        Only relevant for internet radio streams — for local files RadioMonitor stays empty
+        and we exit immediately after the first check.
+        """
+        waited = 0
+        sleep_step = 0.5
+        while waited < max_wait:
+            monitor_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
+            if monitor_artist and monitor_artist.strip():
+                LW.log(['RadioMonitor.Artist is ready after %ss: %s' % (waited, monitor_artist)])
+                return
+            # For local files RadioMonitor stays empty — don't wait unnecessarily.
+            # Check if JSON-RPC already returns a valid artist (= local file, not stream).
+            try:
+                response = xbmc.executeJSONRPC(
+                    '{"jsonrpc":"2.0","method":"Player.GetItem","params":{"playerid":0,"properties":["artist"]},"id":1}')
+                artist_names = _json.loads(response).get('result', {}).get('item', {}).get('artist', [])
+                if artist_names:
+                    LW.log(['JSON-RPC returned artist, not a stream — skip RadioMonitor wait'])
+                    return
+            except Exception:
+                pass
+            LW.log(['waiting for RadioMonitor.Artist... (%ss/%ss)' % (waited, max_wait)])
+            if self.MONITOR.waitForAbort(sleep_step):
+                return
+            waited += sleep_step
+        LW.log(['RadioMonitor.Artist still empty after %ss, continuing without it' % max_wait])
 
     def _waitForAbort(self, wait_time=1):
         if self.MONITOR.waitForAbort(wait_time):
