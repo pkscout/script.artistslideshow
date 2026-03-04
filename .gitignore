@@ -130,3 +130,9 @@ dmypy.json
 # the gitignore file
 .gitignore
 .DS_Store
+
+# IDE and local dev tools
+.vscode/
+.idea/
+download-release-zip.bat
+download-release-zip.ps1
