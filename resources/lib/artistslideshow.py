@@ -41,6 +41,7 @@ IMGURL = URL('binary')
 RADIOMONITOR_ARTIST_PROP = 'Window(10000).Property(RadioMonitor.Artist)'
 RADIOMONITOR_TITLE_PROP = 'Window(10000).Property(RadioMonitor.Title)'
 RADIOMONITOR_MBID_PROP = 'Window(10000).Property(RadioMonitor.MBID)'
+RADIOMONITOR_PLAYING_PROP = 'Window(10000).Property(RadioMonitor.Playing)'
 
 LW.log(['script version %s started' % ADDONVERSION], xbmc.LOGINFO)
 LW.log(['debug logging set to %s' % LOGDEBUG], xbmc.LOGINFO)
@@ -537,12 +538,16 @@ class Main(xbmc.Player):
         return current_artists
 
     def _get_current_artist_names_mbids(self, playing_song):
-        # Check RadioMonitor.Artist first — highest priority for radio streams.
-        # Without this, JSON-RPC always returns something (even if wrong, e.g. when
-        # a station sends ICY metadata in "Title - Artist" order instead of "Artist - Title"),
-        # making the RadioMonitor check inside "if not artist_names" structurally unreachable.
+        # RadioMonitor.Playing is set to 'true' by the Audio Stream Monitor addon
+        # exclusively during active radio stream playback — never for local files.
+        # RadioMonitor.Artist is only populated when the addon is monitoring a stream,
+        # so using it here as primary source is safe: it will never trigger for local
+        # files or when the addon is not installed.
+        # We must check it BEFORE JSON-RPC because JSON-RPC always returns something
+        # for streams (e.g. raw ICY metadata like "Title - Artist"), making any
+        # RadioMonitor fallback inside "if not artist_names" structurally unreachable.
         monitor_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
-        if monitor_artist and monitor_artist.strip():
+        if xbmc.getInfoLabel(RADIOMONITOR_PLAYING_PROP) == 'true' and monitor_artist and monitor_artist.strip():
             self.LAST_RADIOMONITOR_ARTIST = monitor_artist
             LW.log(['RadioMonitor.Artist has priority: ' + monitor_artist])
             artist_names = self._split_artists(monitor_artist)
@@ -1051,7 +1056,7 @@ class Main(xbmc.Player):
             return True
 
         monitor_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
-        if monitor_artist and monitor_artist != self.LAST_RADIOMONITOR_ARTIST:
+        if xbmc.getInfoLabel(RADIOMONITOR_PLAYING_PROP) == 'true' and monitor_artist and monitor_artist != self.LAST_RADIOMONITOR_ARTIST:
             LW.log(['RadioMonitor.Artist changed. Handling this special case directly.'])
             
             # Step 1: Clear screen without fade to black (avoid black flicker during metadata update)
