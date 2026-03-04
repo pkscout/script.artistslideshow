@@ -1293,7 +1293,7 @@ class Main(xbmc.Player):
                 if not self.LAST_FOUND_ARTIST:
                     self.LAST_FOUND_ARTIST = artist
                 got_one_artist_images = True
-            if not self._download() and not got_one_artist_images:
+            if not self._download() and not got_one_artist_images and not self.IMAGESFOUND:
                 self._clean_dir(self.CACHEDIR)
                 self._delete_folder(self.CACHEDIR)
                 self._clean_dir(self.INFODIR)
@@ -1410,7 +1410,7 @@ class Main(xbmc.Player):
                 got_one_artist_images = True
             else:
                 got_one_artist_images = False
-            if not self._download() and not got_one_artist_images:
+            if not self._download() and not got_one_artist_images and not self.IMAGESFOUND:
                 self._clean_dir(self.CACHEDIR)
                 self._delete_folder(self.CACHEDIR)
                 self._clean_dir(self.INFODIR)
