@@ -1519,8 +1519,8 @@ class Main(xbmc.Player):
                 if artist_names:
                     LW.log(['JSON-RPC returned artist, not a stream — skip RadioMonitor wait'])
                     return
-            except Exception:
-                pass
+            except (ValueError, TypeError) as err:
+                LW.log(['failed to parse Player.GetItem JSON-RPC response', err])
             LW.log(['waiting for RadioMonitor.Artist... (%ss/%ss)' % (waited, max_wait)])
             if self.MONITOR.waitForAbort(sleep_step):
                 return
