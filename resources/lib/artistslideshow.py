@@ -872,7 +872,7 @@ class Main(xbmc.Player):
         pl = getSettingInt('storage_target')
         if pl == 0:
             self.ENDREPLACE = getSettingString('end_replace')
-            self.ILLEGALCHARS = list('<>:"/\|?*')
+            self.ILLEGALCHARS = list(r'<>:"/\|?*')
         elif pl == 2:
             self.ENDREPLACE = '.'
             self.ILLEGALCHARS = [':']
@@ -1122,7 +1122,7 @@ class Main(xbmc.Player):
             except IndexError:
                 fanart_number = 1
             try:
-                fanart_number = int(re.search('(\d+)$', tmpname).group(0)) + 1
+                fanart_number = int(re.search(r'(\d+)$', tmpname).group(0)) + 1
             except (ValueError, AttributeError):
                 fanart_number = 1
         else:
