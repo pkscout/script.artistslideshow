@@ -20,7 +20,8 @@
       "Bash(gh api repos/blauesgruen/service.audio.stream.monitor/contents/service.py)",
       "Bash(python -c \"import json,sys,base64; print\\(base64.b64decode\\(json.load\\(sys.stdin\\)[''content'']\\).decode\\(''utf-8''\\)\\)\")",
       "Bash(python -c \"import json,sys,base64; sys.stdout.buffer.write\\(base64.b64decode\\(json.load\\(sys.stdin\\)[''content'']\\)\\)\")",
-      "Bash(gh api repos/pkscout/script.artistslideshow/issues/87/comments --method POST --field body=\"Hi @pkscout,:*)"
+      "Bash(gh api repos/pkscout/script.artistslideshow/issues/87/comments --method POST --field body=\"Hi @pkscout,:*)",
+      "WebFetch(domain:kodi.wiki)"
     ]
   }
 }
