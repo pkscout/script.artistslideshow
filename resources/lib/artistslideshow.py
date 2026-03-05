@@ -38,6 +38,10 @@ LOGDEBUG = getSettingBool('logging')
 LW = Logger(preamble='[Artist Slideshow]', logdebug=LOGDEBUG)
 JSONURL = URL('json')
 IMGURL = URL('binary')
+RADIOMONITOR_ARTIST_PROP = 'Window(10000).Property(RadioMonitor.Artist)'
+RADIOMONITOR_TITLE_PROP = 'Window(10000).Property(RadioMonitor.Title)'
+RADIOMONITOR_MBID_PROP = 'Window(10000).Property(RadioMonitor.MBID)'
+RADIOMONITOR_PLAYING_PROP = 'Window(10000).Property(RadioMonitor.Playing)'
 
 LW.log(['script version %s started' % ADDONVERSION], xbmc.LOGINFO)
 LW.log(['debug logging set to %s' % LOGDEBUG], xbmc.LOGINFO)
@@ -317,7 +321,7 @@ class Main(xbmc.Player):
         if self._get_infolabel('ArtistSlideshow.Image'):
             self.SLIDESHOW.ClearImages(fadetoblack=fadetoblack)
         self._slideshow_thread_stop()
-        if self._is_playing() and ( fadetoblack or clearartists ) and not slideshowstopping:
+        if self._is_playing() and not slideshowstopping:
             self._slideshow_thread_start()
         if self._get_infolabel('ArtistSlideshow.ArtistBiography'):
             self._set_property('ArtistSlideshow.ArtistBiography')
@@ -528,7 +532,29 @@ class Main(xbmc.Player):
             current_artists.append(artist_info[0])
         return current_artists
 
-    def _get_current_artist_names_mbids(self, playing_song):
+    def _get_current_artist_names_mbids(self, playing_song, file_changed=False):
+        # RadioMonitor.Playing is set to 'true' by the Audio Stream Monitor addon
+        # exclusively during active radio stream playback — never for local files.
+        # RadioMonitor.Artist is only populated when the addon is monitoring a stream,
+        # so using it here as primary source is safe: it will never trigger for local
+        # files or when the addon is not installed.
+        # We must check it BEFORE JSON-RPC because JSON-RPC always returns something
+        # for streams (e.g. raw ICY metadata like "Title - Artist"), making any
+        # RadioMonitor fallback inside "if not artist_names" structurally unreachable.
+        # file_changed=True means a new stream started — RadioMonitor may still hold the
+        # previous station's artist, so we wait until the value changes (stale_artist).
+        # file_changed=False means the artist changed mid-stream (song change detected via
+        # LASTRAUDIOARTIST) — RadioMonitor.Artist is already correct, no wait needed.
+        if xbmc.getInfoLabel(RADIOMONITOR_PLAYING_PROP) == 'true':
+            stale = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP) if file_changed else None
+            self._wait_for_radiomonitor(max_wait=10, stale_artist=stale)
+        monitor_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
+        if xbmc.getInfoLabel(RADIOMONITOR_PLAYING_PROP) == 'true' and monitor_artist and monitor_artist.strip():
+            LW.log(['RadioMonitor.Artist has priority: ' + monitor_artist])
+            artist_names = self._split_artists(monitor_artist)
+            monitor_mbid = xbmc.getInfoLabel(RADIOMONITOR_MBID_PROP)
+            mbids = [monitor_mbid] if monitor_mbid else []
+            return artist_names, mbids
         try:
             response = xbmc.executeJSONRPC(
                 '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "musicbrainzartistid"]},"id":1}')
@@ -583,11 +609,16 @@ class Main(xbmc.Player):
                     ['unexpected error getting playing file/song back from Kodi', e])
                 self.ARTISTS_INFO = []
                 return
-            if playing_file != self.LASTPLAYINGFILE or playing_song != self.LASTPLAYINGSONG:
+            monitor_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP) \
+                if xbmc.getInfoLabel(RADIOMONITOR_PLAYING_PROP) == 'true' else ''
+            file_changed = playing_file != self.LASTPLAYINGFILE
+            if file_changed or playing_song != self.LASTPLAYINGSONG \
+                    or monitor_artist != self.LASTRAUDIOARTIST:
                 self.LASTPLAYINGFILE = playing_file
                 self.LASTPLAYINGSONG = playing_song
+                self.LASTRAUDIOARTIST = monitor_artist
                 artist_names, mbids = self._get_current_artist_names_mbids(
-                    playing_song)
+                    playing_song, file_changed)
                 featured_artists = self._get_featured_artists(playing_song)
             else:
                 LW.log(['same file playing, using cached artists_info'])
@@ -847,7 +878,7 @@ class Main(xbmc.Player):
         pl = getSettingInt('storage_target')
         if pl == 0:
             self.ENDREPLACE = getSettingString('end_replace')
-            self.ILLEGALCHARS = list('<>:"/\|?*')
+            self.ILLEGALCHARS = list(r'<>:"/\|?*')
         elif pl == 2:
             self.ENDREPLACE = '.'
             self.ILLEGALCHARS = [':']
@@ -880,6 +911,7 @@ class Main(xbmc.Player):
         self.VARIOUSARTISTSMBID = '89ad4ac3-39f7-470e-963a-56509c546377'
         self.LASTPLAYINGFILE = ''
         self.LASTPLAYINGSONG = ''
+        self.LASTRAUDIOARTIST = ''
         self.LASTJSONRESPONSE = ''
         self.LASTARTISTREFRESH = 0
         self.LASTCACHETRIM = 0
@@ -1066,7 +1098,7 @@ class Main(xbmc.Player):
             except IndexError:
                 fanart_number = 1
             try:
-                fanart_number = int(re.search('(\d+)$', tmpname).group(0)) + 1
+                fanart_number = int(re.search(r'(\d+)$', tmpname).group(0)) + 1
             except (ValueError, AttributeError):
                 fanart_number = 1
         else:
@@ -1319,6 +1351,32 @@ class Main(xbmc.Player):
                         LW.log(loglines)
             self._update_check_file(
                 checkfile, '3.0.0', 'preference conversion complete')
+
+    def _wait_for_radiomonitor(self, max_wait=5, stale_artist=None):
+        """Wait for RadioMonitor.Artist to be populated (or refreshed) by AudioStreamMonitor.
+        Only waits when RadioMonitor.Playing == 'true' (stream active).
+        Returns immediately for local files since RadioMonitor.Playing is never set there.
+
+        stale_artist: if provided, wait until Artist changes to a different non-empty value.
+        This handles stream switches where the previous station's artist persists until
+        the Monitor's Metadata Worker fetches fresh ICY data for the new stream.
+        """
+        if xbmc.getInfoLabel(RADIOMONITOR_PLAYING_PROP) != 'true':
+            LW.log(['RadioMonitor not active, skipping wait (local file or no monitor)'])
+            return
+        waited = 0
+        sleep_step = 0.5
+        while waited < max_wait:
+            monitor_artist = xbmc.getInfoLabel(RADIOMONITOR_ARTIST_PROP)
+            if monitor_artist and monitor_artist.strip():
+                if stale_artist is None or monitor_artist != stale_artist:
+                    LW.log(['RadioMonitor.Artist ready after %ss: %s' % (waited, monitor_artist)])
+                    return
+            LW.log(['waiting for RadioMonitor.Artist... (%ss/%ss, stale=%s)' % (waited, max_wait, stale_artist)])
+            if self.MONITOR.waitForAbort(sleep_step):
+                return
+            waited += sleep_step
+        LW.log(['RadioMonitor.Artist not refreshed after %ss, continuing' % max_wait])
 
     def _waitForAbort(self, wait_time=1):
         if self.MONITOR.waitForAbort(wait_time):
