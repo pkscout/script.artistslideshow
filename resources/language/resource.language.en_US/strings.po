@@ -483,12 +483,3 @@ msgstr ""
 msgctxt "#32947"
 msgid "Farsi"
 msgstr ""
-
-# RadioMonitor notification strings
-msgctxt "#32948"
-msgid "Artist: %s"
-msgstr ""
-
-msgctxt "#32949"
-msgid "Searching: %s"
-msgstr ""

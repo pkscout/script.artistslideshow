@@ -304,11 +304,7 @@ msgctxt "#32309"
 msgid "artist image downloaded"
 msgstr "esittäjän kuva noudetiin"
 
-msgctxt "#32310"
-msgid "Radio Stream Monitor"
-msgstr ""
-
-# empty strings from id 32311 to 32900
+# empty strings from id 32310 to 32900
 # Languages
 msgctxt "#32901"
 msgid "Albanian"

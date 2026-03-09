@@ -303,11 +303,7 @@ msgctxt "#32309"
 msgid "artist image downloaded"
 msgstr ""
 
-msgctxt "#32310"
-msgid "Radio Stream Monitor"
-msgstr ""
-
-# empty strings from id 32311 to 32900
+# empty strings from id 32310 to 32900
 # Languages
 msgctxt "#32901"
 msgid "Albanian"
@@ -486,13 +482,4 @@ msgstr ""
 
 msgctxt "#32947"
 msgid "Farsi"
-msgstr ""
-
-# RadioMonitor notification strings
-msgctxt "#32948"
-msgid "Artist: %s"
-msgstr ""
-
-msgctxt "#32949"
-msgid "Searching: %s"
 msgstr ""
