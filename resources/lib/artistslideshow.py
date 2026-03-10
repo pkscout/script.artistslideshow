@@ -1266,7 +1266,11 @@ class Main(xbmc.Player):
                 self._set_artwork_from_dir(self.CACHEDIR, images)
                 self.IMAGESFOUND = True
                 got_one_artist_images = True
-            if not self._download() and not got_one_artist_images:
+            # Only remove per-artist cache/info directories if we failed to
+            # download images for this artist AND we haven't found any images
+            # for any of the currently playing artists. This prevents deleting
+            # shared or previously-found images (see maintainer feedback).
+            if not self._download() and not got_one_artist_images and not self.IMAGESFOUND:
                 self._clean_dir(self.CACHEDIR)
                 self._delete_folder(self.CACHEDIR)
                 self._clean_dir(self.INFODIR)
