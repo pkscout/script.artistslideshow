@@ -559,8 +559,13 @@ class Main(xbmc.Player):
         available. In all other cases it returns False and allows the existing
         Artist Slideshow logic to run unchanged.
         """
-        playing = xbmc.getInfoLabel(
-            'Window(Home).Property(RadioMonitor.Playing)')
+        try:
+            playing = xbmc.getInfoLabel(
+                'Window(Home).Property(RadioMonitor.Playing)')
+        except Exception as e:
+            LW.log(
+                ['unexpected error reading RadioMonitor.Playing, falling back to default logic', e])
+            return False
         if not playing or playing.lower() != 'true':
             # Audio Stream Monitor does not report an active radio stream,
             # so fall back to the original Artist Slideshow logic.
