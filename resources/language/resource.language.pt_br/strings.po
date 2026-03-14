@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC Addons\n"
-"Report-Msgid-Bugs-To: translations@kodi.tv\n"
+"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: 2025-01-30 13:27+0000\n"
 "Last-Translator: Havok Dan <havokdan@yahoo.com.br>\n"
@@ -303,6 +303,10 @@ msgstr "imagens do artista baixadas"
 msgctxt "#32309"
 msgid "artist image downloaded"
 msgstr "imagem do artista baixada"
+
+msgctxt "#32310"
+msgid "Radio Stream Monitor"
+msgstr ""
 
 # empty strings from id 32310 to 32900
 # Languages
