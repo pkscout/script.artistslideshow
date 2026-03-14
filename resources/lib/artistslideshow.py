@@ -317,7 +317,7 @@ class Main(xbmc.Player):
         if self._get_infolabel('ArtistSlideshow.Image'):
             self.SLIDESHOW.ClearImages(fadetoblack=fadetoblack)
         self._slideshow_thread_stop()
-        if self._is_playing() and not slideshowstopping:
+        if self._is_playing() and ( fadetoblack or clearartists ) and not slideshowstopping:
             self._slideshow_thread_start()
         if self._get_infolabel('ArtistSlideshow.ArtistBiography'):
             self._set_property('ArtistSlideshow.ArtistBiography')
@@ -549,61 +549,6 @@ class Main(xbmc.Player):
                 artist_names.extend(self._split_artists(playingartist))
         return artist_names, mbids
 
-    def _get_radiomonitor_artists_info(self):
-        """
-        Prefer metadata from service.audio.stream.monitor (Audio Stream Monitor)
-        when it indicates that a radio stream is playing.
-
-        This method is intentionally self-contained and only sets ARTISTS_INFO /
-        ALLARTISTS when RadioMonitor.Playing is true and an artist name is
-        available. In all other cases it returns False and allows the existing
-        Artist Slideshow logic to run unchanged.
-        """
-        try:
-            playing = xbmc.getInfoLabel(
-                'Window(Home).Property(RadioMonitor.Playing)')
-        except Exception as e:
-            LW.log(
-                ['unexpected error reading RadioMonitor.Playing, falling back to default logic', e])
-            return False
-        if not playing or playing.lower() != 'true':
-            # Audio Stream Monitor does not report an active radio stream,
-            # so fall back to the original Artist Slideshow logic.
-            return False
-
-        artist = xbmc.getInfoLabel(
-            'Window(Home).Property(RadioMonitor.Artist)').strip()
-        if not artist:
-            # Audio Stream Monitor is active (Playing=true) but does not yet
-            # provide a usable artist. In this case Artist Slideshow should
-            # not apply its own stream heuristic but simply wait until
-            # Audio Stream Monitor has full metadata.
-            # Intentionally set ARTISTS_INFO to empty and return True so that
-            # the original logic is skipped while ASM is in control.
-            self.ARTISTS_INFO = []
-            LW.log(
-                ['Audio Stream Monitor active but no artist yet, waiting for metadata'])
-            return True
-
-        mbid = xbmc.getInfoLabel(
-            'Window(Home).Property(RadioMonitor.MBID)').strip()
-
-        artist_names = [artist]
-        mbids = [mbid] if mbid else []
-
-        artists_info = self._get_current_artists_filtered(artist_names, mbids)
-        if not artists_info:
-            return False
-
-        # Only update ARTISTS_INFO here. ALLARTISTS is intentionally left
-        # unchanged so that _playback_stopped_or_changed can still detect
-        # a change in the artist list and trigger a new slideshow when
-        # Audio Stream Monitor updates the metadata.
-        self.ARTISTS_INFO = artists_info
-        LW.log(['using artist information from Audio Stream Monitor',
-               self.ARTISTS_INFO])
-        return True
-
     def _get_current_artists_filtered(self, artist_names, mbids):
         artists_info = []
         LW.log(['starting with the following artists', artist_names])
@@ -622,8 +567,6 @@ class Main(xbmc.Player):
         return artists_info
 
     def _get_current_artists_info(self):
-        if self._get_radiomonitor_artists_info():
-            return
         featured_artists = ''
         artist_names = []
         mbids = []
