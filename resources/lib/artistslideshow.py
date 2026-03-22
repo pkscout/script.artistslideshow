@@ -559,6 +559,10 @@ class Main(xbmc.Player):
         available. In all other cases it returns False and allows the existing
         Artist Slideshow logic to run unchanged.
         """
+        if not self.USEAUDIOSTREAMMONITOR:
+            LW.log(
+                ['not using Audio Stream Monitor, skipping check for RadioMonitor properties'])
+            return False
         try:
             playing = xbmc.getInfoLabel(
                 'Window(Home).Property(RadioMonitor.Playing)')
@@ -569,6 +573,8 @@ class Main(xbmc.Player):
         if not playing or playing.lower() != 'true':
             # Audio Stream Monitor does not report an active radio stream,
             # so fall back to the original Artist Slideshow logic.
+            LW.log(
+                ['Audio Stream Monitor found no stream, falling back to default logic'])
             return False
 
         artist = xbmc.getInfoLabel(
@@ -856,6 +862,8 @@ class Main(xbmc.Player):
         self.MAINSLEEP = getSettingInt('main_sleep', default=1)
         self.MAINIDLESLEEP = getSettingInt('main_idle_sleep', default=10)
         self.AGRESSIVESTREAMSEARCH = getSettingBool('agressive_stream_search')
+        self.USEAUDIOSTREAMMONITOR = getSettingBool('use_audio_stream_monitor') and xbmc.getCondVisibility(
+            'System.AddonIsEnabled(service.audio.stream.monitor)') == 1
         artist_image_storage = getSettingInt('artist_image_storage')
         if artist_image_storage == 1:
             self.KODILOCALSTORAGE = True

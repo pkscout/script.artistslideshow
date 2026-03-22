@@ -601,9 +601,26 @@
 						<popup>false</popup>
 					</control>
 				</setting>
+				<setting id="use_audio_stream_monitor" type="boolean" label="32146" help="">
+					<level>0</level>
+					<default>false</default>
+					<dependencies>
+						<dependency type="visible" on="property" name="infobool">System.AddonIsEnabled(service.audio.stream.monitor)</dependency>
+					</dependencies>
+					<control type="toggle"/>
+				</setting>
 				<setting id="agressive_stream_search" type="boolean" label="32144" help="">
 					<level>0</level>
 					<default>false</default>
+					<dependencies>
+					    <dependency type="visible">
+						    <or>
+							    <condition operator="is" setting="use_audio_stream_monitor">false</condition>
+							    <condition operator="!is" on="property" name="infobool">System.AddonIsEnabled(service.audio.stream.monitor)</condition>
+						    </or>
+						</dependency>
+					</dependencies>
+					<control type="toggle"/>
 					<control type="toggle"/>
 				</setting>
 				<setting id="logging" type="boolean" label="32119" help="">
