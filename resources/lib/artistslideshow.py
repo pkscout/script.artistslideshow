@@ -584,22 +584,28 @@ class Main(xbmc.Player):
                 self.ARTISTS_INFO = []
                 return
             LW.log(['currently playing song is ' + playing_song])
+            playing = self._get_infolabel(
+                'RadioMonitor.Playing', windowid='Home')
             if self.USEAUDIOSTREAMMONITOR:
-                LW.log(['the cache Radio Monitor artist is ' +
-                       self.RADIOMONITORARTIST])
-                LW.log(['the current Radio Monitor artist is ' +
-                       self._get_infolabel('RadioMonitor.Artist', windowid='Home')])
-                if playing_song:
-                    if self.RADIOMONITORARTIST != self._get_infolabel('RadioMonitor.Artist', windowid='Home'):
-                        artist_names, featured_artists, mbids = self._get_current_artists_radiomonitor()
+                if playing or playing.lower() == 'true':
+                    LW.log(['the cache Radio Monitor artist is ' +
+                           self.RADIOMONITORARTIST])
+                    LW.log(['the current Radio Monitor artist is ' +
+                           self._get_infolabel('RadioMonitor.Artist', windowid='Home')])
+                    if playing_song:
+                        if self.RADIOMONITORARTIST != self._get_infolabel('RadioMonitor.Artist', windowid='Home'):
+                            artist_names, featured_artists, mbids = self._get_current_artists_radiomonitor()
+                        else:
+                            LW.log(
+                                ['same artist from Radio Monitor, using cached artists_info'])
+                            return
                     else:
-                        LW.log(
-                            ['same artist from Radio Monitor, using cached artists_info'])
-                        return
+                        artist_names = []
+                        self.RADIOMONITORARTIST = ''
+                        self.ARTISTS_INFO = []
                 else:
-                    artist_names = []
-                    self.RADIOMONITORARTIST = ''
-                    self.ARTISTS_INFO = []
+                    LW.log(
+                        ['Audio Stream Monitor found no stream, falling back to default logic'])
             if not artist_names:
                 if playing_file != self.LASTPLAYINGFILE or playing_song != self.LASTPLAYINGSONG:
                     self.LASTPLAYINGFILE = playing_file
@@ -630,13 +636,6 @@ class Main(xbmc.Player):
             self.ARTISTS_INFO = []
 
     def _get_current_artists_radiomonitor(self):
-        playing = self._get_infolabel('RadioMonitor.Playing', windowid='Home')
-        if not playing or playing.lower() != 'true':
-            # Audio Stream Monitor does not report an active radio stream,
-            # so fall back to the original Artist Slideshow logic.
-            LW.log(
-                ['Audio Stream Monitor found no stream, falling back to default logic'])
-            return ([], [], [])
         c = 1
         artist = ''
         while not artist and c <= 5:
