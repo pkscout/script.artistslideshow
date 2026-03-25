@@ -605,7 +605,7 @@ class Main(xbmc.Player):
                         self.ARTISTS_INFO = []
                 else:
                     LW.log(
-                        ['Audio Stream Monitor found no stream, falling back to default logic'])
+                        ['Audio Stream Monitor found no stream, using default logic'])
             if not artist_names:
                 if playing_file != self.LASTPLAYINGFILE or playing_song != self.LASTPLAYINGSONG:
                     self.LASTPLAYINGFILE = playing_file
@@ -691,11 +691,12 @@ class Main(xbmc.Player):
                 full_split = []
                 for one_split in the_split:
                     full_split.extend(self._split_artists(one_split))
-                return [s.strip() for s in full_split]
+                return [s.strip(' ()') for s in full_split]
             else:
-                return [s.strip() for s in self._split_artists(the_split[-1])]
+                return [s.strip(' ()') for s in self._split_artists(the_split[-1])]
         else:
             if all:
+
                 return [data]
             else:
                 return []
