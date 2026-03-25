@@ -608,6 +608,9 @@ class Main(xbmc.Player):
                         playing_song)
                     featured_artists = self._get_featured_artists(
                         playing_song)
+                    for artist_name in artist_names:
+                        featured_artists.extend(
+                            self._get_featured_artists(artist_name))
                 else:
                     LW.log(['same song playing, using cached artists_info'])
                     return
