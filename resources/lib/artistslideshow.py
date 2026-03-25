@@ -610,10 +610,11 @@ class Main(xbmc.Player):
         if featured_artists:
             for one_artist in featured_artists:
                 artist_names.append(one_artist.strip(' ()'))
-        if not artist_names:
-            return []
-        self.ARTISTS_INFO = self._get_current_artists_filtered(
-            artist_names, mbids)
+        if artist_names:
+            self.ARTISTS_INFO = self._get_current_artists_filtered(
+                artist_names, mbids)
+        else:
+            self.ARTISTS_INFO = []
 
     def _get_current_artists_radiomonitor(self):
         playing = self._get_infolabel('RadioMonitor.Playing', windowid='Home')
@@ -636,11 +637,11 @@ class Main(xbmc.Player):
                 c += 1
                 if self._waitForAbort(5):
                     return ([], [], [])
-        self.RADIOMONITORARTIST = artist
         if not artist:
             LW.log(
                 ['Audio Stream Monitor got no arist information, falling back to default logic'])
             return ([], [], [])
+        self.RADIOMONITORARTIST = artist
         mbid = self._get_infolabel(
             'RadioMonitor.MBID', windowid='Home').strip()
         title = self._get_infolabel(
