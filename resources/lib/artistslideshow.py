@@ -694,7 +694,7 @@ class Main(xbmc.Player):
                     full_split.extend(self._split_artists(one_split))
                 return [s.strip() for s in full_split]
             else:
-                return self._split_artists(the_split[-1])
+                return [s.strip() for s in self._split_artists(the_split[-1])]
         else:
             if all:
                 return [data]
