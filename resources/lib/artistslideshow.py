@@ -692,7 +692,7 @@ class Main(xbmc.Player):
                 full_split = []
                 for one_split in the_split:
                     full_split.extend(self._split_artists(one_split))
-                return full_split
+                return [s.strip() for s in full_split]
             else:
                 return self._split_artists(the_split[-1])
         else:
