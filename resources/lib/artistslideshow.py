@@ -549,41 +549,6 @@ class Main(xbmc.Player):
                 artist_names.extend(self._split_artists(playingartist))
         return artist_names, mbids
 
-    def _get_radiomonitor_artists_info(self):
-        playing = self._get_infolabel('RadioMonitor.Playing', windowid='Home')
-        if not playing or playing.lower() != 'true':
-            # Audio Stream Monitor does not report an active radio stream,
-            # so fall back to the original Artist Slideshow logic.
-            LW.log(
-                ['Audio Stream Monitor found no stream, falling back to default logic'])
-            return ([], [], [])
-        artist = self._get_infolabel(
-            'RadioMonitor.Artist', windowid='Home').strip()
-        c = 1
-        while not artist and c <= 5:
-            LW.log(
-                ['Audio Stream Monitor active but no artist yet, waiting for metadata loop %s' % str(c)])
-            if self._waitForAbort(5):
-                return ([], [], [])
-            else:
-                artist = self._get_infolabel(
-                    'RadioMonitor.Artist', windowid='Home').strip()
-            c += 1
-        if c > 5:
-            LW.log(
-                ['Audio Stream Monitor got no arist information, falling back to default logic'])
-            return ([], [], [])
-        mbid = self._get_infolabel(
-            'RadioMonitor.MBID', windowid='Home').strip()
-        title = self._get_infolabel(
-            'RadioMonitor.Title', windowid='Home').strip()
-        artist_names = self._get_featured_artists(artist, all=True)
-        mbids = [mbid] if mbid else []
-        featured_artists = self._get_featured_artists(title)
-        LW.log(
-            ['using artist information from Audio Stream Monitor', artist_names, mbids])
-        return (artist_names, featured_artists, mbids)
-
     def _get_current_artists_filtered(self, artist_names, mbids):
         artists_info = []
         LW.log(['starting with the following artists', artist_names])
@@ -618,17 +583,23 @@ class Main(xbmc.Player):
                     ['unexpected error getting playing file/song back from Kodi', e])
                 self.ARTISTS_INFO = []
                 return
+            LW.log(['currently playing song is ' + playing_song])
             if playing_file != self.LASTPLAYINGFILE or playing_song != self.LASTPLAYINGSONG:
                 self.LASTPLAYINGFILE = playing_file
                 self.LASTPLAYINGSONG = playing_song
-                if self.USEAUDIOSTREAMMONITOR:
-                    artist_names, featured_artists, mbids = self._get_radiomonitor_artists_info()
+                if not playing_song:
+                    artist_names = []
+                if self.USEAUDIOSTREAMMONITOR and playing_song:
+                    artist_names, featured_artists, mbids = self._get_current_artists_radiomonitor()
                 if not artist_names:
                     artist_names, mbids = self._get_current_artist_names_mbids(
                         playing_song)
                     featured_artists = self._get_featured_artists(playing_song)
             else:
-                LW.log(['same file playing, using cached artists_info'])
+                if self.USEAUDIOSTREAMMONITOR:
+                    LW.log(['the Radio Monitor artist is %s' %
+                            self.RADIOMONITORARTIST])
+                LW.log(['same song playing, using cached artists_info'])
                 return
         elif self._get_infolabel(self.SKININFO['artist']):
             artist_names = self._split_artists(
@@ -643,6 +614,43 @@ class Main(xbmc.Player):
             return []
         self.ARTISTS_INFO = self._get_current_artists_filtered(
             artist_names, mbids)
+
+    def _get_current_artists_radiomonitor(self):
+        playing = self._get_infolabel('RadioMonitor.Playing', windowid='Home')
+        if not playing or playing.lower() != 'true':
+            # Audio Stream Monitor does not report an active radio stream,
+            # so fall back to the original Artist Slideshow logic.
+            LW.log(
+                ['Audio Stream Monitor found no stream, falling back to default logic'])
+            return ([], [], [])
+        c = 1
+        artist = ''
+        while not artist and c <= 5:
+            artist = self._get_infolabel(
+                'RadioMonitor.Artist', windowid='Home').strip()
+            if artist == self.RADIOMONITORARTIST:
+                artist = ''
+            if not artist:
+                LW.log(
+                    ['Audio Stream Monitor active but no new artist yet, waiting for metadata loop %s' % str(c)])
+                c += 1
+                if self._waitForAbort(5):
+                    return ([], [], [])
+        self.RADIOMONITORARTIST = artist
+        if not artist:
+            LW.log(
+                ['Audio Stream Monitor got no arist information, falling back to default logic'])
+            return ([], [], [])
+        mbid = self._get_infolabel(
+            'RadioMonitor.MBID', windowid='Home').strip()
+        title = self._get_infolabel(
+            'RadioMonitor.Title', windowid='Home').strip()
+        artist_names = self._get_featured_artists(artist, all=True)
+        mbids = [mbid] if mbid else []
+        featured_artists = self._get_featured_artists(title)
+        LW.log(
+            ['using artist information from Audio Stream Monitor', artist_names, mbids])
+        return (artist_names, featured_artists, mbids)
 
     def _get_file_list(self, path, do_filter=False):
         LW.log(['checking %s for artist images' % path])
@@ -924,6 +932,7 @@ class Main(xbmc.Player):
                self._get_infolabel(self.EXTERNALCALL)])
         self.NAME = ''
         self.ALLARTISTS = []
+        self.RADIOMONITORARTIST = ''
         self.MBID = ''
         self.VARIOUSARTISTSMBID = '89ad4ac3-39f7-470e-963a-56509c546377'
         self.LASTPLAYINGFILE = ''
