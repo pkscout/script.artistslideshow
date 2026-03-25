@@ -550,65 +550,39 @@ class Main(xbmc.Player):
         return artist_names, mbids
 
     def _get_radiomonitor_artists_info(self):
-        """
-        Prefer metadata from service.audio.stream.monitor (Audio Stream Monitor)
-        when it indicates that a radio stream is playing.
-
-        This method is intentionally self-contained and only sets ARTISTS_INFO /
-        ALLARTISTS when RadioMonitor.Playing is true and an artist name is
-        available. In all other cases it returns False and allows the existing
-        Artist Slideshow logic to run unchanged.
-        """
-        if not self.USEAUDIOSTREAMMONITOR:
-            LW.log(
-                ['not using Audio Stream Monitor, skipping check for RadioMonitor properties'])
-            return False
-        try:
-            playing = xbmc.getInfoLabel(
-                'Window(Home).Property(RadioMonitor.Playing)')
-        except Exception as e:
-            LW.log(
-                ['unexpected error reading RadioMonitor.Playing, falling back to default logic', e])
-            return False
+        playing = self._get_infolabel('RadioMonitor.Playing', windowid='Home')
         if not playing or playing.lower() != 'true':
             # Audio Stream Monitor does not report an active radio stream,
             # so fall back to the original Artist Slideshow logic.
             LW.log(
                 ['Audio Stream Monitor found no stream, falling back to default logic'])
-            return False
-
-        artist = xbmc.getInfoLabel(
-            'Window(Home).Property(RadioMonitor.Artist)').strip()
-        if not artist:
-            # Audio Stream Monitor is active (Playing=true) but does not yet
-            # provide a usable artist. In this case Artist Slideshow should
-            # not apply its own stream heuristic but simply wait until
-            # Audio Stream Monitor has full metadata.
-            # Intentionally set ARTISTS_INFO to empty and return True so that
-            # the original logic is skipped while ASM is in control.
-            self.ARTISTS_INFO = []
+            return ([], [], [])
+        artist = self._get_infolabel(
+            'RadioMonitor.Artist', windowid='Home').strip()
+        c = 1
+        while not artist and c <= 5:
             LW.log(
-                ['Audio Stream Monitor active but no artist yet, waiting for metadata'])
-            return True
-
-        mbid = xbmc.getInfoLabel(
-            'Window(Home).Property(RadioMonitor.MBID)').strip()
-
-        artist_names = [artist]
+                ['Audio Stream Monitor active but no artist yet, waiting for metadata loop %s' % str(c)])
+            if self._waitForAbort(5):
+                return ([], [], [])
+            else:
+                artist = self._get_infolabel(
+                    'RadioMonitor.Artist', windowid='Home').strip()
+            c += 1
+        if c > 5:
+            LW.log(
+                ['Audio Stream Monitor got no arist information, falling back to default logic'])
+            return ([], [], [])
+        mbid = self._get_infolabel(
+            'RadioMonitor.MBID', windowid='Home').strip()
+        title = self._get_infolabel(
+            'RadioMonitor.Title', windowid='Home').strip()
+        artist_names = self._get_featured_artists(artist, all=True)
         mbids = [mbid] if mbid else []
-
-        artists_info = self._get_current_artists_filtered(artist_names, mbids)
-        if not artists_info:
-            return False
-
-        # Only update ARTISTS_INFO here. ALLARTISTS is intentionally left
-        # unchanged so that _playback_stopped_or_changed can still detect
-        # a change in the artist list and trigger a new slideshow when
-        # Audio Stream Monitor updates the metadata.
-        self.ARTISTS_INFO = artists_info
-        LW.log(['using artist information from Audio Stream Monitor',
-               self.ARTISTS_INFO])
-        return True
+        featured_artists = self._get_featured_artists(title)
+        LW.log(
+            ['using artist information from Audio Stream Monitor', artist_names, mbids])
+        return (artist_names, featured_artists, mbids)
 
     def _get_current_artists_filtered(self, artist_names, mbids):
         artists_info = []
@@ -628,8 +602,6 @@ class Main(xbmc.Player):
         return artists_info
 
     def _get_current_artists_info(self):
-        if self._get_radiomonitor_artists_info():
-            return
         featured_artists = ''
         artist_names = []
         mbids = []
@@ -649,9 +621,12 @@ class Main(xbmc.Player):
             if playing_file != self.LASTPLAYINGFILE or playing_song != self.LASTPLAYINGSONG:
                 self.LASTPLAYINGFILE = playing_file
                 self.LASTPLAYINGSONG = playing_song
-                artist_names, mbids = self._get_current_artist_names_mbids(
-                    playing_song)
-                featured_artists = self._get_featured_artists(playing_song)
+                if self.USEAUDIOSTREAMMONITOR:
+                    artist_names, featured_artists, mbids = self._get_radiomonitor_artists_info()
+                if not artist_names:
+                    artist_names, mbids = self._get_current_artist_names_mbids(
+                        playing_song)
+                    featured_artists = self._get_featured_artists(playing_song)
             else:
                 LW.log(['same file playing, using cached artists_info'])
                 return
@@ -686,14 +661,20 @@ class Main(xbmc.Player):
             files = filtered_files
         return files
 
-    def _get_featured_artists(self, data):
+    def _get_featured_artists(self, data, all=False):
         replace_regex = re.compile(r'ft\.', re.IGNORECASE)
         split_regex = re.compile(r'feat\.', re.IGNORECASE)
         the_split = split_regex.split(replace_regex.sub('feat.', data))
         if len(the_split) > 1:
-            return self._split_artists(the_split[-1])
+            if all:
+                return self._split_artists(the_split)
+            else:
+                return self._split_artists(the_split[-1])
         else:
-            return []
+            if all:
+                return [data]
+            else:
+                return []
 
     def _get_folder_size(self, start_path):
         total_size = 0
@@ -726,11 +707,13 @@ class Main(xbmc.Player):
                 self.NAME, self.MBID)
         return images
 
-    def _get_infolabel(self, item):
+    def _get_infolabel(self, item, windowid='default'):
+        if windowid == 'default':
+            windowid = self.WINDOWID
         if item:
             try:
                 infolabel = xbmc.getInfoLabel(
-                    'Window(%s).Property(%s)' % (self.WINDOWID, item))
+                    'Window(%s).Property(%s)' % (windowid, item))
             except:
                 LW.log(
                     ['problem reading information from %s, returning blank' % item])

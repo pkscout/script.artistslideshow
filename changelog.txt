@@ -1,3 +1,6 @@
+v.4.1.0
+- added support for Radio Stream Monitor for artist information
+
 v.3.3.8
 - fixes for crashes
 
