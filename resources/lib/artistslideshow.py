@@ -686,7 +686,10 @@ class Main(xbmc.Player):
         the_split = split_regex.split(replace_regex.sub('feat.', data))
         if len(the_split) > 1:
             if all:
-                return self._split_artists(the_split)
+                full_split = []
+                for one_split in the_split:
+                    full_split.extend(self._split_artists(one_split))
+                return full_split
             else:
                 return self._split_artists(the_split[-1])
         else:
