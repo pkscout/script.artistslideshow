@@ -584,47 +584,45 @@ class Main(xbmc.Player):
                 self.ARTISTS_INFO = []
                 return
             LW.log(['currently playing song is ' + playing_song])
-            playing = self._get_infolabel(
+            stream_playing = self._get_infolabel(
                 'RadioMonitor.Playing', windowid='Home')
-            if self.USEAUDIOSTREAMMONITOR:
-                if playing or playing.lower() == 'true':
-                    radiomonitorartist = self._get_infolabel(
-                        'RadioMonitor.Artist', windowid='Home')
-                    LW.log(['the cache Radio Monitor artist is ' +
-                           self.RADIOMONITORARTISTCACHE])
-                    LW.log(
-                        ['the current Radio Monitor artist is ' + radiomonitorartist])
-                    playing_check = playing_song or self.IGNOREPLAYINGSONG
-                    if playing_check:
-                        if self.RADIOMONITORARTISTCACHE != radiomonitorartist:
-                            if radiomonitorartist and playing_check:
-                                artist_names, featured_artists, mbids = self._get_current_artists_radiomonitor()
-                            else:
-                                self.RADIOMONITORARTISTCACHE = ''
-                                self.ARTISTS_INFO = []
-                                return
+            if self.USEAUDIOSTREAMMONITOR and (stream_playing or stream_playing.lower() == 'true'):
+                radiomonitorartist = self._get_infolabel(
+                    'RadioMonitor.Artist', windowid='Home')
+                LW.log(['the cache Radio Monitor artist is ' +
+                       self.RADIOMONITORARTISTCACHE])
+                LW.log(
+                    ['the current Radio Monitor artist is ' + radiomonitorartist])
+                playing_check = playing_song or self.IGNOREPLAYINGSONG
+                if playing_check:
+                    if self.RADIOMONITORARTISTCACHE != radiomonitorartist:
+                        if radiomonitorartist and playing_check:
+                            artist_names, featured_artists, mbids = self._get_current_artists_radiomonitor()
                         else:
-                            LW.log(
-                                ['same artist from Radio Monitor, using cached artists_info'])
+                            self.RADIOMONITORARTISTCACHE = ''
+                            self.ARTISTS_INFO = []
                             return
                     else:
-                        self.RADIOMONITORARTISTCACHE = ''
-                        self.ARTISTS_INFO = []
+                        LW.log(
+                            ['same artist from Radio Monitor, using cached artists_info'])
                         return
-            if not artist_names:
-                if playing_file != self.LASTPLAYINGFILE or playing_song != self.LASTPLAYINGSONG:
-                    self.LASTPLAYINGFILE = playing_file
-                    self.LASTPLAYINGSONG = playing_song
-                    artist_names, mbids = self._get_current_artist_names_mbids(
-                        playing_song)
-                    featured_artists = self._get_featured_artists(
-                        playing_song)
-                    for artist_name in artist_names:
-                        featured_artists.extend(
-                            self._get_featured_artists(artist_name))
                 else:
-                    LW.log(['same song playing, using cached artists_info'])
+                    self.RADIOMONITORARTISTCACHE = ''
+                    self.ARTISTS_INFO = []
                     return
+            elif playing_file != self.LASTPLAYINGFILE or playing_song != self.LASTPLAYINGSONG:
+                self.LASTPLAYINGFILE = playing_file
+                self.LASTPLAYINGSONG = playing_song
+                artist_names, mbids = self._get_current_artist_names_mbids(
+                    playing_song)
+                featured_artists = self._get_featured_artists(
+                    playing_song)
+                for artist_name in artist_names:
+                    featured_artists.extend(
+                        self._get_featured_artists(artist_name))
+            else:
+                LW.log(['same song playing, using cached artists_info'])
+                return
         elif self._get_infolabel(self.SKININFO['artist']):
             artist_names = self._split_artists(
                 self._get_infolabel(self.SKININFO['artist']))
