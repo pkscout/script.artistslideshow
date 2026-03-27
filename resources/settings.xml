@@ -3,17 +3,17 @@
 	<section id="script.artistslideshow">
 		<category id="slideshow" label="32000" help="">
 			<group id="1">
+				<setting id="pause_slideshow" type="boolean" label="32145" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
 				<setting id="slide_delay" type="integer" label="32137" help="">
 					<level>0</level>
 					<default>10</default>
 					<control type="edit" format="integer">
 						<heading>32137</heading>
 					</control>
-				</setting>
-				<setting id="pause_slideshow" type="boolean" label="32145" help="">
-					<level>0</level>
-					<default>false</default>
-					<control type="toggle"/>
 				</setting>
 				<setting id="slideshow" type="boolean" label="32112" help="">
 					<level>0</level>
