@@ -588,24 +588,29 @@ class Main(xbmc.Player):
                 'RadioMonitor.Playing', windowid='Home')
             if self.USEAUDIOSTREAMMONITOR:
                 if playing or playing.lower() == 'true':
+                    radiomonitorartist = self._get_infolabel(
+                        'RadioMonitor.Artist', windowid='Home')
                     LW.log(['the cache Radio Monitor artist is ' +
-                           self.RADIOMONITORARTIST])
-                    LW.log(['the current Radio Monitor artist is ' +
-                           self._get_infolabel('RadioMonitor.Artist', windowid='Home')])
-                    if playing_song:
-                        if self.RADIOMONITORARTIST != self._get_infolabel('RadioMonitor.Artist', windowid='Home'):
-                            artist_names, featured_artists, mbids = self._get_current_artists_radiomonitor()
+                           self.RADIOMONITORARTISTCACHE])
+                    LW.log(
+                        ['the current Radio Monitor artist is ' + radiomonitorartist])
+                    playing_check = playing_song or self.IGNOREPLAYINGSONG
+                    if playing_check:
+                        if self.RADIOMONITORARTISTCACHE != radiomonitorartist:
+                            if radiomonitorartist and playing_check:
+                                artist_names, featured_artists, mbids = self._get_current_artists_radiomonitor()
+                            else:
+                                self.RADIOMONITORARTISTCACHE = ''
+                                self.ARTISTS_INFO = []
+                                return
                         else:
                             LW.log(
                                 ['same artist from Radio Monitor, using cached artists_info'])
                             return
                     else:
-                        artist_names = []
-                        self.RADIOMONITORARTIST = ''
+                        self.RADIOMONITORARTISTCACHE = ''
                         self.ARTISTS_INFO = []
-                else:
-                    LW.log(
-                        ['Audio Stream Monitor found no stream, using default logic'])
+                        return
             if not artist_names:
                 if playing_file != self.LASTPLAYINGFILE or playing_song != self.LASTPLAYINGSONG:
                     self.LASTPLAYINGFILE = playing_file
@@ -641,7 +646,7 @@ class Main(xbmc.Player):
         while not artist and c <= 5:
             artist = self._get_infolabel(
                 'RadioMonitor.Artist', windowid='Home').strip()
-            if artist == self.RADIOMONITORARTIST:
+            if artist == self.RADIOMONITORARTISTCACHE:
                 artist = ''
             if not artist:
                 LW.log(
@@ -653,7 +658,7 @@ class Main(xbmc.Player):
             LW.log(
                 ['Audio Stream Monitor got no artist information, falling back to default logic'])
             return ([], [], [])
-        self.RADIOMONITORARTIST = artist
+        self.RADIOMONITORARTISTCACHE = artist
         mbid = self._get_infolabel(
             'RadioMonitor.MBID', windowid='Home').strip()
         title = self._get_infolabel(
@@ -872,6 +877,7 @@ class Main(xbmc.Player):
         self.AGRESSIVESTREAMSEARCH = getSettingBool('agressive_stream_search')
         self.USEAUDIOSTREAMMONITOR = getSettingBool('use_audio_stream_monitor') and xbmc.getCondVisibility(
             'System.AddonIsEnabled(service.audio.stream.monitor)') == 1
+        self.IGNOREPLAYINGSONG = getSettingBool('ignore_playing_song')
         artist_image_storage = getSettingInt('artist_image_storage')
         if artist_image_storage == 1:
             self.KODILOCALSTORAGE = True
@@ -949,7 +955,7 @@ class Main(xbmc.Player):
                self._get_infolabel(self.EXTERNALCALL)])
         self.NAME = ''
         self.ALLARTISTS = []
-        self.RADIOMONITORARTIST = ''
+        self.RADIOMONITORARTISTCACHE = ''
         self.MBID = ''
         self.VARIOUSARTISTSMBID = '89ad4ac3-39f7-470e-963a-56509c546377'
         self.LASTPLAYINGFILE = ''

@@ -609,6 +609,22 @@
 					</dependencies>
 					<control type="toggle"/>
 				</setting>
+
+				<setting id="ignore_playing_song" type="boolean" label="32147" help="">
+					<level>0</level>
+					<default>false</default>
+					<dependencies>
+					    <dependency type="visible">
+						    <or>
+							    <condition operator="is" setting="use_audio_stream_monitor">true</condition>
+							    <condition operator="!is" on="property" name="infobool">System.AddonIsEnabled(service.audio.stream.monitor)</condition>
+						    </or>
+						</dependency>
+					</dependencies>
+					<control type="toggle"/>
+				</setting>
+
+
 				<setting id="agressive_stream_search" type="boolean" label="32144" help="">
 					<level>0</level>
 					<default>false</default>
@@ -620,7 +636,6 @@
 						    </or>
 						</dependency>
 					</dependencies>
-					<control type="toggle"/>
 					<control type="toggle"/>
 				</setting>
 				<setting id="logging" type="boolean" label="32119" help="">
