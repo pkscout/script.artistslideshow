@@ -377,7 +377,6 @@ class Main(xbmc.Player):
                         LW.log(loglines)
                     success, loglines, urldata = IMGURL.Get(
                         url, params=self.PARAMS)
-                    LW.log(loglines)
                     if success:
                         success, loglines = writeFile(
                             bytearray(urldata), tmpname)
@@ -583,19 +582,19 @@ class Main(xbmc.Player):
                     ['unexpected error getting playing file/song back from Kodi', e])
                 self.ARTISTS_INFO = []
                 return
-            LW.log(['currently playing song is ' + playing_song])
             stream_playing = self._get_infolabel(
                 'RadioMonitor.Playing', windowid='Home')
             if self.USEAUDIOSTREAMMONITOR and (stream_playing or stream_playing.lower() == 'true'):
-                radiomonitorartist = self._get_infolabel(
-                    'RadioMonitor.Artist', windowid='Home')
-                LW.log(['the cache Radio Monitor artist is ' +
-                       self.RADIOMONITORARTISTCACHE])
-                LW.log(
-                    ['the current Radio Monitor artist is ' + radiomonitorartist])
                 playing_check = playing_song or self.IGNOREPLAYINGSONG
                 if playing_check:
+                    radiomonitorartist = self._get_infolabel(
+                        'RadioMonitor.Artist', windowid='Home')
                     if self.RADIOMONITORARTISTCACHE != radiomonitorartist:
+                        LW.log(['currently playing song is ' + playing_song])
+                        LW.log(['the cache Radio Monitor artist is ' +
+                                self.RADIOMONITORARTISTCACHE])
+                        LW.log(
+                            ['the current Radio Monitor artist is ' + radiomonitorartist])
                         if radiomonitorartist and playing_check:
                             artist_names, featured_artists, mbids = self._get_current_artists_radiomonitor()
                         else:
@@ -603,8 +602,6 @@ class Main(xbmc.Player):
                             self.ARTISTS_INFO = []
                             return
                     else:
-                        LW.log(
-                            ['same artist from Radio Monitor, using cached artists_info'])
                         return
                 else:
                     self.RADIOMONITORARTISTCACHE = ''
@@ -613,6 +610,7 @@ class Main(xbmc.Player):
             elif playing_file != self.LASTPLAYINGFILE or playing_song != self.LASTPLAYINGSONG:
                 self.LASTPLAYINGFILE = playing_file
                 self.LASTPLAYINGSONG = playing_song
+                LW.log(['currently playing song is ' + playing_song])
                 artist_names, mbids = self._get_current_artist_names_mbids(
                     playing_song)
                 featured_artists = self._get_featured_artists(
@@ -621,7 +619,6 @@ class Main(xbmc.Player):
                     featured_artists.extend(
                         self._get_featured_artists(artist_name))
             else:
-                LW.log(['same song playing, using cached artists_info'])
                 return
         elif self._get_infolabel(self.SKININFO['artist']):
             artist_names = self._split_artists(
