@@ -684,16 +684,20 @@ class Main(xbmc.Player):
 
     def _get_featured_artists(self, data, all=False):
         pattern = re.compile(r'(?i)\b(ft\.|feat\.|/f)\b')
-        # Normalize everything to "feat."
         normalized = pattern.sub('feat.', data)
-        # Split and strip
-        parts = [part.strip()
-                 for part in normalized.split('feat.') if part.strip()]
-        if len(parts) > 1:
+        raw_artists = normalized.split('feat.')
+        artists = []
+        for artist in raw_artists:
+            cleaned = artist.strip().strip('()[]{}')
+            if cleaned:
+                subparts = [p.strip() for p in re.split(
+                    r'\s*/\s*', cleaned) if p.strip()]
+                artists.append(subparts)
+        if len(artists) > 1:
             if all:
-                return parts
+                return artists
             else:
-                return parts[1:]
+                return artists[1:]
         else:
             if all:
                 return [data]
