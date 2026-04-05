@@ -683,20 +683,19 @@ class Main(xbmc.Player):
         return files
 
     def _get_featured_artists(self, data, all=False):
-        replace_regex = re.compile(r'ft\.', re.IGNORECASE)
-        split_regex = re.compile(r'feat\.', re.IGNORECASE)
-        the_split = split_regex.split(replace_regex.sub('feat.', data))
-        if len(the_split) > 1:
+        pattern = re.compile(r'(?i)\b(ft\.|feat\.|/f)\b')
+        # Normalize everything to "feat."
+        normalized = pattern.sub('feat.', data)
+        # Split and strip
+        parts = [part.strip()
+                 for part in normalized.split('feat.') if part.strip()]
+        if len(parts) > 1:
             if all:
-                full_split = []
-                for one_split in the_split:
-                    full_split.extend(self._split_artists(one_split))
-                return [s.strip(' ()') for s in full_split]
+                return parts
             else:
-                return [s.strip(' ()') for s in self._split_artists(the_split[-1])]
+                return parts[1:]
         else:
             if all:
-
                 return [data]
             else:
                 return []

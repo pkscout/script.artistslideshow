@@ -1,5 +1,7 @@
 v.4.1.0
 - added support for Radio Stream Monitor for artist information
+- updated featured artist logic to look in artist name as well (for streams)
+- added another featured artist seperator (/F, so now .ft, .feat and /F)
 
 v.3.3.8
 - fixes for crashes
