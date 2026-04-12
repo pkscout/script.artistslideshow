@@ -692,7 +692,7 @@ class Main(xbmc.Player):
             if cleaned:
                 subparts = [p.strip() for p in re.split(
                     r'\s*/\s*', cleaned) if p.strip()]
-                artists.append(subparts)
+                artists.extend(subparts)
         if len(artists) > 1:
             if all:
                 return artists
