@@ -683,6 +683,7 @@ class Main(xbmc.Player):
         return files
 
     def _get_featured_artists(self, data, all=False):
+        LW.log(['checking for featured artists in ' + data])
         pattern = re.compile(r'(?i)\b(ft\.|feat\.|/f)\b')
         normalized = pattern.sub('feat.', data)
         raw_artists = normalized.split('feat.')
