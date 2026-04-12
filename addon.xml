@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="3.3.8">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="4.1.0">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="script.module.requests" version="2.22.0+matrix.1" />
@@ -9,9 +9,10 @@
 		<provides>executable</provides>
 	</extension>
 	<extension point="xbmc.addon.metadata">
-		<news>
-v.3.3.8
-- fixes for crashes
+		<news>v.4.1.0
+- added support for Radio Stream Monitor for artist information
+- updated featured artist logic to look in artist name as well (for streams)
+- updated multi artist separation artist
 		</news>
 		<assets>
         	<icon>icon.png</icon>
