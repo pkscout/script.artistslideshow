@@ -518,15 +518,6 @@ class Main(xbmc.Player):
         self.SIMILAR = self._get_artistsimilar()
         self._set_properties()
 
-    def _get_current_artists(self):
-        current_artists = []
-        self._get_current_artists_info()
-        for artist_info in self.ARTISTS_INFO:
-            if self.MONITOR.abortRequested():
-                return []
-            current_artists.append(artist_info[0])
-        return current_artists
-
     def _get_artists(self, data, only_featured=False):
         LW.log(['checking for featured artists in ' + data])
         pattern = re.compile(
@@ -549,6 +540,15 @@ class Main(xbmc.Player):
                 return [data]
             else:
                 return []
+
+    def _get_current_artists(self):
+        current_artists = []
+        self._get_current_artists_info()
+        for artist_info in self.ARTISTS_INFO:
+            if self.MONITOR.abortRequested():
+                return []
+            current_artists.append(artist_info[0])
+        return current_artists
 
     def _get_current_artist_names_mbids(self, playing_song):
         try:
