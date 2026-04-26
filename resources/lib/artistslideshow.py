@@ -531,13 +531,20 @@ class Main(xbmc.Player):
         try:
             response = xbmc.executeJSONRPC(
                 '{"jsonrpc":"2.0", "method":"Player.GetItem", "params":{"playerid":0, "properties":["artist", "musicbrainzartistid"]},"id":1}')
-            artist_names = _json.loads(response).get(
+            artist_names_raw = _json.loads(response).get(
                 'result', {}).get('item', {}).get('artist', [])
             mbids = _json.loads(response).get('result', {}).get(
                 'item', {}).get('musicbrainzartistid', [])
         except LookupError:
             artist_names = []
             mbids = []
+        if mbids:
+            artist_names = artist_names_raw
+        else:
+            artist_names = []
+            for one_artist in artist_names_raw:
+                artist_names.extend(
+                    self._get_featured_artists(one_artist, all=True))
         if not artist_names:
             LW.log(
                 ['No artist names returned from JSON call, assuming this is an internet stream'])
@@ -545,7 +552,8 @@ class Main(xbmc.Player):
             if not self.AGRESSIVESTREAMSEARCH and len(playingartists) > 1:
                 del playingartists[1:]
             for playingartist in playingartists:
-                artist_names.extend(self._split_artists(playingartist))
+                artist_names.extend(
+                    self._get_featured_artists(playingartist, all=True))
         return artist_names, mbids
 
     def _get_current_artists_filtered(self, artist_names, mbids):
@@ -613,22 +621,14 @@ class Main(xbmc.Player):
                 LW.log(['currently playing song is ' + playing_song])
                 artist_names, mbids = self._get_current_artist_names_mbids(
                     playing_song)
-                featured_artists = self._get_featured_artists(
-                    playing_song)
-                for artist_name in artist_names:
-                    featured_artists.extend(
-                        self._get_featured_artists(artist_name))
             else:
                 return
         elif self._get_infolabel(self.SKININFO['artist']):
-            artist_names = self._split_artists(
-                self._get_infolabel(self.SKININFO['artist']))
+            artist_names = self._get_featured_artists(
+                self._get_infolabel(self.SKININFO['artist']), all=True)
             mbids = self._get_infolabel(self.SKININFO['mbid']).split(',')
-            featured_artists = self._get_featured_artists(
-                self._get_infolabel(self.SKININFO['title']))
-        if featured_artists:
-            for one_artist in featured_artists:
-                artist_names.append(one_artist.strip(' ()'))
+            artist_names.extend(self._get_featured_artists(
+                self._get_infolabel(self.SKININFO['title'])))
         if artist_names:
             self.ARTISTS_INFO = self._get_current_artists_filtered(
                 artist_names, mbids)
@@ -1222,9 +1222,6 @@ class Main(xbmc.Player):
         if exists:
             LW.log(loglines)
         return thedir
-
-    def _split_artists(self, response):
-        return response.replace(' ft. ', ' / ').replace(' feat. ', ' / ').split(' / ')
 
     def _trim_cache(self):
         if self.RESTRICTCACHE:
