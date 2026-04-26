@@ -538,11 +538,13 @@ class Main(xbmc.Player):
         except LookupError:
             artist_names = []
             mbids = []
+        LW.log(['mbids from Kodi JSON RPC call are', mbids])
         if mbids:
             artist_names = artist_names_raw
         else:
             artist_names = []
             for one_artist in artist_names_raw:
+                LW.log(['checking artist name %s for featured artists' % one_artist])
                 artist_names.extend(
                     self._get_featured_artists(one_artist, all=True))
         if not artist_names:
@@ -691,8 +693,9 @@ class Main(xbmc.Player):
         for artist in raw_artists:
             cleaned = artist.strip().strip('()[]{}')
             if cleaned:
+
                 subparts = [p.strip() for p in re.split(
-                    r'\s*/\s*', cleaned) if p.strip()]
+                    r'\s+/\s+', cleaned) if p.strip()]
                 artists.extend(subparts)
         if len(artists) > 1:
             if all:
