@@ -527,6 +527,29 @@ class Main(xbmc.Player):
             current_artists.append(artist_info[0])
         return current_artists
 
+    def _get_artists(self, data, only_featured=False):
+        LW.log(['checking for featured artists in ' + data])
+        pattern = re.compile(
+            r'(?i)(?:\b(?:ft\.?|feat\.?|/f)|(?<!\S)\[\+\](?!\S))')
+        raw_artists = pattern.split(data)
+        artists = []
+        for artist in raw_artists:
+            cleaned = artist.strip().strip('()[]{}')
+            if cleaned:
+                subparts = [p.strip() for p in re.split(
+                    r'\s+/\s+', cleaned) if p.strip()]
+                artists.extend(subparts)
+        if len(artists) > 1:
+            if not only_featured:
+                return artists
+            else:
+                return artists[1:]
+        else:
+            if not only_featured:
+                return [data]
+            else:
+                return []
+
     def _get_current_artist_names_mbids(self, playing_song):
         try:
             response = xbmc.executeJSONRPC(
@@ -681,29 +704,6 @@ class Main(xbmc.Player):
                     filtered_files.append(file)
             files = filtered_files
         return files
-
-    def _get_artists(self, data, only_featured=False):
-        LW.log(['checking for featured artists in ' + data])
-        pattern = re.compile(
-            r'(?i)(?:\b(?:ft\.?|feat\.?|/f)|(?<!\S)\[\+\](?!\S))')
-        raw_artists = pattern.split(data)
-        artists = []
-        for artist in raw_artists:
-            cleaned = artist.strip().strip('()[]{}')
-            if cleaned:
-                subparts = [p.strip() for p in re.split(
-                    r'\s+/\s+', cleaned) if p.strip()]
-                artists.extend(subparts)
-        if len(artists) > 1:
-            if not only_featured:
-                return artists
-            else:
-                return artists[1:]
-        else:
-            if not only_featured:
-                return [data]
-            else:
-                return []
 
     def _get_folder_size(self, start_path):
         total_size = 0
