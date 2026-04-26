@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="4.1.2~beta2">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="4.2.0~beta1">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="script.module.requests" version="2.22.0+matrix.1" />
@@ -9,7 +9,7 @@
 		<provides>executable</provides>
 	</extension>
 	<extension point="xbmc.addon.metadata">
-		<news>v.4.1.2
+		<news>v.4.2.0
 - updated artist split logic to apply in more places
 - added [+] as separator for artist splits
 		</news>

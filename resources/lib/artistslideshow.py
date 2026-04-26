@@ -544,18 +544,14 @@ class Main(xbmc.Player):
         else:
             artist_names = []
             for one_artist in artist_names_raw:
-                LW.log(['checking artist name %s for featured artists' % one_artist])
                 artist_names.extend(
-                    self._get_featured_artists(one_artist, all=True))
-        if not artist_names:
-            LW.log(
-                ['No artist names returned from JSON call, assuming this is an internet stream'])
-            playingartists = playing_song.split(' - ', 1)
-            if not self.AGRESSIVESTREAMSEARCH and len(playingartists) > 1:
-                del playingartists[1:]
-            for playingartist in playingartists:
-                artist_names.extend(
-                    self._get_featured_artists(playingartist, all=True))
+                    self._get_artists(one_artist))
+        featuredartists = playing_song.split(' - ', 1)
+        if not self.AGRESSIVESTREAMSEARCH and len(featuredartists) > 1:
+            del featuredartists[1:]
+        for featuredartist in featuredartists:
+            artist_names.extend(self._get_artists(
+                featuredartist, only_featured=True))
         return artist_names, mbids
 
     def _get_current_artists_filtered(self, artist_names, mbids):
@@ -569,14 +565,16 @@ class Main(xbmc.Player):
                 LW.log(['deleting extra MBIDs'])
                 del mbids[1:]
         LW.log(['left with', artist_names])
+        seen_artists = set()
         for artist_name, mbid in _zip_longest(artist_names, mbids, fillvalue=''):
-            if artist_name:
+            if artist_name and artist_name not in seen_artists:
                 artists_info.append(
                     (artist_name, self._get_musicbrainz_id(artist_name, mbid)))
+                seen_artists.add(artist_name)
+        LW.log(['final list of artists info', artists_info])
         return artists_info
 
     def _get_current_artists_info(self):
-        featured_artists = ''
         artist_names = []
         mbids = []
         if self.isPlayingAudio():
@@ -606,7 +604,7 @@ class Main(xbmc.Player):
                         LW.log(
                             ['the current Radio Monitor artist is ' + radiomonitorartist])
                         if radiomonitorartist and playing_check:
-                            artist_names, featured_artists, mbids = self._get_current_artists_radiomonitor()
+                            artist_names, mbids = self._get_current_artists_radiomonitor()
                         else:
                             self.RADIOMONITORARTISTCACHE = ''
                             self.ARTISTS_INFO = []
@@ -626,11 +624,11 @@ class Main(xbmc.Player):
             else:
                 return
         elif self._get_infolabel(self.SKININFO['artist']):
-            artist_names = self._get_featured_artists(
-                self._get_infolabel(self.SKININFO['artist']), all=True)
+            artist_names = self._get_artists(
+                self._get_infolabel(self.SKININFO['artist']))
             mbids = self._get_infolabel(self.SKININFO['mbid']).split(',')
-            artist_names.extend(self._get_featured_artists(
-                self._get_infolabel(self.SKININFO['title'])))
+            artist_names.extend(self._get_artists(
+                self._get_infolabel(self.SKININFO['title'], only_featured=True)))
         if artist_names:
             self.ARTISTS_INFO = self._get_current_artists_filtered(
                 artist_names, mbids)
@@ -660,12 +658,12 @@ class Main(xbmc.Player):
             'RadioMonitor.MBID', windowid='Home').strip()
         title = self._get_infolabel(
             'RadioMonitor.Title', windowid='Home').strip()
-        artist_names = self._get_featured_artists(artist, all=True)
+        artist_names = self._get_artists(artist)
         mbids = [mbid] if mbid else []
-        featured_artists = self._get_featured_artists(title)
+        artist_names.extend(self._get_artists(title, only_featured=True))
         LW.log(
             ['using artist information from Audio Stream Monitor', artist_names, mbids])
-        return (artist_names, featured_artists, mbids)
+        return (artist_names, mbids)
 
     def _get_file_list(self, path, do_filter=False):
         LW.log(['checking %s for artist images' % path])
@@ -684,7 +682,7 @@ class Main(xbmc.Player):
             files = filtered_files
         return files
 
-    def _get_featured_artists(self, data, all=False):
+    def _get_artists(self, data, only_featured=False):
         LW.log(['checking for featured artists in ' + data])
         pattern = re.compile(
             r'(?i)(?:\b(?:ft\.?|feat\.?|/f)|(?<!\S)\[\+\](?!\S))')
@@ -697,12 +695,12 @@ class Main(xbmc.Player):
                     r'\s+/\s+', cleaned) if p.strip()]
                 artists.extend(subparts)
         if len(artists) > 1:
-            if all:
+            if not only_featured:
                 return artists
             else:
                 return artists[1:]
         else:
-            if all:
+            if not only_featured:
                 return [data]
             else:
                 return []
