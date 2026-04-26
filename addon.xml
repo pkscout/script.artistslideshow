@@ -10,7 +10,8 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<news>v.4.1.2
-- added [+] as separator for featured artists
+- updated artist split logic to apply in more places
+- added [+] as separator for artist splits
 		</news>
 		<assets>
         	<icon>icon.png</icon>
