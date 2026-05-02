@@ -521,7 +521,7 @@ class Main(xbmc.Player):
     def _get_artists(self, data, only_featured=False):
         LW.log(['checking for featured artists in ' + data])
         pattern = re.compile(
-            r'(?i)(?:\b(?:ft\.?|feat\.?|/f)|(?<!\S)\[\+\](?!\S))')
+            r'(?i)(?:\b(?:ft\.?|feat\.?)\b|\s*/f\s*|(?<!\S)\[\+\](?!\S))')
         raw_artists = pattern.split(data)
         artists = []
         for artist in raw_artists:
@@ -559,7 +559,7 @@ class Main(xbmc.Player):
             mbids = _json.loads(response).get('result', {}).get(
                 'item', {}).get('musicbrainzartistid', [])
         except LookupError:
-            artist_names = []
+            artist_names_raw = []
             mbids = []
         LW.log(['mbids from Kodi JSON RPC call are', mbids])
         if mbids:
@@ -671,11 +671,11 @@ class Main(xbmc.Player):
                     ['Audio Stream Monitor active but no new artist yet, waiting for metadata loop %s' % str(c)])
                 c += 1
                 if self._waitForAbort(5):
-                    return ([], [], [])
+                    return ([], [])
         if not artist:
             LW.log(
                 ['Audio Stream Monitor got no artist information, falling back to default logic'])
-            return ([], [], [])
+            return ([], [])
         self.RADIOMONITORARTISTCACHE = artist
         mbid = self._get_infolabel(
             'RadioMonitor.MBID', windowid='Home').strip()
