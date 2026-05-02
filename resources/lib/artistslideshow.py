@@ -651,7 +651,7 @@ class Main(xbmc.Player):
                 self._get_infolabel(self.SKININFO['artist']))
             mbids = self._get_infolabel(self.SKININFO['mbid']).split(',')
             artist_names.extend(self._get_artists(
-                self._get_infolabel(self.SKININFO['title'], only_featured=True)))
+                self._get_infolabel(self.SKININFO['title']), only_featured=True))
         if artist_names:
             self.ARTISTS_INFO = self._get_current_artists_filtered(
                 artist_names, mbids)

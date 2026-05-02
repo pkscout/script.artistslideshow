@@ -1,6 +1,6 @@
 <addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="4.2.0">
 	<requires>
-		<import addon="xbmc.python" version="3.0.0" />
+		<import addon="xbmc.python" version="3.0.1" />
 		<import addon="script.module.requests" version="2.22.0+matrix.1" />
 		<import addon="script.module.defusedxml" version="0.6.0+matrix.1" />
 		<import addon="script.module.future" version="0.17.1+matrix.2" />
