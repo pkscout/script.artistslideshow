@@ -537,7 +537,7 @@ class Main(xbmc.Player):
                 return artists[1:]
         else:
             if not only_featured:
-                return [data]
+                return artists if artists else [data]
             else:
                 return []
 
