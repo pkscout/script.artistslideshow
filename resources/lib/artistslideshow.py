@@ -521,7 +521,7 @@ class Main(xbmc.Player):
     def _get_artists(self, data, only_featured=False):
         LW.log(['checking for featured artists in ' + data])
         pattern = re.compile(
-            r'(?i)(?:\b(?:ft\.?|feat\.?)\b|\s*/f\s*|(?<!\S)\[\+\](?!\S))')
+            r'(?i)(?:\b(?:ft\.?|feat\.?)\b|\s+/f\s+|(?<!\S)\[\+\](?!\S))')
         raw_artists = pattern.split(data)
         artists = []
         for artist in raw_artists:
