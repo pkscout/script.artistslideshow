@@ -1,4 +1,4 @@
-<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="4.2.0">
+<addon id="script.artistslideshow" name="Artist Slideshow" provider-name="pkscout,ronie" version="4.2.1">
 	<requires>
 		<import addon="xbmc.python" version="3.0.1" />
 		<import addon="script.module.requests" version="2.22.0+matrix.1" />
@@ -9,9 +9,8 @@
 		<provides>executable</provides>
 	</extension>
 	<extension point="xbmc.addon.metadata">
-		<news>v.4.2.0
-- updated artist split logic to apply in more places
-- added [+] as separator for artist splits
+		<news>v.4.2.1
+- Keep running between items of a player that is not gapless
 		</news>
 		<assets>
         	<icon>icon.png</icon>
